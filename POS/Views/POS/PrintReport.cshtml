@@ -1,0 +1,111 @@
+﻿@using POS.Common;
+@using POS.Models
+@using SBSModel.Common;
+@using SBSModel.Models;
+@model POS.Models.POSViewModel
+@{
+    ViewBag.Title = Resources.ResourcePOS.DailyReport;
+}
+
+
+<link rel="stylesheet" href="@Url.Content("~/bootstrap/stylesheets/applicationreport.css")">
+<div class="main-content">
+    <div id="divReport" style="padding: 5px; font-size: 10px">
+        <table style="width: 100%;" class="header-form">
+            <tr>
+                <td style="" width="30%"></td>
+                <td style=""></td>
+            </tr>
+            <tr>
+                <td colspan="2" style=" font-weight:700;">
+                    <span style="text-align: center;">@Resources.ResourcePOS.DailyReport</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <br />
+                </td>
+                <td></td>
+            </tr>
+        </table>
+        <table cellpadding="1" cellspacing="0" style="width:100%;">
+            <thead>
+                <tr bgcolor="#ccc" class="text-highlight">
+                    <td width="5%"></td>
+                    <td align="left">@Resources.ResourcePOS.InvoiceNo</td>
+                    <td align="center">@Resources.ResourcePOS.PaymentType</td>
+                    <td align="right">@Resources.ResourcePOS.Amount</td>
+                    <td width="5%"></td>
+                </tr>
+            </thead>
+            <tbody>
+                @{ decimal total = 0; }
+                @if (Model.receipts != null)
+                {
+                    foreach (var row in Model.receipts)
+                    {
+                        <tr>
+                            <td></td>
+                            <td>
+                                @row.Receipt_No
+                            </td>
+                            <td style="text-align:center;">
+                                @if (row.Cash_Payment > 0)
+                                {
+                                    @Resources.ResourcePOS.Cash
+                                }
+                                else if (row.Approval_Code != null && row.Approval_Code.Length > 0 && row.Card_Type != null && row.Card_Type.Length > 0)
+                                {
+                                    @Resources.ResourcePOS.CreditCard
+                                }
+                                else if (row.Approval_Code != null && row.Approval_Code.Length > 0)
+                                {
+                                    @Resources.ResourcePOS.Nets
+                                }
+                            </td>
+                            <td style="text-align:right; ">
+                                @(row.Net_Amount.Value.ToString("n2"))
+                                
+                            </td>
+                            <td></td>
+                        </tr>
+
+                                total += row.Net_Amount.Value;
+                    }
+                }
+            </tbody>
+            <tfoot>
+                <tr class="status-info">
+                    <td style="text-align:right; " colspan="4">
+                        @(total.ToString("n2"))
+                    </td>
+                    <td>
+                        
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+        <br />
+        <br />
+        <table cellpadding="1" cellspacing="0" style="width:100%;">
+            <tr>
+                <td width="30%" style="font-weight: 700;">
+                    @Resources.ResourcePOS.Cashier
+                </td>
+                <td width="70%" style="font-weight: 700;">
+                    @Resources.ResourcePOS.ReceiptBy
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    (A)
+                </td>
+                <td>
+                    (A)
+                </td>
+            </tr>
+        </table>
+
+    </div>
+</div>
+

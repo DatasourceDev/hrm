@@ -1,0 +1,66 @@
+﻿@model  HR.Models.ExRowViewModel
+@using SBSModel.Models;
+@using System.Text;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Models;
+@using SBSWorkFlowAPI.ModelsAndService;
+@using SBSResourceAPI;
+@using SBSWorkFlowAPI.Constants;
+@{
+   var i = Model.i;
+}
+@functions{ 
+   private string GetFieldID(string field)
+   {
+      return "ExRow" + field;
+   }
+}
+<td>
+   <input type="hidden" id="@GetFieldID("erowID")" value="@Model.erowID" />
+   <input type="hidden" id="@GetFieldID("ExDate")" value="@Model.ExDate" />
+   <input type="hidden" id="@GetFieldID( "Expenses_Date")" value="@Model.Expenses_Date" />
+   <input type="hidden" id="@GetFieldID( "i")" value="@Model.i" />
+   <input type="hidden" id="@GetFieldID( "Row_Type")" value="@Model.Row_Type" />
+   <input type="hidden" id="@GetFieldID( "Expenses_Application_Document_ID")" value="@Model.Expenses_Application_Document_ID" />
+   <input type="hidden" id="@GetFieldID( "Expenses_Config_ID")" value="@Model.Expenses_Config_ID" />
+   <input type="hidden" id="@GetFieldID( "Expenses_Type_Name")" value="@Model.Expenses_Type_Name" />
+   <input type="hidden" id="@GetFieldID( "Expenses_Type_Desc")" value="@Model.Expenses_Type_Desc" />
+   <input type="hidden" id="@GetFieldID( "Expenses_Date")" value="@Model.Expenses_Date" />
+   <input type="hidden" id="@GetFieldID( "Doc_No")" value="@Model.Doc_No" />
+   <input type="hidden" id="@GetFieldID( "Balance")" value="@Model.Balance" />
+   <input type="hidden" id="@GetFieldID( "Selected_Currency")" value="@Model.Selected_Currency" />
+   <input type="hidden" id="@GetFieldID( "Ex_Total_Amount")" value="@Model.Ex_Total_Amount" />
+   <input type="hidden" id="@GetFieldID( "Amount_Claiming")" value="@Model.Amount_Claiming" />
+   <input type="hidden" id="@GetFieldID( "Notes")" value="@Model.Notes" />
+   <input type="hidden" id="@GetFieldID( "Upload_Receipt_ID")" value="@Model.Upload_Receipt_ID" />
+   <input type="hidden" id="@GetFieldID( "Upload_Receipt_Name")" value="@Model.Upload_Receipt_Name" />
+   <input type="hidden" id="@GetFieldID( "Upload_Receipt")" value="@Model.Upload_Receipt" />
+   <input type="hidden" id="@GetFieldID("Ex_Job_Cost_ID")" value="@Model.Ex_Job_Cost_ID" />
+   <input type="hidden" id="@GetFieldID( "Job_Cost_Name")" value="@Model.Job_Cost_Name" />
+   <input type="hidden" id="@GetFieldID( "Withholding_Tax")" value="@Model.Withholding_Tax" />
+   <input type="hidden" id="@GetFieldID( "Tax")" value="@Model.Tax" />
+   <input type="hidden" id="@GetFieldID( "Tax_Type")" value="@Model.Tax_Type" />
+   <input type="hidden" id="@GetFieldID( "Withholding_Tax_Amount")" value="@Model.Withholding_Tax_Amount" />
+   <input type="hidden" id="@GetFieldID( "Withholding_Tax_Type")" value="@Model.Withholding_Tax_Type" />
+   <input type="hidden" id="@GetFieldID( "Tax_Amount")" value="@Model.Tax_Amount" />
+   <input type="hidden" id="@GetFieldID( "Tax_Amount_Type")" value="@Model.Tax_Amount_Type" />
+   <input type="hidden" id="@GetFieldID("Job_Cost_No")" value="@Model.Job_Cost_No" />
+   @Model.Job_Cost_No
+   <br/>
+   @Model.Job_Cost_Name
+</td>
+<td>
+   @Model.Expenses_Type_Name
+</td>
+
+<td class="text-right">
+   <div style="height:37px">@NumUtil.FormatCurrency(Model.Amount_Claiming, 2)</div>
+</td>
+<td>
+   <a href="#" onclick="@HR.Models.TsExFunc.GetEditOnclick(Model)"> <i class="fa fa-edit fa-2x"></i></a>
+   <a href="#" data-toggle="modal" onclick="Del_Onclick('exr@(Model.ExDate + Model.i)')" title="@Resource.Delete">
+      <i class="fa fa-times-circle-o fa-2x"></i>
+   </a>
+</td>
+
+

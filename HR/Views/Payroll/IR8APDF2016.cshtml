@@ -1,0 +1,1139 @@
+﻿@model HR.Models.IR8AViewModel
+@using HR.Models
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+
+@{
+    ViewBag.Title = @Resource.Payroll_PDF;
+    Layout = null;
+
+    String nationality = "";
+    if (Model.Employee_Profile != null && Model.Employee_Profile.Nationality != null)
+        nationality = Model.nationalityList.Where(w => w.Value == Model.Employee_Profile.Nationality_ID.ToString()).FirstOrDefault().Text;
+
+}
+
+
+<div style="line-height: 9.3pt; font-size: 8pt; padding-left: 0pt;text-align: left; font-family: 'Arial','sans-serif';">
+    <table>
+        <tr>
+            <td width="25%">
+                <b>
+                    <span style='font-size:20.0pt;'>
+                        @Model.P_YEAR
+                    </span>
+                </b>
+            </td>
+            <td width="50%">
+                <p align="center" style="padding-left: 0pt; ">
+
+                    <b></b>
+                    <b>
+                        <span style='font-size:16.0pt;'>
+                            @Resource.FORM_IR8A
+                        </span>
+                    </b>
+                </p>
+            <td width="25%"></td>
+        </tr>
+    </table>
+
+
+    <table border=0 cellspacing=1 cellpadding=0 style='width:100.7%;border-collapse:collapse;border:none'>
+        <tr bgcolor="#000">
+            <td>
+                <p align=center style='text-align: center;'>
+                    <span style='color:white'>
+                        @Resource.Message_Return_Of_Employee_Remuneration_For_The_Year_Ended_31_Dec @( Int32.Parse(Model.P_YEAR) - 1)
+                    </span>
+                </p>
+            </td>
+        </tr>
+        <tr bgcolor="#000">
+            <td>
+                <p align=center style='text-align:center;'>
+                    <span style='color:white'>
+                        @Resource.Message_Fill_In_This_Form_And_Give_It_To_Your_Employee
+                    </span><b>
+                        <span style='font-weight:700;color:white'>
+                            @Resource.Message_By_1_Mar
+                        </span>
+                    </b><span style='color:white'>@(Model.P_YEAR)  @Resource.Message_For_His_Submission_Together_With_His_Income_Tax_Return</span>
+                </p>
+            </td>
+        </tr>
+    </table>
+
+
+    <p>
+        <span style='color: black; padding-left: 5px; padding-right: 5px; padding-top: 5px; padding-bottom: 5px; '>
+            @Resource.Message_This_Form_Will_Take_About_10_Minutes
+        </span>
+    </p>
+
+    <p align=center style='text-align:center;line-height:5.0pt;'>
+        <span style='font-size:6.0pt;'>&nbsp;</span>
+    </p>
+    <table border="1" cellspacing=1 cellpadding=1 style='width:100%; border-collapse:collapse;'>
+        <tr>
+            <td width="45%" valign=top style="padding-left: 3px;">
+                <p>
+                    <span>
+                        @Resource.Employees_Tax_Ref_No/ @Resource.UEN
+                        <span></span>
+                    </span>
+                </p>
+                <p>
+                    @Model.company.Registry
+                </p>
+            </td>
+            <td width="55%" style="padding-left: 3px;" valign=top>
+                <p>
+                    <span>
+                        @Resource.Employees_Tax_Ref_No :
+                    </span> <!-- *NRIC / FIN (Foreign Identification No.) -->
+                    @{
+                        string ref_no = Model.Employee_Profile.NRIC;
+                        if (ref_no.IsEmpty())
+                        {
+                            ref_no = "FIN (Foreign Identification No.) <br> " + Model.Employee_Profile.FIN_No;
+                        }
+                        else
+                        {
+                            ref_no = "NRIC  <br>" + ref_no;
+                        }
+
+                    }
+                    @Html.Raw(ref_no)
+                </p>
+            </td>
+        </tr>
+    </table>
+
+    <table border="1" cellspacing=1 cellpadding=1 style='width:100%; border-collapse:collapse;'>
+        <tr>
+            <td width="45%" style="padding-left: 3px;" valign=top>
+                <p>
+                    <span>@Resource.Message_Full_Name_Of_Employee_Per_NRIC_Or_FIN</span>
+                </p>
+                <p>
+                    @AppConst.GetUserName(Model.Employee_Profile.User_Profile)
+                </p>
+            </td>
+            <td width="20%" style="padding-left: 3px; " valign=top>
+                <p>
+                    <span>@Resource.DOB</span>
+                </p>
+                <p>
+                    @(DateUtil.ToDisplayDate(Model.Employee_Profile.DOB))
+                </p>
+            </td>
+            <td width="15%" style="padding-left: 3px; " valign=top>
+                <p>
+                    <span>@Resource.Sex</span>
+                </p>
+                <p>
+                    @(Model.genderList.Where(w => w.Value == Model.Employee_Profile.Gender.Value.ToString()).FirstOrDefault().Text)
+                </p>
+            </td>
+            <td width="20%" style="padding-left: 3px; " valign=top>
+                <p>
+                    <span>@Resource.Nationality</span>
+                </p>
+                <p>
+                    @nationality
+                </p>
+            </td>
+        </tr>
+    </table>
+
+    <table border="1" cellspacing=1 cellpadding=1 style='width:100%; border-collapse:collapse;'>
+        <tr>
+            <td width="45%" valign=top style="padding-left: 3px;">
+                <p>
+                    <span>@Resource.Residential_Address</span>
+                </p>
+                <p>
+                    @Model.Employee_Profile.Residential_Address_1 @Model.Employee_Profile.Postal_Code_1
+                </p>
+            </td>
+            <td width="20%" style="padding-left: 3px;" valign=top>
+                <p>
+                    <span>@Resource.Designation</span>
+                </p>
+                <p>
+                    @(new EmploymentHistoryService().GetCurrentEmploymentHistory(Model.Employee_Profile.Employee_Profile_ID).Designation.Name)
+                </p>
+            </td>
+            <td width="35%" style="padding-left: 3px;" valign=top>
+                <p>
+                    <span>@Resource.Message_Bank_To_Which_Salary_Is_Sredited</span>
+                </p>
+                <p>
+                    @Model.Bank_Name
+                </p>
+            </td>
+        </tr>
+    </table>
+
+    <table border="1" cellspacing=1 cellpadding=1 style='width:100%; border-collapse:collapse;'>
+        <tr>
+            <td width="45%" valign=top style="padding-left: 3px;">
+                <p>
+                    <span>@Resource.Message_If_Employment_Commenced_And_Or_Ceased_During_The_Year_State:</span>
+                </p>
+                <p>
+                    <b>
+                        <span style='font-weight:700;'>@Resource.Message_See_Explanatory_Note_7_2015</span>
+                    </b>
+                </p>
+            </td>
+            <td width="20%" style="padding-left: 3px;" valign=top>
+                <p>
+                    <span>@Resource.Date_Of_Commencement</span>
+                </p>
+                <p>
+                    @Model.Hired_Date
+                </p>
+            </td>
+            <td width="35%" style="padding-left: 3px;" valign=top>
+                <p>
+                    <span>@Resource.Date_Of_Cessation_Overseas_Posting</span>
+                </p>
+                <p>
+                    @Model.Date_of_Cessation
+                </p>
+            </td>
+        </tr>
+    </table>
+
+
+    <table border="1" cellspacing=1 cellpadding=1 style='width:100%; border-collapse:collapse; '>
+        <tr bgcolor="#000">
+            <td width="5%"></td>
+            <td width="80%" valign=top>
+                <p>
+                    <b>
+                        <span style='color:white'>@Resource.INCOME_Upper</span>
+                    </b><b>
+                        <span style='font-size:7.0pt;color:white'>
+                            (@Resource.Message_Enter_NA_For_Items)
+                        </span>
+                    </b>
+                </p>
+            </td>
+            <td width="15%" valign=top>
+                <p>
+                    <span style='color:white'>$</span>
+                </p>
+            </td>
+        </tr>
+    </table>
+
+    <table border="0" cellspacing=1 cellpadding=1>
+        <tr>
+            <td width="4%" valign=top></td>
+            <td width="27%" valign=top></td>
+            <td width="19%" valign=top></td>
+            <td width="35%" valign=top></td>
+            <td width="10%" valign=top></td>
+            <td width="4%" valign=top></td>
+        </tr>
+        <tr>
+            <td align="center">
+                a)
+            </td>
+            <td colspan="3" valign=top>
+                <p>
+                    <b>
+                        <span>@Resource.Message_Gross_Salary_Fees_Leave_Pay_Wages_And_Overtime_Pay (See Explanatory Note 12a)</span>
+                    </b>
+                </p>
+            </td>
+            <td valign=top>
+                <p align="right">
+                    <span style='text-decoration:underline'> @Model.Gross_Salary.ToString("n2") </span>
+                </p>
+            </td>
+            <td />
+        </tr>
+        <tr>
+            <td valign=top align="center">
+                b)
+            </td>
+            <td colspan=3 valign=top>
+                <p>
+                    <b>@Resource.Bonus</b> (@Resource.Message_Non_Contractual_Bonus_Paid_In @( Int32.Parse(Model.P_YEAR) - 1) @Resource.Message_And_Or_Contractual_Bonus)
+                    <b>(See Explanatory Note 12b)</b>
+                </p>
+            </td>
+            <td valign=top>
+                <p align="right">
+                    <span style='text-decoration:underline'> @Model.Bonus.ToString("n2") </span>
+                </p>
+            </td>
+            <td />
+        </tr>
+        <tr>
+            <td valign=top align="center">
+                c)
+            </td>
+            <td colspan=3>
+                <p>
+                    <b>@Resource.DirectorS_Fees</b>
+                    @Resource.Message_Approved_At_The_Company_S_AGM_EGM_On &nbsp;&nbsp; / &nbsp;&nbsp; / @( Int32.Parse(Model.P_YEAR) - 1))
+                    <b>(See Explanatory Note 12c)</b>
+                </p>
+            </td>
+            <td valign=top>
+                <p align="right">
+                    <span style='text-decoration:underline'> @Model.Director_Fee.ToString("n2") </span>
+                </p>
+            </td>
+            <td />
+        </tr>
+        <tr>
+            <td valign=top align="center">
+                d)
+            </td>
+            <td colspan=3 valign=top>
+                <p>
+                    <b>
+                        <span>@Resource.Others:</span>
+                    </b>
+                </p>
+            </td>
+            <td valign=top></td>
+            <td />
+        </tr>
+        <tr>
+            <td valign=top></td>
+            <td valign=top>
+                <p align="left">
+                    <span>
+                        1. @Resource.Allowances:  (i) @Resource.Transport   $
+                    </span>
+                    <span style='text-decoration:underline'> @Model.Allowance_Transport.ToString("n2") </span>
+                </p>
+
+            </td>
+            <td valign=top>
+                <p align="left">
+                    <span>
+                        (ii) @Resource.Entertainment $
+                    </span>
+                    <span style='text-decoration:underline'> @Model.Allowance_Entertain.ToString("n2") </span>
+                </p>
+            </td>
+            <td valign=top>
+                <p align="left">
+                    <span>
+                        (iii) @Resource.Others  $
+                    </span>
+                    <span style='text-decoration:underline'> @Model.Allowance_Others.ToString("n2") <b style='font-weight:700; '>(See Explanatory Note 12b)</b></span>
+                    
+                </p>
+            </td>
+            <td valign=top>
+                <p align="right" style='text-align: right'>
+                    <span style='text-decoration:underline'> @((Model.Allowance_Others + Model.Allowance_Entertain + Model.Allowance_Transport).ToString("n2")) </span>
+                </p>
+            </td>
+            <td />
+        </tr>
+        <tr>
+            <td valign=top></td>
+            <td valign=top>
+                <p>
+                    <span>
+                        2. @Resource.Message_Gross_Commission_For_The_Period
+                    </span>
+                </p>
+            </td>
+            <td valign=top>
+                <p>
+                    <span style='text-decoration:underline'> @Model.Commission_Start </span>
+                    <span>to</span>
+                    <span style='text-decoration:underline'> @Model.Commission_End </span>
+                </p>
+            </td>
+            <td valign=top>
+                <p>
+                    <span>
+                        <!--Monthly / other than monthly payment-->
+                        * @if (Model.Commission_Type == 1)
+                        {
+                            @Resource.Monthly
+                        }
+                          else if (Model.Commission_Type == 2)
+                          {
+                            @:*Monthly/other than monthly payment
+                          }
+                    </span>
+                </p>
+            </td>
+
+            <td valign=top>
+                <p align="right">
+                    <span style='text-decoration:underline'> @Model.Commission_Amount.ToString("n2") </span>
+                </p>
+            </td>
+            <td />
+        </tr>
+        <tr>
+            <td valign=top></td>
+            <td colspan=3 valign=top>
+                <p align="left">
+                    <span>
+                        3. @Resource.Pension $
+                    </span>
+                    <span style='text-decoration:underline'> @Model.Pension.ToString("n2") </span>
+                </p>
+            </td>
+            <td valign=top>
+                <p align="right" style='text-align:right'>
+                    <span style='text-decoration:underline'> @Model.Pension.ToString("n2")  </span>
+                </p>
+            </td>
+            <td />
+        </tr>
+        <tr>
+            <td valign=top></td>
+            <td colspan=3 valign=top>
+                <p>
+                    <span>
+                        4. @Resource.Lump_Sum_Payment<b>[See Explanatory Note 12d(II)]</b>
+                    </span>
+                </p>
+            </td>
+            <td valign=top>
+                <p align="right" style='text-align: right'>
+                    <span style='text-decoration:underline'> @((Model.Gratuity + Model.Notice_Pay + Model.Ex_Gratia + Model.Lump_Sum_Others + Model.Compensation_Loss).ToString("n2")) </span>
+                </p>
+            </td>
+            <td />
+        </tr>
+        <tr>
+            <td valign=top></td>
+            <td colspan=4 valign=top>
+                <table border=1 cellspacing=1 cellpadding=1 width=480>
+                    <tr>
+                        <td width=196 valign=top>
+                            <p align="left">
+                                <span>
+                                    (i) @Resource.Gratuity $
+                                </span>
+                                <span style='text-decoration:underline'> @Model.Gratuity.ToString("n2") </span>
+                            </p>
+                        </td>
+                        <td width=174 valign=top style='width:130.5pt;border:solid windowtext 1.0pt; border-left:none;'>
+                            <p align="left">
+                                <span>
+                                    (ii) @Resource.Notice_Pay $
+                                </span>
+                                <span style='text-decoration:underline'> @Model.Notice_Pay.ToString("n2") </span>
+                            </p>
+                        </td>
+                        <td width=269 colspan=2 valign=top style='width:201.4pt;border:solid windowtext 1.0pt; border-left:none;'>
+                            <p align="left">
+                                <span>
+                                    (iii) @Resource.Ex_Gratia_Payment $
+                                </span>
+                                <span style='text-decoration:underline'> @Model.Ex_Gratia.ToString("n2") </span>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr style='page-break-inside:avoid'>
+                        <td width=639 colspan=4 valign=top style='width:478.9pt;border:solid windowtext 1.0pt; border-top:none;'>
+                            <p align="left">
+                                <span>
+                                    (iv) @Resource.Others (@Resource.Message_Please_State_Nature) $
+                                </span>
+                                <span style='text-decoration:underline'> @Model.Lump_Sum_Others.ToString("n2") </span>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr style='page-break-inside:avoid'>
+                        <td width=639 colspan=4 valign=top style='width:478.9pt;border:solid windowtext 1.0pt; border-top:none;'>
+                            <p align="left">
+                                <span>
+                                    (v) @Resource.Message_Compensation_For_Loss_Of_Office $
+                                </span>
+                                <span style='text-decoration:underline'> @Model.Compensation_Loss.ToString("n2") </span>
+                                <span>
+                                    @Resource.Message_Approval_Obtained_From_IRAS
+                                </span>:<span>
+                                    * @if (Model.Approval_IRAS)
+                                    {
+                                        @Resource.Yes
+                                    }
+                                    else
+                                    {
+                                        @Resource.No
+                                    }
+                                    &nbsp;&nbsp;&nbsp;&nbsp; @Resource.Date_Of_Approval:  @Model.Date_Approval
+                                </span>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr style='page-break-inside:avoid'>
+                        <td width=393 colspan=3 valign=top>
+                            <p>
+                                <b>
+                                    <span>
+                                        @Resource.Reason_For_Payment:
+                                    </span>
+                                </b>
+                                <span style='text-decoration:underline'> @Model.Reason_Payment </span>
+                            </p>
+                        </td>
+                        <td width=246 valign=top>
+                            <p align="left">
+                                <b>
+                                    <span>
+                                        @Resource.Length_Of_Service:
+                                    </span>
+                                </b>
+                                <span style='text-decoration:underline'> @Model.Length_Service.ToString("n2")  </span>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr style='page-break-inside:avoid;'>
+                        <td width=639 colspan=4 valign=top>
+                            <p>
+                                <b>
+                                    <span>
+                                        @Resource.Basis_Of_Driving_At_Payment:
+                                    </span>
+                                </b>
+                                <span style='text-decoration:underline'> @Model.Basis_Payment </span>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                <p></p>
+            </td>
+            <td />
+        </tr>
+        <tr>
+            <td valign=top></td>
+            <td colspan=3 valign=top>
+                <p>
+                    <span>
+                        5. @Resource.Message_Retirement_Benefits_Including_GratuitiesPpension_Ccommutation
+                    </span>
+                </p>
+                <p>
+                    <span>
+                        &nbsp;&nbsp;&nbsp; @Resource.Message_Pension_Provident_Fund_Name_Of_Fund
+                    </span>
+                    <span style='text-decoration:underline'> @Model.Retirement_Pension </span>
+                </p>
+            </td>
+            <td valign=top></td>
+            <td />
+        </tr>
+        <tr>
+            <td></td>
+            <td colspan=2 valign=top>
+                <p>
+                    &nbsp;&nbsp;&nbsp; (@Resource.Message_Amount_Accrued_Up_To_31_Dec_1992 $ <span style='text-decoration:underline'> @Model.Amount_Accured_1992.ToString("n2") </span> )
+                </p>
+            </td>
+            <td valign=top>
+                <p align="right">
+                    <span>
+                        @Resource.Message_Amount_Accrued_From_1993 :
+                    </span>
+                </p>
+            </td>
+            <td>
+                <p align="right">
+                    <span style='text-decoration:underline'> @Model.Amount_Accured_1993.ToString("n2") </span>
+                </p>
+            </td>
+            <td />
+        </tr>
+        <tr>
+            <td valign=top></td>
+            <td colspan=3 valign=top>
+                <span>
+                    6. @Resource.Message_Contributions_Made_By_Employer_Pension_Provident_Fund_Singapore <u>@Resource.Message_Without</u> @Resource.Message_Tax_Concession:
+                </span>
+                <br />
+                <span>
+                    &nbsp;&nbsp;&nbsp; @Resource.Message_Contributions_Made_By_Employer_Pension_Provident_Fund_Singapore <u>@Resource.Message_With</u> @Resource.Message_Tax_Concession:
+                </span>
+            </td>
+            <td valign="top">
+                <p align="right">
+                    <span style='text-decoration:underline'> @Model.Contribution_Out_Singapore.ToString("n2") </span>
+                </p>
+            </td>
+            <td />
+        </tr>
+        <tr>
+            <td valign=top></td>
+            <td colspan=5 valign=top>
+                <table border=1 cellspacing=1 cellpadding=1 width=420>
+                    <tr>
+                        <td valign=top colspan="2">
+                            <p align="left">
+                                <span>
+                                    @Resource.Message_Name_Of_The_Overseas_Pension_Provident_Fund :
+                                </span>
+                                <span style='text-decoration:underline'> @Model.Contribution_With_Name</span>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width=210 valign=top>
+                            <p align="left">
+                                <span>
+                                    @Resource.Message_Full_Amount_Of_The_Contributions :
+                                </span>
+                                <span style='text-decoration:underline'> @Model.Contribution_With_Singapore.ToString("n2")</span>
+                            </p>
+                        </td>
+                        <td width=210 valign=top>
+                            <p align="left">
+                                <span>
+                                    @Resource.Message_Are_Contributions_Mandatory :
+                                </span>
+                                <span style='text-decoration:underline'>
+                                    * @if (Model.Contribution_With_Madatory.HasValue && Model.Contribution_With_Madatory.Value)
+                                    {
+                                        @Resource.Yes
+                                    }
+                                    else
+                                    {
+                                        @Resource.No
+                                    }
+                                </span>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign=top colspan="2">
+                            <p align="left">
+                                <span>
+                                    @Resource.Message_Were_Contributions_Charged_Deductions_Claimed_Singapore :
+                                </span>
+                                <span style='text-decoration:underline'>
+                                    * @if (Model.Contribution_With_Establishment.HasValue && Model.Contribution_With_Establishment.Value)
+                                    {
+                                        @Resource.Yes
+                                    }
+                                    else
+                                    {
+                                        @Resource.No
+                                    }
+                                </span>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                <p>
+                    <span>
+                        <b>&nbsp;&nbsp;&nbsp;@Resource.Message_See_Explanatory_Note_12d_III_2015</b>
+                    </span>
+                </p>
+            </td>
+        </tr>
+
+        <tr>
+            <td valign=top></td>
+            <td colspan=3 valign=top>
+                <p>
+                    <span>
+                        7. @Resource.Message_Excess_Voluntary_Contribution_CPF_Employer :
+                    </span><span style='text-decoration:underline'> @Model.Excess_Less.ToString("n2") </span>
+                </p>
+
+                <b>
+                    &nbsp;&nbsp;&nbsp; @Resource.Message_See_Explanatory_Note_12d_IV_2015
+                </b>
+
+            </td>
+            <td valign=top>
+                <p align="right" style='text-align: right'>
+                    <span style='text-decoration:underline'> @Model.Excess_Employer.ToString("n2") </span>
+                </p>
+            </td>
+            <td />
+        </tr>
+        <tr>
+            <td valign=top></td>
+            <td colspan=3 valign=top>
+
+                <span>
+                    8. @Resource.Message_Gains_Profits_From_Employee_Stock_Option_Ther:
+                </span>
+                <br />
+                <b>
+                    &nbsp;&nbsp;&nbsp; @Resource.Message_See_Explanatory_Note_12d_V_2015
+                </b>
+
+            </td>
+            <td valign=top align=center>
+                <p align="right" style='text-align: right'>
+                    <span style='text-decoration:underline'> @Model.Gain_Profit.ToString("n2") </span>
+                </p>
+            </td>
+            <td />
+        </tr>
+        <tr>
+            <td valign=top></td>
+            <td colspan=3 valign=top>
+                <p>
+                    <span>
+                        9. @Resource.Message_Value_Of_Benefits_In_Kind 
+                        <b>@Resource.Message_See_Explanatory_Note_13_16_2015</b>:
+                    </span>
+                </p>
+            </td>
+            <td valign=top>
+                <p align="right" style='text-align: right'>
+                    <span style='text-decoration:underline'> @Model.Value_Benefit.ToString("n2") </span>
+                </p>
+            </td>
+            <td />
+        </tr>
+        <tr>
+            <td valign=top></td>
+            <td colspan=3 valign=top style='text-align:right;'>
+                <p>
+                    <b>
+                        <span>
+                            @Resource.Total_Upber (@Resource.Items d1 @Resource.To d9)
+                        </span>
+                    </b>
+                </p>
+
+            </td>
+            <td valign=top align=center>
+                <p align="right" style='text-align: right'>
+                    <span style='text-decoration:underline'> @((Model.Allowance_Others + Model.Allowance_Entertain + Model.Allowance_Transport + Model.Commission_Amount + Model.Pension + Model.Gratuity + Model.Notice_Pay + Model.Ex_Gratia + Model.Lump_Sum_Others + Model.Compensation_Loss + Model.Amount_Accured_1992 + Model.Amount_Accured_1993 + Model.Contribution_Out_Singapore + Model.Excess_Less + Model.Gain_Profit + Model.Excess_Employer + Model.Value_Benefit).ToString("n2")) </span>
+                </p>
+            </td>
+            <td />
+        </tr>
+        <tr>
+            <td valign=top align="center">
+                e)
+            </td>
+            <td colspan=4 valign=top>
+                <p>
+                    @Resource.Message_Remissio_Amount_Of_Income :<span style='text-decoration:underline'> $ @Model.Remission_Income.ToString("n2") </span> <b>@Resource.Message_See_Explanatory_Note_12e_2015</b>
+                </p>
+
+            </td>
+
+            <td />
+        </tr>
+        <tr>
+            <td valign=top align="center"></td>
+            <td colspan=4 valign=top>
+                <p>
+                    @Resource.Message_Exempt_Non_Taxable_Income :<span style='text-decoration:underline'> $ @Model.Non_Tax_Income.ToString("n2")</span> <b>@Resource.Message_See_Explanatory_Note_11_2015</b>
+                </p>
+            </td>
+            <td />
+        </tr>
+        <tr>
+            <td valign=top align="center">
+                f)
+            </td>
+            <td colspan=4 valign=top>
+                <table border=1 cellspacing=1 cellpadding=0 width=505>
+                    <tr valign=top>
+                        <td width="65" rowspan="3" style="padding-left:2px">
+                            <p>
+                                @Resource.Message_Employee_S_Income_Tax_Borne_Employer<br />
+                                * @if (Model.Income_Tax_Employer)
+                                {
+                                    @Resource.Yes
+                                }
+                                else
+                                {
+                                    @Resource.No
+                                }
+
+                            </p>
+                        </td>
+                        <td width="440">
+
+                            <table border=1 cellspacing=1 cellpadding=1 width=440>
+                                <tr>
+                                    <td width="440" colspan="2">
+                                        <p>
+                                            <span>
+                                                @Resource.Message_If_Yes_Fully_Borne_By_Employer_DO_NOT_Enter_Any_Amount_In_I_And_II
+                                            </span>
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width=400>
+                                        <p>
+                                            <span>
+                                                (i) @Resource.Message_If_Tax_Ppartially_Borne_By_Employer_I1_No_Emp
+                                            </span>
+                                        </p>
+                                    </td>
+                                    <td width=40 align="center">
+                                        <p align="right">
+                                            <span style='text-decoration:underline'> @Model.Tax_Partially.ToString("n2")  </span>
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width=400>
+                                        <p>
+                                            <span>
+                                                (ii) @Resource.Message_If_A_Fixed_Amount_Of_Tax_Is_Borne_Employee
+                                            </span>
+                                        </p>
+                                    </td>
+                                    <td width=40 align="center">
+                                        <p align="right">
+                                            <span style='text-decoration:underline'> @Model.Tax_Fixed.ToString("n2")  </span>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td />
+        </tr>
+
+    </table>
+    <br />
+    <table border=1 cellspacing=1 cellpadding=1>
+        <tr bgcolor="#000">
+            <td width="4%"></td>
+            <td width="81%" valign=top>
+                <p>
+                    <b>
+                        <span style='color:white'>
+                            @Resource.DEDUCTIONS_Upper
+                        </span>
+                    </b>
+                    <b>
+                        <span style='font-size:7.0pt;color:white'>(@Resource.Message_Enter_NA_For_Items)</span>
+                    </b>
+                </p>
+            </td>
+            <td width="15%" valign=top>
+                <p>
+
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td colspan=2 style="padding-left:25px">
+                <p>
+                    <span style='font-size:7.0pt;'>
+                        @Resource.Employer_Contribution
+                    </span>
+                    @Resource.Message_Contribution_To_CPF_Or_Designated_Pension_Or_Provident_Fund <b>
+                        (@Resource.Message_Less_Amount_Refunded_To_Be_Refunded)
+                    </b><span>@Resource.Name_Of_Fund :</span> <span style='text-decoration:underline'> @Model.Name_CPF </span>
+                </p>
+                <p>
+                    <span style='color:windowtext;font-weight:normal;font-style: normal'>
+                        (@Resource.Message_Please_Aadopt_The_Appropriate_CPF_Rates_Published_CPF_Board_Website
+                    </span><span style='font-weight:normal; font-style:normal'></span><span style='color:windowtext; font-weight:normal;font-style:normal'>@Resource.Message_Do_Not</span>
+                    <span style='font-weight:normal;font-style:normal'>
+                        @Resource.Message_Includ_Excess_Or_Voluntary_Contributions_to_CPF)
+                    </span><span style='color:fuchsia; font-style:normal'></span>
+                    <br />
+                    <span><strong>@Resource.Message_See_Explanatory_Note_12_2015 - @Resource.DEDUCTIONS_Upper</strong></span>
+                </p>
+            </td>
+            <td rowspan="4" style="margin: 0 auto; text-align: center; ">
+                <br />
+                <table border="0">
+                    <tr>
+                        <td width="73%" valign=top>
+                            <p style=" text-align:right; margin:0; padding:0;">
+                                <span style='text-decoration:underline'> @Model.Employee_CPF.ToString("n2") </span>
+                                <br />
+                                <br />
+                                <br />
+                                <br />
+                                <span style='text-decoration:underline'> @Model.Donation.ToString("n2") </span>
+                                <br />
+                                <br />
+                                <span style='text-decoration:underline'> @Model.Contribution_Mosque.ToString("n2") </span>
+                                <br />
+                                <span style='text-decoration:underline; '> @Model.Life_Insurance.ToString("n2") </span>
+                            </p>
+                        </td>
+                        <td width="27%" valign=top></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td valign=top colspan=2 style="padding-left:25px">
+
+                <p>
+                    <b>
+                        <span>@Resource.Donations</span>
+                    </b><span>@Resource.Message_Donations_Deducted_From_Salaries_For :</span>
+                </p>
+                <p>
+                    <span>
+                        * @if (Model.Yayasan_Mendaki_Fund == "on")
+                        {
+                            @Resource.Message_Yayasan_Mendaki_Fund@:/
+                          }
+                        @if (Model.Community_chest_of_Singapore == "on")
+                        {
+                            @Resource.Message_Community_Chest_Of_Singapore@:/
+                          }
+                        @if (Model.SINDA == "on")
+                        {
+                            @:SINDA/
+                          }
+                        @if (Model.CDAC == "on")
+                        {
+                            @:CDAC/
+                          }
+                        @if (Model.ECF == "on")
+                        {
+                            @:ECF/
+                          }
+                        @if (Model.Other_tax_exempt_donations == "on")
+                        {
+                            @Resource.Message_Other_Tax_Exempt_Donations
+                        }
+                    </span>
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td colspan=2 style="padding-left:25px">
+                <p>
+                    <b>
+                        <span>
+                            @Resource.Contributions
+                        </span>
+                    </b><span>@Resource.Message_Deducted_From_Salaries_For_Mosque_Building_Fund :</span>
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td colspan=2 style="padding-left:25px">
+                <p>
+                    <b>
+                        <span>
+                            @Resource.Life_Insurance_Premiums
+                        </span>
+                    </b><span>
+                        @Resource.Message_Deducted_From<b> </b>@Resource.Message_Salaries:
+                    </span>
+                </p>
+            </td>
+        </tr>
+
+    </table>
+
+
+    <table border=1 cellspacing=0 cellpadding=0>
+        <tr>
+            <td>
+                <table border=0 cellspacing=1 cellpadding=1>
+                    <tr bgcolor="#000">
+                        <td width="100%" colspan=5 valign=top style="padding-left:25px;">
+                            <p>
+                                <b>
+                                    <span style='color:white'>
+                                        @Resource.DECLARATION_Upper
+                                    </span>
+                                </b><b>
+                                    <span style='font-size:7.0pt;color:white'> @Resource.Message_See_Explanatory_Note_4_2015</span>
+                                </b>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="100%" colspan=5 valign=top style="padding-left: 4px;">
+                            <table border="0" width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="15%">
+                                        <span>
+                                            @Resource.Name_Of_Employer :  
+                                        </span>
+                                    </td>
+                                    <td width="85%" align="left">
+                                        @Model.company.Name
+                                        <table border="0.5" width="96%"><tr><td></td></tr></table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td width="100%" colspan=5 valign=top style="padding-left: 4px;">
+
+                            <table border="0" width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="16%">
+                                        <span>
+                                            @Resource.Address_Of_Employer :
+                                        </span>
+                                    </td>
+                                    <td width="84%" align="left">
+                                        @Model.company.Address @Model.company.Zip_Code
+                                        <table border="0.5" width="96%"><tr><td></td></tr></table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="37%" valign=top style="padding-left:0px;">
+                            <table border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="1"></td>
+                                    <td align="left" width="90%">
+                                        <p>
+                                            @Model.employer.User_Profile.Name
+                                            <table border="0.5" width="90%"><tr><td></td></tr></table>
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="1"></td>
+                                    <td>
+                                        <p>
+                                            <span>
+                                                @Resource.Message_Name_Of_Authorised_Person_Making_The_Declaration
+                                            </span>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td width="18%" valign=top>
+                            <table border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="1"></td>
+                                    <td align="left" width="90%">
+                                        <p>
+                                            @(new EmploymentHistoryService().GetCurrentEmploymentHistory(Model.employer.Employee_Profile_ID).Designation.Name)
+                                            <table border="0.5" width="90%"><tr><td></td></tr></table>
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="1"></td>
+                                    <td>
+                                        <p>
+                                            <span>@Resource.Designation</span>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td width="15%" valign=top>
+
+                            <table border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="1"></td>
+                                    <td align="left" width="90%">
+                                        <p>
+                                            @Model.employer.Mobile_No
+                                            <table border="0.5" width="90%"><tr><td></td></tr></table>
+                                        </p>
+
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="1"></td>
+                                    <td>
+                                        <p>
+                                            <span>@Resource.Tel</span>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td width="16%" valign=top>
+                            <table border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="1"></td>
+                                    <td align="left" width="90%">
+                                        <p>
+                                            &nbsp; &nbsp; &nbsp; &nbsp;
+                                            <table border="0.5" width="90%"><tr><td></td></tr></table>
+                                        </p>
+
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="1"></td>
+                                    <td>
+                                        <p>
+                                            <span>@Resource.Signature</span>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td width="11%" valign=top>
+                            <table border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="1"></td>
+                                    <td align="left" width="90%">
+                                        <p>
+                                            @Model.Run_Date
+                                            <table border="0.5" width="90%"><tr><td></td></tr></table>
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="1"></td>
+                                    <td>
+                                        <p>
+                                            <span>@Resource.Date</span>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <p align=center style='text-align:center'>
+        <b>
+            <span>
+                @Resource.Message_There_Are_Penalties_For_Failing_To_Give_A_Return_Or_Furnishing_Incorrect_Or_Late_Returns
+            </span>
+        </b>
+    </p>
+
+    <table>
+        <tr>
+            <td>
+                <b>
+                    IR8A(1/@(Model.P_YEAR))
+                </b>
+            </td>
+            <td style="text-align:right">
+                <b>
+                    @Resource.Message_Delete_Where_Applicables
+                </b>
+            </td>
+        </tr>
+    </table>
+</div>

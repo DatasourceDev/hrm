@@ -1,0 +1,62 @@
+﻿@model  HR.Models.PayrollDetailViewModel
+@using HR.Models;
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+    var userlogin = UserSession.getUser(Request.RequestContext.HttpContext);
+    var i = Model.Index;
+
+    var prcs = Model.prcOvertimeList;
+    if (prcs.Count > 0)
+    {
+        Model.PRC_ID = NumUtil.ParseInteger(prcs[0].Value);
+        Model.Description = prcs[0].Desc;
+    }
+}
+<script type="text/javascript">
+    $(function () {
+        $(".chosen-select").chosen({ disable_search_threshold: 10 });
+        if ('@Model.Row_Type' == '@RowType.DELETE')
+            $('#' + 'overtimeRow-@i').hide();
+    });
+</script>
+<td>
+   @Html.Hidden("Overtime_Rows[" + i + "].CPF_Deduction", Model.CPF_Deduction)
+    @Html.Hidden("Overtime_Rows[" + i + "].Payroll_Detail_ID", Model.Payroll_Detail_ID)
+    @Html.Hidden("Overtime_Rows[" + i + "].PRM_ID", Model.PRM_ID)
+    @Html.Hidden("Overtime_Rows[" + i + "].Row_Type", Model.Row_Type)
+    @Html.Hidden("Overtime_Rows[" + i + "].PRT_ID", Model.PRT_ID)
+
+    <select class="chosen-select chosen-transparent form-control" id="Overtime_Rows_@(i)__PRC_ID" name="Overtime_Rows[@i].PRC_ID" >
+        @foreach (var h in Model.prcOvertimeList)
+        {
+              <option value="@h.Value" @(Model.PRC_ID.HasValue && Model.PRC_ID.Value == NumUtil.ParseInteger(h.Value) ? "selected" : "")>@h.Text</option>
+        }
+    </select>
+
+    <div class="validation-error">
+        @Html.ValidationMessage("Overtime_Rows[" + i + "].PRC_ID")
+    </div>
+</td>
+<td>
+    <input type="text" class="form-control  text-right" id="Overtime_Rows_@(i)__Hours_Worked" name="Overtime_Rows[@i].Hours_Worked" value="@Model.Hours_Worked"  onblur="ValidateDecimal('Overtime_Rows_@(i)__Hours_Worked', '@Resource.Number_Of_Hours_Worked', false)">
+    <div class="validation-error">
+        @Html.ValidationMessage("Overtime_Rows[" + i + "].Hours_Worked", "", new { id = "Overtime_Rows_" + i + "__Hours_Worked_Err" })
+    </div>
+</td>
+
+<td>
+    <input type="text" class="form-control text-right" id="Overtime_Rows_@(i)__Amount" name="Overtime_Rows[@i].Amount" value="@Model.Amount" onchange='SumOvertime()' onblur="ValidateDecimal('Overtime_Rows_@(i)__Amount', '@Resource.Amount_Payable_SymbolDollar', false)">
+    <div class="validation-error">
+        @Html.ValidationMessage("Overtime_Rows[" + i + "].Amount", "", new { id = "Overtime_Rows_" + i + "__Amount_Err" })
+    </div>
+</td>
+<td class="actions text-left" style="cursor:pointer">
+    <a data-toggle="modal" onclick="return DeleteOvertime('overtimeRow-@i', @i);">
+        <i class="fa fa-times-circle-o fa-2x"></i>
+    </a>
+</td>
+
+

@@ -1,0 +1,272 @@
+﻿@model  HR.Models.CPFGenerateViewModels
+@using HR.Models;
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@{
+    ViewBag.Title = @Resource.IR8B_Generate_File;
+}
+
+<script type="text/javascript">
+    $(function () {
+        var param = {
+            name: "process",
+            hasProcess: true,
+            hasConfirm: true
+        };
+        //InitDatatable("#empDataTable", null, InitDatatableApplyLink(param), 1, 'asc');
+        InitDatatable("#empDataTable", null, null, 1, 'asc');
+    });
+
+
+    function showComfirmModal(prm_id) {
+        $('#btnOpenDlgConfirm').get(0).click();
+        $("#hidprmid").val(prm_id);
+    }
+    $(function () {
+        $("#btnComfirm").click(function () {
+            ShowMask();
+            $('#btnClose').get(0).click();
+            var prmid = $("#hidprmid").val();
+            theForm.action = '@Url.Action("PayrollConfirm", "Payroll")' + '?pPRMID=' + prmid;
+            theForm.method = 'post';
+            theForm.submit();
+        });
+    });
+
+
+    //Added BY sun 20-08-2015
+    function ChkAll_Onchange() {
+        var chkall = $('#chkall').get(0);
+
+        var rowcount = $('#payrolldataTables > tbody >tr').length;
+        for (var i = 0; i < rowcount; i++) {
+            var chk = $('input[name="empIds"]').get(i);
+            if (chk != null) {
+                if (chkall.checked == true) {
+                    chk.checked = true;
+                }
+                else {
+                    chk.checked = false;
+                }
+            }
+        }
+    }
+
+    //Added BY sun 20-08-2015
+    function PrintCPFSubmission_Onclick() {
+        $("#btnPrintCPFSubmission").click(function () {
+
+            if ($('input[name="File_Type"]:radio:checked').val() == "TXT") {
+                var File_Type = "TXT";
+            }
+            if ($('input[name="File_Type"]:radio:checked').val() == "DTL") {
+                var File_Type = "DTL";
+            }
+            if ($('input[name="File_Type"]:radio:checked').val() == "DAT") {
+                var File_Type = "DAT";
+            }
+
+            var month = $("#Process_Month").val();
+            var year = $("#Process_Year").val();
+            theForm.action = '@Url.Action("PrintCPFSubmission", "Payroll")' + '?pFileType=' + File_Type;
+            theForm.method = 'post';
+            theForm.submit();
+        });
+        $('#modal-comfirm').modal('hide');
+    }
+
+    function checkValidation() {
+        var processMth = document.getElementById('CPF_ProcessMonth').value;
+        var processYr = document.getElementById('CPF_ProcessYear').value;
+        if (processMth == "-") {
+            alert('@Resource.The @Resource.Process_Month @Resource.Field @Resource.Is_Rrequired_Lower !');
+            return false;
+        }
+
+        if (processYr == "-") {
+            alert('@Resource.The @Resource.Process_Year @Resource.Field @Resource.Is_Rrequired_Lower !');
+            return false;
+        }
+
+        return true;
+    }
+
+</script>
+<!-- page header -->
+<div class="pageheader">
+
+    <h2> @Resource.IR8B_Generate_File</h2>
+
+    <div class="breadcrumbs">
+        <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li class="active">@Resource.IR8B_Generate_File</li>
+        </ol>
+    </div>
+
+</div>
+
+
+<div class="main">
+
+    <div class="row">
+
+        <div class="col-md-12">
+            <!-- tile  -->
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+
+                if (Model.result.Code < 0)
+                {
+                    <div class="alert alert-red">
+                        @if (Model.result.Code == ERROR_CODE.ERROR_18_NO_PAYROLL_RECORDS)
+                        {
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        }
+                        else
+                        {
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        }
+                    </div>
+                }
+                else if (Model.result.Code > 0)
+                {
+                    if (Model.result.Code == ERROR_CODE.SUCCESS)
+                    {
+                        if (string.IsNullOrEmpty(Model.result.Msg))
+                        {
+                            if (string.IsNullOrEmpty(Model.result.Msg))
+                            {
+                                Model.result.Msg = Resource.SUCCESS_CONFIRM;
+                            }
+                            <div class="alert alert-success">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                    }
+                    else if (Model.result.Code == ERROR_CODE.SUCCESS_GENERATE)
+                    {
+                        <div class="alert alert-success">
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        </div>
+                    }
+
+                }
+            }
+            @using (Html.BeginForm("IR8BGenerateFile", "Payroll", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+            {
+                <input type="hidden" id="Payment_Type" name="Payment_Type" value="0" />
+                <section class="tile color transparent-black filter" id="secfilter">
+                    <div class="tile-header transparent">
+                        <h1 style="cursor:pointer"><strong>@Resource.Process_Month_Or_Year</strong></h1>
+                    </div>
+                    <div class="tile-body">
+
+                        <div class="row">
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <label for="Process_Month" class="control-label">@Resource.Process_Year</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-sm-8">
+                                        <select class="chosen-select chosen-transparent form-control" id="IR8B_Year" name="IR8B_Year">
+                                            <option value="0" selected="selected">-</option>
+                                            @if (Model.IR8A_YearList != null)
+                                            {
+                                                foreach (var year in Model.IR8B_YearList)
+                                                {
+                                                    if (Model.IR8B_Year == year)
+                                                    {
+                                                        <option value="@year" selected="selected">@year</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@year">@year</option>
+                                                    }
+
+                                                }
+                                            }
+                                        </select>
+                                        <div class="validation-error">
+                                            @Html.ValidationMessageFor(m => m.IR8B_Year)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="col-sm-8">
+                                        <button type="submit" class="btn btn-primary" value="true" name="Generate">@Resource.Generate_IRA8B</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="tile color transparent-black">
+                    <div class="tile-header transparent">
+                        <h1><strong>@Resource.Submission_History</strong></h1>
+                        <div class="controls">
+                            <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="tile-body">
+
+                        <div class="table-responsive">
+                            <table class="table table-datatable table-custom" id="empDataTable">
+                                <thead>
+                                    <tr>
+                                        <th class="no-sort">@Resource.Process_Year</th>
+                                        <th class="no-sort">@Resource.File_Generated_Date</th>
+                                        <th class="no-sort">@Resource.Generated_No</th>
+                                        <th class="no-sort">@Resource.File_Name</th>
+                                        <th class="no-sort" style="width:10%;">@Resource.CPF_Employeee_List</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model != null && Model.generatedIR8B_File != null && Model.generatedIR8B_File.Count > 0)
+                                    {
+                                        var i = 0;
+                                        foreach (var row in Model.generatedIR8B_File)
+                                        {
+                                            <tr>
+                                                <td>@row.Process_Year</td>
+                                                <td>@DateUtil.ToDisplayDate(row.Generated_Date)</td>
+                                                <td>@row.RFF_Code</td>
+                                                <td>@row.File_Name</td>
+                                                <td align="center">
+                                                    <a href="@Url.Action("IRA8BGenerateFileDetail", "Payroll", new { generatedID = EncryptUtil.Encrypt(@row.Generated_ID) })" title="@Resource.Detail">
+                                                        <i class="fa fa-list fa-2x"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            i++;
+                                        }
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </section>
+
+            }
+
+        </div>
+
+
+    </div>
+
+
+</div>

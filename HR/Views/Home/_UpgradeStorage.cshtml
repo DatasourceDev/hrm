@@ -1,0 +1,61 @@
+﻿@model  HR.Models.DashBoardViewModel
+@using SBSModel.Common;
+@using SBSModel.Models;
+<div class="modal fade" id="modal-UpgradeStorage" role="dialog" aria-labelledby="modelUpgradeStorage" aria-hidden="true">
+   @using (Html.BeginForm("Index", "Home", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data" }))
+   {
+      <div class="modal-dialog">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h3 class="modal-title" id="modelUpgradeStorage"><strong>@Resource.Upgrade_Storage</strong></h3>
+            </div>
+            <div class="modal-body">
+               <div class="row">
+                  <div class="col-md-4">
+                     <div class="col-sm-12">
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <button id="btn500" name="pageAction" type="submit" class="btn btn-default btn-lg margin-bottom-20" value="btn500" onclick="return confirm('@Resource.Confirm_Upgrade');">500 MB</button>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <label for="month" class="control-label">+ $0.15/ @Resource.Month.ToLower()</label>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="col-sm-12">
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <button id="btn1gb" name="pageAction" type="submit" class="btn btn-default btn-lg margin-bottom-20" value="btn1gb" onclick="return confirm('@Resource.Confirm_Upgrade');">1 GB</button>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <label for="month" class="control-label">+ $0.20/ @Resource.Month.ToLower()</label>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="col-sm-12">
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <button id="btn2gb" name="pageAction" type="submit" class="btn btn-default btn-lg margin-bottom-20" value="btn2gb" onclick="return confirm('@Resource.Confirm_Upgrade');">2 GB</button>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <label for="month" class="control-label">+ $1.00/ @Resource.Month.ToLower()</label>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   }
+</div>

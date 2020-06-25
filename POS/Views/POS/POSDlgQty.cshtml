@@ -1,0 +1,116 @@
+﻿@using POS.Common;
+@using POS.Models;
+@using SBSModel.Common;
+@using SBSModel.Models;
+@model  POS.Models.POSViewModel
+
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnSetQty").click(function () {
+            var pQty = $('#Set_Qty').val();
+            var index = $('#Set_Qty_Index').val();
+
+            var valid = true;
+            if (ValidateDecimal('Set_Qty', 'Qty', true) == false) {
+                valid = false;
+            }
+
+
+            if (valid ==true) {
+                var qty = parseInt(pQty);
+
+                if (index >= 0)
+                {
+                    $('#Product_Rows_' + index + '__Qty_Label').get(0).style.textDecoration = 'none';
+                    $('#Product_Rows_' + index + '__Qty').val(qty);
+                    $('#Product_Rows_' + index + '__Qty_Label').val(formatNumber(qty));
+
+                    $('#Product_Rows_' + index + '__Qty_Label2').hide();
+                    SumAll();
+                }
+                else
+                {
+                    var rowcount = $('#selProductdataTables > tbody >tr').length;
+                    for (var i = 0; i < rowcount; i++) {
+                        var chk = $('input[name="chk' + i + '"]').get(0);
+                        if (chk != null) {
+                            if (chk.checked == true) {
+                                if ($('#Product_Rows_' + i + '__Row_Type').val() != '@RowType.DELETE') {
+                                    $('#Product_Rows_' + i + '__Qty_Label').get(0).style.textDecoration = 'line-through';
+                                    $('#Product_Rows_' + i + '__Qty2').val(qty);
+                                    $('#Product_Rows_' + i + '__Qty_Label2').show();
+                                    $('#Product_Rows_' + i + '__Qty_Label2').val(formatNumber(qty));
+
+                                    //$('#Product_Rows_' + i + '__Qty_Label').get(0).style.color = '#FF0 !important';
+                                    //$('#Product_Rows_' + i + '__Qty_Label2').get(0).style.color = '#FF0 !important';
+                                }
+                              
+                               
+                            }
+                            
+                        }
+
+
+                    }
+                }
+                $('#Set_Qty_Index').val('');
+                $('#Set_Qty').val('');
+                $("#modal-set-qty").modal('hide');
+                
+            }
+
+        });
+
+    });
+
+</script>
+<div class="main-content" style="color:#fff;">
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <input type="hidden" id="Set_Qty_Index" value="" />
+            <div id="modal-set-qty" class="modal hide fade">
+                <div class="modal-body">
+                    <div class="control-group text-center">
+                        <label class="control-label" style="font-weight: 600; font-size: 20px; line-height: 40px">Set Qty</label>
+                    </div>
+                    <div class="control-group">
+                        <div class="span6">
+                            <div class="control-group">
+                                @Html.Label("Set_Qty_Label", "Qty", new { @class = "control-label", style = "font-size:18px;" })
+                            </div>
+                            <div class="control-group">
+                                <div class="span9">
+                                    @Html.TextBox("Set_Qty", "1", new { style = "width:90%;text-align:right;", @class = "bg-white" })
+                                    <div class="validation-error">
+                                        <span id="Set_Qty_Err"></span>
+                                    </div>
+                                </div>
+                                <div class="span3">
+                                    @Html.TextBoxFor(m => m.Currency_Code, new { Readonly = true })
+                                </div>
+                               
+                            </div>
+                        </div>
+                        <div class="span6">
+                            <div class="control-group">
+
+                                @{
+                                    Html.RenderPartial("POSDlgNumber", new POSNumberViewModel()
+                                    {
+                                        Type = POSDlgType.Qty,
+                                        Display_Label_ID = "Set_Qty"
+                                    });
+                                   
+                                }
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

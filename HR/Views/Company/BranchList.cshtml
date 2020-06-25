@@ -1,0 +1,24 @@
+﻿@model  HR.Models.BranchViewModel
+@using SBSResourceAPI;
+
+@if (Model.BranchList != null)
+{
+    foreach (var row in Model.BranchList)
+    {
+        <tr class="status-info">
+            <td>
+                @row.Branch_Code
+            </td>
+            <td>@row.Branch_Name  </td>
+            <td>@row.Branch_Desc </td>
+            <td align="center">
+                <a data-toggle="modal" href="#editBranchModalContainerID" onclick="showBranchModal('#editBranchModalContainerID', '#editBranchModalBodyID', @row.Branch_ID, @row.Company_ID)">
+                    @Resource.Edit
+                </a> |
+                <a data-toggle="modal" onclick="return DeleteBranch('@row.Branch_ID','@row.Company_ID');">
+                    @Resource.Delete
+                </a>
+            </td>
+        </tr>
+    }
+}

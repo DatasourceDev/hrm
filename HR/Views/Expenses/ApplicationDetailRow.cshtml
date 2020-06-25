@@ -1,0 +1,132 @@
+﻿@model HR.Models.ExpensesDetailViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using HR.Common;
+@{
+   var userlogin = UserSession.getUser(Request.RequestContext.HttpContext);
+   var i = Model.Index;
+   var uitem = UserUtil.GetUserItem(Request.RequestContext.HttpContext);
+}
+
+<style>
+   body table tr.selectedRow {
+      background-color: rgba(0, 0, 0, 0.4);
+   }
+</style>
+
+<script type="text/javascript">
+   $(function () {
+      $(document).ready(function () {
+         $("table tr").click(function () {
+            $("table tr").removeClass('selectedRow');
+            $(this).addClass('selectedRow');
+         });
+      });
+   });
+</script>
+
+@functions{
+   private string GetFieldName(int index, string field)
+   {
+      return "Detail_Rows[" + index + "]." + field;
+   }
+   private string GetFieldID(int index, string field)
+   {
+      return "Detail_Rows_" + index + "__" + field;
+   }
+   private string GetFieldErr(int index, string field)
+   {
+      return "Detail_Rows_" + index + "__" + field + "_Err";
+   }
+}
+
+<td id="td-@i">
+
+   @if (Model.Row_Type == RowType.DELETE) { 
+      
+      <script type="text/javascript">
+         $(function () {
+            $('#' + 'erow-@i').hide();
+         });
+      </script>
+   }
+   <input data-field-type='date' class="form-control input-table-transparent" type="text"
+          id="@GetFieldID(i, "Expenses_Date_Text")"
+          name="@GetFieldName(i, "Expenses_Date_Text")"
+          value="@Model.Expenses_Date" />
+   <div class="validation-error">
+      @Html.ValidationMessage(GetFieldName(i, "Expenses_Date"))
+   </div>
+</td>
+<td>
+
+   @Html.Hidden(GetFieldName(i, "Index"), Model.Index)
+   @Html.Hidden(GetFieldName(i, "Row_Type"), Model.Row_Type)
+   @Html.Hidden(GetFieldName(i, "Expenses_Application_Document_ID"), Model.Expenses_Application_Document_ID)
+   @Html.Hidden(GetFieldName(i, "Expenses_Config_ID"), Model.Expenses_Config_ID)
+   @Html.Hidden(GetFieldName(i, "Expenses_Type_Name"), Model.Expenses_Type_Name)
+   @Html.Hidden(GetFieldName(i, "Expenses_Type_Desc"), Model.Expenses_Type_Desc)
+   @Html.Hidden(GetFieldName(i, "Expenses_Date"), Model.Expenses_Date)
+   @Html.Hidden(GetFieldName(i, "Doc_No"), Model.Doc_No)
+   @Html.Hidden(GetFieldName(i, "Balance"), Model.Balance)
+   @Html.Hidden(GetFieldName(i, "Selected_Currency"), Model.Selected_Currency)
+   @Html.Hidden(GetFieldName(i, "Total_Amount"), Model.Total_Amount)
+   @Html.Hidden(GetFieldName(i, "Amount_Claiming"), Model.Amount_Claiming)
+   @Html.Hidden(GetFieldName(i, "Notes"), Model.Notes)
+   @Html.Hidden(GetFieldName(i, "Upload_Receipt_ID"), Model.Upload_Receipt_ID)
+   @Html.Hidden(GetFieldName(i, "Upload_Receipt_Name"), Model.Upload_Receipt_Name)
+   @Html.Hidden(GetFieldName(i, "Upload_Receipt"), Model.Upload_Receipt)
+   @Html.Hidden(GetFieldName(i, "UOM_ID"), Model.UOM_ID)
+   @Html.Hidden(GetFieldName(i, "UOM_Name"), Model.UOM_Name)
+   @Html.Hidden(GetFieldName(i, "Amount_Per_UOM"), Model.Amount_Per_UOM)
+   @Html.Hidden(GetFieldName(i, "Mileage"), Model.Mileage)
+   @Html.Hidden(GetFieldName(i, "Job_Cost_ID"), Model.Job_Cost_ID)
+   @Html.Hidden(GetFieldName(i, "Job_Cost_Name"), Model.Job_Cost_Name)
+   @Html.Hidden(GetFieldName(i, "Withholding_Tax"), Model.Withholding_Tax)
+   @Html.Hidden(GetFieldName(i, "Tax"), Model.Tax)
+   @Html.Hidden(GetFieldName(i, "Tax_Type"), Model.Tax_Type)
+   @Html.Hidden(GetFieldName(i, "Withholding_Tax_Amount"), Model.Withholding_Tax_Amount)
+   @Html.Hidden(GetFieldName(i, "Withholding_Tax_Type"), Model.Withholding_Tax_Type)
+   @Html.Hidden(GetFieldName(i, "Tax_Amount"), Model.Tax_Amount)
+   @Html.Hidden(GetFieldName(i, "Tax_Amount_Type"), Model.Tax_Amount_Type)
+   @Html.Hidden(GetFieldName(i, "View_Readonly"), Model.View_Readonly)
+
+   <input class="form-control input-table-transparent" type="text"
+          id="@GetFieldID(i, "Expenses_Type_Name_Text")"
+          name="@GetFieldName(i, "Expenses_Type_Name_Text")"
+          value="@Model.Expenses_Type_Name" />
+   <div class="validation-error">
+      @Html.ValidationMessage(GetFieldName(i, "Expenses_Type_Name"))
+   </div>
+</td>
+@if (uitem.Is_Indent)
+{
+   <td>
+      <input class="form-control input-table-transparent" type="text"
+             id="@GetFieldID(i, "Job_Cost_Name_Text")"
+             name="@GetFieldName(i, "Job_Cost_Name_Text")"
+             value="@Model.Job_Cost_Name" />
+      <div class="validation-error">
+         @Html.ValidationMessage(GetFieldName(i, "Job_Cost_Name"))
+      </div>
+   </td>
+}
+<td class="text-right">
+   <input class="form-control input-table-transparent text-right" type="text"
+          id="@GetFieldID(i, "Amount_Claiming_Text")"
+          name="@GetFieldName(i, "Amount_Claiming_Text")"
+          value="@NumUtil.FormatCurrency(Model.Amount_Claiming,2)" />
+   <div class="validation-error">
+      @Html.ValidationMessage(GetFieldName(i, "Amount_Claiming"))
+   </div>
+</td>
+<td class="actions text-left" style="cursor:pointer">
+   <a href="#" id="btnEditDetail-@i" onclick="EditDetail_Onclick('@i','@Model.Expenses_Application_Document_ID', '@Model.Expenses_Config_ID','@Model.Row_Type','@Model.Expenses_Date','@Model.Balance', '@Model.Total_Amount','@Model.Amount_Claiming', '@Model.Selected_Currency', '@Model.Tax', '@Model.Notes' , '@Model.Expenses_Type_Desc', '@Model.Expenses_Type_Name', '@Model.UOM_ID', '@Model.UOM_Name', '@Model.Mileage', '@Model.Amount_Per_UOM','@Model.Upload_Receipt_ID', '@Model.Upload_Receipt_Name','@Model.Upload_Receipt','@Model.Job_Cost_ID','@Model.Withholding_Tax','@Model.Doc_No','@Model.Tax_Type','@Model.Withholding_Tax_Amount','@Model.Tax_Amount','@Model.Tax_Amount_Type','@Model.Withholding_Tax_Type','@Model.Job_Cost_Name')" title="@(Model.View_Readonly ? Resource.View : Resource.Edit)"><i class="fa fa-edit fa-2x"></i></a>
+   @if (!Model.View_Readonly)
+   {
+      <a data-toggle="modal" onclick="return DeleteDetail('erow-@i', @i);" title="@Resource.Delete">
+         <i class="fa fa-times-circle-o fa-2x"></i>
+      </a>
+   }
+</td>

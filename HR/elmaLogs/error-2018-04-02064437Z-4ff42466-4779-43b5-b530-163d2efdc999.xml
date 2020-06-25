@@ -1,0 +1,212 @@
+﻿<error errorId="4ff42466-4779-43b5-b530-163d2efdc999" application="/LM/W3SVC/44/ROOT" host="LAPTOP-64514UIV" type="System.Web.HttpException" message="The controller for path '/__browserLink/requestData/759c6f6f9f80400fa4a2c85f8cb2eaa3' was not found or does not implement IController." source="System.Web.Mvc" detail="System.Web.HttpException (0x80004005): The controller for path '/__browserLink/requestData/759c6f6f9f80400fa4a2c85f8cb2eaa3' was not found or does not implement IController.&#xD;&#xA;   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)&#xD;&#xA;   at System.Web.Mvc.DefaultControllerFactory.CreateController(RequestContext requestContext, String controllerName)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController&amp; controller, IControllerFactory&amp; factory)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContext httpContext, AsyncCallback callback, Object state)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.System.Web.IHttpAsyncHandler.BeginProcessRequest(HttpContext context, AsyncCallback cb, Object extraData)&#xD;&#xA;   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()&#xD;&#xA;   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)&#xD;&#xA;   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean&amp; completedSynchronously)" user="thidarat.s@smartdevsolution.com" time="2018-04-02T06:44:37.1294540Z" statusCode="404">
+  <serverVariables>
+    <item name="ALL_HTTP">
+      <value string="HTTP_CONNECTION:keep-alive&#xD;&#xA;HTTP_ACCEPT:application/json, text/javascript, */*; q=0.01&#xD;&#xA;HTTP_ACCEPT_ENCODING:gzip, deflate, br&#xD;&#xA;HTTP_ACCEPT_LANGUAGE:en,th;q=0.9&#xD;&#xA;HTTP_COOKIE:ASP.NET_SessionId=qm0xcj0phy4y14etm0geim3b; __schema_version=v18; __is_subscribed=true; __hub_token=6dcc209a-9344-48dc-a103-02bee6076f21; __company=1ANDOLPPvOklGZxQslPasA==; __cashier=5wXyW0dQsugCIMazLEVa9g==; __master_refresh=false; __cashier_refresh=false; __branch=so64cdDg4El7mmklqpAJAQ==; culture=en; __terminal=NzKOIZsTG1T3P70ihGBrsQ==; .AspNetCore.Antiforgery.IQO7TBeQrv4=CfDJ8FmcxlNToSNAt8eJNOJilhPp7V9XdA_KVP6VGPFlDOxJtPvH3Mk_UvAcYL2-trpUHSSAtuIeT9WkPgO5I6WYQ4jML8UZhYxyLhK7bNDJA-5PJdf6zpBp1e01zoykp5mHf5bN0gIf_VaznY1j0VtWOfs; .AspNetCore.Cookies=CfDJ8FmcxlNToSNAt8eJNOJilhO10sFj6eBbmTdSU7ObkKj50F3jRf111xVA5YH5ZoSz6GEoOHuojiNPgXFnIFJyhqcjio6Jmyi5WktCt4KRKriI-wmjCwLe3IfJ2aDx32_mnfM6X5QdTuxQ_RaZVLYlZ7NNWwER3n2iA_Wx5Kd6ilkKDkC5BGc-CitENAcyLSkKKbPp00OrX8wM22QYZTGUPqj2sOd7Z_C5AUpghZRcCMt3NTS2c6f_swQiR5Mp7hZPlvM3kv-BI6CadkWhLLia7-fvekbcYyZHyxtTnZvHP89vuH1d0COUT7LLMGXlZpwF7BO6lJCFHwkRXBGJbVe6lfImeU1xDDCjIjAPsjpBJ0WkmNWdBhv5Oh00g919Zb7uX2tYflpJtRaIH7rSrjIQ7erG7uk3oaQmzeW5XmH4y7Fqh-Z-WlnaAvjEkcjePUqgtBcTWvxl-mFpjTYTfuMHn7aE-ef4XE8qxlb3bqEFJDl4dI-WUOed5IUc_8IbWYs4lxNX6bEnmuM1oAsrziVHuFI-p5GAKNmaTK8OEBGVApBh; __RequestVerificationToken=pnT7TpuAlCYOfPTcBFFuTZec9Nvn9PPLmmWJRI0pycXwX-PunHe8xLjPcmylzfN3kNNwI2dtxV6bgtBnMoXgxX6OT-I1; .AspNet.ApplicationCookie=8fi7luUAFiBTDwFO4rvmkRZlvWVjvY-CJ6xoUdCJMsRwZw8uftazf00gg9jUIyC_KWvEorJIhL0I2-bO3q53wpGjmhXz58IVKYXEvH5o4SEEQwOhCZxvv7Zig1xu92YPODFoIXSC267_HNc6Y2DsoTENMqeNHJA5zKt9l2pKJYC8cnRHbvi8qePkqzruYa00vUKEREOJNWu7PX7Gz6o63j46esty_mMa3vClS-fS-MLL1fm_-3kmDZwbMaOLpMau0c6Sad52fLhNcGYuicUIDjkR728pKpW3nKXKf0uRqVBHn3cpSrowoOBRrrK8_sm8rR2gRfXWsGVY8vUZZKjQGZirPqNE8VuiVlDfOR0DHkphG31zObNFI9TwhDnHVapp917Hn7lEjtIA7bgoHxZW3mfGDUhLacWCd9RUfB_DIo3O7vJ-&#xD;&#xA;HTTP_HOST:localhost:59485&#xD;&#xA;HTTP_REFERER:http://localhost:59485/Expenses/TransactionSummary?Search_Year=&amp;Search_Month=&amp;search_Jobcost=0&amp;search_Emp=&amp;search_Status=Pending&#xD;&#xA;HTTP_USER_AGENT:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36&#xD;&#xA;HTTP_X_REQUESTED_WITH:XMLHttpRequest&#xD;&#xA;" />
+    </item>
+    <item name="ALL_RAW">
+      <value string="Connection: keep-alive&#xD;&#xA;Accept: application/json, text/javascript, */*; q=0.01&#xD;&#xA;Accept-Encoding: gzip, deflate, br&#xD;&#xA;Accept-Language: en,th;q=0.9&#xD;&#xA;Cookie: ASP.NET_SessionId=qm0xcj0phy4y14etm0geim3b; __schema_version=v18; __is_subscribed=true; __hub_token=6dcc209a-9344-48dc-a103-02bee6076f21; __company=1ANDOLPPvOklGZxQslPasA==; __cashier=5wXyW0dQsugCIMazLEVa9g==; __master_refresh=false; __cashier_refresh=false; __branch=so64cdDg4El7mmklqpAJAQ==; culture=en; __terminal=NzKOIZsTG1T3P70ihGBrsQ==; .AspNetCore.Antiforgery.IQO7TBeQrv4=CfDJ8FmcxlNToSNAt8eJNOJilhPp7V9XdA_KVP6VGPFlDOxJtPvH3Mk_UvAcYL2-trpUHSSAtuIeT9WkPgO5I6WYQ4jML8UZhYxyLhK7bNDJA-5PJdf6zpBp1e01zoykp5mHf5bN0gIf_VaznY1j0VtWOfs; .AspNetCore.Cookies=CfDJ8FmcxlNToSNAt8eJNOJilhO10sFj6eBbmTdSU7ObkKj50F3jRf111xVA5YH5ZoSz6GEoOHuojiNPgXFnIFJyhqcjio6Jmyi5WktCt4KRKriI-wmjCwLe3IfJ2aDx32_mnfM6X5QdTuxQ_RaZVLYlZ7NNWwER3n2iA_Wx5Kd6ilkKDkC5BGc-CitENAcyLSkKKbPp00OrX8wM22QYZTGUPqj2sOd7Z_C5AUpghZRcCMt3NTS2c6f_swQiR5Mp7hZPlvM3kv-BI6CadkWhLLia7-fvekbcYyZHyxtTnZvHP89vuH1d0COUT7LLMGXlZpwF7BO6lJCFHwkRXBGJbVe6lfImeU1xDDCjIjAPsjpBJ0WkmNWdBhv5Oh00g919Zb7uX2tYflpJtRaIH7rSrjIQ7erG7uk3oaQmzeW5XmH4y7Fqh-Z-WlnaAvjEkcjePUqgtBcTWvxl-mFpjTYTfuMHn7aE-ef4XE8qxlb3bqEFJDl4dI-WUOed5IUc_8IbWYs4lxNX6bEnmuM1oAsrziVHuFI-p5GAKNmaTK8OEBGVApBh; __RequestVerificationToken=pnT7TpuAlCYOfPTcBFFuTZec9Nvn9PPLmmWJRI0pycXwX-PunHe8xLjPcmylzfN3kNNwI2dtxV6bgtBnMoXgxX6OT-I1; .AspNet.ApplicationCookie=8fi7luUAFiBTDwFO4rvmkRZlvWVjvY-CJ6xoUdCJMsRwZw8uftazf00gg9jUIyC_KWvEorJIhL0I2-bO3q53wpGjmhXz58IVKYXEvH5o4SEEQwOhCZxvv7Zig1xu92YPODFoIXSC267_HNc6Y2DsoTENMqeNHJA5zKt9l2pKJYC8cnRHbvi8qePkqzruYa00vUKEREOJNWu7PX7Gz6o63j46esty_mMa3vClS-fS-MLL1fm_-3kmDZwbMaOLpMau0c6Sad52fLhNcGYuicUIDjkR728pKpW3nKXKf0uRqVBHn3cpSrowoOBRrrK8_sm8rR2gRfXWsGVY8vUZZKjQGZirPqNE8VuiVlDfOR0DHkphG31zObNFI9TwhDnHVapp917Hn7lEjtIA7bgoHxZW3mfGDUhLacWCd9RUfB_DIo3O7vJ-&#xD;&#xA;Host: localhost:59485&#xD;&#xA;Referer: http://localhost:59485/Expenses/TransactionSummary?Search_Year=&amp;Search_Month=&amp;search_Jobcost=0&amp;search_Emp=&amp;search_Status=Pending&#xD;&#xA;User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36&#xD;&#xA;X-Requested-With: XMLHttpRequest&#xD;&#xA;" />
+    </item>
+    <item name="APPL_MD_PATH">
+      <value string="/LM/W3SVC/44/ROOT" />
+    </item>
+    <item name="APPL_PHYSICAL_PATH">
+      <value string="E:\Work2\SBSolutions\HRSBS2 (Dev)\HR\" />
+    </item>
+    <item name="AUTH_TYPE">
+      <value string="ApplicationCookie" />
+    </item>
+    <item name="AUTH_USER">
+      <value string="thidarat.s@smartdevsolution.com" />
+    </item>
+    <item name="AUTH_PASSWORD">
+      <value string="*****" />
+    </item>
+    <item name="LOGON_USER">
+      <value string="" />
+    </item>
+    <item name="REMOTE_USER">
+      <value string="thidarat.s@smartdevsolution.com" />
+    </item>
+    <item name="CERT_COOKIE">
+      <value string="" />
+    </item>
+    <item name="CERT_FLAGS">
+      <value string="" />
+    </item>
+    <item name="CERT_ISSUER">
+      <value string="" />
+    </item>
+    <item name="CERT_KEYSIZE">
+      <value string="" />
+    </item>
+    <item name="CERT_SECRETKEYSIZE">
+      <value string="" />
+    </item>
+    <item name="CERT_SERIALNUMBER">
+      <value string="" />
+    </item>
+    <item name="CERT_SERVER_ISSUER">
+      <value string="" />
+    </item>
+    <item name="CERT_SERVER_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="CERT_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="CONTENT_LENGTH">
+      <value string="0" />
+    </item>
+    <item name="CONTENT_TYPE">
+      <value string="" />
+    </item>
+    <item name="GATEWAY_INTERFACE">
+      <value string="CGI/1.1" />
+    </item>
+    <item name="HTTPS">
+      <value string="off" />
+    </item>
+    <item name="HTTPS_KEYSIZE">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SECRETKEYSIZE">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SERVER_ISSUER">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SERVER_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="INSTANCE_ID">
+      <value string="44" />
+    </item>
+    <item name="INSTANCE_META_PATH">
+      <value string="/LM/W3SVC/44" />
+    </item>
+    <item name="LOCAL_ADDR">
+      <value string="::1" />
+    </item>
+    <item name="PATH_INFO">
+      <value string="/__browserLink/requestData/759c6f6f9f80400fa4a2c85f8cb2eaa3" />
+    </item>
+    <item name="PATH_TRANSLATED">
+      <value string="E:\Work2\SBSolutions\HRSBS2 (Dev)\HR\__browserLink\requestData\759c6f6f9f80400fa4a2c85f8cb2eaa3" />
+    </item>
+    <item name="QUERY_STRING">
+      <value string="version=2" />
+    </item>
+    <item name="REMOTE_ADDR">
+      <value string="::1" />
+    </item>
+    <item name="REMOTE_HOST">
+      <value string="::1" />
+    </item>
+    <item name="REMOTE_PORT">
+      <value string="3669" />
+    </item>
+    <item name="REQUEST_METHOD">
+      <value string="GET" />
+    </item>
+    <item name="SCRIPT_NAME">
+      <value string="/__browserLink/requestData/759c6f6f9f80400fa4a2c85f8cb2eaa3" />
+    </item>
+    <item name="SERVER_NAME">
+      <value string="localhost" />
+    </item>
+    <item name="SERVER_PORT">
+      <value string="59485" />
+    </item>
+    <item name="SERVER_PORT_SECURE">
+      <value string="0" />
+    </item>
+    <item name="SERVER_PROTOCOL">
+      <value string="HTTP/1.1" />
+    </item>
+    <item name="SERVER_SOFTWARE">
+      <value string="Microsoft-IIS/10.0" />
+    </item>
+    <item name="URL">
+      <value string="/__browserLink/requestData/759c6f6f9f80400fa4a2c85f8cb2eaa3" />
+    </item>
+    <item name="HTTP_CONNECTION">
+      <value string="keep-alive" />
+    </item>
+    <item name="HTTP_ACCEPT">
+      <value string="application/json, text/javascript, */*; q=0.01" />
+    </item>
+    <item name="HTTP_ACCEPT_ENCODING">
+      <value string="gzip, deflate, br" />
+    </item>
+    <item name="HTTP_ACCEPT_LANGUAGE">
+      <value string="en,th;q=0.9" />
+    </item>
+    <item name="HTTP_COOKIE">
+      <value string="ASP.NET_SessionId=qm0xcj0phy4y14etm0geim3b; __schema_version=v18; __is_subscribed=true; __hub_token=6dcc209a-9344-48dc-a103-02bee6076f21; __company=1ANDOLPPvOklGZxQslPasA==; __cashier=5wXyW0dQsugCIMazLEVa9g==; __master_refresh=false; __cashier_refresh=false; __branch=so64cdDg4El7mmklqpAJAQ==; culture=en; __terminal=NzKOIZsTG1T3P70ihGBrsQ==; .AspNetCore.Antiforgery.IQO7TBeQrv4=CfDJ8FmcxlNToSNAt8eJNOJilhPp7V9XdA_KVP6VGPFlDOxJtPvH3Mk_UvAcYL2-trpUHSSAtuIeT9WkPgO5I6WYQ4jML8UZhYxyLhK7bNDJA-5PJdf6zpBp1e01zoykp5mHf5bN0gIf_VaznY1j0VtWOfs; .AspNetCore.Cookies=CfDJ8FmcxlNToSNAt8eJNOJilhO10sFj6eBbmTdSU7ObkKj50F3jRf111xVA5YH5ZoSz6GEoOHuojiNPgXFnIFJyhqcjio6Jmyi5WktCt4KRKriI-wmjCwLe3IfJ2aDx32_mnfM6X5QdTuxQ_RaZVLYlZ7NNWwER3n2iA_Wx5Kd6ilkKDkC5BGc-CitENAcyLSkKKbPp00OrX8wM22QYZTGUPqj2sOd7Z_C5AUpghZRcCMt3NTS2c6f_swQiR5Mp7hZPlvM3kv-BI6CadkWhLLia7-fvekbcYyZHyxtTnZvHP89vuH1d0COUT7LLMGXlZpwF7BO6lJCFHwkRXBGJbVe6lfImeU1xDDCjIjAPsjpBJ0WkmNWdBhv5Oh00g919Zb7uX2tYflpJtRaIH7rSrjIQ7erG7uk3oaQmzeW5XmH4y7Fqh-Z-WlnaAvjEkcjePUqgtBcTWvxl-mFpjTYTfuMHn7aE-ef4XE8qxlb3bqEFJDl4dI-WUOed5IUc_8IbWYs4lxNX6bEnmuM1oAsrziVHuFI-p5GAKNmaTK8OEBGVApBh; __RequestVerificationToken=pnT7TpuAlCYOfPTcBFFuTZec9Nvn9PPLmmWJRI0pycXwX-PunHe8xLjPcmylzfN3kNNwI2dtxV6bgtBnMoXgxX6OT-I1; .AspNet.ApplicationCookie=8fi7luUAFiBTDwFO4rvmkRZlvWVjvY-CJ6xoUdCJMsRwZw8uftazf00gg9jUIyC_KWvEorJIhL0I2-bO3q53wpGjmhXz58IVKYXEvH5o4SEEQwOhCZxvv7Zig1xu92YPODFoIXSC267_HNc6Y2DsoTENMqeNHJA5zKt9l2pKJYC8cnRHbvi8qePkqzruYa00vUKEREOJNWu7PX7Gz6o63j46esty_mMa3vClS-fS-MLL1fm_-3kmDZwbMaOLpMau0c6Sad52fLhNcGYuicUIDjkR728pKpW3nKXKf0uRqVBHn3cpSrowoOBRrrK8_sm8rR2gRfXWsGVY8vUZZKjQGZirPqNE8VuiVlDfOR0DHkphG31zObNFI9TwhDnHVapp917Hn7lEjtIA7bgoHxZW3mfGDUhLacWCd9RUfB_DIo3O7vJ-" />
+    </item>
+    <item name="HTTP_HOST">
+      <value string="localhost:59485" />
+    </item>
+    <item name="HTTP_REFERER">
+      <value string="http://localhost:59485/Expenses/TransactionSummary?Search_Year=&amp;Search_Month=&amp;search_Jobcost=0&amp;search_Emp=&amp;search_Status=Pending" />
+    </item>
+    <item name="HTTP_USER_AGENT">
+      <value string="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36" />
+    </item>
+    <item name="HTTP_X_REQUESTED_WITH">
+      <value string="XMLHttpRequest" />
+    </item>
+  </serverVariables>
+  <queryString>
+    <item name="version">
+      <value string="2" />
+    </item>
+  </queryString>
+  <cookies>
+    <item name="ASP.NET_SessionId">
+      <value string="qm0xcj0phy4y14etm0geim3b" />
+    </item>
+    <item name="__schema_version">
+      <value string="v18" />
+    </item>
+    <item name="__is_subscribed">
+      <value string="true" />
+    </item>
+    <item name="__hub_token">
+      <value string="6dcc209a-9344-48dc-a103-02bee6076f21" />
+    </item>
+    <item name="__company">
+      <value string="1ANDOLPPvOklGZxQslPasA==" />
+    </item>
+    <item name="__cashier">
+      <value string="5wXyW0dQsugCIMazLEVa9g==" />
+    </item>
+    <item name="__master_refresh">
+      <value string="false" />
+    </item>
+    <item name="__cashier_refresh">
+      <value string="false" />
+    </item>
+    <item name="__branch">
+      <value string="so64cdDg4El7mmklqpAJAQ==" />
+    </item>
+    <item name="culture">
+      <value string="en" />
+    </item>
+    <item name="__terminal">
+      <value string="NzKOIZsTG1T3P70ihGBrsQ==" />
+    </item>
+    <item name=".AspNetCore.Antiforgery.IQO7TBeQrv4">
+      <value string="CfDJ8FmcxlNToSNAt8eJNOJilhPp7V9XdA_KVP6VGPFlDOxJtPvH3Mk_UvAcYL2-trpUHSSAtuIeT9WkPgO5I6WYQ4jML8UZhYxyLhK7bNDJA-5PJdf6zpBp1e01zoykp5mHf5bN0gIf_VaznY1j0VtWOfs" />
+    </item>
+    <item name=".AspNetCore.Cookies">
+      <value string="CfDJ8FmcxlNToSNAt8eJNOJilhO10sFj6eBbmTdSU7ObkKj50F3jRf111xVA5YH5ZoSz6GEoOHuojiNPgXFnIFJyhqcjio6Jmyi5WktCt4KRKriI-wmjCwLe3IfJ2aDx32_mnfM6X5QdTuxQ_RaZVLYlZ7NNWwER3n2iA_Wx5Kd6ilkKDkC5BGc-CitENAcyLSkKKbPp00OrX8wM22QYZTGUPqj2sOd7Z_C5AUpghZRcCMt3NTS2c6f_swQiR5Mp7hZPlvM3kv-BI6CadkWhLLia7-fvekbcYyZHyxtTnZvHP89vuH1d0COUT7LLMGXlZpwF7BO6lJCFHwkRXBGJbVe6lfImeU1xDDCjIjAPsjpBJ0WkmNWdBhv5Oh00g919Zb7uX2tYflpJtRaIH7rSrjIQ7erG7uk3oaQmzeW5XmH4y7Fqh-Z-WlnaAvjEkcjePUqgtBcTWvxl-mFpjTYTfuMHn7aE-ef4XE8qxlb3bqEFJDl4dI-WUOed5IUc_8IbWYs4lxNX6bEnmuM1oAsrziVHuFI-p5GAKNmaTK8OEBGVApBh" />
+    </item>
+    <item name="__RequestVerificationToken">
+      <value string="pnT7TpuAlCYOfPTcBFFuTZec9Nvn9PPLmmWJRI0pycXwX-PunHe8xLjPcmylzfN3kNNwI2dtxV6bgtBnMoXgxX6OT-I1" />
+    </item>
+    <item name=".AspNet.ApplicationCookie">
+      <value string="8fi7luUAFiBTDwFO4rvmkRZlvWVjvY-CJ6xoUdCJMsRwZw8uftazf00gg9jUIyC_KWvEorJIhL0I2-bO3q53wpGjmhXz58IVKYXEvH5o4SEEQwOhCZxvv7Zig1xu92YPODFoIXSC267_HNc6Y2DsoTENMqeNHJA5zKt9l2pKJYC8cnRHbvi8qePkqzruYa00vUKEREOJNWu7PX7Gz6o63j46esty_mMa3vClS-fS-MLL1fm_-3kmDZwbMaOLpMau0c6Sad52fLhNcGYuicUIDjkR728pKpW3nKXKf0uRqVBHn3cpSrowoOBRrrK8_sm8rR2gRfXWsGVY8vUZZKjQGZirPqNE8VuiVlDfOR0DHkphG31zObNFI9TwhDnHVapp917Hn7lEjtIA7bgoHxZW3mfGDUhLacWCd9RUfB_DIo3O7vJ-" />
+    </item>
+  </cookies>
+</error>

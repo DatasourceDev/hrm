@@ -1,0 +1,75 @@
+﻿@model  HR.Models.ConfigulationViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+
+<script type="text/javascript">
+    $(function () {
+
+    });
+</script>
+<div id="exchange-tab" class="tab-pane fade in ">
+    @using (Html.BeginForm("Configuration", "Configuration", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        <a id="btnAddExchange" href="#modal-exchange" role="button" data-toggle="modal" style="display:none;"></a>
+        <div class="row">
+            <div class="col-md-12">
+                <section class="tile transparent">
+
+                    <div class="tile-header transparent">
+                        <h1><strong>@Resource.Exchange_Rate</strong></h1>
+                        <div class="controls">
+                            <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                        </div>
+                    </div>
+
+
+                    <div class="tile-body">
+                        <div class="table-responsive">
+                            <table class="table table-datatable table-custom" id="ExchangeDataTable">
+                                <thead>
+                                    <tr>
+                                        <th class="sort-alpha">@Resource.Years</th>
+                                        <th class="sort-alpha">@Resource.Status</th>
+                                        <th class="no-sort" width="110px">@Resource.Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.ExchangeList != null)
+                                    {
+                                        foreach (var row in Model.ExchangeList)
+                                        {
+                                            <tr>
+                                                <td>@row.Fiscal_Year</td>
+                                                <td>@StatusUtil.Get_Record_Status(row.Record_Status)</td>
+                                                <td class="actions text-left">
+                                                    @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                    {
+                                                        <a href="@Url.Action("ExchangeRateInfo", "Configuration", new { pExchangeID = EncryptUtil.Encrypt(row.Exchange_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U), tabAction = "exchange" })" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                                    }
+                                                    @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_D))
+                                                    {
+                                                        <a href="@Url.Action("ExchangeDelete", "Configuration", new { pExchangeID = EncryptUtil.Encrypt(row.Exchange_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_D), tabAction = "exchange" })" onclick="return confirm('@Resource.Confirm_Delete_Msg');" title="@Resource.Delete">
+                                                            <i class="fa fa-times-circle-o fa-2x"></i>
+                                                        </a>
+                                                    }
+
+                                                </td>
+
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    }
+</div>
+

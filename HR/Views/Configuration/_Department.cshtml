@@ -1,0 +1,147 @@
+﻿
+@model  HR.Models.ConfigulationViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnDepartmentSave").click(function () {
+            if ($('#Department_ID').val() > 0) {
+                if (!Confirm_Alert($('#Department_ID').val())) {
+                    return;
+                }
+            }
+
+            if ($('#Department_Status').val() == '@RecordStatus.Active' && $('#Department_ID').val() != null) {
+                var data = { pDepartmentID: $('#Department_ID').val() };
+                ShowMask();
+                $.ajax({
+                    url: '@Url.Action("CheckDepartmentRelation", "Configuration")',
+                    //Passes the content of an input up
+                    data: data,
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        if (data != null && data.related == true) {
+                            if (confirm('@Resource.Message_Disabled_Status_To_Inactive')) {
+                                theFormOne.action = '@Url.Action("Configuration", "Configuration")' + '?tabAction=department';
+                                theFormOne.method = 'post';
+                                theFormOne.submit();
+                                return;
+                            }
+                        }
+                        else {
+                            theFormOne.action = '@Url.Action("Configuration", "Configuration")' + '?tabAction=department';
+                            theFormOne.method = 'post';
+                            theFormOne.submit();
+                            return;
+                        }
+                        CloseMask();
+                    }
+                });
+            }
+            else {
+                ShowMask();
+                theFormOne.action = '@Url.Action("Configuration", "Configuration")' + '?tabAction=department';
+                theFormOne.method = 'post';
+                theFormOne.submit();
+            }
+        });
+    });
+
+    function AddDepartment_Onclick() {
+        $('#btnAddDepartment').get(0).click();
+        $('#Department_ID').val('');
+
+        $('#Department_Name').val('');
+        $('#Department_Status').val('@RecordStatus.Active');
+        $('#Department_Status').trigger("chosen:updated");
+    }
+    function EditDepartment_Onclick(dID, name, status) {
+        $('#btnAddDepartment').get(0).click();
+        $('#Department_ID').val(dID);
+
+        $('#Department_Name').val(name);
+        $('#Department_Status').val(status);
+        $('#Department_Status').trigger("chosen:updated");
+    }
+</script>
+
+<div id="department-tab" class="tab-pane fade in ">
+    @using (Html.BeginForm("Configuration", "Configuration", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        <a id="btnAddDepartment" href="#modal-department" role="button" data-toggle="modal" style="display:none;"></a>
+        <div class="row">
+            <div class="col-md-12">
+                <section class="tile transparent">
+
+                    <div class="tile-header transparent">
+                        <h1><strong>@Resource.Department</strong></h1>
+                        <div class="controls">
+                            <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                        </div>
+                    </div>
+                    <div class="tile-body">
+                        <div class="table-responsive">
+                            <table class="table table-datatable table-custom" id="departmentDataTable">
+                                <thead>
+                                    <tr>
+                                        <th class="no-sort" style="width: 40px;">
+                                            <div class="checkbox check-transparent">
+                                                <input type="checkbox" value="1" id="chkallDepartment">
+                                                <label for="chkallDepartment"></label>
+                                            </div>
+                                        </th>
+                                        <th class="sort-alpha">@Resource.Department_Name</th>
+                                        <th class="sort-alpha">@Resource.Status</th>
+                                        <th class="no-sort" width="110px">@Resource.Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{var j = 0;}
+                                    @if (Model.DepartmentList != null)
+                                    {
+                                        foreach (var row in Model.DepartmentList)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="checkbox check-transparent">
+                                                        <input type="checkbox" value="@row.Department_ID" name="departs" id="departs[@j]">
+                                                        <label for="departs[@j]"></label>
+                                                    </div>
+                                                </td>
+                                                <td>@row.Name</td>
+                                                <td>@StatusUtil.Get_Record_Status(row.Record_Status)</td>
+                                                <td class="actions text-left">
+                                                    @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                    {
+                                                        <a href="#" onclick="EditDepartment_Onclick('@row.Department_ID','@row.Name', '@row.Record_Status')"><i class="fa fa-edit fa-2x"></i></a>
+                                                    }
+                                                    @*@if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_D))
+                                                        {
+                                                            <a href="@Url.Action("Configuration", "Configuration", new { Department_ID = row.Department_ID, operation = UserSession.RIGHT_D, tabAction = "department" })" onclick="return confirm('@Resource.ConfirmDelete');" title="Delete">
+                                                                <i class="fa fa-times-circle-o fa-2x"></i>
+                                                            </a>
+                                                        }*@
+                                                </td>
+                                            </tr>
+                                                    j++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    }
+</div>
+
+
+
+

@@ -1,0 +1,744 @@
+﻿@model  Time.Models.TimeSheetViewModel
+@using SBSModel.Models;
+@using System.Text;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Models;
+@using SBSWorkFlowAPI.ModelsAndService;
+@using SBSResourceAPI;
+@using SBSWorkFlowAPI.Constants;
+@{
+   ViewBag.Title = @Resource.Time_Sheet_Management;
+}
+@{
+   var userlogin = UserUtil.getUser(Request.RequestContext.HttpContext);
+   var requests = new List<Request>();
+   var requestIDs = new List<int>();
+   var recordIDs = new List<int>();
+
+   int? emploginID = null;
+   var hist = new EmploymentHistoryService().GetCurrentEmploymentHistoryByProfile(userlogin.Profile_ID);
+   if (hist != null)
+   {
+      emploginID = hist.Employee_Profile_ID;
+      var aService = new SBSWorkFlowAPI.Service();
+      var r = aService.GetMyTasks(userlogin.Company_ID.Value, hist.Department_ID.Value, userlogin.Profile_ID, ModuleCode.Time, ApprovalType.TimeSheet, "");
+      if (r.Item2.IsSuccess && r.Item1 != null)
+      {
+         requests = r.Item1.ToList();
+         requestIDs = r.Item1.Select(s => s.Request_ID).ToList();
+      }
+   }
+}
+
+@if ((Model.rights != null && Model.rights.Contains(Operation.A)))
+{
+   <script type="text/javascript">
+      $(function () {
+         InitDatepicker();
+
+         var module = '@Model.tabAction';
+         if ('@string.IsNullOrEmpty(Model.tabAction)' == "True") {
+            module = "pending";
+         }
+         var liID = "li-" + module;
+         var tabID = module + "-tab";
+         $("#" + liID).addClass("active");
+         $("#" + tabID).addClass("active");
+
+         //InitDatatable('pendingDataTable', null, null);
+         InitDatatable('processedDataTable', null, null);
+      })
+
+      $(function () {
+
+      });
+   </script>
+
+        <!-- page header -->
+   <div class="pageheader">
+      <h2> @Resource.Time_Sheet_Management</h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li class="active">@Resource.Time_Sheet_Management</li>
+         </ol>
+      </div>
+   </div>
+
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+            <!-- tile grading -->
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+
+            <!-- tile widget -->
+            <section class="tile color transparent-black">
+               <div class="tile-widget nopadding color transparent-white rounded-top-corners">
+                  <ul class="nav nav-tabs tabdrop">
+                     <li id="li-pending"><a href="#pending-tab" data-toggle="tab">@Resource.Pending</a></li>
+                     <li id="li-processed"><a href="#processed-tab" data-toggle="tab">@Resource.Rejected / @Resource.Approved / @Resource.Cancelled</a></li>
+                  </ul>
+               </div>
+               <div class="tile-body tab-content rounded-bottom-corners">
+                  <div id="pending-tab" class="tab-pane fade in">
+                     <div class="row">
+                        <div class="col-md-12">
+                           <section class="tile color transparent filter" id="secfilter1">
+                              <div class="tile-header transparent">
+                                 <h1 onclick="CollapseHeader(null, 'btncollapse1', 'secfilter1')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                                 <div class="controls">
+                                    <a href="#" class="minimize filter" id="btncollapse1"><i class="fa fa-search  color-white"></i></a>
+                                 </div>
+                              </div>
+                              <div class="tile-body">
+                                 @using (Html.BeginForm("TimeSheetManagement", "TimeSheet", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                                 {
+                                    @Html.AntiForgeryToken()
+                                    <div class="row">
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="search_Pending_Emp" class="control-label">@Resource.Request_From</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <select class="chosen-select chosen-transparent form-control" id="Search_Pending_Emp" name="Search_Pending_Emp">
+                                                   <option value="">-</option>
+                                                   @if (Model.EmployeeList != null)
+                                                   {
+                                                      foreach (var row in Model.EmployeeList)
+                                                      {
+                                                         <option value="@row.Employee_Profile_ID" @(Model.Search_Pending_Emp == row.Employee_Profile_ID ? "selected" : "")>@AppConst.GetUserName(row.User_Profile)</option>
+                                                      }
+                                                   }
+                                                </select>
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.Search_Pending_Emp)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="Search_Pending_Date_From" class="control-label">@Resource.Date_Applied</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <input type="text" class="form-control input-datepicker" id="Search_Pending_Date_From" name="Search_Pending_Date_From" value="@Model.Search_Pending_Date_From">
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.Search_Pending_Date_From)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="Search_Pending_Date_To" class="control-label">@Resource.To</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <input type="text" class="form-control input-datepicker" id="Search_Pending_Date_To" name="Search_Pending_Date_To" value="@Model.Search_Pending_Date_To">
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.Search_Pending_Date_To)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                    <div class="row">
+                                       <div class="col-md-6">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <button type="submit" class="btn btn-default" name="tabAction" value="pending">@Resource.Filter</button>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 }
+                              </div>
+                           </section>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-12">
+                           @using (Html.BeginForm("TimeSheetManagement", "TimeSheet", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                           {
+                              @Html.AntiForgeryToken()
+                              <section class="tile transparent">
+                                 <div class="tile-header transparent">
+                                    <h1><strong>@Resource.Pending_Applications</strong></h1>
+                                    <div class="controls">
+                                       <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                    </div>
+                                 </div>
+                                 <div class="tile-body">
+                                    <div class="table-responsive">
+                                       <table class="table table-datatable table-custom" id="pendingDataTable">
+                                          <thead>
+                                             <tr>
+                                                <th class="sort-alpha"></th>
+                                                <th class="sort-alpha">@Resource.Employee_Name</th>
+                                                <th class="sort-alpha">@Resource.Date</th>
+                                                <th class="sort-alpha">(@Resource._24_Hour_Clock)<br /> @Resource.Clock_In</th>
+                                                <th class="sort-alpha">(@Resource._24_Hour_Clock)<br /> @Resource.Clock_Out</th>
+                                                <th class="sort-alpha">@Resource.Indent_No</th>
+                                                <th class="sort-alpha">@Resource.Customer_Name</th>
+                                                <th class="sort-numeric">@Resource.Duration</th>
+                                                <th class="sort-numeric">@Resource.Hour_Rate</th>
+                                                <th class="sort-Amount">@Resource.Total_Amount_SymbolDollar</th>
+                                                <th class="sort-alpha">@Resource.Status</th>
+                                                <th class="no-sort" style="width:50px;">@Resource.Action</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             @if (Model.TimeSheetList != null)
+                                             {
+                                                int no = 1;
+                                                int i = 0;
+                                                foreach (var row in Model.TimeSheetList)
+                                                {
+                                                   var show = false;
+                                                   var status = "";
+                                                   if (Model.Search_Pending_Emp.HasValue)
+                                                   {
+                                                      if (row.Employee_Profile_ID != Model.Search_Pending_Emp)
+                                                      {
+                                                         continue;
+                                                      }
+                                                   }
+                                                   if (!string.IsNullOrEmpty(Model.Search_Pending_Date_From))
+                                                   {
+                                                      if (row.Date_Of_Date.Value < DateUtil.ToDate(Model.Search_Pending_Date_From))
+                                                      {
+                                                         continue;
+                                                      }
+                                                   }
+                                                   if (!string.IsNullOrEmpty(Model.Search_Pending_Date_To))
+                                                   {
+                                                      if (row.Date_Of_Date.Value > DateUtil.ToDate(Model.Search_Pending_Date_To))
+                                                      {
+                                                         continue;
+                                                      }
+                                                   }
+                                                   if (string.IsNullOrEmpty(row.Cancel_Status))
+                                                   {
+                                                      if (row.Overall_Status == WorkflowStatus.Closed)
+                                                      {
+                                                         continue;
+                                                      }
+                                                      else if (row.Overall_Status == WorkflowStatus.Rejected)
+                                                      {
+                                                         continue;
+                                                      }
+                                                   }
+                                                   else
+                                                   {
+                                                      if (row.Cancel_Status == WorkflowStatus.Cancellation_Rejected)
+                                                      {
+                                                         continue;
+                                                      }
+                                                      else if (row.Cancel_Status == WorkflowStatus.Cancelled)
+                                                      {
+                                                         continue;
+                                                      }
+                                                   }
+                                                   if (string.IsNullOrEmpty(row.Cancel_Status))
+                                                   {
+                                                      //Normal
+                                                      if (requestIDs.Contains(row.Request_ID.HasValue ? row.Request_ID.Value : 0))
+                                                      {
+                                                         var request = requests.Where(w => w.Request_ID == row.Request_ID).FirstOrDefault();
+                                                         if (request != null && request.Task_Assignment != null)
+                                                         {
+                                                            status = request.Status;
+                                                            if (request.Status == WorkflowStatus.Pending || request.Status == WorkflowStatus.Approved)
+                                                            {
+                                                               var tasks = request.Task_Assignment.Where(w => w.Record_Status == WfRecordStatus.Active).OrderBy(o => o.Approval_Level).ToList();
+                                                               if (tasks != null && tasks.Count > 0)
+                                                               {
+                                                                  var task = tasks.FirstOrDefault();
+                                                                  if (task != null)
+                                                                  {
+                                                                     if (task.Is_Indent != true && task.Profile_ID == userlogin.Profile_ID)
+                                                                     {
+                                                                        show = true;
+                                                                     }
+                                                                     else
+                                                                     {
+                                                                        if (task.Is_Indent.HasValue && task.Is_Indent.Value)
+                                                                        {
+                                                                           var task1 = tasks.Where(w => w.Is_Indent == true && w.Indent_Closed != true && w.Profile_ID == userlogin.Profile_ID).FirstOrDefault();
+                                                                           if (task1 != null)
+                                                                           {
+                                                                              show = true;
+                                                                           }
+                                                                        }
+                                                                     }
+                                                                  }
+                                                               }
+                                                            }
+                                                         }
+                                                      }
+                                                      else if (row.Supervisor == emploginID)
+                                                      {
+                                                         show = true;
+                                                      }
+                                                   }
+                                                   else
+                                                   {
+                                                      if (row.Cancel_Status == WorkflowStatus.Canceling)
+                                                      {
+                                                         if (requestIDs.Contains(row.Request_Cancel_ID.HasValue ? row.Request_Cancel_ID.Value : 0))
+                                                         {
+                                                            var request = requests.Where(w => w.Request_ID == row.Request_Cancel_ID).FirstOrDefault();
+                                                            if (request != null && request.Task_Assignment != null)
+                                                            {
+                                                               status = request.Status;
+                                                               //var task = request.Task_Assignment.Where(w => w.Record_Status == WfRecordStatus.Active && w.Profile_ID == userlogin.Profile_ID).OrderBy(o => o.Approval_Level).FirstOrDefault();
+                                                               //if (task != null)
+                                                               //{
+                                                               //   show = true;
+                                                               //}
+                                                               var tasks = request.Task_Assignment.Where(w => w.Record_Status == WfRecordStatus.Active).OrderBy(o => o.Approval_Level).ToList();
+                                                               if (tasks != null && tasks.Count > 0)
+                                                               {
+                                                                  var task = tasks.FirstOrDefault();
+                                                                  if (task != null)
+                                                                  {
+                                                                     if (task.Is_Indent != true && task.Profile_ID == userlogin.Profile_ID)
+                                                                     {
+                                                                        show = true;
+                                                                     }
+                                                                     else
+                                                                     {
+                                                                        if (task.Is_Indent.HasValue && task.Is_Indent.Value)
+                                                                        {
+                                                                           var task1 = tasks.Where(w => w.Is_Indent == true && w.Indent_Closed != true && w.Profile_ID == userlogin.Profile_ID).FirstOrDefault();
+                                                                           if (task1 != null)
+                                                                           {
+                                                                              show = true;
+                                                                           }
+                                                                        }
+                                                                     }
+                                                                  }
+                                                               }
+                                                            }
+                                                         }
+                                                         else if (row.Supervisor == emploginID)
+                                                         {
+                                                            show = true;
+                                                         }
+                                                      }
+                                                   }
+                                                   if (show)
+                                                   {
+                                                      recordIDs.Add(row.Time_Sheet_ID);
+                                                      var duration = row.Duration.HasValue ? row.Duration.Value : new TimeSpan();
+                                                      <tr>
+                                                         <td width="30px">
+                                                            <div class="checkbox check-transparent">
+                                                               <input type="checkbox" value="@row.Time_Sheet_ID" name="tIds" id="tIds[@i]">
+                                                               <label for="tIds[@i]"></label>
+                                                            </div>
+                                                         </td>
+                                                         <td width="120px">@row.Employee_Name</td>
+                                                         <td width="75px">@DateUtil.ToDisplayDate(row.Date_Of_Date)</td>
+                                                         <td width="65px">@DateUtil.ToDisplayTime(row.Clock_In)</td>
+                                                         <td width="65px">@DateUtil.ToDisplayTime(row.Clock_Out)</td>
+                                                         <td>
+                                                            <span style="font-weight:700">@row.Indent_No</span>
+                                                            <br />
+                                                            <span style="color: rgb(144, 144, 144);">@row.Indent_Name</span>
+                                                         </td>
+                                                         <td>@row.Customer_Name</td>
+                                                         <td width="65px">@duration.Hours @Resource.Hr_S @(duration.Minutes > 0 ? duration.Minutes + " " + Resource.Min_S : "") </td>
+                                                         <td class="text-right">@NumUtil.FormatCurrency(row.Hour_Rate, 2)</td>
+                                                         <td class="text-right">
+                                                            @NumUtil.FormatCurrency(row.Total_Amount, 2)
+                                                         </td>
+                                                         <td width="70px">
+                                                            @if (!string.IsNullOrEmpty(row.Cancel_Status))
+                                                            {
+                                                               @StatusUtil.Get_Overall_Status(row.Cancel_Status)
+                                                            }
+                                                            else
+                                                            {
+                                                               if (row.Overall_Status == WorkflowStatus.Pending || row.Overall_Status == WorkflowStatus.Approved)
+                                                               {
+                                                                  @Resource.Pending
+                                                               }
+                                                               else
+                                                               {
+                                                                  @StatusUtil.Get_Overall_Status(row.Overall_Status)
+                                                               }
+                                                            }
+                                                         </td>
+                                                         <td class="actions text-left">
+                                                            <a href="@Url.Action("Application", "TimeSheet", new { tsID = EncryptUtil.Encrypt(row.Time_Sheet_ID), operation = EncryptUtil.Encrypt(Operation.U), pappr = EncryptUtil.Encrypt("Manage"), tabAction = "pending" })"><i class="fa fa-file-o  fa-2x"></i></a>
+                                                         </td>
+                                                      </tr>
+                                                            no++;
+                                                            i++;
+                                                   }
+                                                }
+                                             }
+                                          </tbody>
+                                          <tfoot>
+                                             <tr>
+                                                <td colspan="12">
+                                                   <button type="submit" class="btn btn-primary" id="btnApprove" name="pStatus" value="@WorkflowStatus.Approved">@Resource.Approve</button>
+                                                   <button type="submit" class="btn btn-primary" id="btnReject" name="pStatus" value="@WorkflowStatus.Rejected">@Resource.Reject</button>
+                                                </td>
+                                             </tr>
+                                          </tfoot>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </section>
+                           }
+                        </div>
+                     </div>
+                  </div>
+
+                  <div id="processed-tab" class="tab-pane fade in">
+                     <div class="row">
+                        <div class="col-md-12">
+                           <section class="tile color transparent filter" id="secfilter2">
+                              <div class="tile-header transparent">
+                                 <h1 onclick="CollapseHeader(null, 'btncollapse2', 'secfilter2')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                                 <div class="controls">
+                                    <a href="#" class="minimize filter" id="btncollapse2"><i class="fa fa-search  color-white"></i></a>
+                                 </div>
+                              </div>
+                              <div class="tile-body">
+                                 @using (Html.BeginForm("TimeSheetManagement", "TimeSheet", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                                 {
+                                    @Html.AntiForgeryToken()
+                                    <div class="row">
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="Search_Process_Emp" class="control-label">@Resource.Request_From</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <select class="chosen-select chosen-transparent form-control" id="Search_Process_Emp" name="Search_Process_Emp">
+                                                   <option value="">-</option>
+                                                   @if (Model.EmployeeList != null)
+                                                   {
+                                                      foreach (var row in Model.EmployeeList)
+                                                      {
+                                                         <option value="@row.Employee_Profile_ID" @(Model.Search_Process_Emp == row.Employee_Profile_ID ? "selected" : "")>@AppConst.GetUserName(row.User_Profile)</option>
+                                                      }
+                                                   }
+                                                </select>
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.Search_Process_Emp)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="Search_Process_Date_From" class="control-label">@Resource.Date_Applied</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <input type="text" class="form-control input-datepicker" id="Search_Process_Date_From" name="Search_Process_Date_From" value="@Model.Search_Process_Date_From">
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.Search_Process_Date_From)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="Search_Process_Date_To" class="control-label">@Resource.To</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <input type="text" class="form-control input-datepicker" id="Search_Process_Date_To" name="Search_Process_Date_To" value="@Model.Search_Process_Date_To">
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.Search_Process_Date_To)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                    <div class="row">
+                                       <div class="col-md-6">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <button type="submit" class="btn btn-default" name="tabAction" value="processed">@Resource.Filter</button>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 }
+                              </div>
+                           </section>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-12">
+                           <section class="tile transparent">
+                              <div class="tile-header transparent">
+                                 <h1><strong>@Resource.Rejected / @Resource.Approved / @Resource.Cancelled</strong></h1>
+                                 <div class="controls">
+                                    <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                 </div>
+                              </div>
+                              <div class="tile-body">
+                                 <div class="table-responsive">
+                                    <table class="table table-datatable table-custom" id="processedDataTable">
+                                       <thead>
+                                          <tr>
+                                             <th class="sort-alpha">@Resource.Employee_Name</th>
+                                             <th class="sort-alpha">@Resource.Date</th>
+                                             <th class="sort-alpha">(@Resource._24_Hour_Clock)<br /> @Resource.Clock_In</th>
+                                             <th class="sort-alpha">(@Resource._24_Hour_Clock)<br /> @Resource.Clock_Out</th>
+                                             <th class="sort-alpha">@Resource.Indent_No</th>
+                                             <th class="sort-alpha">@Resource.Customer_Name</th>
+                                             <th class="sort-numeric">@Resource.Duration</th>
+                                             <th class="sort-numeric">@Resource.Hour_Rate</th>
+                                             <th class="sort-Amount">@Resource.Total_Amount_SymbolDollar</th>
+                                             <th class="sort-alpha">@Resource.Status</th>
+                                             <th class="no-sort" style="width:50px;">@Resource.Action</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody>
+                                          @if (Model.TimeSheetList != null)
+                                          {
+                                             int no = 1;
+                                             foreach (var row in Model.TimeSheetList)
+                                             {
+                                                var show = false;
+                                                var status = "";
+                                                var approval = "";
+
+                                                if (Model.Search_Process_Emp.HasValue)
+                                                {
+                                                   if (row.Employee_Profile_ID != Model.Search_Process_Emp)
+                                                   {
+                                                      continue;
+                                                   }
+                                                }
+                                                if (!string.IsNullOrEmpty(Model.Search_Process_Date_From))
+                                                {
+                                                   if (row.Date_Of_Date.Value < DateUtil.ToDate(Model.Search_Process_Date_From))
+                                                   {
+                                                      continue;
+                                                   }
+                                                }
+                                                if (!string.IsNullOrEmpty(Model.Search_Process_Date_To))
+                                                {
+                                                   if (row.Date_Of_Date.Value > DateUtil.ToDate(Model.Search_Process_Date_To))
+                                                   {
+                                                      continue;
+                                                   }
+                                                }
+
+                                                if (string.IsNullOrEmpty(row.Cancel_Status))
+                                                {
+                                                   if (!row.Request_ID.HasValue && row.Employee_Profile_ID == userlogin.Employee_Profile.Select(s => s.Employee_Profile_ID).FirstOrDefault())
+                                                   {
+                                                      if (!row.Supervisor.HasValue)
+                                                      {
+                                                         show = true;
+                                                      }
+                                                   }
+                                                   else if (requestIDs.Contains(row.Request_ID.HasValue ? row.Request_ID.Value : 0))
+                                                   {
+                                                      var request = requests.Where(w => w.Request_ID == row.Request_ID.Value).FirstOrDefault();
+                                                      if (request != null && request.Task_Assignment != null)
+                                                      {
+                                                         status = request.Status;
+                                                         if (request.Status == WorkflowStatus.Approved || request.Status == WorkflowStatus.Rejected || request.Status == WorkflowStatus.Closed)
+                                                         {
+                                                            var task = request.Task_Assignment.Where(w => w.Record_Status == WfRecordStatus.InActive & w.Profile_ID == userlogin.Profile_ID).FirstOrDefault();
+                                                            if (task != null)
+                                                            {
+                                                               var active = request.Task_Assignment.Where(w => w.Record_Status == WfRecordStatus.Active & w.Profile_ID != userlogin.Profile_ID).FirstOrDefault();
+                                                               if (active != null)
+                                                               {
+                                                                  if (request.Status == WorkflowStatus.Approved || request.Status == WorkflowStatus.Closed)
+                                                                  {
+                                                                     approval = active.Name;
+                                                                  }
+                                                               }
+                                                               show = true;
+                                                            }
+                                                         }
+                                                      }
+                                                   }
+                                                   else if (row.Supervisor == emploginID)
+                                                   {
+                                                      if (row.Overall_Status == WorkflowStatus.Closed || row.Overall_Status == WorkflowStatus.Rejected)
+                                                      {
+                                                         show = true;
+                                                      }
+                                                   }
+                                                }
+                                                else
+                                                {
+                                                   if (!row.Request_Cancel_ID.HasValue && row.Employee_Profile_ID == userlogin.Employee_Profile.Select(s => s.Employee_Profile_ID).FirstOrDefault())
+                                                   {
+                                                      if (row.Cancel_Status == WorkflowStatus.Cancelled || row.Cancel_Status == WorkflowStatus.Cancellation_Rejected)
+                                                      {
+                                                         if (!row.Supervisor.HasValue)
+                                                         {
+                                                            show = true;
+                                                         }
+                                                      }
+                                                   }
+                                                   else
+                                                      if (requestIDs.Contains(row.Request_Cancel_ID.HasValue ? row.Request_Cancel_ID.Value : 0))
+                                                      {
+                                                         var request = requests.Where(w => w.Request_ID == row.Request_Cancel_ID).FirstOrDefault();
+                                                         if (request != null && request.Task_Assignment != null)
+                                                         {
+                                                            status = request.Status;
+                                                            var task = request.Task_Assignment.Where(w => w.Profile_ID == userlogin.Profile_ID).FirstOrDefault();
+                                                            if (task != null)
+                                                            {
+                                                               var selfactive = request.Task_Assignment.Where(w => w.Record_Status == WfRecordStatus.Active & w.Profile_ID == userlogin.Profile_ID).FirstOrDefault();
+                                                               if (selfactive == null)
+                                                               {
+                                                                  var active = request.Task_Assignment.Where(w => w.Record_Status == WfRecordStatus.Active & w.Profile_ID != userlogin.Profile_ID).FirstOrDefault();
+                                                                  if (active != null)
+                                                                  {
+                                                                     if (row.Cancel_Status == WorkflowStatus.Canceling)
+                                                                     {
+                                                                        approval = active.Name;
+                                                                        show = true;
+                                                                     }
+                                                                  }
+                                                               }
+                                                               if (row.Cancel_Status != WorkflowStatus.Canceling)
+                                                               {
+                                                                  show = true;
+                                                               }
+                                                            }
+                                                         }
+                                                      }
+                                                      else if (requestIDs.Contains(row.Request_ID.HasValue ? row.Request_ID.Value : 0))
+                                                      {
+                                                         var request = requests.Where(w => w.Request_ID == row.Request_ID).FirstOrDefault();
+                                                         if (request != null && request.Task_Assignment != null)
+                                                         {
+                                                            status = request.Status;
+                                                            if (request.Status == WorkflowStatus.Approved || request.Status == WorkflowStatus.Rejected || request.Status == WorkflowStatus.Closed || request.Status == WorkflowStatus.Cancelled || request.Status == WorkflowStatus.Cancellation_Rejected)
+                                                            {
+                                                               var task = request.Task_Assignment.Where(w => w.Record_Status == WfRecordStatus.InActive & w.Profile_ID == userlogin.Profile_ID).FirstOrDefault();
+                                                               if (task != null)
+                                                               {
+                                                                  if (row.Cancel_Status == WorkflowStatus.Approved)
+                                                                  {
+                                                                     approval = task.Name;
+                                                                  }
+                                                                  show = true;
+                                                               }
+                                                            }
+                                                            else if (request.Status == WorkflowStatus.Pending && row.Cancel_Status == WorkflowStatus.Cancelled)
+                                                            {
+                                                               show = true;
+                                                            }
+                                                         }
+                                                      }
+                                                      else if (row.Supervisor == emploginID)
+                                                      {
+                                                         if (row.Cancel_Status == WorkflowStatus.Cancelled || row.Cancel_Status == WorkflowStatus.Cancellation_Rejected)
+                                                         {
+                                                            show = true;
+                                                         }
+                                                      }
+                                                }
+
+                                                if (show)
+                                                {
+                                                   if (recordIDs.Contains(row.Time_Sheet_ID))
+                                                   {
+                                                      continue;
+                                                   }
+                                                   var duration = row.Duration.HasValue ? row.Duration.Value : new TimeSpan();
+                                                   <tr>
+                                                      <td width="120px">@row.Employee_Name</td>
+                                                      <td width="75px">@DateUtil.ToDisplayDate(row.Date_Of_Date)</td>
+                                                      <td width="65px">@DateUtil.ToDisplayTime(row.Clock_In)</td>
+                                                      <td width="65px">@DateUtil.ToDisplayTime(row.Clock_Out)</td>
+                                                      <td>
+                                                         <span style="font-weight:700">@row.Indent_No</span>
+                                                         <br />
+                                                         <span style="color: rgb(144, 144, 144); ">@row.Indent_Name</span>
+                                                      </td>
+                                                      <td>@row.Customer_Name</td>
+                                                      <td width="65px">@duration.Hours @Resource.Hr_S @(duration.Minutes > 0 ? duration.Minutes + " " + Resource.Min_S : "") </td>
+                                                      <td class="text-right">@NumUtil.FormatCurrency(row.Hour_Rate, 2)</td>
+                                                      <td class="text-right">
+                                                         @NumUtil.FormatCurrency(row.Total_Amount, 2)
+                                                      </td>
+                                                      <td width="70px">
+                                                         @if (!string.IsNullOrEmpty(row.Cancel_Status) && row.Cancel_Status != WorkflowStatus.Cancellation_Rejected)
+                                                         {
+                                                            @StatusUtil.Get_Overall_Status(row.Cancel_Status)
+                                                         }
+                                                         else
+                                                         {
+                                                            if (row.Overall_Status == WorkflowStatus.Pending || row.Overall_Status == WorkflowStatus.Approved)
+                                                            {
+                                                               @Resource.Pending
+                                                            }
+                                                            else
+                                                            {
+                                                               @StatusUtil.Get_Overall_Status(row.Overall_Status)
+                                                            }
+                                                         }
+                                                      </td>
+                                                      <td class="actions text-left">
+                                                         <a href="@Url.Action("Application", "TimeSheet", new { tsID = EncryptUtil.Encrypt(row.Time_Sheet_ID), operation = EncryptUtil.Encrypt(Operation.U), pappr = EncryptUtil.Encrypt("Manage"), tabAction = "processed" })"><i class="fa fa-file-o  fa-2x"></i></a>
+                                                      </td>
+                                                   </tr>
+                                                         no++;
+                                                }
+                                             }
+                                          }
+                                       </tbody>
+                                    </table>
+                                 </div>
+                              </div>
+                           </section>
+                        </div>
+                     </div>
+                  </div>
+                  <!-- / Tab panes -->
+               </div>
+            </section>
+         </div>
+      </div>
+   </div>
+}

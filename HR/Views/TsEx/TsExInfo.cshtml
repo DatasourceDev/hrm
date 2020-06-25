@@ -1,0 +1,565 @@
+﻿@model  HR.Models.TsExInfoViewModels
+@using SBSModel.Models;
+@using System.Text;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Models;
+@using SBSWorkFlowAPI.ModelsAndService;
+@using SBSResourceAPI;
+@using SBSWorkFlowAPI.Constants;
+
+@{
+   ViewBag.Title = @Resource.Timesheet_Expenses;
+}
+<style>
+   .divider {
+      border-bottom: 1px solid #eee;
+      padding-top: 10px;
+      margin-bottom: 20px;
+   }
+</style>
+
+<script>
+   $(function () {
+
+
+
+   });
+   function AddTs_Onclick(dw, datestr) {
+      var rowcount = $('#ts' + datestr + ' > tbody >tr').length;
+      var data = { pIndex: rowcount, pDw: dw, pDate: datestr };
+      $.ajax({
+         url: '@Url.Action("TsRow", "TsEx")',
+         data: data,
+         contentType: "application/json; charset=utf-8",
+         success: function (data) {
+            if ($('#tsr' + datestr + rowcount).get(0) == null)
+            {
+               var str = '<tr  id="tsr' + datestr + rowcount + '">';
+               str = str + data + '</tr>';
+               $('#ts' + datestr + ' > tbody').append(str);
+            }
+            CloseMask();
+         }
+      });
+   }
+
+   function Save_Onclick(status) {
+      $("#divmain").append("<input type='hidden' name='Status' value='" + status + "' />");
+      var tindex = 0;
+      var exindex = 0;
+      var tables = $('.datestr');
+      for (var d = 0; d < $('.datestr').length; d++) {
+         /*time sheet*/
+         var tsbname = '#ts' + $('.datestr')[d].value + ' > tbody >tr';
+         for (var i = 0; i < $(tsbname).length; i++) {
+            var tr = $(tsbname)[i];
+            if (tr != null) {
+               var display = tr.style.display;
+               if (display != "none") {
+                  $("#divmain").append("<input type='hidden' name='TsRows[" + tindex + "].Dtl_ID' value='" + $(tsbname + " #Dtl_ID")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='TsRows[" + tindex + "].Job_Cost_ID' value='" + $(tsbname + " #Job_Cost_ID")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='TsRows[" + tindex + "].Clock_In' value='" + $(tsbname + " #Clock_In")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='TsRows[" + tindex + "].Clock_Out' value='" + $(tsbname + " #Clock_Out")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='TsRows[" + tindex + "].Date_Of_Date' value='" + $(tsbname + " #Date_Of_Date")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='TsRows[" + tindex + "].Lunch_In' value='" + $(tsbname + " #Lunch_In")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='TsRows[" + tindex + "].Lunch_Out' value='" + $(tsbname + " #Lunch_Out")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='TsRows[" + tindex + "].Note' value='" + $(tsbname + " #Note")[i].value + "' />");
+                  tindex++;
+               }
+            }
+         }
+         /*expenses*/
+
+         var exname = '#ex' + $('.datestr')[d].value + ' > tbody >tr';
+         var rowprefix = "ExRow";
+         for (var i = 0; i < $(exname).length; i++) {
+            var tr = $(exname)[i];
+            if (tr != null) {
+               var display = tr.style.display;
+               if (display != "none") {
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Expenses_Date' value='" + $(exname + " #" + rowprefix + "Expenses_Date")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Expenses_Application_Document_ID' value='" + $(exname + " #" + rowprefix + "Expenses_Application_Document_ID")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Expenses_Config_ID' value='" + $(exname + " #" + rowprefix + "Expenses_Config_ID")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Expenses_Type_Name' value='" + $(exname + " #" + rowprefix + "Expenses_Type_Name")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Expenses_Type_Desc' value='" + $(exname + " #" + rowprefix + "Expenses_Type_Desc")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Expenses_Date' value='" + $(exname + " #" + rowprefix + "Expenses_Date")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Doc_No' value='" + $(exname + " #" + rowprefix + "Doc_No")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Balance' value='" + $(exname + " #" + rowprefix + "Balance")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Selected_Currency' value='" + $(exname + " #" + rowprefix + "Selected_Currency")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Ex_Total_Amount' value='" + $(exname + " #" + rowprefix + "Ex_Total_Amount")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Amount_Claiming' value='" + $(exname + " #" + rowprefix + "Amount_Claiming")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Notes' value='" + $(exname + " #" + rowprefix + "Notes")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Upload_Receipt_ID' value='" + $(exname + " #" + rowprefix + "Upload_Receipt_ID")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Upload_Receipt_Name' value='" + $(exname + " #" + rowprefix + "Upload_Receipt_Name")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Upload_Receipt' value='" + $(exname + " #" + rowprefix + "Upload_Receipt")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Ex_Job_Cost_ID' value='" + $(exname + " #" + rowprefix + "Ex_Job_Cost_ID")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Job_Cost_Name' value='" + $(exname + " #" + rowprefix + "Job_Cost_Name")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Job_Cost_No' value='" + $(exname + " #" + rowprefix + "Job_Cost_No")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Withholding_Tax' value='" + $(exname + " #" + rowprefix + "Withholding_Tax")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Tax' value='" + $(exname + " #" + rowprefix + "Tax")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Tax_Type' value='" + $(exname + " #" + rowprefix + "Tax_Type")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Withholding_Tax_Amount' value='" + $(exname + " #" + rowprefix + "Withholding_Tax_Amount")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Withholding_Tax_Type' value='" + $(exname + " #" + rowprefix + "Withholding_Tax_Type")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Tax_Amount' value='" + $(exname + " #" + rowprefix + "Tax_Amount")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].Tax_Amount_Type' value='" + $(exname + " #" + rowprefix + "Tax_Amount_Type")[i].value + "' />");
+                  $("#divmain").append("<input type='hidden' name='ExRows[" + exindex + "].ExDate' value='" + $(exname + " #" + rowprefix + "ExDate")[i].value + "' />");
+
+                  exindex++;
+               }
+            }
+         }
+      }
+      ShowMask();
+      theForm.submit();
+   }
+
+   function Del_Onclick(rowid) {
+      $('#' + rowid).hide();
+   }
+
+   function AddEx_Onclick(pExdate) {
+      ShowMask();
+      $.ajax({
+         url: '@Url.Action("ExDlg", "TsEx", new { pEmpID = Model.Employee_Profile_ID })&pExdate=' + pExdate + '&pPID=@Model.Profile_ID',
+         type: 'Get',
+         contentType: "application/json; charset=utf-8",
+         success: function (data) {
+            $('#modal-detail').html(data);
+            $('#btnOpenExDlg').get(0).click();
+            CloseMask();
+         }
+      });
+   }
+
+
+   function EditEx_Onclick(pERowID, pDID, pDocNo, pExdate, pFullExdate, pExConfID, pCurID, ptotalAmt, pTaxType, pTax, pTaxAmtType, pWhTax, pWhTaxType, pJID, pRcpID, pRcpName, pRcp, pNote) {
+      var data = {
+         pERowID: pERowID,
+         pDID: pDID,
+         pDocNo: pDocNo,
+         pCurID: pCurID,
+         pExConfID: pExConfID,
+         pExdate: pExdate,
+         pFullExdate: pFullExdate,
+         ptotalAmt: ptotalAmt,
+         pTaxType: pTaxType,
+         pTax: pTax,
+         pTaxAmtType: pTaxAmtType,
+         pWhTax: pWhTax,
+         pWhTaxType: pWhTaxType,
+         pEmpID: $('#Employee_Profile_ID').val(),
+         pJID: pJID,
+         pPID: $('#Profile_ID').val(),
+         pRcpID: pRcpID,
+         pRcpName: pRcpName,
+         pRcp: pRcp,
+         pNote: pNote,
+      };
+
+      ShowMask();
+      $.ajax({
+         type: "POST",
+         url: "ExDlg",
+         data: JSON.stringify(data),
+         contentType: "application/json; charset=utf-8",
+      }).done(function (data) {
+         if (data != null) {
+            $('#modal-detail').html(data);
+            $('#btnOpenExDlg').get(0).click();
+            CloseMask();
+         }
+      });
+   }
+
+   function ViewEx_Onclick(pDtlID) {
+      var data = {
+         pDtlID: pDtlID,
+      };
+
+      ShowMask();
+      $.ajax({
+         type: "POST",
+         url: "ExDlgMngt",
+         data: JSON.stringify(data),
+         contentType: "application/json; charset=utf-8",
+      }).done(function (data) {
+         if (data != null) {
+            $('#modal-detail').html(data);
+            $('#btnOpenExDlg').get(0).click();
+            CloseMask();
+         }
+      });
+   }
+   var configloading = false;
+   function applicationConfig() {
+      if (configloading == true)
+         return;
+      if ($('#Expenses_Config_ID').val() != null && $('#Expenses_Config_ID').val() != '' && $('#Expenses_Date').val() != null && $('#Expenses_Date').val() != '') {
+         $('#Balance').val(0);
+         $('#Amount_Claiming').val(0);
+         configloading = true;
+
+         $.ajax({
+            type: "GET",
+            url: "ApplicationConfig",
+            data:
+               {
+                  pCurID: $('#Selected_Currency').val(),
+                  pExConfID: $('#Expenses_Config_ID').val(),
+                  ptotalAmt: $('#Ex_Total_Amount').val(),
+                  pFullExdate: $('#Expenses_Date').val(),
+                  pTaxType: $('#Tax_Type').val(),
+                  pTax: $('#Tax').val(),
+                  pTaxAmtType: $('#Tax_Amount_Type').val(),
+                  pWhTax: $('#Withholding_Tax').val(),
+                  pWhTaxType: $('#Withholding_Tax_Type').val(),
+                  pEmpID: $('#Employee_Profile_ID').val(),
+                  pJID: $('#Ex_Job_Cost_ID').val(),
+                  pPID: $('#Profile_ID').val(),
+               },
+         }).done(function (data) {
+            if (data != null) {
+               $('#Selected_Currency').val(data.Selected_Currency);
+               $('#Amount_Claiming').val(data.Amount_Claiming);
+               $('#Balance').get(0).setAttribute('readonly', true);
+               $('#Tax_Amount').val(data.Tax_Amount);
+               $('#Withholding_Tax_Amount').val(data.Withholding_Tax_Amount);
+               $('#form-action').css('display', 'block');
+               $('#Balance').val(data.Balance);
+               $('#Balance_Amount').val(formatCurrency(data.Balance_Amount));
+               $('#Selected_Currency').val(data.Selected_Currency);
+               $('#Selected_Currency').trigger('chosen:updated');
+               $('#Expenses_Type_Desc').val(data.Expenses_Type_Desc);
+               $('#Expenses_Type_Name').val(data.Expenses_Type_Name);
+               $('#Expenses_Config_ID').val(data.Expenses_Config_ID);
+               $('#Expenses_Config_ID').trigger('chosen:updated');
+               $('#Job_Cost_Balance').val(formatCurrency(data.Job_Cost_Balance));
+               $('#Job_Cost_Name').val(data.Job_Cost_Name);
+               $('#Job_Cost_No').val(data.Job_Cost_No);
+               configloading = false;
+
+            }
+         });
+      }
+   }
+
+   function SaveChangeExRow() {
+      var valid = true;
+      if (!ValidateRequire('Expenses_Config_ID', '@Resource.Expenses_Type', true)) { valid = false; }
+      //if (!ValidateDecimal('Ex_Total_Amount', '@Resource.Total_Amount', true)) { valid = false; }
+      if (!ValidateDecimal('Ex_Job_Cost_IDs', '@Resource.Job_Cost', true)) { valid = false; }
+      if (!ValidateDecimal('Tax', '@Resource.Tax', false)) { valid = false; }
+      if (!ValidateDecimal('Withholding_Tax', '@Resource.Withholding_Tax', false)) { valid = false; }
+      if (!valid)
+         return;
+
+      var data = {
+         pIndex: $('#i').val(),
+         pERowID: $('#erowID').val(),
+         pDocID: $('#Expenses_Application_Document_ID').val(),
+         pDocNo: $('#Doc_No').val(),
+         pNotes: $('#Notes').val(),
+         pRcp: $('#Upload_Receipt').val(),
+         pRcpName: $('#Upload_Receipt_Name').val(),
+         pCurID: $('#Selected_Currency').val(),
+         pExConfID: $('#Expenses_Config_ID').val(),
+         ptotalAmt: $('#Ex_Total_Amount').val(),
+         pExdate: $('#ExDate').val(),
+         pFullExdate: $('#Expenses_Date').val(),
+         pTaxType: $('#Tax_Type').val(),
+         pTax: $('#Tax').val(),
+         pTaxAmtType: $('#Tax_Amount_Type').val(),
+         pWhTax: $('#Withholding_Tax').val(),
+         pWhTaxType: $('#Withholding_Tax_Type').val(),
+         pEmpID: $('#Employee_Profile_ID').val(),
+         pJID: $('#Ex_Job_Cost_ID').val(),
+         pPID: $('#Profile_ID').val(),
+      };
+      if ($("#uploadfile")[0].files[0] != null) {
+         var fileToLoad = $("#uploadfile")[0].files[0];
+         var fileReader = new FileReader();
+         fileReader.onload = function (fileLoadedEvent) {
+            var srcData = fileLoadedEvent.target.result; // <--- data: base64
+            if (srcData == "data:")
+               srcData = "";
+            data.pRcp = srcData;
+            data.pRcpName = fileToLoad.name;
+            SaveChangeExRow2(data);
+         }
+         fileReader.readAsDataURL(fileToLoad);
+      }
+      else {
+         SaveChangeExRow2(data);
+      }
+   }
+   function SaveChangeExRow2(data) {
+      var newrow = false;
+      var rowcount = $('#ex' + data.pExdate + ' > tbody >tr').length;
+      if ((data.pDocID == null || data.pDocID == '') && (data.pERowID == null || data.pERowID == '')) {
+         data.pIndex = rowcount;
+         data.pERowID = 'exr' + data.pExdate + rowcount;
+         newrow = true;
+      }
+      ShowMask();
+      $.ajax({
+         url: '@Url.Action("ExRow", "TsEx")',
+         type: 'POST',
+         data: JSON.stringify(data),
+         contentType: "application/json; charset=utf-8",
+         success: function (rdata) {
+            if (rdata != null) {
+               if (newrow == true) {
+                  $('#ex' + data.pExdate + ' > tbody').append('<tr  id="exr' + data.pExdate + rowcount + '">' + rdata + '</tr>');
+               }
+               else {
+                  $('#' + data.pERowID).html(rdata);
+               }
+               $('#btnClose').get(0).click();
+               CloseMask();
+            }
+         }
+      });
+   }
+
+   function ShowFile_Onclick() {
+      if ($('#Upload_Receipt_ID').val() != null) {
+         var a = document.createElement('a');
+         var linkText = document.createTextNode($('#Upload_Receipt_Name').val());
+         a.appendChild(linkText);
+         a.href = '@Url.Action("ApplicationFile", "Expenses")' + '?pUploadID=' + $('#Upload_Receipt_ID').val();
+         a.target = "_blank"
+         a.click();
+      }
+   }
+
+
+</script>
+<div id="appConfig"></div>
+<div class="pageheader">
+   <h2>@Resource.Timesheet_Expenses</h2>
+   <div class="breadcrumbs">
+      <ol class="breadcrumb">
+         <li>@Resource.You_Are_Here</li>
+         <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+         <li class="active">@Resource.Expenses</li>
+      </ol>
+   </div>
+</div>
+<script>
+
+</script>
+@using (Html.BeginForm("TsExInfo", "TsEx", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "theForm", enctype = "multipart/form-data" }))
+{
+   <input type="hidden" id="operation" name="operation" value="@Model.operation" />
+   @Html.HiddenFor(m => m.Profile_ID)
+   @Html.HiddenFor(m => m.TsEx_ID)
+   @Html.HiddenFor(m => m.Time_Sheet_ID)
+   @Html.HiddenFor(m => m.Expenses_ID)
+   @Html.HiddenFor(m => m.Employee_Profile_ID)
+   @Html.HiddenFor(m => m.ExStatus)
+   @Html.HiddenFor(m => m.TsStatus)
+   @Html.HiddenFor(m => m.tabAction)
+   @Html.HiddenFor(m => m.ac)
+   @Html.HiddenFor(m => m.ctlr)
+   @Html.HiddenFor(m => m.wfCurrentStatus)
+   @Html.HiddenFor(m => m.Emp_Login_ID)
+   
+   <div class="main" id="divmain">
+      <div class="row">
+         <div class="col-md-12">
+            @if (Model.result != null)
+            {
+               <div class="alert @(Model.result.Code < 0 ? "alert-red" : "alert-success") ">
+                  @Html.Raw(AppConst.GetMsg(Model.result))
+               </div>
+            }
+         </div>
+      </div>
+      <div class="row">
+         <div class="col-md-12">
+            <section class="tile color transparent-black">
+               <div class="tile-header transparent">
+                  <h1><strong>@Resource.Timesheet_Expenses</strong></h1>
+                  <div class="controls">
+                     <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body">
+                  <div class="row">
+                     <div class="col-md-3">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="Year" class="control-label">@Resource.Employee</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input type="text" class="form-control" id="Name" name="Name" value="@Model.Name" readonly>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-2">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="Month" class="control-label">@Resource.Month</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input type="hidden" id="Month" name="Month" value="@Model.Month" readonly>
+                              <input type="text" class="form-control" id="Month" name="Month" value="@DateUtil.GetFullMonth(Model.Month)" readonly>
+                              <div class="validation-error">
+                                @Html.ValidationMessageFor(m=>m.Month)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-1">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="Year" class="control-label">@Resource.Year</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input type="text" class="form-control" id="Year" name="Year" value="@Model.Year" readonly>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Year)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-2">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="Date_Applied" class="control-label">@Resource.Doc_Date</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input type="text" class="form-control" id="Date_Applied" name="Date_Applied" value="@Model.Date_Applied" readonly>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Date_Applied)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-2">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="Date_Applied" class="control-label">@Resource.Doc_No</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input type="text" class="form-control" id="Expenses_No" name="Expenses_No" value="@Model.Expenses_No" readonly>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-2">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label class="control-label">@Resource.Status</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              @if (!string.IsNullOrEmpty(Model.ExCancelStatus) && Model.ExCancelStatus == WorkflowStatus.Cancelled)
+                              {
+                                 <h4 style="color:red">
+                                    @Resource.Cancelled
+                                 </h4>
+                              }
+                              else if (Model.ExStatus == WorkflowStatus.Closed && string.IsNullOrEmpty(Model.ExCancelStatus))
+                              {
+                                 <h4 style="color:green">
+                                    @Resource.Closed
+                                 </h4>
+                              }
+                              else if (Model.ExStatus == WorkflowStatus.Closed && Model.ExCancelStatus != WorkflowStatus.Cancelled)
+                              {
+                                 <h4 style="color:green">
+                                    @Resource.Closed
+                                 </h4>
+                              }
+                              else if (Model.ExStatus == WorkflowStatus.Rejected)
+                              {
+                                 <h4 style="color:red">
+                                    @Resource.Rejected
+                                 </h4>
+                              }
+                              else
+                              {
+                                 <h4 style="color:orange">
+                                    @Model.ExStatus
+                                 </h4>
+                              }
+                              @*<h4>@Model.ExStatus</h4>*@
+                              @*<input type="text" class="form-control" value="@Model.ExStatus" readonly>*@
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="row">
+                     <div class="col-md-3">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="TsTotal_Amount" class="control-label">@Resource.Time_Sheet @Resource.Amount</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input type="text" class="form-control number" id="TsTotal_Amount" name="TsTotal_Amount" value="@NumUtil.Comma(Model.TsTotal_Amount)" readonly>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-3">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="ExTotal_Amount" class="control-label">@Resource.Amount_Claiming</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input type="text" class="form-control number" id="ExTotal_Amount" name="ExTotal_Amount" value="@NumUtil.Comma(Model.ExTotal_Amount)" readonly>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-3">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="ExTotal_Amount" class="control-label">Next Approver</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input type="text" class="form-control" id="Next_Approver" name="Next_Approver" value="@Model.Next_Approver" readonly>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                
+               </div>
+            </section>
+         </div>
+      </div>
+      @if (Model.ExStatus == WorkflowStatus.Draft && Model.Employee_Profile_ID == Model.Emp_Login_ID)
+         {
+         
+            Html.RenderPartial("_TsExInfoNew", Model);
+         }
+         else
+         {
+            Html.RenderPartial("_TsExInfoMngt", Model);
+         }
+      <div style="height:200px"></div>
+   </div>
+   <a id="btnOpenExDlg" href="#modal-detail" role="button" data-toggle="modal" style="display:none;"></a>
+   <div class="modal fade" id="modal-detail" tabindex="-1" role="dialog" aria-labelledby="modalConfirmLabel" aria-hidden="true">
+   </div>
+
+}
+
+
+
+

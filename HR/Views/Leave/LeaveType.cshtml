@@ -1,0 +1,1236 @@
+﻿@model HR.Models.LeaveTypeViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@{
+    ViewBag.Title = Resource.Leave_Type;
+}
+
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+    <script type="text/javascript">
+
+        var dslist = new Array();
+        var dsTextlist = new Array();
+        var dcnt = '@(Model.designationList != null ? Model.designationList.Count : 0)';
+        $(function () {
+
+            @for (var i = 0; i < (Model.designationList != null ? Model.designationList.Count : 0) ; i++)
+        {
+            var value = Model.designationList[i].Value != null ? Model.designationList[i].Value : "0";
+            var text = Model.designationList[i].Value != null ? Model.designationList[i].Text : "All";
+
+            @:dslist.push('@value'); dsTextlist.push('@text');
+                                                                                                                                                }
+
+
+            Parent_Onchange();
+            Claimable_Type_Onchange();
+
+            $("#Claimable_Type").change(function () {
+                Claimable_Type_Onchange();
+            });
+
+            $("#clear").click(function () {
+                $('#Department_ID').css("display", "none");
+                $('#isDepartment').val("0");
+            });
+
+            $("#btnDetailSubmit").click(function () {
+                ClearValidate('#Designations');
+                ClearValidate('#Year_Service');
+                ClearValidate('#Default_Leave_Amount');
+
+                var valid = true;
+
+                if (ValidateArrayRequire('Designations', '@Resource.Designation', true) == false) {
+                    valid = false;
+                }
+
+                if (ValidateNumber('Year_Service', '@Resource.Years_Services', true, true) == false) {
+                    valid = false;
+                }
+
+                if (ValidateDecimal('Default_Leave_Amount', '@Resource.Default_Leave_Amount', true, true) == false) {
+                    valid = false;
+                }
+
+                if (!valid) {
+                    return;
+                }
+
+                var pYear = parseInt($('#Year_Service').val());
+                var pAmount = parseFloat($('#Default_Leave_Amount').val());
+                var pDesignation = new Array();
+
+                if ($('#Event_Click').val() == '@RowType.EDIT') {
+                    var index = parseInt($('#Index').val());
+                    if (index != null && !isNaN(index)) {
+
+                        var dtexts = "";
+
+                        $("[name='Detail_Rows[" + index + "].Designations']").remove();
+                        var dstr = "[";
+                        var dselcnt = 0;
+
+                        for (var i = 0; i < dcnt ; i++) {
+                            if ($("#Designations-" + i).get(0).checked == true) {
+                                if (dselcnt > 0) {
+                                    dstr = dstr + ',';
+                                }
+                                dstr = dstr + dslist[i];
+                                dselcnt++;
+                                dtexts = dtexts + dsTextlist[i] + "\r\n";
+                                var d = "<input type='hidden' name='Detail_Rows[" + index + "].Designations' value='" + dslist[i] + "' />";
+                                $('#td-' + index).append(d);
+
+                                pDesignation.push(dslist[i]);
+                            }
+                        }
+
+                        dstr = dstr + "]"
+
+                        $('#Detail_Rows_' + index + '__Year_Service').val(pYear);
+                        $('#Detail_Rows_' + index + '__Default_Leave_Amount').val(pAmount);
+                        $('#Detail_Rows_' + index + '__Designations_Text').val(dtexts);
+                        $('#Detail_Rows_' + index + '__Year_Service_Text').val(pYear);
+                        $('#Detail_Rows_' + index + '__Default_Leave_Amount_Text').val(pAmount);
+                        $('#Detail_Rows_' + index + '__Designations_Text').get(0).rows = dselcnt;
+
+
+                        var clickevent = "EditDetail_Onclick('" + index + "','" + $('#Leave_Config_ID').val() + "','" + $('#Group_ID').val() + "','" + $('#Row_Type').val() + "'," + dstr + ",'" + pYear + "','" + pAmount + "')";
+                        $('#btnEditDetail-' + index).attr("onclick", clickevent);
+                        $('#btnClose').get(0).click();
+
+                    }
+                }
+                else {
+
+                    for (var i = 0; i < dcnt ; i++) {
+                        if ($("#Designations-" + i).get(0).checked == true) {
+                            pDesignation.push(dslist[i]);
+                        }
+                    }
+
+                    var rowcount = $('#designationDataTable > tbody >tr').length;
+                    var data = { pIndex: rowcount, pDesignation: pDesignation, pYear: pYear, pAmount: pAmount };
+                    ShowMask();
+                    $.ajax({
+                        url: '@Url.Action("AddNewLeaveDetail", "Leave")',
+                        //Passes the content of an input up
+                        data: data,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            var str = '<tr  id="erow-' + rowcount + '">';
+                            str = str + data + '</tr>';
+                            $('#designationDataTable > tbody').append(str);
+                            $('#btnAddDesignation').get(0).click();
+                            $('#btnClose').get(0).click();
+                            CloseMask();
+                        }
+                    });
+                }
+
+            });
+
+            //---------------------------------------------------------------//
+            $('input[name="Bring_Forward"]:radio').change(function () {
+                if ($('input[name="Bring_Forward"]:radio:checked').val() == "true") {
+                    $('#Months_To_Expiry').prop('disabled', false);
+                    $('#Bring_Forward_Percent').prop('disabled', false);
+                    $('#Bring_Forward_Days').prop('disabled', false);
+                    $('#Months_To_Expiry').val("1");
+                    $('#Months_To_Expiry').trigger("chosen:updated");
+
+                    $('#Is_Bring_Forward_DaysY').prop('disabled', false);
+                    $('#Is_Bring_Forward_DaysN').prop('disabled', false);
+                    Is_Bring_Forward_Days_Onchange();
+                } else {
+                    $('#Months_To_Expiry').prop('disabled', true);
+                    $('#Bring_Forward_Percent').prop('disabled', true);
+                    $('#Bring_Forward_Percent').val(0);
+                    $('#Bring_Forward_Days').prop('disabled', true);
+                    $('#Bring_Forward_Days').val(0);
+
+                    $('#Months_To_Expiry').val("");
+                    $('#Months_To_Expiry').trigger("chosen:updated");
+
+                    $('#Is_Bring_Forward_DaysY').prop('disabled', true);
+                    $('#Is_Bring_Forward_DaysN').prop('disabled', true);
+                }
+               
+            });
+
+            $('input[name="Is_Bring_Forward_Days"]:radio').change(function () {
+                Is_Bring_Forward_Days_Onchange();
+            });
+
+            if ('@Model.Bring_Forward' == "False") {
+                $('#Months_To_Expiry').prop('disabled', true);
+                $('#Bring_Forward_Percent').prop('disabled', true);
+                $('#Bring_Forward_Percent').val(0);
+                $('#Bring_Forward_Days').prop('disabled', true);
+                $('#Bring_Forward_Days').val(0);
+                $('#Months_To_Expiry').val("");
+                $('#Months_To_Expiry').trigger("chosen:updated");
+
+                $('#Is_Bring_Forward_DaysY').prop('disabled', true);
+                $('#Is_Bring_Forward_DaysN').prop('disabled', true);
+            }
+            else {
+                if ('@Model.Is_Bring_Forward_Days' == "False") {
+                    Is_Bring_Forward_Days_Onchange();
+                }
+            }
+        });
+        function Is_Bring_Forward_Days_Onchange()
+        {
+            if ($('input[name="Is_Bring_Forward_Days"]:radio:checked').val() == "true") {
+                $('#Bring_Forward_Percent').prop('disabled', true);
+                $('#Bring_Forward_Days').prop('disabled', false);
+
+            } else {
+                $('#Bring_Forward_Percent').prop('disabled', false);
+                $('#Bring_Forward_Days').prop('disabled', true);
+            }
+        }
+
+        function Claimable_Type_Onchange() {
+            if ($("#Claimable_Type option:selected").text() == "Per Department") {
+
+                $('#isDepartment').val("1");
+
+                $('#Department_ID').prop('disabled', false)
+            } else {
+                $('#Department_ID').prop('disabled', true)
+                $('#isDepartment').val("0");
+
+                $('#Department_ID').val("");
+            }
+
+            $('#Department_ID').trigger("chosen:updated");
+        }
+
+        function AddDesignation_Onclick() {
+            ClearValidate('#Designations');
+            ClearValidate('#Year_Service');
+            ClearValidate('#Default_Leave_Amount');
+
+            $('#btnAddDesignation').get(0).click();
+            $('#Event_Click').val('@RowType.ADD');
+
+            $('#Leave_Config_ID').val('');
+            $('#Index').val('');
+            $('#Group_ID').val('');
+            $('#Row_Type').val('@RowType.ADD');
+            $('#Year_Service').val(0);
+            $('#Default_Leave_Amount').val(0);
+
+            if ($("[name='Designations']") != null) {
+                for (var i = 0 ; i < $("[name='Designations']").length; i++) {
+                    $("[name='Designations']").get(i).checked = false;
+                }
+            }
+            Designations_Onchange();
+        }
+
+        function EditDetail_Onclick(index, eConfigID, groupID, rowType, designations, yearService, DefaultLeaveAmount) {
+            ClearValidate('#Designations');
+            ClearValidate('#Year_Service');
+            ClearValidate('#Default_Leave_Amount');
+
+            $('#btnAddDesignation').get(0).click();
+            $('#Event_Click').val('@RowType.EDIT');
+            $('#Leave_Config_ID').val(eConfigID);
+            $('#Index').val(index);
+            $('#Year_Service').val(parseInt(yearService));
+            $('#Default_Leave_Amount').val(DefaultLeaveAmount);
+
+            if (designations != null) {
+                for (var i = 0; i < dcnt ; i++) {
+                    $("[name='Designations']").get(i).checked = false;
+                    for (var j = 0 ; j < designations.length ; j++) {
+                        if (dslist[i] == designations[j]) {
+                            $("[name='Designations']").get(i).checked = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            Designations_Onchange();
+        }
+
+        function DeleteDetail(rowid, index) {
+            if (confirm('@Resource.Confirm_Delete_Msg')) {
+                $('#Detail_Rows_' + index + '__Row_Type').val('@RowType.DELETE');
+                $('#' + rowid).hide();
+            }
+        }
+
+       function Start_Tour()
+        {
+            //New Leave creation tour            
+            var strtitle = "New Leave Type Creation";
+            var newLTypeTour = new Tour({
+                storage: false,
+                steps: [
+                {
+                    element: "#Leave_Name",
+                    title: strtitle,
+                    content: "Enter the leave name here.",
+                    onNext: function () {
+                    }
+                },
+                {
+                    element: "#lblGender",
+                    title: strtitle,
+                    content: "Select the eligible gender for this new leave type.",
+                    onNext: function () {
+                    }
+                },
+                {
+                    element: "#lblMaritalStatus",
+                    title: strtitle,
+                    content: "Select the eligible gender for this new leave type.",
+                    onNext: function () {
+                    }
+                },
+                {
+                    element: "#li-designation",
+                    title: strtitle,
+                    content: "You can set the leave amount by service year in this tab.",
+                    onNext: function () {
+                    }
+                },
+                {
+                    element: "#btnAddByDesignation",
+                    title: strtitle,
+                    content: "This button allows you to set up leave amount by service year.",
+                    onNext: function () {
+                        $("#designation-tab").removeClass("active");
+                        $("#li-designation").removeClass("active");
+                        $("#extra-tab").addClass("active in");
+                        $("#li-extra").addClass("active");
+                    }
+                },
+                {
+                    element: "#li-extra",
+                    title: strtitle,
+                    content: "If you have an employee who have more or less entitlement leave amount than others, you can set up here.",
+                    onNext: function () {
+                    }
+                },
+                {
+                    element: "#btnAddExtra",
+                    title: strtitle,
+                    content: "This button allows you to add extra leave amount of specified employee. The entered leave amouont will be add or minus based on 'By designation' set up."
+                }
+                ],
+                onEnd: function () {
+                    createCookie("newLTypeTour", "End");
+                    $("#extra-tab").removeClass("active");
+                    $("#li-extra").removeClass("active");
+                    $("#designation-tab").addClass("active in");
+                    $("#li-designation").addClass("active");
+                }
+            });
+            newLTypeTour.init();
+            newLTypeTour.start();
+        }
+
+        function Designations_Onchange() {
+            var haveAll = false;
+
+            for (var i = 0; i < dcnt ; i++) {
+                var ds = $("#Designations-" + i).get(0);
+                if (i == 0) {
+                    if (ds.checked == true) {
+                        haveAll = true;
+                    }
+                }
+                else {
+                    if (haveAll == true) {
+                        $("#Designations-" + i).get(0).checked = false;
+                        $("#Designations-" + i).prop('disabled', true);
+                    }
+                    else {
+                        $("#Designations-" + i).prop('disabled', false);
+                    }
+                }
+            }
+        }
+
+        function addNewExtra() {
+            var rowcount = $('#lextraDataTable > tbody >tr').length;
+            var data = { pIndex: rowcount };
+            ShowMask();
+            $.ajax({
+                url: '@Url.Action("AddNewLeaveExtra", "Leave")',
+                //Passes the content of an input up
+                data: data,
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    var str = '<tr class="status-info" id="exrow-' + rowcount + '">';
+                    str = str + data + '</tr>';
+                    $('#lextraDataTable > tbody').append(str);
+                    CloseMask();
+                }
+            });
+        }
+
+        function DeleteExtra(rowid, index) {
+            if (confirm('@Resource.Confirm_Delete_Msg')) {
+                $('#Extra_Rows_' + index + '__Row_Type').val('@RowType.DELETE');
+                $('#' + rowid).hide();
+            }
+        }
+
+        /*Added By Jane 03/02/2016*/
+        function Parent_Onchange() {
+            var parentID = $('#Leave_Config_Parent_ID').val();
+            if (parentID == null || parentID == '' || parentID == 0)
+                $('#divBringForward').show();
+            else
+                $('#divBringForward').hide();
+        }
+
+    </script>
+    <div class="pageheader">
+        @if (Model.lid == 0)
+        {
+            <h2>@Resource.Add_New_Leave_Type <span></span></h2>
+        }
+        else
+        {
+            <h2>@Resource.Leave_Type_Details<span></span></h2>
+        }
+
+        <div class="breadcrumbs">
+            <ol class="breadcrumb">
+                <li>@Resource.You_Are_Here</li>
+                <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+                <li><a href="@Url.Action("Configuration", "Leave")">@Resource.Leave_Config</a></li>
+                <li class="active">@Resource.Leave_Type_Info</li>
+            </ol>
+        </div>
+    </div>
+
+    using (Html.BeginForm("LeaveType", "Leave", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        <div class="main">
+            <div class="row">
+                <div class="col-md-12">
+                    @if (Model.result != null && Model.result.Code != 0)
+                    {
+
+                        if (Model.result.Code < 0)
+                        {
+                            <div class="alert alert-red">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                        else if (Model.result.Code > 0)
+                        {
+                            <div class="alert alert-success">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                    }
+                    <section class="tile color transparent-black">
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.Leave_Type</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                           <span class="label label-success tour-guide pull-right" onclick="Start_Tour();" style="cursor:pointer">@Resource.Guide</span>
+                        </div>
+                        <div class="tile-body">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" value="@Model.operation" name="operation" />
+                            <input type="hidden" value="@Model.lid" name="lid" />
+                            <input type="hidden" value="@Model.Type" name="Type" />
+                            <input type="hidden" value="@((Model.Is_Default.HasValue ? Model.Is_Default.Value : false).ToString())" name="Is_Default" />
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Leave_Name" class="control-label">@Resource.Leave_Type</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control" name="Leave_Name" id="Leave_Name" value="@Model.Leave_Name" @((Model.Is_Default.HasValue && Model.Is_Default.Value ? "readonly" : "") )>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Leave_Name)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Leave_Config_Parent_ID" class="control-label">@Resource.Related_To</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <select class="chosen-select chosen-transparent form-control" id="Leave_Config_Parent_ID" name="Leave_Config_Parent_ID" onchange="Parent_Onchange()">
+                                                @foreach (var row in Model.relatedtoList)
+                                                {
+                                                    if (Model.Leave_Config_Parent_ID == NumUtil.ParseInteger(row.Value))
+                                                    {
+                                                        <option value="@row.Value" selected>@row.Text</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Leave_Config_Parent_ID)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Leave_Description" class="control-label">@Resource.Leave_Description</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <textarea class="form-control" name="Leave_Description" id="Leave_Description" rows="5">@Model.Leave_Description</textarea>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Leave_Description)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" id="divBringForward">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label class="control-label">@Resource.Bring_Forward</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Bring_Forward)
+                                                {
+                                                    <input type="radio" name="Bring_Forward" id="Bring_ForwardY" value="true" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Bring_Forward" id="Bring_ForwardY" value="true">
+                                                }
+
+                                                <label for="Bring_ForwardY">@Resource.Yes</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Bring_Forward)
+                                                {
+                                                    <input type="radio" name="Bring_Forward" id="Bring_ForwardN" value="false">
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Bring_Forward" id="Bring_ForwardN" value="false" checked>
+                                                }
+                                                <label for="Bring_ForwardN">@Resource.No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Months_To_Expiry" class="control-label">@Resource.Bring_Forward_Percent</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-1">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Is_Bring_Forward_Days)
+                                                {
+                                                    <input type="radio" name="Is_Bring_Forward_Days" id="Is_Bring_Forward_DaysN" value="false">
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Is_Bring_Forward_Days" id="Is_Bring_Forward_DaysN" value="false" checked>
+                                                }
+                                                <label for="Is_Bring_Forward_DaysN"></label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="text" class="form-control" name="Bring_Forward_Percent" id="Bring_Forward_Percent" value="@((Model.Bring_Forward_Percent.HasValue ? Model.Bring_Forward_Percent.Value : 0).ToString("n0"))">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Bring_Forward_Percent)
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1 text-left" style="padding-left:0px"> <label class="control-label" style="padding-left:0px">%</label></div>
+                                        <div class="col-md-1">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Is_Bring_Forward_Days)
+                                                {
+                                                    <input type="radio" name="Is_Bring_Forward_Days" id="Is_Bring_Forward_DaysY" value="true" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Is_Bring_Forward_Days" id="Is_Bring_Forward_DaysY" value="true">
+                                                }
+                                                <label for="Is_Bring_Forward_DaysY"></label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="text" class="form-control" name="Bring_Forward_Days" id="Bring_Forward_Days" value="@Model.Bring_Forward_Days.ToString("n0")">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Bring_Forward_Days)
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1 text-left" style="padding-left:0px"> <label class="control-label" style="padding-left:0px">@Resource.Days</label></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Months_To_Expiry" class="control-label">@Resource.Months_To_Expiry</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <select class="chosen-select chosen-transparent form-control" id="Months_To_Expiry" name="Months_To_Expiry">
+                                                @foreach (var row in Model.monthList)
+                                                {
+                                                    if (Model.Months_To_Expiry == NumUtil.ParseInteger(row.Value))
+                                                    {
+                                                        <option value="@row.Value" selected>@row.Value</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@(row.Value != null ? row.Value : "")">@row.Value</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Months_To_Expiry)
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label class="control-label">@Resource.Deduct_In_Payroll</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Deduct_In_Payroll)
+                                                {
+                                                    <input type="radio" name="Deduct_In_Payroll" id="Deduct_In_PayrollY" value="true" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Deduct_In_Payroll" id="Deduct_In_PayrollY" value="true">
+                                                }
+                                                <label for="Deduct_In_PayrollY">@Resource.Yes</label>
+                                            </div>
+
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Deduct_In_Payroll)
+                                                {
+                                                    <input type="radio" name="Deduct_In_Payroll" id="Deduct_In_PayrollN" value="false">
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Deduct_In_Payroll" id="Deduct_In_PayrollN" value="false" checked>
+                                                }
+                                                <label for="Deduct_In_PayrollN">@Resource.No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label class="control-label">@Resource.Allowed_Probation</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Allowed_Probation)
+                                                {
+                                                    <input type="radio" name="Allowed_Probation" id="Allowed_ProbationY" value="true" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Allowed_Probation" id="Allowed_ProbationY" value="true">
+                                                }
+                                                <label for="Allowed_ProbationY">@Resource.Yes</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Allowed_Probation)
+                                                {
+                                                    <input type="radio" name="Allowed_Probation" id="Allowed_ProbationN" value="false">
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Allowed_Probation" id="Allowed_ProbationN" value="false" checked>
+                                                }
+
+                                                <label for="Allowed_ProbationN">@Resource.No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label class="control-label">@Resource.Document_Required</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Upload_Document)
+                                                {
+                                                    <input type="radio" name="Upload_Document" id="Upload_DocumentY" value="true" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Upload_Document" id="Upload_DocumentY" value="true">
+                                                }
+                                                <label for="Upload_DocumentY">@Resource.Yes</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Upload_Document)
+                                                {
+                                                    <input type="radio" name="Upload_Document" id="Upload_DocumentN" value="false">
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Upload_Document" id="Upload_DocumentN" value="false" checked>
+                                                }
+                                                <label for="Upload_DocumentN">@Resource.No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Months_To_Expiry" class="control-label">@Resource.Allowed_Notice_Period</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Allowed_Notice_Period.HasValue && Model.Allowed_Notice_Period.Value)
+                                                {
+                                                    <input type="radio" name="Allowed_Notice_Period" id="Allowed_Notice_PeriodY" value="true" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Allowed_Notice_Period" id="Allowed_Notice_PeriodY" value="true">
+                                                }
+                                                <label for="Allowed_Notice_PeriodY">@Resource.Yes</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Allowed_Notice_Period.HasValue && Model.Allowed_Notice_Period.Value)
+                                                {
+                                                    <input type="radio" name="Allowed_Notice_Period" id="Allowed_ProbationN" value="false">
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Allowed_Notice_Period" id="Allowed_Notice_PeriodN" value="false" checked>
+                                                }
+                                                <label for="Allowed_Notice_PeriodN">@Resource.No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label id="lblGender" for="Months_To_Expiry" class="control-label">@Resource.Gender</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @for (var i = 0; i < Model.genderList.Count; i++)
+                                        {
+                                            <div class="col-md-4">
+                                                <div class="checkbox check-transparent">
+                                                    @if (Model.Condition_Rows != null && Model.Condition_Rows.Contains(NumUtil.ParseInteger(Model.genderList[i].Value)))
+                                                    {
+                                                        <input type="checkbox" value="@Model.genderList[i].Value" id="Gender_@i" name="Condition_Rows" checked>
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="checkbox" value="@Model.genderList[i].Value" id="Gender_@i" name="Condition_Rows">
+                                                    }
+
+                                                    <label for="Gender_@i">@Model.genderList[i].Text</label>
+                                                </div>
+                                            </div>
+                                        }
+                                        <div class="validation-error">
+                                            @Html.ValidationMessageFor(m => m.Condition_Rows)
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label id="lblMaritalStatus" for="Months_To_Expiry" class="control-label">@Resource.Marital_Status</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @for (var i = 0; i < Model.maritalList.Count; i++)
+                                        {
+                                            <div class="col-md-4">
+                                                <div class="checkbox check-transparent">
+                                                    @if (Model.Condition_Rows != null && Model.Condition_Rows.Contains(NumUtil.ParseInteger(Model.maritalList[i].Value)))
+                                                    {
+                                                        <input type="checkbox" value="@Model.maritalList[i].Value" id="Marital_Status_@i" name="Condition_Rows" checked>
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="checkbox" value="@Model.maritalList[i].Value" id="Marital_Status_@i" name="Condition_Rows">
+                                                    }
+                                                    <label for="Marital_Status_@i">@Model.maritalList[i].Text</label>
+                                                </div>
+                                            </div>
+                                        }
+                                        <div class="validation-error">
+                                            @Html.ValidationMessageFor(m => m.Condition_Rows)
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                </div>
+                            </div>
+
+                           <div class="row">
+                              <div class="col-md-4">
+                                 @*-------------------------------*@
+                                 <div class="form-group">
+                                    <div class="col-md-12">
+                                       <label class="control-label">@Resource.Accumulative</label>
+                                    </div>
+                                 </div>
+                                 <div class="form-group">
+                                    <div class="col-md-4">
+                                       <div class="radio radio-transparent">
+                                          @if (Model.Is_Accumulative)
+                                          {
+                                             <input type="radio" name="Is_Accumulative" id="AccumulativeY" value="true" checked>
+                                          }
+                                          else
+                                          {
+                                             <input type="radio" name="Is_Accumulative" id="AccumulativeY" value="true">
+                                          }
+                                          <label for="AccumulativeY">@Resource.Yes</label>
+                                       </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                       <div class="radio radio-transparent">
+                                          @if (Model.Is_Accumulative)
+                                          {
+                                             <input type="radio" name="Is_Accumulative" id="AccumulativeN" value="false">
+                                          }
+                                          else
+                                          {
+                                             <input type="radio" name="Is_Accumulative" id="AccumulativeN" value="false" checked>
+                                          }
+                                          <label for="AccumulativeN">@Resource.No</label>
+                                       </div>
+                                    </div>
+                                 </div>
+                                 @*-------------------------------*@
+                              </div>
+
+                           </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="validation-error">
+                        @Html.ValidationMessage("Detail_Rows")
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <section class="tile color transparent-black">
+                        <div class="tile-widget nopadding color transparent-white rounded-top-corners">
+                            <!-- Nav tabs -->
+                            <ul class="nav nav-tabs tabdrop">
+                                <li id="li-designation" class="active"><a href="#designation-tab" data-toggle="tab">@Resource.By_Designation</a></li>
+                                <li id="li-extra"><a href="#extra-tab" data-toggle="tab">@Resource.By_Employee</a></li>
+                            </ul>
+                            <!-- / Nav tabs -->
+                        </div>
+                        <div class="tile-body tab-content ">
+                            <div id="designation-tab" class="tab-pane fade in active">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <section class="tile color transparent">
+
+                                            <div class="tile-body">
+                                                <div class="row">
+                                                    <div class="col-md-12 text-center">
+                                                        <a id="btnAddByDesignation" class="btn btn-greensea  btn-sm add-row" onclick="AddDesignation_Onclick()">@Resource.Add_An_Item</a>
+                                                    </div>
+                                                </div>
+                                                <div class="table-responsive">
+                                                    <table class="table table-datatable table-custom" id="designationDataTable">
+                                                        <thead>
+                                                            <tr>
+                                                                <th class="sort-alpha">@Resource.Designation</th>
+                                                                <th class="sort-numeric">@Resource.Years_S_Of_Service</th>
+                                                                <th class="sort-amount">@Resource.Default_Leave_Amount</th>
+                                                                <th class="no-sort" width="110px">@Resource.Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @if (Model.Detail_Rows != null)
+                                                            {
+                                                                var i = 0;
+                                                                foreach (var row in Model.Detail_Rows)
+                                                                {
+                                                                    var designations = Newtonsoft.Json.JsonConvert.SerializeObject(row.Designations);
+                                                                    var desinationsText = "";
+
+                                                                    <tr id="erow-@i">
+                                                                        <td id="td-@i">
+                                                                            @if (Model.Detail_Rows[i].Row_Type == RowType.DELETE)
+                                                                            {
+                                                                                <script type="text/javascript">
+                                                                                    $(function () {
+                                                                                        $('#' + 'erow-@i').hide();
+                                                                                    });
+                                                                                </script>
+                                                                            }
+                                                                            @if (Model.Detail_Rows[i].Row_Type == null)
+                                                                            {
+                                                                                @Html.Hidden("Detail_Rows[" + i + "].Row_Type", RowType.EDIT)
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                @Html.Hidden("Detail_Rows[" + i + "].Row_Type", Model.Detail_Rows[i].Row_Type)
+                                                                            }
+                                                                            @Html.Hidden("Detail_Rows[" + i + "].Leave_Config_ID", Model.Detail_Rows[i].Leave_Config_ID)
+                                                                            @Html.Hidden("Detail_Rows[" + i + "].Group_ID", Model.Detail_Rows[i].Group_ID)
+                                                                            @if (Model.Detail_Rows[i].Designations != null)
+                                                                            {
+                                                                                var j = 0;
+                                                                                foreach (var drow in Model.Detail_Rows[i].Designations)
+                                                                                {
+                                                                                    foreach (var d in Model.designationList)
+                                                                                    {
+                                                                                        if (NumUtil.ParseInteger(d.Value) == drow)
+                                                                                        {
+                                                                                            if (j > 0)
+                                                                                            {
+                                                                                                desinationsText = desinationsText + Environment.NewLine;
+                                                                                            }
+                                                                                            desinationsText = desinationsText + d.Text;
+                                                                                            <input type="hidden" name="Detail_Rows[@i].Designations" value="@d.Value" />
+                                                                                            break;
+                                                                                        }
+                                                                                    }
+                                                                                    j++;
+                                                                                }
+                                                                                <textarea class="form-control input-table-transparent" id="Detail_Rows_@(i)__Designations_Text" rows="@row.Designations.Length">@desinationsText</textarea>
+                                                                            }
+                                                                            <div class="validation-error">
+                                                                                @Html.ValidationMessage("Detail_Rows[" + i + "].Designations")
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input type="text" class="form-control input-table-transparent" id="Detail_Rows_@(i)__Year_Service_Text" value="@Model.Detail_Rows[i].Year_Service">
+                                                                            <input type="hidden" id="Detail_Rows_@(i)__Year_Service" name="Detail_Rows[@i].Year_Service" value="@Model.Detail_Rows[i].Year_Service">
+                                                                            <div class="validation-error">
+                                                                                @Html.ValidationMessage("Detail_Rows[" + i + "].Year_Service")
+                                                                            </div>
+                                                                        </td>
+                                                                        <td class="text-right">
+                                                                            <input type="text" class="form-control input-table-transparent text-right" id="Detail_Rows_@(i)__Default_Leave_Amount_Text" value="@Model.Detail_Rows[i].Default_Leave_Amount">
+                                                                            <input type="hidden" class="form-control" id="Detail_Rows_@(i)__Default_Leave_Amount" name="Detail_Rows[@i].Default_Leave_Amount" value="@Model.Detail_Rows[i].Default_Leave_Amount">
+                                                                            <div class="validation-error">
+                                                                                @Html.ValidationMessage("Detail_Rows[" + i + "].Default_Leave_Amount")
+                                                                            </div>
+                                                                        </td>
+                                                                        <td class="actions text-left">
+                                                                            <a href="#" id="btnEditDetail-@i" onclick="EditDetail_Onclick('@i', '@row.Leave_Config_ID','@row.Group_ID','@row.Row_Type',@designations,'@row.Year_Service','@row.Default_Leave_Amount')"><i class="fa fa-edit fa-2x"></i></a>
+                                                                            <a data-toggle="modal" onclick="return DeleteDetail('erow-@i', @i);" href="#">
+                                                                                <i class="fa fa-times-circle-o fa-2x"></i>
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                            i++;
+                                                                }
+
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+
+                                        </section>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="extra-tab" class="tab-pane fade in ">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <section class="tile color transparent">
+
+                                            <div class="tile-body">
+                                                <div class="row">
+                                                    <div class="col-md-12 text-center">
+                                                        <a id="btnAddExtra" class="btn btn-greensea  btn-sm add-row" onclick="addNewExtra()">@Resource.Add_An_Item</a>
+                                                    </div>
+                                                </div>
+                                                <div class="table-responsive">
+                                                    <table class="table table-datatable table-custom" id="lextraDataTable">
+                                                        <thead>
+                                                            <tr>
+                                                                <th class="sort-alpha">@Resource.Name</th>
+                                                                <th class="sort-alpha">@Resource.Adjustment</th>
+                                                                <th class="sort-amount">@Resource.No_Of_Days</th>
+                                                                <th class="no-sort" width="110px">@Resource.Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @if (Model.Extra_Rows != null)
+                                                            {
+                                                                var i = 0;
+                                                                foreach (var row in Model.Extra_Rows)
+                                                                {
+                                                                    <tr id="exrow-@i">
+                                                                        <td>
+                                                                            @if (Model.Extra_Rows[i].Row_Type == RowType.DELETE)
+                                                                            {
+                                                                                <script type="text/javascript">
+                                                                                    $(function () {
+                                                                                        $('#' + 'exrow-@i').hide();
+                                                                                    });
+                                                                                </script>
+                                                                            }
+                                                                            @if (Model.Extra_Rows[i].Row_Type == null)
+                                                                            {
+                                                                                @Html.Hidden("Extra_Rows[" + i + "].Row_Type", RowType.EDIT)
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                @Html.Hidden("Extra_Rows[" + i + "].Row_Type", Model.Extra_Rows[i].Row_Type)
+                                                                            }
+                                                                            @Html.Hidden("Extra_Rows[" + i + "].Leave_Config_ID", Model.Extra_Rows[i].Leave_Config_ID)
+                                                                            @Html.Hidden("Extra_Rows[" + i + "].Leave_Config_Extra_ID", Model.Extra_Rows[i].Leave_Config_Extra_ID)
+
+                                                                            <select class="chosen-select chosen-transparent form-control" id="Extra_Rows_@(i)__Employee_Profile_ID" name="Extra_Rows[@i].Employee_Profile_ID">
+                                                                                @foreach (var erow in Model.empList)
+                                                                                {
+
+                                                                                    if (Model.Extra_Rows[i].Employee_Profile_ID == NumUtil.ParseInteger(erow.Value))
+                                                                                    {
+                                                                                        <option value="@(erow.Value != null ? erow.Value : "0")" selected>@erow.Text</option>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <option value="@(erow.Value != null ? erow.Value : "0")">@erow.Text</option>
+                                                                                    }
+
+                                                                                }
+
+                                                                            </select>
+                                                                            <div class="validation-error">
+                                                                                @Html.ValidationMessage("Extra_Rows[" + i + "].Employee_Profile_ID")
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <select class="chosen-select chosen-transparent form-control" id="Extra_Rows_@(i)__Adjustment_Type" name="Extra_Rows[@i].Adjustment_Type">
+                                                                                @foreach (var arow in Model.adjustmentTypeList)
+                                                                                {
+
+                                                                                    if (Model.Extra_Rows[i].Adjustment_Type == arow.Value)
+                                                                                    {
+                                                                                        <option value="@(arow.Value != null ? arow.Value : "0")" selected>@arow.Text</option>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <option value="@(arow.Value != null ? arow.Value : "0")">@arow.Text</option>
+                                                                                    }
+                                                                                }
+                                                                            </select>
+                                                                            <div class="validation-error">
+                                                                                @Html.ValidationMessage("Extra_Rows[" + i + "].Adjustment_Type")
+                                                                            </div>
+                                                                        </td>
+                                                                        <td class="text-right">
+                                                                            <input type="text" class="form-control text-right" id="Extra_Rows_@(i)__No_Of_Days" name="Extra_Rows[@i].No_Of_Days" value="@Model.Extra_Rows[i].No_Of_Days">
+                                                                            <div class="validation-error">
+                                                                                @Html.ValidationMessage("Extra_Rows[" + i + "].No_Of_Days")
+                                                                            </div>
+                                                                        </td>
+                                                                        <td class="actions text-left" style="cursor:pointer">
+                                                                            <a data-toggle="modal" onclick="return DeleteExtra('exrow-@i', @i);">
+                                                                                <i class="fa fa-times-circle-o fa-2x"></i>
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                                i++;
+
+                                                                }
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+
+                                        </section>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <section class="tile color transparent-white">
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U) | Model.rights.Contains(UserSession.RIGHT_C))
+                                    {
+                                        <button type="submit" class="btn btn-primary" onclick="return Confirm_Alert('@Model.lid');">@Resource.Save</button>
+                                    }
+                                    <a href="@Url.Action("Configuration", "Leave", new { tabAction = "leaveType" })" class="btn btn-default">@Resource.Back</a>
+                                    <a id="btnAddDesignation" href="#modal-designation" role="button" data-toggle="modal" style="display:none;"></a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="modal-designation" tabindex="-1" role="dialog" aria-labelledby="modalConfirmLabel" aria-hidden="true">
+            <input type="hidden" id="Leave_Config_ID">
+            <input type="hidden" id="Index">
+            <input type="hidden" id="Group_ID">
+            <input type="hidden" id="Row_Type">
+            <input type="hidden" id="Event_Click">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title"><strong>@Resource.Item_Details</strong></h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <label for="Designations" class="control-label">@Resource.Designation</label>
+                                        <div class="validation-error">
+                                            <span id="Designations_Err"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12" style="height:300px;overflow-y:auto">
+                                        <table class="table table-datatable table-custom" id="Designations">
+                                            <tbody>
+                                                @if (Model != null && Model.designationList != null && Model.designationList.Count > 0)
+                                                {
+                                                    var i = 0;
+                                                    foreach (var row in Model.designationList)
+                                                    {
+                                                        <tr>
+                                                            <td style="width:30px">
+                                                                <div class="checkbox">
+                                                                    <input type="checkbox" value="@row.Value" id="Designations-@i" name="Designations" onchange="Designations_Onchange()">
+                                                                    <label for="Designations-@i"></label>
+                                                                </div>
+                                                            </td>
+                                                            <td>@row.Text</td>
+                                                        </tr>
+                                                        i++;
+                                                    }
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <label for="Year_Service" class="control-label">@Resource.Years_S_Of_Services_More</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <input type="text" class="form-control input-datepicker" id="Year_Service" name="Year_Service" value="@Model.Year_Service">
+                                        <div class="validation-error">
+                                            <span id="Year_Service_Err"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <label for="Year_Service" class="control-label">@Resource.Default_Leave_Amount</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-10">
+                                        <input type="text" class="form-control input-datepicker" id="Default_Leave_Amount" name="Default_Leave_Amount" value="@Model.Default_Leave_Amount">
+                                        <div class="validation-error">
+                                            <span id="Default_Leave_Amount_Err"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        @*<label class="control-label">@Model.Company_Currency</label>*@
+                                        <label class="control-label">@Resource.Days</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btnClose" type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+                        <button id="btnDetailSubmit" type="button" class="btn btn-primary" name="tabAction" value="leaveType">@Resource.Save_Change</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="md-overlay"></div><!-- the overlay element -->
+    }
+}

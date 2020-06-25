@@ -1,0 +1,150 @@
+﻿@model Authentication.Models.GlobalLookupViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSModel.Common;
+@using Authentication.Common;
+@using SBSResourceAPI;
+@{
+   ViewBag.Title = Resource.Company_Configuration;
+}
+
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+   <!-- page header -->
+   <div class="pageheader">
+      <h2>@Resource.Lookup_By_Data</h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li><a href="@Url.Action("CompanyGlobalLookup", "GlobalLookup", new { pDefID = EncryptUtil.Encrypt(Model.Def_ID) })">@Resource.Company_Configuration</a></li>
+            <li class="active">@Resource.Lookup_By_Data</li>
+         </ol>
+      </div>
+   </div>
+   using (Html.BeginForm("CompanyGlobalLookupInfo", "GlobalLookup", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+   {
+      @Html.AntiForgeryToken()
+
+      <input type="hidden" name="operation" value="@Model.operation" />
+      <input type="hidden" name="Lookup_Data_ID" value="@Model.Lookup_Data_ID" />
+      <input type="hidden" name="Def_ID" value="@Model.Def_ID" />
+      <input type="hidden" name="Lookup_Def_Name" value="@Model.Lookup_Def_Name" />
+      <div class="main">
+         <div class="row">
+            <div class="col-md-12">
+               @if (Model.result != null && Model.result.Code != 0)
+               {
+                  if (Model.result.Code < 0)
+                  {
+                     <div class="alert alert-red">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                     </div>
+                  }
+                  else if (Model.result.Code > 0)
+                  {
+                     <div class="alert alert-success">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                     </div>
+                  }
+               }
+               <section class="tile color transparent-black">
+                  <div class="tile-body">
+                     <div class="row">
+                        <div class="col-md-12">
+                           <section class="tile transparent">
+                              <div class="tile-header transparent">
+                                 <h1><strong>@Model.Lookup_Def_Name</strong></h1>
+                                 <div class="controls">
+                                    <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                 </div>
+                              </div>
+                              <div class="tile-body">
+                                 <div class="row">
+                                    <div class="col-md-6">
+                                       <div class="form-group">
+                                          <div class="col-md-12">
+                                             <label for="Name" class="control-label">@Resource.Name</label>
+                                          </div>
+                                       </div>
+                                       <div class="form-group">
+                                          <div class="col-md-12">
+                                             <input type="text" class="form-control" name="Name" id="Name" value="@Model.Name">
+                                             <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Name)
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="form-group">
+                                          <div class="col-md-12">
+                                             <label for="Record_Status" class="control-label">@Resource.Status</label>
+                                          </div>
+                                       </div>
+                                       <div class="form-group">
+                                          <div class="col-md-12">
+                                             <select class="chosen-select chosen-transparent form-control" id="Record_Status" name="Record_Status">
+                                                @if (Model.Statuslst != null)
+                                                {
+                                                   foreach (var row in Model.Statuslst)
+                                                   {
+                                                      if (Model.Record_Status == row.Value)
+                                                      {
+                                                         <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                      }
+                                                      else
+                                                      {
+                                                         <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                                      }
+                                                   }
+                                                }
+                                             </select>
+                                             <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Record_Status)
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                       <div class="form-group">
+                                          <div class="col-md-12">
+                                             <label for="Description" class="control-label">@Resource.Description</label>
+                                          </div>
+                                       </div>
+                                       <div class="form-group">
+                                          <div class="col-md-12">
+                                             <textarea class="form-control" name="Description" id="Description" rows="5">@Model.Description</textarea>
+                                             <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Description)
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </section>
+                        </div>
+                     </div>
+                  </div>
+               </section>
+               <div class="row">
+                  <div class="col-md-12">
+                     <section class="tile color transparent-white" style="padding-left:15px;">
+                        <div class="tile-body">
+                           <div class="row">
+                              <div class="col-md-12 text-left">
+                                 @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U) | Model.rights.Contains(UserSession.RIGHT_C))
+                                 {
+                                    <button type="submit" class="btn btn-primary" onclick="return Confirm_Alert('@Model.Lookup_Data_ID');">@Resource.Save</button>
+                                 }
+                                 <a href="@Url.Action("CompanyGlobalLookup", "GlobalLookup", new { pDefID = EncryptUtil.Encrypt(Model.Def_ID) })" class="btn btn-default">@Resource.Back</a>
+                              </div>
+                           </div>
+                        </div>
+                     </section>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   }
+}

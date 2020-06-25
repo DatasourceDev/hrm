@@ -1,0 +1,214 @@
+﻿@model  HR.Models.TimeArrangementViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+
+
+<a id="btnAddArg" href="#modal-arg" role="button" data-toggle="modal" style="display:none;"></a>
+@using (Html.BeginForm("Arrangement", "Time", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Employee_Profile_ID)
+    @Html.HiddenFor(m => m.Arrangement_ID)
+
+    <input type="hidden" name="operation" id="operation" value="@Model.operation" />
+    <input type="hidden" id="display_Effective_Date" name="display_Effective_Date" value="@Model.search_Effective_Date" >
+    <div class="modal fade" id="modal-arg" tabindex="-1" role="dialog" aria-labelledby="modalConfirmLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="modalConfirmLabel"><strong>@Resource.Employee_Arrangement</strong></h3>
+                </div>
+                <div class="modal-body">
+                    @if (Model.result != null && Model.result.Code != 0)
+                    {
+                        if (Model.result.Code < 0)
+                        {
+                            <div class="alert alert-red">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                        else if (Model.result.Code > 0)
+                        {
+                            <div class="alert alert-success">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                    }
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <label for="Employee_Profile_ID" class="control-label">@Resource.Employee</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <input type="text" class="form-control" id="Employee_Name" name="Employee_Name" value="@Model.Employee_Name" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <label for="Branch_ID" class="control-label">@Resource.Branch</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <select class="chosen-select form-control" id="Branch_ID" name="Branch_ID">
+                                        @foreach (var row in Model.cBranchlist)
+                                        {
+                                            <option value="@row.Value" @(Model.Branch_ID == NumUtil.ParseInteger(row.Value) ? "selected" : "")>@row.Text</option>
+                                        }
+                                    </select>
+                                    <div class="validation-error">
+                                        @Html.ValidationMessageFor(m => m.Branch_ID)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <label for="Effective_Date" class="control-label">@Resource.Effective_Date</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <input type="text" class="form-control input-datepicker2" id="Effective_Date" name="Effective_Date" value="@Model.Effective_Date">
+                                    <div class="validation-error">
+                                        @Html.ValidationMessageFor(m => m.Effective_Date)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <label for="Repeat" class="control-label" style="height:20px;"></label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-6">
+                                    <div class="checkbox ">
+                                        <input type="checkbox" value="true" id="Repeat" name="Repeat" @(Model.Repeat.HasValue && Model.Repeat.Value ? "checked" : "") onchange="Repeat_Onchange()">
+                                        <label for="Repeat">@Resource.Repeat</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12" id="divDayOfWeek">
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <label for="Day_Of_Week" class="control-label">@Resource.Day_Of_Week</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <div class="row">
+                                        @for (var i = 0; i < 4; i++)
+                                        {
+                                            var dChecked = false;
+                                            if (Model.Day_Of_Weeks != null && Model.Day_Of_Weeks.Contains((i - 1).ToString()))
+                                            {
+                                                dChecked = true;
+                                            }
+                                            <div class="col-sm-3">
+                                                <div class="checkbox">
+                                                    <input type="checkbox" value="@(i-1)" id="Day_Of_Weeks-@i" name="Day_Of_Weeks" onchange="Day_Of_Weeks_Onchange()" @(dChecked ? "checked" : "")>
+                                                    <label for="Day_Of_Weeks-@i">@DateUtil.GetFullDayOfweek(i - 1)</label>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="row">
+                                        @for (var i = 4; i < 8; i++)
+                                        {
+                                            var dChecked = false;
+                                            if (Model.Day_Of_Weeks != null && Model.Day_Of_Weeks.Contains((i - 1).ToString()))
+                                            {
+                                                dChecked = true;
+                                            }
+                                            <div class="col-sm-3">
+                                                <div class="checkbox">
+                                                    <input type="checkbox" value="@(i-1)" id="Day_Of_Weeks-@i" name="Day_Of_Weeks" onchange="Day_Of_Weeks_Onchange()" @(dChecked ? "checked" : "")>
+                                                    <label for="Day_Of_Weeks-@i">@DateUtil.GetFullDayOfweek(i - 1)</label>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="validation-error">
+                                        @Html.ValidationMessageFor(m => m.Day_Of_Week)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <label for="arg_Port" class="control-label">@Resource.Time</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control input-timepicker2" id="Time_From" name="Time_From" value="@Model.Time_From">
+                                    <div class="validation-error">
+                                        @Html.ValidationMessageFor(m => m.Time_From)
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control input-timepicker2" id="Time_To" name="Time_To" value="@Model.Time_To">
+                                    <div class="validation-error">
+                                        @Html.ValidationMessageFor(m => m.Time_To)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <label for="Remark" class="control-label">@Resource.Remark</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <textarea class="form-control" id="Remark" name="Remark" rows="3">@Model.Remark</textarea>
+                                    <div class="validation-error">
+                                        @Html.ValidationMessageFor(m => m.Remark)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+                    @if (Model.rights != null && Model.rights.Contains(Operation.D))
+                    {
+                        <button id="btnDelete" type="submit" class="btn btn-red" style="display:none;" onclick="$('#operation').val('@Operation.D');">@Resource.Delete</button>
+                    }
+                    @if (Model.rights != null && Model.rights.Contains(Operation.U) | Model.rights.Contains(Operation.C))
+                    {
+                        <button type="submit" class="btn btn-primary">@Resource.Save_Change</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}

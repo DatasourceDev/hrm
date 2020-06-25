@@ -1,0 +1,66 @@
+﻿@using System.Web.Configuration
+@using HR.Models;
+@using HR.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+<!DOCTYPE html>
+<html>
+<head>
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta charset="UTF-8" />
+   @HtmlUtil.InitFrontJS()
+   @HtmlUtil.InitFrontCSS()
+   <script type="text/javascript" src="//cdn.jsdelivr.net/jquery.slick/1.6.0/slick.min.js"></script>
+   <script src="@Url.Content("~/frontpage/assets/js/vendor/text-rotator/jquery.simple-text-rotator.js")"></script>
+   <script src="@Url.Content("~/frontpage/assets/js/vendor/owl-carousel/owl.carousel.min.js")"></script>
+   <script src="@Url.Content("~/frontpage/assets/js/vendor/nivo-lightbox/nivo-lightbox.min.js")"></script>
+   <script src="@Url.Content("~/frontpage/assets/js/vendor/tweet-js/jquery.tweet.min.js")"></script>
+   <script src="@Url.Content("~/frontpage/assets/js/vendor/vticker/jquery.vticker.min.js")"></script>
+   <script src="@Url.Content("~/frontpage/assets/js/vendor/jflickrfeed/jflickrfeed.min.js")"></script>
+   <script src="@Url.Content("~/frontpage/assets/js/vendor/appear/jquery.appear.js")"></script>
+   <script src="@Url.Content("~/frontpage/assets/js/vendor/parallax/jquery.parallax-1.1.3.js")"></script>
+
+   <script src="@Url.Content("~/assets/js/vendor/no-ui-slider/jquery.nouislider.min.js")"></script>
+   <link rel="stylesheet" href="@Url.Content("~/assets/js/vendor/no-ui-slider/css/jquery.nouislider.min.css")">
+   <script src="@Url.Content("~/assets/js/vendor/colorbox/jquery.colorbox-min.js")"></script>
+   <link rel="stylesheet" href="@Url.Content("~/assets/js/vendor/colorbox/css/colorbox.css")">
+</head>
+<body class="bg-white">
+   <div class="mask"><div id="loader"></div></div>
+   <div class="navbar navbar-fixed-top" role="navigation" data-0="line-height:80px; height:80px;-webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);" data-300="line-height:40px; height:40px;-webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">
+      <div class="container">
+         <!-- Branding -->
+         <div class="navbar-header">
+            <a class="navbar-brand" href="@Url.Action("Front", "Front")">
+            </a>
+            <div class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+               <a href="#">
+                  <i class="fa fa-bars"></i>
+               </a>
+            </div>
+         </div>
+         <!-- Branding end -->
+         <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+               <li class="dropdown" data-init="onHover">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-0="padding: 30px 25px 22px;border-bottom-width:4px;" data-100="padding: 24px 25px 16px;border-bottom-width:3px;" data-200="padding: 15px 25px 12px;border-bottom-width:2px;" data-300="padding: 15px 25px 10px;border-bottom-width:1px;">
+                     @Resource.Solution <span class="caret"></span>
+                  </a>
+                  <ul class="dropdown-menu" role="menu">
+                     <li><a href="@Url.Action("Front", "Front", new { step = "module" })">@Resource.Message_Browse_By_Work_Type</a></li>
+                     <li><a href="@Url.Action("Front", "Front", new { step = "module" })">@Resource.Message_Browse_By_Industries</a></li>
+                     <li><a href="@Url.Action("Front", "Front", new { step = "module" })">@Resource.Message_Browse_By_Products</a></li>
+                  </ul>
+               </li>
+               <li><a href="@Url.Action("Front", "Front")" data-0="padding: 30px 25px 22px;border-bottom-width:4px;" data-100="padding: 24px 25px 16px;border-bottom-width:3px;" data-200="padding: 15px 25px 12px;border-bottom-width:2px;" data-300="padding: 15px 25px 10px;border-bottom-width:1px;">@Resource.Message_Clients_Projects</a></li>
+               <li><a href="@Url.Action("Front", "Front")" data-0="padding: 30px 25px 22px;border-bottom-width:4px;" data-100="padding: 24px 25px 16px;border-bottom-width:3px;" data-200="padding: 15px 25px 12px;border-bottom-width:2px;" data-300="padding: 15px 25px 10px;border-bottom-width:1px;">@Resource.Message_Tutorial_And_Support</a></li>
+               <li><a href="@Url.Action("Front", "Front")" data-0="padding: 30px 25px 22px;border-bottom-width:4px;" data-100="padding: 24px 25px 16px;border-bottom-width:3px;" data-200="padding: 15px 25px 12px;border-bottom-width:2px;" data-300="padding: 15px 25px 10px;border-bottom-width:1px;">@Resource.About</a></li>
+               <li class="search"><input type="text" placeholder="&#61442;" data-0="margin-top:23px" data-300="margin-top:10px"></li>
+            </ul>
+         </div><!--/.navbar-collapse -->
+      </div>
+   </div>
+   @RenderBody()
+</body>
+</html>

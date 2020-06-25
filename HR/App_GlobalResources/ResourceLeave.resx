@@ -1,0 +1,552 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AddApprovalWorkflow" xml:space="preserve">
+    <value>Add Approval work flow</value>
+  </data>
+  <data name="AddHoliday" xml:space="preserve">
+    <value>Add Holiday &amp; Event</value>
+  </data>
+  <data name="AddLeaveAdjustment" xml:space="preserve">
+    <value>Add Leave Adjustment</value>
+  </data>
+  <data name="AddLeaveType" xml:space="preserve">
+    <value>Add Leave Type</value>
+  </data>
+  <data name="Address_While_On_Leave" xml:space="preserve">
+    <value>Address</value>
+  </data>
+  <data name="AdjustmentAmount" xml:space="preserve">
+    <value>Adjustment Amount</value>
+  </data>
+  <data name="Allowed_Probation" xml:space="preserve">
+    <value>Allowed for Probation</value>
+  </data>
+  <data name="Applicable" xml:space="preserve">
+    <value>Applicable</value>
+  </data>
+  <data name="Application" xml:space="preserve">
+    <value>Application</value>
+  </data>
+  <data name="ApplicableFor" xml:space="preserve">
+    <value>Applicable for</value>
+  </data>
+  <data name="Approval" xml:space="preserve">
+    <value>Approval</value>
+  </data>
+  <data name="ApprovalWorkflow" xml:space="preserve">
+    <value>Leave Approval Workflow</value>
+  </data>
+  <data name="ApprovalWorkflowInfo" xml:space="preserve">
+    <value>Leave Approval Workflow Information</value>
+  </data>
+  <data name="ApprovalWorkflowList" xml:space="preserve">
+    <value>Approval Workflow List</value>
+  </data>
+  <data name="Approval_Status_1st" xml:space="preserve">
+    <value>1-Approval</value>
+  </data>
+  <data name="Approval_Status_2st" xml:space="preserve">
+    <value>2-Approval</value>
+  </data>
+  <data name="Approved" xml:space="preserve">
+    <value>Approved</value>
+  </data>
+  <data name="ApprovedCancellationApplications" xml:space="preserve">
+    <value>Approved Cancellation Applications</value>
+  </data>
+  <data name="ApprovedLeave" xml:space="preserve">
+    <value>Approved Leave</value>
+  </data>
+  <data name="ApprovedLeaveList" xml:space="preserve">
+    <value>Approved Leave List</value>
+  </data>
+  <data name="Approver" xml:space="preserve">
+    <value>Approver</value>
+  </data>
+  <data name="Branch" xml:space="preserve">
+    <value>Branch</value>
+  </data>
+  <data name="BringForward" xml:space="preserve">
+    <value>Bring Forward</value>
+  </data>
+  <data name="Bring_Forward" xml:space="preserve">
+    <value>Bring Forward to next year</value>
+  </data>
+  <data name="Bring_Forward_Days" xml:space="preserve">
+    <value>Days</value>
+  </data>
+  <data name="Bring_Forward_Percent" xml:space="preserve">
+    <value>How many days to bring forward?</value>
+  </data>
+  <data name="Bring_Forward_Percent_" xml:space="preserve">
+    <value>Bring Forward Percent</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="CancelApproved" xml:space="preserve">
+    <value>Cancel Approved</value>
+  </data>
+  <data name="Cancellation" xml:space="preserve">
+    <value>Cancellation</value>
+  </data>
+  <data name="Closed" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+  <data name="Contact_While_Overseas" xml:space="preserve">
+    <value>Contact No</value>
+  </data>
+  <data name="Custom_Fiscal_Year" xml:space="preserve">
+    <value>Ficial Year - Custom Fiscal Year</value>
+  </data>
+  <data name="Custom_Fiscal_Year_" xml:space="preserve">
+    <value>Custom Fiscal Year</value>
+  </data>
+  <data name="Date_Applied" xml:space="preserve">
+    <value>Date Applied From</value>
+  </data>
+  <data name="Days" xml:space="preserve">
+    <value>Days</value>
+  </data>
+  <data name="Days_Taken" xml:space="preserve">
+    <value>Days Taken</value>
+  </data>
+  <data name="Deduct_In_Payroll" xml:space="preserve">
+    <value>Deduct in Payroll</value>
+  </data>
+  <data name="DefaultLeaveAmount" xml:space="preserve">
+    <value>Default Leave Amount</value>
+  </data>
+  <data name="Default_Fiscal_Year" xml:space="preserve">
+    <value>Default Fiscal Year (31 Dec)</value>
+  </data>
+  <data name="Department" xml:space="preserve">
+    <value>Department</value>
+  </data>
+  <data name="Designation" xml:space="preserve">
+    <value>Designation</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Employee" xml:space="preserve">
+    <value>Employee</value>
+  </data>
+  <data name="EmployeeName" xml:space="preserve">
+    <value>Employee Name</value>
+  </data>
+  <data name="EmployeeNo" xml:space="preserve">
+    <value>Employee No</value>
+  </data>
+  <data name="End_Date" xml:space="preserve">
+    <value>End Date</value>
+  </data>
+  <data name="FinalApproval" xml:space="preserve">
+    <value>Final Approval</value>
+  </data>
+  <data name="FinalApprover" xml:space="preserve">
+    <value>Final Approver</value>
+  </data>
+  <data name="FirstApproval" xml:space="preserve">
+    <value>First Approval</value>
+  </data>
+  <data name="FirstApprover" xml:space="preserve">
+    <value>First Approver</value>
+  </data>
+  <data name="Fiscal_Year" xml:space="preserve">
+    <value>Fiscal Year</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>From</value>
+  </data>
+  <data name="FullDay" xml:space="preserve">
+    <value>Full Day</value>
+  </data>
+  <data name="Gender" xml:space="preserve">
+    <value>Gender</value>
+  </data>
+  <data name="HalfDay" xml:space="preserve">
+    <value>Half Day</value>
+  </data>
+  <data name="Holiday" xml:space="preserve">
+    <value>Holiday &amp; Event</value>
+  </data>
+  <data name="HolidayEndDate" xml:space="preserve">
+    <value>Holiday &amp; Event End Date</value>
+  </data>
+  <data name="HolidayInfo" xml:space="preserve">
+    <value>Holiday &amp; Event Information</value>
+  </data>
+  <data name="HolidayLength" xml:space="preserve">
+    <value>Full Day/Half Day</value>
+  </data>
+  <data name="HolidayList" xml:space="preserve">
+    <value>Holiday &amp; Event List</value>
+  </data>
+  <data name="HolidayName" xml:space="preserve">
+    <value>Holiday &amp; Event Name</value>
+  </data>
+  <data name="HolidayStartDate" xml:space="preserve">
+    <value>Holiday &amp; Event Start Date</value>
+  </data>
+  <data name="Holiday_Length" xml:space="preserve">
+    <value>Holiday &amp; Event Length</value>
+  </data>
+  <data name="Leave" xml:space="preserve">
+    <value>Leave</value>
+  </data>
+  <data name="LeaveAdjustment" xml:space="preserve">
+    <value>Leave Adjustment</value>
+  </data>
+  <data name="LeaveAdjustmentInfo" xml:space="preserve">
+    <value>Leave Adjustment Information</value>
+  </data>
+  <data name="LeaveAdjustmentList" xml:space="preserve">
+    <value>Leave Adjustment List</value>
+  </data>
+  <data name="LeaveApproval" xml:space="preserve">
+    <value>Leave Approval</value>
+  </data>
+  <data name="LeaveConfig" xml:space="preserve">
+    <value>Leave Configuration</value>
+  </data>
+  <data name="LeaveDate" xml:space="preserve">
+    <value>Leave Date</value>
+  </data>
+  <data name="LeaveInfo" xml:space="preserve">
+    <value>Leave Information</value>
+  </data>
+  <data name="LeaveLeft" xml:space="preserve">
+    <value>Leave Balance</value>
+  </data>
+  <data name="LeaveManagement" xml:space="preserve">
+    <value>Leave Management</value>
+  </data>
+  <data name="LeaveName" xml:space="preserve">
+    <value>Leave Name</value>
+  </data>
+  <data name="LeaveRecord" xml:space="preserve">
+    <value>My Record</value>
+  </data>
+  <data name="LeaveReport" xml:space="preserve">
+    <value>Leave Report</value>
+  </data>
+  <data name="LeaveTypeList" xml:space="preserve">
+    <value>Leave Type List</value>
+  </data>
+  <data name="Leave_Description" xml:space="preserve">
+    <value>Leave Description</value>
+  </data>
+  <data name="Leave_Type" xml:space="preserve">
+    <value>Leave Type</value>
+  </data>
+  <data name="Leave_Type_Info" xml:space="preserve">
+    <value>Leave Type Information</value>
+  </data>
+  <data name="Marital_Status" xml:space="preserve">
+    <value>Marital Status</value>
+  </data>
+  <data name="MaxLeavetoNextYear" xml:space="preserve">
+    <value>Max. Leave to next year</value>
+  </data>
+  <data name="Months_To_Expiry" xml:space="preserve">
+    <value>Expiration period for brought forward leave</value>
+  </data>
+  <data name="MyLeave" xml:space="preserve">
+    <value>My Leave</value>
+  </data>
+  <data name="NewApplication" xml:space="preserve">
+    <value>New Leave</value>
+  </data>
+  <data name="NewRequest" xml:space="preserve">
+    <value>New Request</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No.</value>
+  </data>
+  <data name="NotApplicableFor" xml:space="preserve">
+    <value>Not applicable for</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="NumberOfLeaveEntitled" xml:space="preserve">
+    <value>Number of Leave entitled</value>
+  </data>
+  <data name="Pending" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="PendingCancellationApplications" xml:space="preserve">
+    <value>Pending Cancellation Applications</value>
+  </data>
+  <data name="PendingLeaveApplications" xml:space="preserve">
+    <value>Pending Leave Applications</value>
+  </data>
+  <data name="Period" xml:space="preserve">
+    <value>Period</value>
+  </data>
+  <data name="PeriodAM" xml:space="preserve">
+    <value>AM</value>
+  </data>
+  <data name="PeriodPM" xml:space="preserve">
+    <value>PM</value>
+  </data>
+  <data name="PublicHoliday" xml:space="preserve">
+    <value>Public Holiday</value>
+  </data>
+  <data name="Reason" xml:space="preserve">
+    <value>Reason</value>
+  </data>
+  <data name="Rejected" xml:space="preserve">
+    <value>Rejected</value>
+  </data>
+  <data name="RejectedLeaveList" xml:space="preserve">
+    <value>Rejected Leave List</value>
+  </data>
+  <data name="Remark" xml:space="preserve">
+    <value>Remark</value>
+  </data>
+  <data name="RequestFrom" xml:space="preserve">
+    <value>Request From</value>
+  </data>
+  <data name="Reviewer" xml:space="preserve">
+    <value>Reviewer</value>
+  </data>
+  <data name="Start_Date" xml:space="preserve">
+    <value>Start Date</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="TeamCalendar" xml:space="preserve">
+    <value>Team Calendar</value>
+  </data>
+  <data name="To" xml:space="preserve">
+    <value>To</value>
+  </data>
+  <data name="Upload_Document" xml:space="preserve">
+    <value>Upload Document</value>
+  </data>
+  <data name="WhileOverseas" xml:space="preserve">
+    <value>While On Leave (Optional)</value>
+  </data>
+  <data name="WorkingDays" xml:space="preserve">
+    <value>Working Days</value>
+  </data>
+  <data name="Year" xml:space="preserve">
+    <value>Year</value>
+  </data>
+  <data name="YearsServices" xml:space="preserve">
+    <value>Year(s) of service</value>
+  </data>
+  <data name="Years_Services" xml:space="preserve">
+    <value>Year(s) of services more than</value>
+  </data>
+  <data name="Delegation" xml:space="preserve">
+    <value>Delegation</value>
+  </data>
+  <data name="DelegateApprovalTo" xml:space="preserve">
+    <value>Delegate Approval To</value>
+  </data>
+  <data name="ListOfEmployees" xml:space="preserve">
+    <value>List of employees</value>
+  </data>
+  <data name="AllowedNoticePeriod" xml:space="preserve">
+    <value>Allow for Resignation notice period</value>
+  </data>
+  <data name="DocumentRequired" xml:space="preserve">
+    <value>Document required? </value>
+  </data>
+  <data name="String1" xml:space="preserve">
+    <value />
+  </data>
+  <data name="PrimaryContactNo" xml:space="preserve">
+    <value>Primary Contact No</value>
+  </data>
+  <data name="SecondaryContactNo" xml:space="preserve">
+    <value>Secondary Contact No</value>
+  </data>
+  <data name="CustomizedLeaveType" xml:space="preserve">
+    <value>Customized Leave Type</value>
+  </data>
+  <data name="DefaultLeaveType" xml:space="preserve">
+    <value>Default Leave Type</value>
+  </data>
+  <data name="Citizenship" xml:space="preserve">
+    <value>Citizenship</value>
+  </data>
+  <data name="Continuously" xml:space="preserve">
+    <value>Continuously</value>
+  </data>
+  <data name="EligibleFor" xml:space="preserve">
+    <value>Eligible for</value>
+  </data>
+  <data name="Flexibly" xml:space="preserve">
+    <value>Flexibly</value>
+  </data>
+  <data name="FormatOfTakingLeave" xml:space="preserve">
+    <value>Format Of Taking Leave</value>
+  </data>
+  <data name="ValidPeriod" xml:space="preserve">
+    <value>If allow taking leave flexibly, specify the valid period</value>
+  </data>
+  <data name="Customized" xml:space="preserve">
+    <value>Customized</value>
+  </data>
+  <data name="LeaveTypeDefault" xml:space="preserve">
+    <value>Leave Type Default</value>
+  </data>
+  <data name="LeaveTypeDefaultInfo" xml:space="preserve">
+    <value>Leave Type Default Information</value>
+  </data>
+  <data name="LeaveTypeDefaultChild" xml:space="preserve">
+    <value>Leave Type Default Child</value>
+  </data>
+  <data name="LeaveTypeDefaultNormal" xml:space="preserve">
+    <value>Leave Type Default Normal</value>
+  </data>
+  <data name="Adjustment" xml:space="preserve">
+    <value>Adjustment</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="NoOfDays" xml:space="preserve">
+    <value>No. of Days</value>
+  </data>
+  <data name="MaternityValidityPeriod" xml:space="preserve">
+    <value>Maternity validity  period after 1st application date</value>
+  </data>
+  <data name="Cancelled" xml:space="preserve">
+    <value>Cancelled</value>
+  </data>
+  <data name="Weeks" xml:space="preserve">
+    <value>Weeks</value>
+  </data>
+  <data name="WeeksTaken" xml:space="preserve">
+    <value>Weeks Taken</value>
+  </data>
+  <data name="RelatedTo" xml:space="preserve">
+    <value>Related to</value>
+  </data>
+  <data name="Import_Leave" xml:space="preserve">
+    <value>Import Leave</value>
+  </data>
+</root>

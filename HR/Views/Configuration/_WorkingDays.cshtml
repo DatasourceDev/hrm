@@ -1,0 +1,581 @@
+﻿@model  HR.Models.ConfigulationViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+
+<script type="text/javascript">
+   $(function () {
+      CL_OnChange('@(Model.CL_Sun.HasValue ? Model.CL_Sun.Value : true)'.toLowerCase(), 'Sun', true);
+      CL_OnChange('@(Model.CL_Mon.HasValue ? Model.CL_Mon.Value : true)'.toLowerCase(), 'Mon', true);
+      CL_OnChange('@(Model.CL_Tue.HasValue ? Model.CL_Tue.Value : true)'.toLowerCase(), 'Tue', true);
+      CL_OnChange('@(Model.CL_Wed.HasValue ? Model.CL_Wed.Value : true)'.toLowerCase(), 'Wed', true);
+      CL_OnChange('@(Model.CL_Thu.HasValue ? Model.CL_Thu.Value : true)'.toLowerCase(), 'Thu', true);
+      CL_OnChange('@(Model.CL_Fri.HasValue ? Model.CL_Fri.Value : true)'.toLowerCase(), 'Fri', true);
+      CL_OnChange('@(Model.CL_Sat.HasValue ? Model.CL_Sat.Value : true)'.toLowerCase(), 'Sat', true);
+
+      CL_Lunch_OnChange('@(Model.CL_Lunch.HasValue ? Model.CL_Lunch.Value : true)'.toLowerCase(), false);
+   });
+
+   function Working_Days_Onchange(opt, days) {
+      if (opt.checked) {
+         @*$('#CL_MonO').get(0).checked = true;
+            $('#CL_TueO').get(0).checked = true;
+            $('#CL_MonO').get(0).checked = true;
+            $('#CL_WedO').get(0).checked = true;
+            $('#CL_ThuO').get(0).checked = true;
+            $('#CL_FriO').get(0).checked = true;
+
+            CL_OnChange('@false'.toLowerCase(), 'Mon');
+            CL_OnChange('@false'.toLowerCase(), 'Tue');
+            CL_OnChange('@false'.toLowerCase(), 'Wed');
+            CL_OnChange('@false'.toLowerCase(), 'Thu');
+            CL_OnChange('@false'.toLowerCase(), 'Fri');
+            if (days == 5.5 | days == 6) {
+                $('#CL_SatO').get(0).checked = true;
+                CL_OnChange('@false'.toLowerCase(), 'Sat');
+            }*@
+      }
+
+   }
+   function CL_Open(day) {
+      $('#CL_' + day + 'O').get(0).checked = true;
+      $('#ST_' + day + '_Time').prop('disabled', false);
+      $('#ST_' + day + '_Time').val('09:00');
+      $('#ET_' + day + '_Time').prop('disabled', false);
+      $('#ET_' + day + '_Time').val('18:00');
+   }
+
+   function CL_OnChange(close, day, init) {
+      if (close == "true" | close == "True" | close == true) {
+         $('#ST_' + day + '_Time').prop('disabled', true);
+         $('#ST_' + day + '_Time').val('');
+         $('#ET_' + day + '_Time').prop('disabled', true);
+         $('#ET_' + day + '_Time').val('');
+      }
+      else {
+         if (init == null || init == false) {
+            var days5 = $('#Days5').get(0);
+            var days5_5 = $('#Days5_5').get(0);
+            var days6 = $('#Days6').get(0);
+            var days7 = $('#Days7').get(0);
+            //open
+            CL_Open(day);
+            if (day == 'Sun') {
+               CL_Open('Mon');
+               CL_Open('Tue');
+               CL_Open('Wed');
+               CL_Open('Thu');
+               if (days5_5.checked || days6.checked || days7.checked) {
+                  CL_Open('Fri');
+                  if (days7.checked)
+                     CL_Open('Sat');
+               }
+            }
+            else if (day == 'Mon') {
+               CL_Open('Tue');
+               CL_Open('Wed');
+               CL_Open('Thu');
+               CL_Open('Fri');
+               if (days5_5.checked || days6.checked || days7.checked) {
+                  CL_Open('Sat');
+                  if (days7.checked)
+                     CL_Open('Sun');
+               }
+            }
+            else if (day == 'Tue') {
+               CL_Open('Wed');
+               CL_Open('Thu');
+               CL_Open('Fri');
+               CL_Open('Sat');
+               if (days5_5.checked || days6.checked || days7.checked) {
+                  CL_Open('Sun');
+                  if (days7.checked)
+                     CL_Open('Mon');
+               }
+            }
+            else if (day == 'Wed') {
+               CL_Open('Thu');
+               CL_Open('Fri');
+               CL_Open('Sat');
+               CL_Open('Sun');
+               if (days5_5.checked || days6.checked || days7.checked) {
+                  CL_Open('Mon');
+                  if (days7.checked)
+                     CL_Open('Tue');
+               }
+            }
+            else if (day == 'Thu') {
+               CL_Open('Fri');
+               CL_Open('Sat');
+               CL_Open('Sun');
+               CL_Open('Mon');
+               if (days5_5.checked || days6.checked || days7.checked) {
+                  CL_Open('Tue');
+                  if (days7.checked)
+                     CL_Open('Wed');
+               }
+            }
+            else if (day == 'Fri') {
+               CL_Open('Sat');
+               CL_Open('Sun');
+               CL_Open('Mon');
+               CL_Open('Tue');
+               if (days5_5.checked || days6.checked || days7.checked) {
+                  CL_Open('Wed');
+                  if (days7.checked)
+                     CL_Open('Thu');
+               }
+            }
+            else if (day == 'Sat') {
+               CL_Open('Sun');
+               CL_Open('Mon');
+               CL_Open('Tue');
+               CL_Open('Wed');
+               if (days5_5.checked || days6.checked || days7.checked) {
+                  CL_Open('Thu');
+                  if (days7.checked)
+                     CL_Open('Fri');
+               }
+            }
+         }
+      }
+   }
+
+   function CL_Lunch_OnChange(close, setdefault) {
+      if (close == "true" | close == "True" | close == true) {
+         $('#ST_Lunch_Time').prop('disabled', true);
+         $('#ST_Lunch_Time').val('');
+         $('#ET_Lunch_Time').prop('disabled', true);
+         $('#ET_Lunch_Time').val('');
+      } else {
+         if (setdefault == true) {
+            $('#CL_LunchO').get(0).checked = true;
+            $('#ST_Lunch_Time').prop('disabled', false);
+            $('#ST_Lunch_Time').val('12:00');
+            $('#ET_Lunch_Time').prop('disabled', false);
+            $('#ET_Lunch_Time').val('13:00');
+         }
+      }
+   }
+
+</script>
+<div id="working-tab" class="tab-pane fade in ">
+   @using (Html.BeginForm("Configuration", "Configuration", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+   {
+      @Html.AntiForgeryToken()
+      @Html.HiddenFor(m => m.Working_Days_ID)
+      <div class="row">
+         <div class="col-md-12">
+            <section class="tile transparent">
+               <div class="tile-header transparent">
+                  <h1><strong>@Resource.Working_Days</strong></h1>
+                  <div class="controls">
+                     <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body">
+                  <div class="row">
+                     <div class="col-md-12">
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <label class="control-label">@Resource.Working_Days</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-3">
+                              <div class="radio radio-transparent">
+                                 <input type="radio" name="Days" id="Days5" value="5" @(Model.Days.HasValue && Model.Days.Value == 5 ? "checked" : "") onchange="Working_Days_Onchange(this,5)">
+                                 <label for="Days5">@Resource.Working_Day5</label>
+                              </div>
+                           </div>
+                           <div class="col-sm-3">
+                              <div class="radio radio-transparent">
+                                 <input type="radio" name="Days" id="Days5_5" value="5.5" @(Model.Days.HasValue && Model.Days.Value == 5.5M ? "checked" : "") onchange="Working_Days_Onchange(this, 5.5)">
+                                 <label for="Days5_5">@Resource.Working_Day5_5</label>
+                              </div>
+                           </div>
+                           <div class="col-sm-3">
+                              <div class="radio radio-transparent">
+                                 <input type="radio" name="Days" id="Days6" value="6" @(Model.Days.HasValue && Model.Days.Value == 6 ? "checked" : "") onchange="Working_Days_Onchange(this, 6)">
+                                 <label for="Days6">@Resource.Working_Day6</label>
+                              </div>
+                           </div>
+                           <div class="col-sm-3">
+                              <div class="radio radio-transparent">
+                                 <input type="radio" name="Days" id="Days7" value="7" @(Model.Days.HasValue && Model.Days.Value == 7 ? "checked" : "") onchange="Working_Days_Onchange(this, 7)">
+                                 <label for="Days7">@Resource.Working_Day7</label>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </section>
+         </div>
+      </div>
+      <div class="row">
+         <div class="col-md-12">
+            <section class="tile transparent">
+               <div class="tile-header transparent">
+                  <h1><strong>@Resource.Working_Hours</strong></h1>
+                  <div class="controls">
+                     <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body">
+                  <div class="validation-error">
+                     @Html.ValidationMessageFor(m => m.Days)
+                  </div>
+                  <div class="row">
+                     <div class="col-md-12">
+                        <div class="form-group">
+                           <div class="col-sm-3">
+                              <label class="control-label">@Resource.Sunday</label>
+                           </div>
+                           <div class="col-sm-2">
+                              <div class="radio radio-transparent">
+                                 <input type="radio" name="CL_Sun" id="CL_SunO" value="false" @(Model.CL_Sun.HasValue && !Model.CL_Sun.Value ? "checked" : "") onchange="CL_OnChange(false,'Sun')">
+                                 <label for="CL_SunO">@Resource.Open</label>
+                              </div>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.CL_Sun)
+                              </div>
+                           </div>
+                           <div class="col-sm-2">
+                              <div class="radio radio-transparent">
+                                 <input type="radio" name="CL_Sun" id="CL_SunC" value="true" @(Model.CL_Sun.HasValue && !Model.CL_Sun.Value ? "" : "checked") onchange="CL_OnChange(true,'Sun')">
+                                 <label for="CL_SunC">@Resource.Close</label>
+                              </div>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.CL_Sun)
+                              </div>
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="text" class="form-control input-timepicker" id="ST_Sun_Time" name="ST_Sun_Time" value="@Model.ST_Sun_Time">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.ST_Sun_Time)
+                              </div>
+                           </div>
+                           <div class="col-sm-1">
+                              <label class="control-label">@Resource.To</label>
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="text" class="form-control input-timepicker" id="ET_Sun_Time" name="ET_Sun_Time" value="@Model.ET_Sun_Time">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.ET_Sun_Time)
+                              </div>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-3">
+                              <label class="control-label">@Resource.Monday</label>
+                           </div>
+                           <div class="col-sm-2">
+                              <div class="radio radio-transparent">
+                                 <input type="radio" name="CL_Mon" id="CL_MonO" value="false" @(Model.CL_Mon.HasValue && !Model.CL_Mon.Value ? "checked" : "") checked onchange="CL_OnChange(false, 'Mon')">
+                                 <label for="CL_MonO">@Resource.Open</label>
+                              </div>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.CL_Mon)
+                              </div>
+                           </div>
+                           <div class="col-sm-2">
+                              <div class="radio radio-transparent">
+                                 <input type="radio" name="CL_Mon" id="CL_MonC" value="true" @(Model.CL_Mon.HasValue && !Model.CL_Mon.Value ? "" : "checked") onchange="CL_OnChange(true, 'Mon')">
+                                 <label for="CL_MonC">@Resource.Close</label>
+                              </div>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.CL_Mon)
+                              </div>
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="text" class="form-control input-timepicker" id="ST_Mon_Time" name="ST_Mon_Time" value="@Model.ST_Mon_Time">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.ST_Mon_Time)
+                              </div>
+                           </div>
+                           <div class="col-sm-1">
+                              <label class="control-label">@Resource.To</label>
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="text" class="form-control input-timepicker" id="ET_Mon_Time" name="ET_Mon_Time" value="@Model.ET_Mon_Time">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.ET_Mon_Time)
+                              </div>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-3">
+                              <label class="control-label">@Resource.Tuesday</label>
+                           </div>
+                           <div class="col-sm-2">
+                              <div class="radio radio-transparent">
+                                 <input type="radio" name="CL_Tue" id="CL_TueO" value="false" @(Model.CL_Tue.HasValue && !Model.CL_Tue.Value ? "checked" : "") checked onchange="CL_OnChange(false, 'Tue')">
+                                 <label for="CL_TueO">@Resource.Open</label>
+                              </div>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.CL_Tue)
+                              </div>
+                           </div>
+                           <div class="col-sm-2">
+                              <div class="radio radio-transparent">
+                                 <input type="radio" name="CL_Tue" id="CL_TueC" value="true" @(Model.CL_Tue.HasValue && !Model.CL_Tue.Value ? "" : "checked") onchange="CL_OnChange(true, 'Tue')">
+                                 <label for="CL_TueC">@Resource.Close</label>
+                              </div>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.CL_Tue)
+                              </div>
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="text" class="form-control input-timepicker" id="ST_Tue_Time" name="ST_Tue_Time" value="@Model.ST_Tue_Time">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.ST_Tue_Time)
+                              </div>
+                           </div>
+                           <div class="col-sm-1">
+                              <label class="control-label">@Resource.To</label>
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="text" class="form-control input-timepicker" id="ET_Tue_Time" name="ET_Tue_Time" value="@Model.ET_Tue_Time">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.ET_Tue_Time)
+                              </div>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-3">
+                              <label class="control-label">@Resource.Wednesday</label>
+                           </div>
+                           <div class="col-sm-2">
+                              <div class="radio radio-transparent">
+                                 <input type="radio" name="CL_Wed" id="CL_WedO" value="false" @(Model.CL_Wed.HasValue && !Model.CL_Wed.Value ? "checked" : "") onchange="CL_OnChange(false, 'Wed')">
+                                 <label for="CL_WedO">@Resource.Open</label>
+                              </div>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.CL_Wed)
+                              </div>
+                           </div>
+                           <div class="col-sm-2">
+                              <div class="radio radio-transparent">
+                                 <input type="radio" name="CL_Wed" id="CL_WedC" value="true" @(Model.CL_Wed.HasValue && !Model.CL_Wed.Value ? "" : "checked") onchange="CL_OnChange(true, 'Wed')">
+                                 <label for="CL_WedC">@Resource.Close</label>
+                              </div>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.CL_Wed)
+                              </div>
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="text" class="form-control input-timepicker" id="ST_Wed_Time" name="ST_Wed_Time" value="@Model.ST_Wed_Time">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.ST_Wed_Time)
+                              </div>
+                           </div>
+                           <div class="col-sm-1">
+                              <label class="control-label">@Resource.To</label>
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="text" class="form-control input-timepicker" id="ET_Wed_Time" name="ET_Wed_Time" value="@Model.ET_Wed_Time">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.ET_Wed_Time)
+                              </div>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-3">
+                              <label class="control-label">@Resource.Thursday</label>
+                           </div>
+                           <div class="col-sm-2">
+                              <div class="radio radio-transparent">
+                                 <input type="radio" name="CL_Thu" id="CL_ThuO" value="false" @(Model.CL_Thu.HasValue && !Model.CL_Thu.Value ? "checked" : "") onchange="CL_OnChange(false, 'Thu')">
+                                 <label for="CL_ThuO">@Resource.Open</label>
+                              </div>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.CL_Thu)
+                              </div>
+                           </div>
+                           <div class="col-sm-2">
+                              <div class="radio radio-transparent">
+                                 <input type="radio" name="CL_Thu" id="CL_ThuC" value="true" @(Model.CL_Thu.HasValue && !Model.CL_Thu.Value ? "" : "checked") onchange="CL_OnChange(true, 'Thu')">
+                                 <label for="CL_ThuC">@Resource.Close</label>
+                              </div>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.CL_Thu)
+                              </div>
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="text" class="form-control input-timepicker" id="ST_Thu_Time" name="ST_Thu_Time" value="@Model.ST_Thu_Time">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.ST_Thu_Time)
+                              </div>
+                           </div>
+                           <div class="col-sm-1">
+                              <label class="control-label">@Resource.To</label>
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="text" class="form-control input-timepicker" id="ET_Thu_Time" name="ET_Thu_Time" value="@Model.ET_Thu_Time">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.ET_Thu_Time)
+                              </div>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-3">
+                              <label class="control-label">@Resource.Friday</label>
+                           </div>
+                           <div class="col-sm-2">
+                              <div class="radio radio-transparent">
+                                 <input type="radio" name="CL_Fri" id="CL_FriO" value="false" @(Model.CL_Fri.HasValue && !Model.CL_Fri.Value ? "checked" : "") onchange="CL_OnChange(false, 'Fri')">
+                                 <label for="CL_FriO">@Resource.Open</label>
+                              </div>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.CL_Fri)
+                              </div>
+                           </div>
+                           <div class="col-sm-2">
+                              <div class="radio radio-transparent">
+                                 <input type="radio" name="CL_Fri" id="CL_FriC" value="true" @(Model.CL_Fri.HasValue && !Model.CL_Fri.Value ? "" : "checked") onchange="CL_OnChange(true, 'Fri')">
+                                 <label for="CL_FriC">@Resource.Close</label>
+                              </div>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.CL_Fri)
+                              </div>
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="text" class="form-control input-timepicker" id="ST_Fri_Time" name="ST_Fri_Time" value="@Model.ST_Fri_Time">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.ST_Fri_Time)
+                              </div>
+                           </div>
+                           <div class="col-sm-1">
+                              <label class="control-label">@Resource.To</label>
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="text" class="form-control input-timepicker" id="ET_Fri_Time" name="ET_Fri_Time" value="@Model.ET_Fri_Time">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.ET_Fri_Time)
+                              </div>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-3">
+                              <label class="control-label">@Resource.Saturday</label>
+                           </div>
+                           <div class="col-sm-2">
+                              <div class="radio radio-transparent">
+                                 <input type="radio" name="CL_Sat" id="CL_SatO" value="false" @(Model.CL_Sat.HasValue && !Model.CL_Sat.Value ? "checked" : "") onchange="CL_OnChange(false, 'Sat')">
+                                 <label for="CL_SatO">@Resource.Open</label>
+                              </div>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.CL_Sat)
+                              </div>
+                           </div>
+                           <div class="col-sm-2">
+                              <div class="radio radio-transparent">
+                                 <input type="radio" name="CL_Sat" id="CL_SatC" value="true" @(Model.CL_Sat.HasValue && !Model.CL_Sat.Value ? "" : "checked") onchange="CL_OnChange(true, 'Sat')">
+                                 <label for="CL_SatC">@Resource.Close</label>
+                              </div>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.CL_Sat)
+                              </div>
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="text" class="form-control input-timepicker" id="ST_Sat_Time" name="ST_Sat_Time" value="@Model.ST_Sat_Time">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.ST_Sat_Time)
+                              </div>
+                           </div>
+                           <div class="col-sm-1">
+                              <label class="control-label">@Resource.To</label>
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="text" class="form-control input-timepicker" id="ET_Sat_Time" name="ET_Sat_Time" value="@Model.ET_Sat_Time">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.ET_Sat_Time)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </section>
+         </div>
+      </div>
+      <div class="row">
+         <div class="col-md-12">
+            <section class="tile transparent">
+               <div class="tile-header transparent">
+                  <h1><strong>@Resource.Lunch_Time</strong></h1>
+                  <div class="controls">
+                     <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body">
+                  <div class="row">
+                     <div class="col-md-12">
+                        <div class="form-group">
+                           <div class="col-sm-3">
+                              <label class="control-label">@Resource.Lunch</label>
+                           </div>
+                           <div class="col-sm-2">
+                              <div class="radio radio-transparent">
+                                 <input type="radio" name="CL_Lunch" id="CL_LunchO" value="false" @(Model.CL_Lunch.HasValue && !Model.CL_Lunch.Value ? "checked" : "") onchange="CL_Lunch_OnChange(false,true)">
+                                 <label for="CL_LunchO">@Resource.Open</label>
+                              </div>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.CL_Lunch)
+                              </div>
+                           </div>
+                           <div class="col-sm-2">
+                              <div class="radio radio-transparent">
+                                 <input type="radio" name="CL_Lunch" id="CL_LunchC" value="true" @(Model.CL_Lunch.HasValue && !Model.CL_Lunch.Value ? "" : "checked") onchange="CL_Lunch_OnChange(true, true)">
+                                 <label for="CL_LunchC">@Resource.Close</label>
+                              </div>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.CL_Lunch)
+                              </div>
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="text" class="form-control input-timepicker" id="ST_Lunch_Time" name="ST_Lunch_Time" value="@Model.ST_Lunch_Time">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.ST_Lunch_Time)
+                              </div>
+                           </div>
+                           <div class="col-sm-1">
+                              <label class="control-label">@Resource.To</label>
+                           </div>
+                           <div class="col-sm-2">
+                              <input type="text" class="form-control input-timepicker" id="ET_Lunch_Time" name="ET_Lunch_Time" value="@Model.ET_Lunch_Time">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.ET_Lunch_Time)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </section>
+         </div>
+      </div>
+      <div class="row">
+         <div class="col-md-12">
+            <section class="tile color transparent-white" style="padding-left:15px;">
+               <div class="tile-body">
+                  <div class="row">
+                     <div class="col-md-12">
+                        @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U) && Model.rights.Contains(UserSession.RIGHT_C))
+                        {
+                           <button type="submit" class="btn btn-primary" name="tabAction" value="working" onclick="return Confirm_Alert('@Model.Employee_No_Pattern_ID');">@Resource.Save</button>
+                        }
+                     </div>
+                  </div>
+               </div>
+            </section>
+         </div>
+      </div>
+   }
+</div>
+
+
+

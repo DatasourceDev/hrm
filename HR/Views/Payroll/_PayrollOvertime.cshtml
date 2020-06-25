@@ -1,0 +1,121 @@
+﻿@model  HR.Models.PayrollViewModels
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using HR.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+    var cbService = new ComboService();
+    var userlogin = UserSession.getUser(Request.RequestContext.HttpContext);
+}
+<script type="text/javascript">
+    function SumOvertime(donotsum) {
+        var total = 0;
+        var rowcount = $('#overtimeDataTable > tbody >tr').length;
+        for (var i = 0; i < rowcount; i++) {
+            var amount = parseFloat($('input[name="Overtime_Rows[' + i + '].Amount"]').val());
+            if (!isNaN(amount)) {
+                total = total + amount;
+            }
+        }
+        var totalstr = formatCurrency(total);
+
+        $('#Overtime_Total_Amount').val(totalstr);
+        $('#Overtime').val(totalstr);
+        SumAll(donotsum);
+    }
+
+    function addNewOvertime() {
+        var rowcount = $('#overtimeDataTable > tbody >tr').length;
+        var data = { pIndex: rowcount, pAllowType: '@PayrollAllowanceType.Overtime' };
+        ShowMask();
+        $.ajax({
+            url: '@Url.Action("PayrollNewPRD", "Payroll")',
+            //Passes the content of an input up
+            data: data,
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                var str = '<tr class="status-info" id="overtimeRow-' + rowcount + '">';
+                str = str + data + '</tr>';
+                $('#overtimeDataTable > tbody').append(str);
+                CloseMask();
+            }
+        });
+    }
+
+    function DeleteOvertime(rowid, index) {
+        if (confirm('@Resource.Confirm_Delete_Msg')) {
+            $('#Overtime_Rows_' + index + '__Row_Type').val('@RowType.DELETE');
+            $('#' + rowid).hide();
+
+            $('input[name="Overtime_Rows[' + index + '].Amount"]').val(0);
+            SumOvertime();
+        }
+    }
+</script>
+<div id="overtime-tab" class="tab-pane fade in">
+    <div class="tile-header">
+        <h1><strong>@Resource.Overtime</strong></h1>
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <a id="btnAddOT" class="btn btn-greensea  btn-sm add-row" onclick="addNewOvertime()">@Resource.Add_An_Item</a>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-custom" id="overtimeDataTable">
+            <thead>
+                <tr>
+                    <th id="thOTPayment">@Resource.Overtime_Payment_Rate</th>
+                    <th id="thOTHours">@Resource.Number_Of_Hours_Worked</th>
+                    <th id="thOTAmt">@Resource.Amount_Payable_SymbolDollar</th>
+                    <th width="110px">@Resource.Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Overtime_Rows != null)
+                {
+                    for (var i = 0; i < Model.Overtime_Rows.Length; i++)
+                    {
+                        var row = Model.Overtime_Rows[i];
+                        <tr id="overtimeRow-@i">
+                            @{Html.RenderPartial("_PayrollOvertimeRow", new PayrollDetailViewModel()
+                                  {
+                                      Amount = row.Amount,
+                                      Description = row.Description,
+                                      Index = i,
+                                      Payroll_Detail_ID = row.Payroll_Detail_ID,
+                                      PRC_ID = row.PRC_ID,
+                                      PRM_ID = row.PRM_ID,
+                                      PRT_ID = row.PRT_ID,
+                                      Row_Type = row.Row_Type,
+                                      Hours_Worked = row.Hours_Worked,
+                                      prcOvertimeList = Model.prcOvertimeList,
+                                  });}
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="row " style="padding-top:30px;">
+        <div class="col-md-8">
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <div class="col-md-12">
+                    <label for="Overtime_Total_Amount" class="control-label">@Resource.Total_Amount</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-8">
+                    <input type="text" class="form-control text-right" id="Overtime_Total_Amount" value="0.00" readonly>
+                </div>
+                <div class="col-md-2">
+                    <label class="control-label">@Model.Company_Currency_Code</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

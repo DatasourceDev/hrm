@@ -1,0 +1,47 @@
+﻿@model  HR.Models.ExchangeCurrencyViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+    var i = Model.Index;
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("#ExchangeCurrency_Rows_" + @i + "__Currency_ID").chosen({ disable_search_threshold: 10 });
+        $("#ExchangeCurrency_Rows_" + @i + "__Company_Currency_Name").trigger("chosen:updated");
+    });
+</script>
+
+<td>
+    @Html.Hidden("ExchangeCurrency_Rows[" + i + "].Row_Type", RowType.ADD)
+    <input type="hidden" name="ExchangeCurrency_Rows[@i].Exchange_Period" id="ExchangeCurrency_Rows_@(i)__Exchange_Period" value="@Model.Exchange_Period">
+    <select class="chosen-select chosen-transparent form-control" id="ExchangeCurrency_Rows_@(i)__Currency_ID" name="ExchangeCurrency_Rows[@i].Currency_ID" onchange="Currency_OnChange(@i)">
+        @foreach (var prow in Model.Currency_List)
+        {
+            if (Model.Currency_ID == NumUtil.ParseInteger(prow.Value))
+            {
+                <option value="@prow.Value" selected>@prow.Text</option>
+            }
+            else
+            {
+                <option value="@(prow.Value != null ? prow.Value : "0")">@prow.Text</option>
+            }
+        }
+    </select>
+</td>
+<td>
+    <input type="text" class="form-control" name="ExchangeCurrency_Rows[@i].Company_Currency_Name" id="ExchangeCurrency_Rows_@(i)__Company_Currency_Name" value="@Model.Company_Currency_Name" readonly>
+    <div class="validation-error">
+        @Html.ValidationMessage("ExchangeCurrency_Rows[" + i + "].Company_Currency_Name")
+    </div>
+</td>
+<td class="actions text-center" style="cursor:pointer">
+    <a data-toggle="modal" onclick="return DeleteCurrencyInfo_Onclick('brow-@i', @i);">
+        <i class="fa fa-times-circle-o fa-2x"></i>
+    </a>
+</td>
+
+

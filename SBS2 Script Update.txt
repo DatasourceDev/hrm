@@ -1,0 +1,2876 @@
+/*Added by Tiun 14/08/2015 */
+GO
+ALTER TABLE [dbo].[Product_Category]
+    ADD [Category_Level]     INT       NULL,
+        [Category_Parent_ID] INT          NULL;
+
+
+GO
+ALTER TABLE [dbo].[Product]
+    ADD [Product_Category_L1]    INT             NULL,
+        [Product_Category_L2]    INT             NULL,
+        [Product_Category_L3]    INT             NULL,
+        [Brand]                  VARCHAR (500)   NULL,
+        [Vendor_ID]              INT             NULL,
+        [Reorder_Qty]            DECIMAL (18, 2) NULL,
+        [Sellable]               BIT             NULL,
+        [Extra_Info_Description] VARCHAR (500)   NULL;
+
+
+ALTER TABLE [dbo].[Product] WITH NOCHECK
+    ADD CONSTRAINT [fk_Product_Product_Category_L1] FOREIGN KEY ([Product_Category_L1]) REFERENCES [dbo].[Product_Category] ([Product_Category_ID]);
+
+
+ALTER TABLE [dbo].[Product] WITH NOCHECK
+    ADD CONSTRAINT [fk_Product_Product_Category_L2] FOREIGN KEY ([Product_Category_L2]) REFERENCES [dbo].[Product_Category] ([Product_Category_ID]);
+
+
+ALTER TABLE [dbo].[Product] WITH NOCHECK
+    ADD CONSTRAINT [fk_Product_Product_Category_L3] FOREIGN KEY ([Product_Category_L3]) REFERENCES [dbo].[Product_Category] ([Product_Category_ID]);
+
+
+ALTER TABLE [dbo].[Product] WITH NOCHECK
+    ADD CONSTRAINT [fk_Product_Vendor] FOREIGN KEY ([Vendor_ID]) REFERENCES [dbo].[Vendor] ([Vendor_ID]);
+
+
+ALTER TABLE [dbo].[Product] WITH CHECK CHECK CONSTRAINT [fk_Product_Product_Category_L1];
+
+ALTER TABLE [dbo].[Product] WITH CHECK CHECK CONSTRAINT [fk_Product_Product_Category_L2];
+
+ALTER TABLE [dbo].[Product] WITH CHECK CHECK CONSTRAINT [fk_Product_Product_Category_L3];
+
+ALTER TABLE [dbo].[Product] WITH CHECK CHECK CONSTRAINT [fk_Product_Vendor];
+
+
+GO
+
+
+CREATE TABLE [dbo].[Tag] (
+    [Tag_ID]   INT           IDENTITY (1, 1) NOT NULL,
+    [Tag_Name] VARCHAR (300) NULL,
+    CONSTRAINT [pk_Tag] PRIMARY KEY CLUSTERED ([Tag_ID] ASC)
+);
+
+
+CREATE TABLE [dbo].[Product_Tag] (
+    [Product_Tag_ID] INT IDENTITY (1, 1) NOT NULL,
+    [Tag_ID]         INT NULL,
+    [Product_ID]     INT NULL,
+    CONSTRAINT [pk_Product_Tag] PRIMARY KEY CLUSTERED ([Product_Tag_ID] ASC),
+    CONSTRAINT [fk_Product_Tag_Tag] FOREIGN KEY ([Tag_ID]) REFERENCES [dbo].[Tag] ([Tag_ID]),
+    CONSTRAINT [fk_Product_Tag_Product] FOREIGN KEY ([Product_ID]) REFERENCES [dbo].[Product] ([Product_ID])
+);
+
+
+GO
+ALTER TABLE [dbo].[Bom]
+    ADD [Description] VARCHAR (500) NULL;
+
+ 
+GO
+ALTER TABLE [dbo].[Kit]
+    ADD [Description] VARCHAR (500) NULL;
+
+
+
+
+CREATE TABLE [dbo].[Product_Attribute] (
+    [Attribute_ID]   INT           IDENTITY (1, 1) NOT NULL,
+    [Attribute_Name] VARCHAR (150) NULL,
+    [Product_ID]     INT           NULL,
+    CONSTRAINT [pk_Product_Attribute] PRIMARY KEY CLUSTERED ([Attribute_ID] ASC),
+    CONSTRAINT [fk_Product_Attribute_Product] FOREIGN KEY ([Product_ID]) REFERENCES [dbo].[Product] ([Product_ID])
+);
+
+CREATE TABLE [dbo].[Product_Attribute_Value] (
+    [Attribute_Value_ID] INT           IDENTITY (1, 1) NOT NULL,
+    [Attribute_Value]    VARCHAR (150) NULL,
+    [Attribute_ID]       INT           NULL,
+    CONSTRAINT [pk_Product_Attribute_Value] PRIMARY KEY CLUSTERED ([Attribute_Value_ID] ASC),
+    CONSTRAINT [fk_Product_Attribute_Value_Product_Attribute] FOREIGN KEY ([Attribute_ID]) REFERENCES [dbo].[Product_Attribute] ([Attribute_ID])
+);
+
+CREATE TABLE [dbo].[Product_Price] (
+    [Product_Price_ID] INT           IDENTITY (1, 1) NOT NULL,
+    [Price_Name]       VARCHAR (150) NULL,
+    [Product_ID]       INT           NULL,
+    CONSTRAINT [pk_Product_Price] PRIMARY KEY CLUSTERED ([Product_Price_ID] ASC),
+    CONSTRAINT [fk_Product_Price_Product] FOREIGN KEY ([Product_ID]) REFERENCES [dbo].[Product] ([Product_ID])
+);
+
+CREATE TABLE [dbo].[Product_Attribute_Map] (
+    [Map_ID]        INT             IDENTITY (1, 1) NOT NULL,
+    [Attr1]         INT             NULL,
+    [Attr2]         INT             NULL,
+    [Attr3]         INT             NULL,
+    [Attr4]         INT             NULL,
+    [Attr5]         INT             NULL,
+    [Costing_Price] DECIMAL (18, 2) NULL,
+    [Selling_Price] DECIMAL (18, 2) NULL,
+    [Record_Status] BIT             NULL,
+    CONSTRAINT [pk_Product_Attribute_Map] PRIMARY KEY CLUSTERED ([Map_ID] ASC),
+    CONSTRAINT [fk_Product_Attribute_Map_Product_Attribute_Value_Attr1] FOREIGN KEY ([Attr1]) REFERENCES [dbo].[Product_Attribute_Value] ([Attribute_Value_ID]),
+    CONSTRAINT [fk_Product_Attribute_Map_Product_Attribute_Value_Attr2] FOREIGN KEY ([Attr2]) REFERENCES [dbo].[Product_Attribute_Value] ([Attribute_Value_ID]),
+    CONSTRAINT [fk_Product_Attribute_Map_Product_Attribute_Value_Attr3] FOREIGN KEY ([Attr3]) REFERENCES [dbo].[Product_Attribute_Value] ([Attribute_Value_ID]),
+    CONSTRAINT [fk_Product_Attribute_Map_Product_Attribute_Value_Attr4] FOREIGN KEY ([Attr4]) REFERENCES [dbo].[Product_Attribute_Value] ([Attribute_Value_ID]),
+    CONSTRAINT [fk_Product_Attribute_Map_Product_Attribute_Value_Attr5] FOREIGN KEY ([Attr5]) REFERENCES [dbo].[Product_Attribute_Value] ([Attribute_Value_ID])
+);
+
+CREATE TABLE [dbo].[Product_Attribute_Map_Price] (
+    [Map_Price_ID]     INT             IDENTITY (1, 1) NOT NULL,
+    [Map_ID]           INT             NULL,
+    [Product_Price_ID] INT             NULL,
+    [Price]            DECIMAL (18, 2) NULL,
+    CONSTRAINT [pk_Product_Attribute_Map_Price] PRIMARY KEY CLUSTERED ([Map_Price_ID] ASC),
+    CONSTRAINT [fk_Product_Attribute_Map_Price_Product_Attribute_Map] FOREIGN KEY ([Map_ID]) REFERENCES [dbo].[Product_Attribute_Map] ([Map_ID]),
+    CONSTRAINT [fk_Product_Attribute_Map_Price_Product_Price] FOREIGN KEY ([Product_Price_ID]) REFERENCES [dbo].[Product_Price] ([Product_Price_ID])
+);
+
+/*Added by Jane 14/08/2015 */
+GO
+alter table Expenses_Config
+add Is_MileAge bit null
+
+alter table Expenses_Config
+add UOM_ID int null
+
+alter table Expenses_Config
+add Amount_Per_UOM decimal(18,2) null
+
+ALTER TABLE [dbo].[Expenses_Config] WITH NOCHECK
+ADD CONSTRAINT [fk_Expenses_Config_UOM] FOREIGN KEY ([UOM_ID]) REFERENCES [dbo].[Global_Lookup_Data] ([Lookup_Data_ID]);
+
+insert into Global_Lookup_Def (Name , Description, Create_By, Create_On) values ('UOM', 'Unit Of Measurement', 'admin', getdate());
+    
+alter table Expenses_Application_Document
+add Mileage decimal(18,2) null
+
+
+/*Added by Jane 24/08/2015 */ 
+alter table Expenses_Config
+drop constraint fk_Expenses_Config_Claimable_Type
+
+alter table Expenses_Config
+alter column Claimable_Type varchar(50) null
+ 
+
+create table Expenses_Category
+(
+Expenses_Category_ID int identity(1,1) not null,
+Category_Name varchar(150) null,
+Category_Description varchar(500) null,
+Record_Status varchar(50) null,
+Company_ID int null,
+Create_By varchar(150) null,
+Create_On datetime null,
+Update_By varchar(150) null,
+Update_On datetime null,
+constraint pk_Expenses_Category Primary KEY (Expenses_Category_ID),
+constraint fk_Expenses_Category_Company foreign key (Company_ID) references Company(Company_ID)
+)
+
+alter table Expenses_Config
+add Expenses_Category_ID int null
+
+
+ALTER TABLE [dbo].[Expenses_Config] WITH NOCHECK
+ADD CONSTRAINT [fk_Expenses_Config_Category] FOREIGN KEY ([Expenses_Category_ID]) REFERENCES [dbo].[Expenses_Category] ([Expenses_Category_ID]);
+
+/*Added by Jane 02/09/2015 */ 
+alter table Product
+alter column Record_Status varchar(50) null
+
+alter table Banking_Info
+add Account_Name varchar(300) null
+
+alter table Banking_Info
+add Selected bit null
+
+alter table Leave_Config
+add Allowed_Notice_Period bit null
+
+alter table Inventory_Location
+add Parent_Location_ID int null;
+
+ALTER TABLE [dbo].[Inventory_Location] WITH NOCHECK
+ADD CONSTRAINT [fk_Inventory_Location_Parent] FOREIGN KEY ([Parent_Location_ID]) REFERENCES [dbo].[Inventory_Location] ([Inventory_Location_ID]);
+
+alter table Bom
+add Description varchar(500) null;
+
+alter table Kit
+add Description varchar(500) null;
+
+alter table Unit_Of_Measurement
+add Unit_Code varchar(150) null;
+
+alter table Unit_Of_Measurement
+add Is_Stocking bit null;
+
+create table Product_Image
+(
+Product_Image_ID uniqueidentifier ROWGUIDCOL not null UNIQUE,
+Product_ID int null,
+Is_Main bit null,
+Image_Name varchar(300) null,
+Image VARBINARY(MAX) FILESTREAM null,
+constraint pk_Product_Image Primary KEY (Product_Image_ID) ,
+CONSTRAINT [fk_Product_Image_Product] FOREIGN KEY ([Product_ID]) REFERENCES [dbo].[Product] ([Product_ID])
+)
+
+create table Product_Image_Attribute
+(
+Product_Image_Attribute_ID int IDENTITY(1, 1) not null,
+Product_Image_ID uniqueidentifier null,
+Map_ID int null,
+constraint pk_Product_Image_Attribute Primary KEY (Product_Image_Attribute_ID) ,
+CONSTRAINT [fk_Product_Image_Attribute_Product_Image] FOREIGN KEY ([Product_Image_ID]) REFERENCES [dbo].[Product_Image] ([Product_Image_ID]),
+CONSTRAINT [fk_Product_Image_Attribute_Map] FOREIGN KEY ([Map_ID]) REFERENCES [dbo].[Product_Attribute_Map] ([Map_ID])
+)
+
+
+/*Added by Nay on 15-Sept-2015*/
+IF EXISTS(SELECT 1 FROM sysobjects WHERE id = OBJECT_ID('HR_FileExport_History') AND OBJECTPROPERTY(id,'IsTable') = 1)
+BEGIN
+ DROP TABLE HR_FileExport_History
+END
+GO
+CREATE TABLE HR_FileExport_History 
+(
+ Generated_ID   INT    NOT NULL IDENTITY(1,1),
+ Process_Year   INT     NULL, 
+ Process_Month   INT     NULL,   
+ File_Type    VARCHAR(10)   NULL,
+ Company_ID    INT     NULL, 
+ Generated_Date   DATETIME   NULL,
+ File_LocalPath   VARCHAR(200) NULL,
+ RFF_Code    INT    NOT NULL,
+ [File_Name]    VARCHAR(50)  NULL,
+ Create_By    VARCHAR(150) NULL,
+ Create_On    DATETIME, 
+ Update_By	varchar (150)	null,
+Update_On	Datetime	null,
+
+ CONSTRAINT PK_HR_FileExport_History PRIMARY KEY 
+ (
+  Generated_ID  ASC
+ ),
+ CONSTRAINT FK_HR_FileExport_History_10 FOREIGN KEY (Company_ID)
+  REFERENCES Company(Company_ID)
+)
+GO
+
+
+
+IF EXISTS(SELECT 1 FROM sysobjects WHERE id = OBJECT_ID('HR_FileExport_History_Detail') AND OBJECTPROPERTY(id,'IsTable') = 1)
+BEGIN
+ DROP TABLE HR_FileExport_History_Detail
+END
+GO
+CREATE TABLE HR_FileExport_History_Detail
+(
+ Detail_ID    INT    NOT NULL IDENTITY(1,1), 
+ Generated_ID   INT     NULL,
+ Process_Year   INT     NULL, 
+ Process_Month   INT     NULL,   
+ Employee_Profile_ID  INT     NULL,
+ Employee_No    VARCHAR(150)  NULL,
+ NRIC     VARCHAR(30)  NULL, 
+ Name     VARCHAR(150)  NULL,
+ Department_ID   INT     NULL,
+ Designation_ID   INT     NULL,
+ CPF_Contribution  NUMERIC(10,2)  NULL,
+ CPF_Employee   NUMERIC(10,2)  NULL,
+ Ordinary_Wages   NUMERIC(10,2)  NULL,
+ Additional_Wages  NUMERIC(10,2)  NULL,
+ Race     INT     NULL,
+ Residential_Status  VARCHAR(1)   NULL,
+ Create_By    VARCHAR(150) NULL,
+ Create_On    DATETIME, 
+ Update_By	varchar (150)	null,
+Update_On	Datetime	null,
+
+ CONSTRAINT PK_HR_FileExport_History_Detail PRIMARY KEY 
+ (
+  Detail_ID  ASC
+ ),
+ CONSTRAINT FK_HR_FileExport_History_Detail_10 FOREIGN KEY (Generated_ID)
+  REFERENCES HR_FileExport_History(Generated_ID)
+)
+GO
+/*Added by Nay on 15-Sept-2015*/
+
+
+
+/* Added new columns by Nay on 17-Sept-2015*/
+IF NOT EXISTS(SELECT 1 FROM sys.columns WHERE name = 'CPF_Submission_No' and OBJECT_ID = OBJECT_ID('Company_Details'))
+BEGIN
+	ALTER TABLE Company_Details 
+	ADD CPF_Submission_No		VARCHAR(300)		NULL
+END
+GO
+
+IF NOT EXISTS(SELECT 1 FROM sys.columns WHERE name = 'patUser_ID' and OBJECT_ID = OBJECT_ID('Company_Details'))
+BEGIN
+	ALTER TABLE Company_Details 
+	ADD patUser_ID		VARCHAR(10)		NULL
+END
+GO
+
+IF NOT EXISTS(SELECT 1 FROM sys.columns WHERE name = 'patPassword' and OBJECT_ID = OBJECT_ID('Company_Details'))
+BEGIN
+	ALTER TABLE Company_Details 
+	ADD patPassword		VARCHAR(20)		NULL
+END
+GO
+/* Added new columns by Nay on 17-Sept-2015*/
+
+
+/* Added by Jane on 25-Sept-2015*/
+
+alter table Product
+drop column Brand
+
+alter table POS_Receipt
+drop Constraint fk_POS_Receipt_Card_Type,fk_POS_Receipt_Card_Branch
+
+alter table POS_Receipt
+drop column Discount_Reason,
+Card_Type,Card_Branch,Voucher_Amount,Approval_Code,Promotion_ID
+
+alter table POS_Receipt
+alter column Total_GST_Amount decimal (18,2) null
+
+alter table POS_Products_Rcp
+alter column Total_GST_Amount decimal (18,2) null
+
+/* Added new columns by Nay on 28-Sept-2015*/
+IF NOT EXISTS(SELECT 1 FROM sys.columns WHERE name = 'Company_Source' and OBJECT_ID = OBJECT_ID('Company_Details'))
+BEGIN
+	ALTER TABLE Company_Details 
+	ADD Company_Source		VARCHAR(1)		NULL
+END
+GO
+
+IF NOT EXISTS(SELECT 1 FROM sys.columns WHERE name = 'PayerID_Type' and OBJECT_ID = OBJECT_ID('Company_Details'))
+BEGIN
+	ALTER TABLE Company_Details 
+	ADD PayerID_Type		VARCHAR(1)		NULL
+END
+GO
+
+IF NOT EXISTS(SELECT 1 FROM sys.columns WHERE name = 'PayerID_No' and OBJECT_ID = OBJECT_ID('Company_Details'))
+BEGIN
+	ALTER TABLE Company_Details 
+	ADD PayerID_No		VARCHAR(20)		NULL
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM sys.columns WHERE name = 'Branch_ID' and OBJECT_ID = OBJECT_ID('Company_Details'))
+BEGIN
+	ALTER TABLE Company_Details 
+	ADD Branch_ID		INT		NULL
+END
+GO
+/* Added new columns by Nay on 28-Sept-2015*/
+
+/*Added new page for IR8A Configuration page*/
+
+INSERT INTO PAGE(Page_Url,Module_Detail_ID,Create_By,Create_On)
+VALUES('/Payroll/IR8AGenerateConfig',(select Module_Detail_ID from SBS_Module_Detail where Module_Detail_Name = 'Payroll'),'admin',current_timestamp)
+
+INSERT INTO Page_Role(User_Role_ID,Page_ID,Create_By,Create_On)
+VALUES((select User_Role_ID from User_Role where Role_Name = 'HR Admin')
+,(select Page_ID from Page where Page.Page_Url = '/Payroll/IR8AGenerateConfig'),'Admin',CURRENT_TIMESTAMP)
+
+Insert into Access_Page ( Access_ID,Page_Role_ID
+) VALUES (  1    ,(select Page_Role_ID from Page_Role where Page_ID in(select Page_ID from Page where Page.Page_Url = '/Payroll/IR8AGenerateConfig')  ) )
+Insert into Access_Page ( Access_ID,Page_Role_ID
+) VALUES (  2   ,(select Page_Role_ID from Page_Role where Page_ID in(select Page_ID from Page where Page.Page_Url = '/Payroll/IR8AGenerateConfig')  ) )
+Insert into Access_Page ( Access_ID,Page_Role_ID
+) VALUES (  3   ,(select Page_Role_ID from Page_Role where Page_ID in(select Page_ID from Page where Page.Page_Url = '/Payroll/IR8AGenerateConfig')  ) )
+Insert into Access_Page ( Access_ID,Page_Role_ID
+) VALUES (  4    ,(select Page_Role_ID from Page_Role where Page_ID in(select Page_ID from Page where Page.Page_Url = '/Payroll/IR8AGenerateConfig')  ) )
+
+/*Added new page for IR8A Configuration page*/
+
+/*Added by Sun 1/10/2015*/
+alter table Employee_profile
+add Residential_Country_1 int null
+
+alter table Employee_profile
+add Residential_Country_2 int null
+
+alter table Employee_profile
+add CONSTRAINT [fk_Employee_Profile_Residential_Country_1] FOREIGN KEY (Residential_Country_1) REFERENCES [dbo].Country (Country_ID);
+
+alter table Employee_profile
+add CONSTRAINT [fk_Employee_Profile_Residential_Country_2] FOREIGN KEY (Residential_Country_2) REFERENCES [dbo].Country (Country_ID);
+
+
+alter table Leave_Application_Document
+add Second_Contact_While_Overseas varchar(30) null
+
+alter table Quotation
+alter column Record_Status varchar(50)
+
+CREATE TABLE [dbo].[IR8A_Bank] (
+[Bank_Code] varchar(1) not NULL,
+[Description] varchar(50) NULL,
+[SBS_Banking_Info_ID] int NULL,
+Constraint PK_IR8A_Bank_10 primary key (Bank_Code),
+Constraint FK_IR8A_Bank_10 foreign key (SBS_Banking_Info_ID) references Banking_Info (Banking_Info_ID)
+)
+
+CREATE TABLE [dbo].[IR8A_Country] (
+[Country_Code] int NOT NULL,
+[Description] varchar(50) NULL,
+[SBS_Country_ID] int NULL,
+Constraint PK_IR8A_Country_10 primary key (Country_Code),
+Constraint FK_IR8A_Country_10 foreign key (SBS_Country_ID) references Country (Country_ID),
+)
+
+CREATE TABLE [dbo].[IR8A_Nationality] (
+[Nationality_Code] int NOT NULL,
+[Description] varchar(50)  NULL,
+[SBS_Nationality_ID] int NULL,
+Constraint PK_IR8A_Nationality_10 primary key (Nationality_Code),
+Constraint FK_IR8A_Nationality_10 foreign key (SBS_Nationality_ID) references Nationality (Nationality_ID)
+)
+
+
+
+/*Added by Sun 16/10/2015*/
+
+alter table Donation_Formula
+add Record_Status varchar(50) NULL
+
+alter table PRG
+add Record_Status varchar(50) NULL
+
+alter table Leave_Default
+add Record_Status varchar(50) NULL
+
+alter table Leave_Config
+add Record_Status varchar(50) NULL
+
+alter table Leave_Adjustment
+add Record_Status varchar(50) NULL
+
+alter table Employment_History_Allowance
+add  Update_By    VARCHAR(150) NULL
+
+alter table Expenses_Config
+add Record_Status varchar(50) NULL
+
+alter table Employment_History_Allowance
+add  Update_On    DATETIME 
+
+EXEC sp_rename 'PRC.Status', 'Record_Status', 'COLUMN'
+
+alter table PRC
+alter COLUMN  Record_Status varchar(50) NULL
+
+alter table Product
+drop column Product_Profile_Photo
+alter table Product
+drop constraint fk_Product_Product_Category
+
+alter table Product
+drop column Product_Category_ID
+alter table Product
+drop constraint fk_Product_Product_Category
+
+alter table POS_Receipt
+add Customer_Name varchar(150) null
+
+alter table POS_Receipt
+add Customer_Email varchar(50) null
+
+alter table POS_Receipt
+add Contact_No  varchar(50) null
+
+alter table POS_Receipt
+add NRIC_No   varchar(30) null
+
+alter table POS_Receipt
+add Service_Charge_Rate int null
+
+alter table POS_Receipt
+add Service_Charge decimal(18,2) null
+
+alter table POS_Receipt_Configuration
+add Service_Charge_Include  bit null
+
+alter table POS_Terminal
+add Is_WebPRNT   bit null
+
+
+/*Added by Sun 19/10/2015*/
+GO
+CREATE TABLE [dbo].[Promotion] (
+		[Promotion_ID]      INT             NOT NULL IDENTITY(1,1),
+        [Company_ID]        INT             NULL,
+        [Promotion_Name]    VARCHAR (300)   NULL,
+        [Start_Date]        DATETIME        NULL,
+        [End_Date]          DATETIME        NULL,
+        [Promotion_Type]    VARCHAR (150)   NULL,
+        [Record_Status]     VARCHAR (50)    NULL,
+        [Description]       VARCHAR (500)   NULL,   
+    
+        [User_Per_Customer] INT             NULL,
+        [Coupon]            VARCHAR (50)    NULL,
+        [Coupon_Code]       VARCHAR (150)   NULL,
+        [User_Per_Coupon]   INT             NULL,
+        [Priority]          INT             NULL,
+        [App_Without_Pro]   BIT             NULL,
+        [Create_By]         VARCHAR (150)   NULL,
+        [Create_On]         DATETIME        NULL,
+        [Update_By]         VARCHAR (150)   NULL,
+        [Update_On]         DATETIME        NULL
+		CONSTRAINT pk_Promotion PRIMARY KEY (Promotion_ID),
+		CONSTRAINT fk_Promotion_Company FOREIGN KEY (Company_ID) REFERENCES Company(Company_ID)
+		)    
+
+GO
+CREATE TABLE [dbo].[Promotion_Branch] (
+		[Promotion_Branch_ID]   INT         NOT NULL IDENTITY(1,1),
+        [Promotion_ID]			INT         NULL,
+        [Branch_ID]				INT			NULL,
+		CONSTRAINT pk_Promotion_Branch PRIMARY KEY (Promotion_Branch_ID),
+		CONSTRAINT fk_Promotion_Branch_Promotion FOREIGN KEY (Promotion_ID) REFERENCES Promotion(Promotion_ID),
+		CONSTRAINT fk_Promotion_Branch_Branch FOREIGN KEY (Branch_ID) REFERENCES Branch(Branch_ID)
+		)    
+		
+GO
+CREATE TABLE [dbo].[Promotion_Product] (
+		[Promotion_Product_ID]  INT				NOT NULL IDENTITY(1,1),
+
+        [Product_ID]			INT				NULL,
+        [Discount_Amount]		DECIMAL(18,2)	NULL,
+		[Discount_Type]			VARCHAR (150)	NULL,
+		CONSTRAINT pk_Promotion_Product PRIMARY KEY (Promotion_Product_ID),
+		CONSTRAINT fk_Promotion_Product_Product FOREIGN KEY (Product_ID) REFERENCES Product(Product_ID)
+		)    
+
+GO
+CREATE TABLE [dbo].[Promotion_Spacial] (
+		[Promotion_Spacial_ID]  INT				NOT NULL IDENTITY(1,1),
+        [Product_ID]			INT				NULL,
+        [Purchase_Type]			VARCHAR (50)	NULL,
+		[Min]					DECIMAL(18,2)	NULL,
+		[Max]					DECIMAL(18,2)	NULL,
+		[Discount]				VARCHAR (150)	NULL,
+		[Qty_Discount_Apply]	DECIMAL(18,2)	NULL,
+
+		CONSTRAINT pk_Promotion_Spacial PRIMARY KEY  (Promotion_Spacial_ID),
+		CONSTRAINT fk_Promotion_Spacial_Product FOREIGN KEY (Product_ID) REFERENCES Product(Product_ID)
+		)    
+
+/*Added by Sun 28/10/2015*/
+
+alter table Promotion_Product
+	add Promotion_ID int null
+
+alter table Promotion_Spacial
+	add Promotion_ID int null
+
+alter table Promotion_Product
+	add CONSTRAINT fk_Promotion_Product_Promotion FOREIGN KEY (Promotion_ID) REFERENCES Promotion(Promotion_ID)
+
+alter table Promotion_Spacial
+	add CONSTRAINT fk_Promotion_Spacial_Promotion FOREIGN KEY (Promotion_ID) REFERENCES Promotion(Promotion_ID)
+
+alter table Promotion_Product
+	add Currency_ID int null
+
+alter table Promotion_Product
+	add CONSTRAINT fk_Promotion_Product_Currency FOREIGN KEY (Currency_ID) REFERENCES Currency(Currency_ID)
+
+/*Added by Sun 29/10/2015*/
+
+alter table Promotion_Spacial
+	add Discount_Type VARCHAR (50) null
+
+
+
+/*Edit  by Sun 30/10/2015  SBS2DB */
+
+alter table Promotion_Product
+	drop constraint fk_Promotion_Product
+
+alter table Promotion_Spacial
+	drop constraint fk_Promotion_Spacial
+
+alter table Promotion_Product
+	add CONSTRAINT fk_Promotion_Product_Promotion FOREIGN KEY (Promotion_ID) REFERENCES Promotion(Promotion_ID)
+
+alter table Promotion_Spacial
+	add CONSTRAINT fk_Promotion_Spacial_Promotion FOREIGN KEY (Promotion_ID) REFERENCES Promotion(Promotion_ID)
+
+
+
+	alter table POS_Terminal
+add Terminal_Local_ID	varchar (50)		null
+
+alter table POS_Shift
+add Shift_Local_ID	varchar (50)	null
+
+alter table POS_Shift
+add Terminal_Local_ID	varchar (50)	null
+
+alter table POS_Shift
+add Terminal_ID	int null
+
+alter table POS_Shift
+add Constraint fk_POS_Shift_Terminal foreign key (Terminal_ID) references POS_Terminal (Terminal_ID)
+
+
+alter table POS_Receipt
+add Receipt_Local_No	varchar (50)	null
+
+
+
+/*Added by Sun 02/11/2015*/
+
+	alter table Promotion_Spacial
+alter COLUMN  Discount DECIMAL(18,2) NULL
+
+/*Added by Sun 09/11/2015*/
+
+GO
+CREATE TABLE [dbo].[Tax] (
+    [Tax_ID]			INT IDENTITY (1, 1) NOT NULL,
+    [Company_ID]				INT				NULL,
+    [Include_Service_Charge]    BIT				NULL,
+	[Service_Charge_Tax]        DECIMAL(18, 2)	NULL,
+    [Include_Surcharge]			BIT				NULL,
+	[Include_GST]				BIT				NULL,
+    [Record_Status]				VARCHAR (50)	NULL,
+	[Create_By]					VARCHAR (150)   NULL,
+    [Create_On]					DATETIME        NULL,
+    [Update_By]					VARCHAR (150)   NULL,
+    [Update_On]					DATETIME        NULL
+    CONSTRAINT [pk_Tax_Preference] PRIMARY KEY CLUSTERED ([Tax_ID] ASC),
+    CONSTRAINT [fk_Tax_Preference_Company_ID] FOREIGN KEY ([Company_ID]) REFERENCES [dbo].[Company] ([Company_ID])
+);
+
+GO
+CREATE TABLE [dbo].[Tax_Surcharge] (
+    [Tax_Surcharge_ID]			INT				IDENTITY (1, 1) NOT NULL,
+    [Tax_Preference_ID]			INT				NULL,
+    [Tax_Title]					INT				NULL,
+	[Tax]						DECIMAL(18, 2)	NULL,
+    [Record_Status]				VARCHAR (50)	NULL,
+	[Create_By]					VARCHAR (150)   NULL,
+    [Create_On]					DATETIME        NULL,
+    [Update_By]					VARCHAR (150)   NULL,
+    [Update_On]					DATETIME        NULL
+    CONSTRAINT [pk_Tax_Surcharge] PRIMARY KEY CLUSTERED ([Tax_Surcharge_ID] ASC),
+    CONSTRAINT [fk_Tax_Surcharge_Tax] FOREIGN KEY ([Tax_Preference_ID]) REFERENCES [dbo].[Tax] ([Tax_ID]),
+	CONSTRAINT [fk_Tax_Surcharge_Lookup_Data] FOREIGN KEY ([Tax_Title]) REFERENCES [dbo].[Global_Lookup_Data] ([Lookup_Data_ID])
+);
+
+CREATE TABLE [dbo].[Tax_GST] (
+    [Tax_GST_ID]				INT				IDENTITY (1, 1) NOT NULL,
+    [Tax_Preference_ID]			INT				NULL,
+    [Tax_Title]					VARCHAR (150)	NULL,
+	[Tax]						DECIMAL(18, 2)	NULL,
+	[Tax_Type]					VARCHAR (50)  	NULL,
+    [Effective_Date]			DATETIME		NULL,
+	[Is_Default]				BIT				NULL,
+    [Record_Status]				VARCHAR (50)	NULL,
+	[Create_By]					VARCHAR (150)   NULL,
+    [Create_On]					DATETIME        NULL,
+    [Update_By]					VARCHAR (150)   NULL,
+    [Update_On]					DATETIME        NULL
+    CONSTRAINT [pk_Tax_GST] PRIMARY KEY CLUSTERED ([Tax_GST_ID] ASC),
+    CONSTRAINT [fk_Tax_GST_Tax_Preference] FOREIGN KEY ([Tax_Preference_ID]) REFERENCES [dbo].[Tax] ([Tax_ID])
+);
+
+/*
+	Added by Nay on 13-Nov-2015
+*/
+IF EXISTS(SELECT 1 FROM sysobjects WHERE id = OBJECT_ID('IR8A_Nationality') AND OBJECTPROPERTY(id,'IsTable') = 1)
+BEGIN
+	DROP TABLE IR8A_Nationality
+END
+GO
+CREATE TABLE IR8A_Nationality
+(
+	Nationality_Code			INT		NOT NULL, 
+	[Description]		VARCHAR(50)		NOT NULL, 
+	SBS_Nationality_ID			INT		NULL,
+	CONSTRAINT PK_IR8A_Nationality_10 PRIMARY KEY 
+	(
+		Nationality_Code		ASC
+	),
+	CONSTRAINT FK_IR8A_Nationality_10 FOREIGN KEY (SBS_Nationality_ID)
+	REFERENCES Nationality(Nationality_ID)
+)
+GO
+
+IF EXISTS(SELECT 1 FROM sysobjects WHERE id = OBJECT_ID('IR8A_Bank') AND OBJECTPROPERTY(id,'IsTable') = 1)
+BEGIN
+	DROP TABLE IR8A_Bank
+END
+GO
+CREATE TABLE IR8A_Bank
+(
+	Bank_Code				VARCHAR(1)		NOT NULL, 
+	[Description]			VARCHAR(50)		NOT NULL, 
+	SBS_Banking_Info_ID		INT				NULL,
+	CONSTRAINT PK_IR8A_Bank_10 PRIMARY KEY 
+	(
+		Bank_Code		ASC
+	),
+	CONSTRAINT FK_IR8A_Bank_10 FOREIGN KEY (SBS_Banking_Info_ID)
+	REFERENCES Banking_Info(Banking_Info_ID)
+)
+GO
+
+IF EXISTS(SELECT 1 FROM sysobjects WHERE id = OBJECT_ID('IR8A_Country') AND OBJECTPROPERTY(id,'IsTable') = 1)
+BEGIN
+	DROP TABLE IR8A_Country
+END
+GO
+CREATE TABLE IR8A_Country
+(
+	Country_Code			INT				NOT NULL, 
+	[Description]			VARCHAR(50)		NOT NULL, 
+	SBS_Country_ID			INT		NULL,
+	CONSTRAINT PK_IR8A_Country_10 PRIMARY KEY 
+	(
+		Country_Code		ASC
+	),
+	CONSTRAINT FK_IR8A_Country_10 FOREIGN KEY (SBS_Country_ID)
+	REFERENCES Country(Country_ID)
+)
+GO
+
+IF EXISTS(SELECT 1	FROM sysobjects WHERE id = OBJECT_ID('HR_FileExport_IR8A_Detail') AND OBJECTPROPERTY(id,'IsTable') = 1)
+BEGIN
+	DROP TABLE HR_FileExport_IR8A_Detail
+END
+GO
+CREATE TABLE HR_FileExport_IR8A_Detail
+(
+	[Detail_ID]				[int] IDENTITY(1,1) NOT NULL,
+	[Generated_ID]			[int]				NOT NULL,
+	[Process_Year]			[int]				NOT NULL,
+	[Employee_Profile_ID]	[int]				NOT NULL,
+	[Employee_No]			[varchar](150)		NULL,
+	[NRIC]					[varchar](30)		NULL,
+	[Name]					[varchar](150)		NULL,
+	[Department_ID]			INT					NULL, 
+	[Designation_ID]		INT					NULL, 
+	[Total_Amount]			NUMERIC(10,2)		NULL,
+	[Donation]				NUMERIC(10,2)		NULL,
+	[CPF_Desgn_Pension]		NUMERIC(10,2)		NULL,
+	[Insurance]				NUMERIC(10,2)		NULL,
+	[Salary]				NUMERIC(10,2)		NULL,
+	[Bonus]					NUMERIC(10,2)		NULL,
+	[Directors_Fee]			NUMERIC(10,2)		NULL,
+	[Others]				NUMERIC(10,2)		NULL,
+	[Gross_Commission]		NUMERIC(10,2)		NULL,
+	[Pension]				NUMERIC(10,2)		NULL,
+	[Create_By]				[varchar](150)		NULL,
+	[Create_On]				[datetime]			NULL,
+	CONSTRAINT [PK_HR_FileExport_IR8A_Detail] PRIMARY KEY CLUSTERED 
+	(
+		[Detail_ID] ASC
+	)
+)
+GO
+
+
+
+
+DELETE FROM IR8A_Nationality
+GO
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(351,'AFGHAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(201,'ALBANIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(401,'ALGERIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(503, 'AMERICAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(721, 'AMERICAN SAMOA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(153, 'ANDORRAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(451, 'ANGOLAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(670, 'ANGUILLA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(673, 'ANTARCTICA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(641, 'ANTIGUA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(601, 'ARGENTINIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(217, 'ARMENIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(625, 'ARUBA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(701, 'AUSTRALIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(131, 'AUSTRIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(218, 'AZERBAIJANI',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(642, 'BAHAMAS',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(371, 'BAHRAINI',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(352, 'BANGLADESHI',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(643, 'BARBADOS',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(211, 'BELARUSSIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(101, 'BELGIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(644, 'BELIZE',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(452, 'BENIN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(645, 'BERMUDAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(353, 'BHUTAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(646, 'BOLIVIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(994, 'BOSNIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(453, 'BOTSWANA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(139, 'BOUVET ISLAND',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(738, 'BR NAT. OVERSEAS',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(995, 'BR OVERSEAS CIT.',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(996, 'BR PROTECTED PERS.',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(602, 'BRAZILIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(110, 'BRITISH',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(675,'BRITISH DEPENDENT TERR CITIZEN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(708, 'BRITISH INDIAN OCEAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(886, 'BRITISH SUBJECT',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(671, 'BRITISH VIRGIN ISLND',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(302, 'BRUNEIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(202, 'BULGARIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(454, 'BURKINA FASO',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(455, 'BURUNDI',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(312, 'CAMBODIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(456, 'CAMEROON',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(501, 'CANADIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(457, 'CAPE VERDE',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(647, 'CAYMANESE',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(458, 'CENTRAL AFRICAN REP',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(459, 'CHADIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(603, 'CHILEAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(336, 'CHINESE',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(709, 'CHRISTMAS ISLANDS',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(710, 'COCOS KEELING ISLAND',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(604, 'COLOMBIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(460, 'COMOROS',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(461, 'CONGO',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(722, 'COOK ISLANDS',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(648, 'COSTA RICAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(232, 'CROATIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(621, 'CUBAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(372, 'CYPRIOT',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(234, 'CZECH',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(203, 'CZECHOSLOVAK',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(102, 'DANISH',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(674, 'DEMOCRATIC REP OF THE CONGO',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(407, 'DJIBOUTI',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(649, 'DOMINICA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(622, 'DOMINICAN REPUBLIC',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(991, 'DUTCH',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(887, 'EAST TIMORESE',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(605, 'ECUADORIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(402, 'EGYPTIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(462, 'EQUATORIAL GUINEA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(410, 'ERITREA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(213, 'ESTONIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(408, 'ETHIOPIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(141, 'FAEROE ISLANDS',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(651, 'FALKLAND IS',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(702, 'FIJIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(305, 'FILIPINO',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(132, 'FINNISH',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(103, 'FRENCH',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(652, 'FRENCH GUIANA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(723, 'FRENCH POLYNESIA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(711, 'FRENCH SOUTHERN TERR',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(463, 'GABON',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(464, 'GAMBIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(216, 'GEORGIA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(104, 'GERMAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(421, 'GHANAIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(154, 'GIBRALTAR',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(105, 'GREEK',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(142, 'GREENLAND',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(653, 'GRENADIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(654, 'GUADELOUPE',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(724, 'GUAM',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(655, 'GUATEMALA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(465, 'GUINEA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(466, 'GUINES BISSAU',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(656, 'GUYANA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(657, 'HAITIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(712, 'HEARD MCDONALD ISLND',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(658, 'HONDURAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(332, 'HONG KONG',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(205, 'HUNGARIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(133 ,'ICELAND',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(354 ,'INDIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(303 ,'INDONESIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(373 ,'IRANIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(374 ,'IRAQI',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(106 ,'IRISH',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(672 ,'ISLE OF MAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(375 ,'ISRAELI',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(107 ,'ITALIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(422 ,'IVORY COAST',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(659 ,'JAMAICAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(331 ,'JAPANESE',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(376 ,'JORDANIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(676 ,'KAMPUCHEAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(221 ,'KAZAKH',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(423 ,'KENYAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(219 ,'KIRGHIZ',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(725 ,'KIRIBATI',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(337 ,'KOREAN, NORTH',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(333 ,'KOREAN, SOUTH',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(677 ,'KOSOVAR',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(377 ,'KUWAITI',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(990 ,'KYRGHIS',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(894 ,'KYRGYZSTAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(313 ,'LAOTIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(214 ,'LATVIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(378 ,'LEBANESE',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(467 ,'LESOTHO',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(424 ,'LIBERIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(403 ,'LIBYAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(138 ,'LIECHTENSTEIN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(215 ,'LITHUANIA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(108 ,'LUXEMBOURG',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(335 ,'MACAO',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(210 ,'MACEDONIA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(425 ,'MADAGASCAR',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(468 ,'MALAWI',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(304 ,'MALAYSIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(355 ,'MALDIVIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(469 ,'MALI',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(155 ,'MALTESE',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(735 ,'MARSHELLES',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(661 ,'MARTINIQUE',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(470 ,'MAURITANEAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(426 ,'MAURITIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(606 ,'MEXICAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(736 ,'MICRONESIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(222 ,'MOLDOVIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(143 ,'MONACO',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(338 ,'MONGOLIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(678 ,'MONTENEGRIN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(662 ,'MONTSERRAT',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(404 ,'MOROCCAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(427 ,'MOZAMBIQUE',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(311 ,'MYANMAR',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(471 ,'NAMIBIA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(703 ,'NAURUAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(356 ,'NEPALESE',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(109 ,'NETHERLANDS',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(623 ,'NETHERLANDS ANTIL.',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(704 ,'NEW CALEDONIA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(705 ,'NEW ZEALANDER',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(660 ,'NICARAGUAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(472 ,'NIGER',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(428 ,'NIGERIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(726 ,'NIUE ISLAND',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(713 ,'NORFOLK ISLAND',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(734 ,'NORTHERN MARIANA ISL',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(134 ,'NORWEGIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(699 ,'OC CTRL STH AMERICA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(499 ,'OC IN OTHER AFRICA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(319 ,'OC IN S E ASIA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(509 ,'OC NORTH AMERICA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(799 ,'OC OCEANIA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(379 ,'OMAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(999 ,'OTHERS',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(998 ,'PACIFIC IS TRUST T',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(357 ,'PAKISTANI',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(737 ,'PALAU',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(386 ,'PALESTINIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(624 ,'PANAMANIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(706 ,'PAPUA NEW GUINEA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(607 ,'PARAGUAY',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(608 ,'PERUVIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(727 ,'PITCAIRN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(206 ,'POLISH',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(111 ,'PORTUGUESE',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(502 ,'PUERTO RICAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(380 ,'QATAR',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(429 ,'REUNION',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(207 ,'ROMANIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(223 ,'RUSSIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(473 ,'RWANDA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(663 ,'SAINT KITTS NEVIS',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(650 ,'SALVADORAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(707 ,'SAMOAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(144 ,'SAN MARINO',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(474 ,'SAO TOME PRINCI',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(381 ,'SAUDI ARABIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(475 ,'SENEGALESE',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(679 ,'SERBIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(476 ,'SEYCHELLES',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(477 ,'SIERRA LEONE',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(301 ,'SINGAPORE CITIZEN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(235 ,'SLOVAK',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(233 ,'SLOVENIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(728 ,'SOLOMON ISLANDS',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(409 ,'SOMALI',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(478 ,'SOUTH AFRICAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(112 ,'SPANISH',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(358 ,'SRI LANKAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(484 ,'ST HELENA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(664 ,'ST LUCIA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(505 ,'ST PIERRE MIQUELON',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(665 ,'ST VINCENT',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(405 ,'SUDANESE',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(666 ,'SURINAME',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(135 ,'SVALBARD JAN MAYEN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(480 ,'SWAZI',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(136 ,'SWEDISH',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(137 ,'SWISS',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(382 ,'SYRIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(224 ,'TADZHIK',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(334 ,'TAIWANESE',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(992 ,'TAJIKISTANI',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(430 ,'TANZANIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(306 ,'THAI',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(307 ,'TIMORENSE',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(481 ,'TOGO',NULL) 
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(729,'TOKELAU ISLANDS',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(730 ,'TONGA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(667 ,'TRINIDAD AND TOBAGO',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(406 ,'TUNISIA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(152 ,'TURK',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(225 ,'TURKMEN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(668 ,'TURKS AND CAICOS IS',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(731 ,'TUVALU',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(504 ,'U S MINOR ISLANDS',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(431 ,'UGANDIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(212 ,'UKRAINIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(383 ,'UNITED ARAB EM.',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(889 ,'UNKNOWN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(993 ,'UPPER VOLTA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(609 ,'URUGUAY',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(226 ,'UZBEK',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(732 ,'VANUATU',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(145 ,'VATICAN CITY STATE',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(610 ,'VENEZUELAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(314 ,'VIETNAMESE',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(669,'VIRGIN ISLANDS US',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(733 ,'WALLIS AND FUTUNA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(479,' WESTERN SAHARA',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(388,'YEMEN ARAB REP',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(387,'YEMEN, SOUTH',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(384,'YEMENI',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(209,'YUGOSLAV',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(482,'ZAIRAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(432,'ZAMBIAN',NULL)
+INSERT INTO IR8A_Nationality(Nationality_Code,[Description],SBS_Nationality_ID)
+VALUES(483,'ZIMBABWEAN',NULL)
+GO
+
+UPDATE ir8a SET 
+	ir8a.SBS_Nationality_ID = a.Nationality_ID 
+FROM Nationality a JOIN IR8A_Nationality ir8a 
+ON a.Description like '%' + ir8a.Description + '%'
+GO
+
+
+DELETE FROM IR8A_Bank 
+GO
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('1','DBS/POSB',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('2','UOB/OUB',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('3','OCBC',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('4','OTHERS',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('5','CIMB BANK BHD',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('6','CITIBANK',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('7','HSBC',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('8','MAY BANK',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('9','STAND CHAR',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('A','FEB',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('B','AUST N Z',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('C','BANGKOK BK',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('D','BK AMERICA',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('E','BK CHINA',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('F','BK E ASIA',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('G','BK INDIA',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('H','BK TOKYO',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('I','B N PARIS',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('J','CREDIT AGR',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('K','HL BK',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('L','ICICI BANK',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('M','INDIAN BK',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('N','INDIAN OVE',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('O','ICB CHINA',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('P','JPMORGAN C',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('Q','MIZUHO BK',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('R','PT BANK NEGARA INDON (PERSERO)',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('S','RHB BANK B',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('T','ST B INDIA',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('U','SMBC',NULL)
+INSERT INTO IR8A_Bank(Bank_Code,Description,SBS_Banking_Info_ID)
+VALUES('V','UCO BK',NULL)
+GO
+
+UPDATE ir8a SET 
+	ir8a.SBS_Banking_Info_ID = a.Banking_Info_ID 
+FROM IR8A_Bank ir8a JOIN Banking_Info a 
+ON ir8a.Description like '%' + a.Bank_Name+ '%'
+GO
+
+
+
+DELETE FROM IR8A_Country 
+GO
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(351,'AFGHANISTAN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(201,'ALBANIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(401,'ALGERIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(721,'AMERICAN SAMOA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(153,'ANDORRA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(451,'ANGOLA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(670,'ANGUILLA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(641,'ANTIGUA AND BARBUDA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(601,'ARGENTINA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(217,'ARMENIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(625,'ARUBA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(701,'AUSTRALIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(131,'AUSTRIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(218,'AZERBAIJAN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(642,'BAHAMAS ISLAND',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(371,'BAHRAIN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(352,'BANGLADESH',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(643,'BARBADOS',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(211,'BELARUS',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(101,'BELGIUM',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(644,'BELIZE',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(452,'BENIN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(645,'BERMUDA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(353,'BHUTAN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(646,'BOLIVIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(453,'BOTSWANA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(139,'BOUVET ISLAND',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(602,'BRAZIL',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(708,'BRITISH INDIAN OCEAN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(671,'BRITISH VIRGIN ISLND',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(302,'BRUNEI',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(202,'BULGARIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(454,'BURKINA FASO',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(455,'BURUNDI',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(312,'CAMBODIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(456,'CAMEROON UNITED REP',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(501,'CANADA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(457,'CAPE VERDE',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(647,'CAYMAN ISLANDS',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(458,'CENTRAL AFRICAN REP',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(459,'CHAD',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(603,'CHILE',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(709,'CHRISTMAS ISLANDS',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(710,'COCOS KEELING ISLAND',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(604,'COLOMBIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(460,'COMOROS ISLAND',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(461,'CONGO',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(722,'COOK ISLAND',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(648,'COSTA RICA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(422,'COTE DIVOIRE',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(232,'CROATIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(621,'CUBA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(372,'CYPRUS',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(234,'CZECH REPUBLIC',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(203,'CZECHOSLOVAKIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(409,'DEM REP OF SOMALI',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(385,'DEMOCRATIC YEMEN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(102,'DENMARK',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(407,'DJIBOUTI',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(649,'DOMINICA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(622,'DOMINICAN REPUBLIC',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(307,'EAST TIMOR',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(605,'ECUADOR',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(402,'EGYPT',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(650,'EL SALVADOR',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(462,'EQUATORIAL GUINEA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(410,'ERITREA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(213,'ESTONIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(408,'ETHIOPIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(141,'FAEROE ISLANDS',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(651,'FALKLAND IS',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(702,'FIJI',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(132,'FINLAND',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(103,'FRANCE',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(652,'FRENCH GUIANA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(723,'FRENCH POLYNESIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(711,'FRENCH SOUTHERN TERR',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(463,'GABON',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(464,'GAMBIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(216,'GEORGIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(104,'GERMANY',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(421,'GHANA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(154,'GIBRALTAR',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(105,'GREECE',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(142,'GREENLAND',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(653,'GRENADA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(654,'GUADELOUPE',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(724,'GUAM',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(655,'GUATEMALA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(465,'GUINEA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(466,'GUINES BISSAU',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(656,'GUYANA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(657,'HAITI',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(712,'HEARD MCDONALD ISLND',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(658,'HONDURAS',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(332,'HONG KONG',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(205,'HUNGARY',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(133,'ICELAND',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(354,'INDIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(303,'INDONESIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(374,'IRAQ',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(106,'IRELAND',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(373,'ISLAMIC REP OF IRAN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(672,'ISLE OF MAN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(375,'ISRAEL',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(107,'ITALY',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(659,'JAMAICA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(331,'JAPAN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(376,'JORDAN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(221,'KAZAKHSTAN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(423,'KENYA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(725,'KIRIBATI',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(337,'KOREA NORTH DEM PEO',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(377,'KUWAIT',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(219,'KYRGYZSTAN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(313,'LAOS PEO DEM REP',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(214,'LATVIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(378,'LEBANON',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(467,'LESOTHO',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(424,'LIBERIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(403,'LIBYA A JAMAHIRIYA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(138,'LIECHSTENSTEIN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(215,'LITHUANIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(108,'LUXEMBOURG',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(335,'MACAU',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(425,'MADAGASCAR',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(468,'MALAWI',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(304,'MALAYSIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(355,'MALDIVES',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(469,'MALI',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(155,'MALTA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(735,'MARSHALL ISLANDS',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(661,'MARTINIQUE',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(470,'MAURITANIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(426,'MAURITIUS',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(606,'MEXICO',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(736,'MICRONESIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(222,'MOLDOVA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(143,'MONACO',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(338,'MONGOLIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(662,'MONTSERRAT',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(404,'MOROCCO',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(427,'MOZAMBIQUE',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(311,'MYANMAR',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(471,'NAMIBIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(703,'NAURU',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(356,'NEPAL',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(109,'NETHERLANDS',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(623,'NETHERLANDS ANTILLES',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(704,'NEW CALEDONIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(732,'NEW HERBRIDES',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(705,'NEW ZEALAND',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(660,'NICARAGUA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(472,'NIGER',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(428,'NIGERIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(726,'NIUE',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(713,'NORFOLK ISLAND',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(734,'NORTHERN MARIANA ISLANDS',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(134,'NORWAY',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(499,'O C IN OTHER AFRICA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(319,'O C IN S E ASIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(699,'OC CTRL STH AMERICA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(509,'OC NORTH AMERICA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(799,'OC OCEANIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(379,'OMAN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(999,'OTHERS',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(357,'PAKISTAN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(737,'PALAU',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(386,'PALESTINE',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(624,'PANAMA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(706,'PAPUA NEW GUINEA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(607,'PARAGUAY',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(336,'PEOPLE''S REPUBLIC OF CHINA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(608,'PERU',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(305,'PHILIPPINES',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(727,'PITCAIRN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(206,'POLAND',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(111,'PORTUGAL',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(502,'PUERTO RICO',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(380,'QATAR',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(333,'REP OF KOREA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(482,'REP OF ZAIRE',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(429,'REUNION ISLAND',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(207,'ROMANIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(223,'RUSSIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(473,'RWANDA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(663,'SAINT KITTS NEVIS',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(664,'SAINT LUCIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(665,'SAINT VINCENT',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(707,'SAMOA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(144,'SAN MARINO',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(474,'SAO TOME PRINCIPE',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(381,'SAUDI ARABIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(475,'SENEGAL',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(476,'SEYCHELLES',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(477,'SIERRA LEONE',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(301,'SINGAPORE',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(235,'SLOVAK REPUBLIC',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(233,'SLOVENIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(728,'SOLOMON ISLANDS',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(478,'SOUTH AFRICA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(112,'SPAIN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(358,'SRI LANKA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(484,'ST HELENA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(505,'ST PIERRE MIQUELON',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(405,'SUDAN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(666,'SURINAM',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(135,'SVALBARD JAN MAYEN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(480,'SWAZILAND',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(136,'SWEDEN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(137,'SWITZERLAND',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(382,'SYRIAN ARAB REP',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(334,'TAIWAN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(224,'TAJIKISTAN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(430,'TANZANIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(306,'THAILAND',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(481,'TOGO',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(729,'TOKELAU',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(730,'TONGA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(667,'TRINIDAD AND TOBAGO',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(406,'TUNISIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(152,'TURKEY',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(225,'TURKMENISTAN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(668,'TURKS AND CAICOS IS',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(731,'TUVALU',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(504,'U S MINOR ISLANDS',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(431,'UGANDA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(212,'UKRAINE',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(383,'UNITED ARAB EMIRATES',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(110,'UNITED KINGDOM',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(503,'UNITED STATES',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(609,'URUGUAY',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(226,'UZBEKISTAN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(145,'VATICAN CITY STATE',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(610,'VENEZUELA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(314,'VIETNAM SOC REP OF',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(669,'VIRGIN ISLANDS US',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(733,'WALLIS AND FUTUNA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(479,'WESTERN SAHARA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(384,'YEMEN',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(209,'YUGOSLAVIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(432,'ZAMBIA',NULL)
+INSERT INTO IR8A_Country(Country_Code,[Description],SBS_Country_ID)
+VALUES(483,'ZIMBABWE',NULL)
+GO
+
+
+UPDATE ir8a SET 
+	ir8a.SBS_Country_ID = c.Country_ID
+FROM IR8A_Country ir8a JOIN 
+Country c on 
+ir8a.Description like '%' + c.Description + '%' 
+GO
+
+
+IF NOT EXISTS(SELECT 1 FROM sys.columns WHERE name = 'Company_Source' and OBJECT_ID = OBJECT_ID('Company_Details'))
+BEGIN
+	ALTER TABLE Company_Details 
+	ADD Company_Source		VARCHAR(1)		NULL
+END
+GO
+
+IF NOT EXISTS(SELECT 1 FROM sys.columns WHERE name = 'PayerID_Type' and OBJECT_ID = OBJECT_ID('Company_Details'))
+BEGIN
+	ALTER TABLE Company_Details 
+	ADD PayerID_Type		VARCHAR(1)		NULL
+END
+GO
+
+IF NOT EXISTS(SELECT 1 FROM sys.columns WHERE name = 'PayerID_No' and OBJECT_ID = OBJECT_ID('Company_Details'))
+BEGIN
+	ALTER TABLE Company_Details 
+	ADD PayerID_No		VARCHAR(20)		NULL
+END
+GO
+IF NOT EXISTS(SELECT 1 FROM sys.columns WHERE name = 'Branch_ID' and OBJECT_ID = OBJECT_ID('Company_Details'))
+BEGIN
+	ALTER TABLE Company_Details 
+	ADD Branch_ID		INT		NULL
+END
+GO
+
+Declare @def_ID		INT
+SELECT @def_ID = Def_ID from Global_Lookup_Def where Name = 'Work_Pass_Type'
+DELETE FROM Global_Lookup_Data WHERE Def_ID = @Def_ID
+
+INSERT INTO Global_Lookup_Data(Def_ID,Name,[Description],Create_By,Create_On,Record_Status)
+VALUES(@def_ID,'FIN','FIN','Admin',CURRENT_TIMESTAMP,'Active')
+INSERT INTO Global_Lookup_Data(Def_ID,Name,[Description],Create_By,Create_On,Record_Status)
+VALUES(@def_ID,'IFRN','Immigration File Ref No','Admin',CURRENT_TIMESTAMP,'Active')
+INSERT INTO Global_Lookup_Data(Def_ID,Name,[Description],Create_By,Create_On,Record_Status)
+VALUES(@def_ID,'WPN','Work Permit No','Admin',CURRENT_TIMESTAMP,'Active')
+INSERT INTO Global_Lookup_Data(Def_ID,Name,[Description],Create_By,Create_On,Record_Status)
+VALUES(@def_ID,'MIC','Malaysian I/C','Admin',CURRENT_TIMESTAMP,'Active')
+INSERT INTO Global_Lookup_Data(Def_ID,Name,[Description],Create_By,Create_On,Record_Status)
+VALUES(@def_ID,'PPN','Passport No','Admin',CURRENT_TIMESTAMP,'Active')
+GO
+
+
+
+DELETE FROM Page WHERE Page_Url = '/Payroll/IR8AGenerateFile'
+GO
+INSERT INTO page(Page_Url,Module_Detail_ID,Create_By,Create_On)
+VALUES('/Payroll/IR8AGenerateFile',5,'Admin',CURRENT_TIMESTAMP)
+GO
+DELETE FROM Page_Role WHERE Page_ID IN(SELECT Page_ID FROM Page where Page_Url = '/Payroll/IR8AGenerateConfig')
+GO
+DELETE FROM Page WHERE Page_Url = '/Payroll/IR8AGenerateConfig'
+GO
+INSERT INTO page(Page_Url,Module_Detail_ID,Create_By,Create_On)
+VALUES('/Payroll/IR8AGenerateConfig',5,'Admin',CURRENT_TIMESTAMP)
+GO
+
+
+DELETE FROM Page_Role WHERE Page_ID IN(SELECT Page_ID FROM Page where Page_Url = '/Payroll/IR8AGenerateConfig')
+GO
+INSERT INTO Page_Role(User_Role_ID,Page_ID,Create_By,Create_On) 
+SELECT 5,Page_ID,'Admin',CURRENT_TIMESTAMP FROM Page where Page_Url = '/Payroll/IR8AGenerateConfig'
+GO
+DELETE FROM Page_Role WHERE Page_ID IN(SELECT Page_ID FROM Page where Page_Url = '/Payroll/IR8AGenerateFile')
+GO
+INSERT INTO Page_Role(User_Role_ID,Page_ID,Create_By,Create_On) 
+SELECT 5,Page_ID,'Admin',CURRENT_TIMESTAMP FROM Page where Page_Url = '/Payroll/IR8AGenerateFile'
+GO
+
+/*Added by Jane 17/11/2015 */
+alter table Company_Logo
+add Company_ID int null
+
+select 'update Company_Logo set Company_ID = ' + CONVERT(varchar(10), p.Company_ID) + ' where Company_Logo_ID =''' + CONVERT(varchar(50), a.Company_Logo_ID) + ''';'
+from Company_Details p
+inner join Company_Logo a on p.Company_Logo_ID = a.Company_Logo_ID
+
+alter table Company_Details
+drop constraint fk_Company_Details_Company_Logo
+
+alter table Company_Details 
+drop column Company_Logo_ID
+
+alter table Company_Logo
+add Constraint fk_Company_Logo_Company foreign key (Company_ID) references Company (Company_ID)
+
+--------------------------
+alter table Upload_Document
+add Leave_Application_Document_ID int null
+
+select 'update Upload_Document set Leave_Application_Document_ID = ' + CONVERT(varchar(10), p.Leave_Application_Document_ID) + ' where Upload_Document_ID =''' + CONVERT(varchar(50), a.Upload_Document_ID) + ''';'
+from  Leave_Application_Document p
+inner join Upload_Document a on p.Upload_Document_ID = a.Upload_Document_ID
+
+alter table Leave_Application_Document
+drop constraint fk_Leave_Application_Document_Upload_Document
+
+alter table Leave_Application_Document 
+drop column Upload_Document_ID
+
+alter table Upload_Document
+add Constraint fk_Upload_Document_Leave_Application_Document foreign key (Leave_Application_Document_ID) references Leave_Application_Document (Leave_Application_Document_ID)
+
+-----------------
+alter table User_Profile_Photo
+drop constraint fk_User_Profile_Photo_Company
+alter table User_Profile_Photo
+drop column Company_ID 
+
+alter table User_Profile_Photo
+add Profile_ID int null
+
+select 'update User_Profile_Photo set Profile_ID = ' + CONVERT(varchar(10), p.Profile_ID) + ' where User_Profile_Photo_ID =''' + CONVERT(varchar(50), a.User_Profile_Photo_ID) + ''';'
+from User_Profile p
+inner join User_Profile_Photo a on p.User_Profile_Photo_ID = a.User_Profile_Photo_ID
+
+alter table User_Profile
+drop constraint fk_User_Profile_Photo
+
+alter table User_Profile 
+drop column User_Profile_Photo_ID
+
+alter table User_Profile_Photo
+add Constraint fk_User_Profile_Photo_Profile foreign key (Profile_ID) references User_Profile (Profile_ID)
+
+
+-----------------
+select * from Upload_Receipt
+alter table Upload_Receipt
+add Expenses_Application_Document_ID int null
+
+select 'update Upload_Receipt set Expenses_Application_Document_ID = ' + CONVERT(varchar(10), p.Expenses_Application_Document_ID) + ' where Upload_Receipt_ID =''' + CONVERT(varchar(50), a.Upload_Receipt_ID) + ''';'
+from  Expenses_Application_Document p
+inner join Upload_Receipt a on p.Upload_Receipt_ID = a.Upload_Receipt_ID
+
+
+alter table Expenses_Application_Document
+drop constraint fk_Expenses_Application_Document_Upload_Receipt
+
+
+alter table Expenses_Application_Document 
+drop column Upload_Receipt_ID
+
+alter table Upload_Receipt
+add Constraint fk_Upload_Receipt_Expenses_Application_Document foreign key (Expenses_Application_Document_ID) references Expenses_Application_Document (Expenses_Application_Document_ID)
+
+---------------------------------------
+
+drop table Product_Profile_Photo
+
+
+
+alter table POS_receipt
+add Surcharge_Amount decimal(18,2) null
+alter table POS_receipt
+add Surcharge_Percen decimal(18,2) null
+
+alter table POS_Receipt_Payment
+add Surcharge_Amount decimal(18,2) null
+alter table POS_Receipt_Payment
+add Surcharge_Percen decimal(18,2) null
+
+alter table POS_Receipt
+alter column Service_Charge_Rate decimal(18,2)
+
+
+drop table PREDT
+
+alter table POS_Terminal
+add IP_Address varchar(50) null
+
+alter table Tax
+drop column Service_Charge_Tax
+
+alter table Tax
+add Service_Charge_Percen decimal(18,2) null
+
+alter table Tax
+add Surcharge_Percen decimal(18,2) null
+
+alter table POS_Receipt_Configuration
+drop column Surcharge_Percen
+
+alter table POS_Receipt_Configuration
+drop column Surcharge_Include
+
+alter table POS_Receipt_Configuration
+drop column Service_Charge_Include
+
+alter table POS_Receipt
+add Is_Uploaded bit null
+
+alter table POS_Receipt_Payment
+add Is_Uploaded bit null
+
+alter table POS_Products_Rcp
+add Is_Uploaded bit null
+
+alter table Inventory_Transaction
+add Is_Uploaded bit null
+
+alter table POS_Terminal
+add Is_Uploaded bit null
+
+alter table POS_Shift
+add Is_Uploaded bit null
+
+alter table Company_Details
+drop constraint fk_Company_Details_Register_By
+
+alter table Company_Details
+drop column Register_By
+
+alter table POS_Receipt_Payment
+add Receipt_Local_ID varchar(50) null
+
+alter table POS_Products_Rcp
+add Receipt_Local_ID varchar(50) null
+
+alter table Inventory_Transaction
+add Receipt_Local_ID varchar(50) null
+
+CREATE TABLE [dbo].[Product_RelatedProduct] (
+[Related_ID] int IDENTITY(1, 1) NOT NULL,
+[Based_Product_ID] int NOT NULL,
+[Related_Product_ID] int NOT NULL,
+[Related_Product_Code] varchar(50) NULL,
+[Related_Product_Name] varchar(500) NULL,
+[Update_On] datetime NULL,
+[Update_By] varchar(150) NULL,
+Constraint pk_Product_RelatedProduct primary key (Related_ID)
+)
+
+CREATE TABLE [dbo].[SBS_No_Pattern] (
+[Pattern_ID] int IDENTITY(1, 1) NOT NULL,
+[Company_ID] int NULL,
+[Ref_Count] int NULL,
+[Pattern_Type] varchar(100) NULL,
+[Create_By] varchar(150) NULL,
+[Create_On] datetime NULL,
+[Update_By] varchar(150) NULL,
+[Update_On] datetime NULL,
+Constraint pk_SBS_No_Pattern primary key (Pattern_ID),
+constraint fk_SBS_No_Pattern_Company foreign key (Company_ID) references Company(Company_ID)
+)
+
+alter table Company_Details
+add Is_Sandbox bit null
+
+
+alter table POS_Receipt
+add Is_Latest bit null
+
+alter table POS_Receipt_Payment
+add Is_Latest bit null
+
+alter table POS_Products_Rcp
+add Is_Latest bit null
+
+alter table Inventory_Transaction
+add Is_Latest bit null
+
+alter table POS_Terminal
+add Is_Latest bit null
+
+alter table POS_Shift
+add Is_Latest bit null
+
+alter table POS_Receipt_Payment
+add  Create_By    VARCHAR(150) NULL,
+ Create_On    DATETIME, 
+ Update_By	varchar (150)	null,
+Update_On	Datetime	null
+
+
+
+/*----Added by sun 11/01/2015 ---*/
+
+GO
+CREATE TABLE [dbo].[Exchange] 
+   ([Exchange_ID] 			    INT IDENTITY (1, 1) NOT NULL,
+        [Fiscal_Year]				INT             NULL,
+		[Record_Status]			    VARCHAR (50)	NULL,
+		[Create_By]					VARCHAR (150)   NULL,
+		[Create_On]					DATETIME        NULL,
+		[Update_By]					VARCHAR (150)   NULL,
+		[Update_On]					DATETIME        NULL,
+	CONSTRAINT [pk_Exchange] PRIMARY KEY CLUSTERED ([Exchange_ID] ASC))
+
+
+GO
+CREATE TABLE  [dbo].[Exchange_Currency]
+   ( [Exchange_Currency_ID]    	INT IDENTITY (1, 1) NOT NULL,
+        [Exchange_ID]				INT             NULL,
+ 		[Currency_ID]				INT             NULL,
+  		[Exchange_Period]			VARCHAR (150)   NULL, 
+	CONSTRAINT [pk_Exchange_Currency] PRIMARY KEY CLUSTERED ([Exchange_Currency_ID] ASC),
+    CONSTRAINT [fk_Exchange_Currency] FOREIGN KEY ([Exchange_ID]) REFERENCES [dbo].[Exchange] ([Exchange_ID]))
+
+
+GO
+CREATE TABLE  [dbo].[Exchange_Rate]
+   ( [Exchange_Rate_ID]			INT IDENTITY (1, 1) NOT NULL,
+        [Exchange_Currency_ID]		INT					NULL,
+        [Rate]						DECIMAL (18, 2)		NULL,
+		[Exchange_Period]			VARCHAR (150)       NULL,
+		[Exchange_Date]				DATETIME			NULL,
+		[Exchange_Month]			VARCHAR (150)       NULL,
+  CONSTRAINT [pk_Exchange_Rate] PRIMARY KEY CLUSTERED ([Exchange_Rate_ID] ASC),
+  CONSTRAINT [fk_Exchange_Rate] FOREIGN KEY ([Exchange_Currency_ID]) REFERENCES [dbo].[Exchange_Currency] ([Exchange_Currency_ID]))
+
+
+   alter table POS_Receipt
+  drop constraint fk_POS_Receipt_POS_Terminal
+    
+  alter table POS_Receipt
+  drop column Terminal_ID
+
+
+
+  /*----Added by sun 20/01/2015 ---*/
+  GO
+ALTER TABLE [dbo].[Exchange]
+    ADD [Company_ID] int  NULL;
+	
+alter table Exchange_Rate
+	alter column Exchange_Month int  NULL;
+
+alter table Expenses_Config
+	add Is_Accumulative bit null
+
+
+	alter table ETIRA8
+add Contribution_With_Singapore decimal(18,2) null
+
+
+alter table ETIRA8
+add Contribution_With_Name varchar(300) null
+
+alter table ETIRA8
+add Contribution_With_Madatory bit null
+
+alter table ETIRA8
+add Contribution_With_Establishment bit null
+
+alter table ETIRA8
+add Remission_Income decimal(18,2) null
+
+alter table ETIRA8
+add Non_Tax_Income decimal(18,2) null
+
+alter table PRM
+add No_Of_Hours decimal(18,2) null
+
+alter table Page
+	add Page_Attempt int  NULL;
+
+alter table Leave_Application_Document
+add Weeks_Taken decimal(18,2) null
+
+alter table Leave_Application_Document
+add Relationship_ID int null
+
+ALTER TABLE [dbo].[Leave_Application_Document] WITH NOCHECK
+    ADD CONSTRAINT [fk_Leave_Application_Document_Child] FOREIGN KEY ([Relationship_ID]) REFERENCES [dbo].[Relationship] ([Relationship_ID]);
+
+alter table Leave_Config
+add Leave_Config_Parent_ID int null
+
+alter table Leave_Config
+add constraint  fk_Leave_Config_Parent  FOREIGN KEY ([Leave_Config_Parent_ID]) REFERENCES [dbo].[Leave_Config] ([Leave_Config_ID]);
+
+
+
+/*----------Added by sun  08/02/2016  ---*/
+GO
+CREATE TABLE  [dbo].[Notification_Scheduler]
+	  ( [Notification_Scheduler_ID]			INT IDENTITY (1, 1) NOT NULL,
+	  	[Company_ID]				INT					NULL,
+		[Notice_Type]				VARCHAR (150)       NULL,
+	    [Trigger_Set_Up]			BIT					NULL,
+		[Trigger_Period]			VARCHAR (50)        NULL,
+	    [Start_Time]				TIME				NULL,
+		[Start_Date]				DATETIME			NULL,
+		[Recur_Every_Days]			INT					NULL,
+		[Recur_Every_Weeks]			INT					NULL,
+		[Selected_Sunday]			BIT					NULL,
+		[Selected_Monday]			BIT					NULL,
+		[Selected_Tuesday]			BIT					NULL,
+		[Selected_Wednesday]		BIT					NULL,
+		[Selected_Thursday]			BIT					NULL,
+		[Selected_Friday]			BIT					NULL,
+		[Selected_Saturday]			BIT					NULL,
+		[Selected_Months]			INT					NULL,
+		[Selected_Days]				VARCHAR (150)       NULL,
+		[Create_By]					VARCHAR (150)		NULL,
+		[Create_On]					DATETIME			NULL,
+		[Update_By]					VARCHAR (150)		NULL,
+		[Update_On]					DATETIME			NULL,
+	CONSTRAINT [pk_Notification_Scheduler] PRIMARY KEY CLUSTERED ([Notification_Scheduler_ID] ASC),
+	CONSTRAINT [fk_Notification_Scheduler_Company] FOREIGN KEY ([Company_ID]) REFERENCES [dbo].[Company] ([Company_ID]))
+
+
+/*----------Added by sun  15/02/2016  ---*/
+GO
+alter table Request
+	add Leave_Application_Document_ID int null
+
+alter table Leave_Application_Document
+	add Cancel_Status varchar(50)  null
+
+alter table Leave_Application_Document
+	add Request_Cancel_ID int null
+      
+
+alter table Expenses_Application
+	add Cancel_Status varchar(50)  null
+
+alter table Expenses_Application
+	add Request_Cancel_ID int null
+
+USE [SBS2DB]
+GO
+
+/****** Object:  Table [dbo].[Promotion_Codes]    Script Date: 4/3/2016 4:53:18 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+SET ANSI_PADDING ON
+GO
+
+CREATE TABLE [dbo].[Promotion_Codes](
+	[Promotion_Code_ID] [int] IDENTITY(1,1) NOT NULL,
+	[Promotion_ID] [int] NOT NULL,
+	[Code_Type] [varchar](10) NULL,
+	[Code] [varchar](50) NULL,
+	[Amount_Type] [varchar](1) NULL,
+	[Amount] [decimal](18, 2) NULL,
+	[Usage_Count] [int] NULL,
+	[Create_Date] [datetime] NULL,
+	[Update_Date] [datetime] NULL,
+	[Status] [varchar](15) NULL,
+ CONSTRAINT [PK_Promotion_Codes] PRIMARY KEY CLUSTERED 
+(
+	[Promotion_Code_ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+
+SET ANSI_PADDING OFF
+GO
+
+ALTER TABLE [dbo].[Promotion_Codes]  WITH CHECK ADD  CONSTRAINT [FK_Promotion_Codes_Promotion] FOREIGN KEY([Promotion_ID])
+REFERENCES [dbo].[Promotion] ([Promotion_ID])
+GO
+
+ALTER TABLE [dbo].[Promotion_Codes] CHECK CONSTRAINT [FK_Promotion_Codes_Promotion]
+GO
+
+ALTER TABLE dbo.Promotion 
+ADD Use_Promo_Code bit NULL, 
+Promo_Code varchar(50) NULL;
+
+ALTER TABLE dbo.Promotion 
+DROP COLUMN 
+Coupon, Coupon_Code;
+
+alter table Purchase_Order
+	add Request_ID int null
+
+alter table Purchase_Order
+	add Cancel_Status varchar(50)  null
+
+alter table Purchase_Order
+	add Request_Cancel_ID int null
+
+alter table Purchase_Order
+alter column Overall_Status varchar(50) null
+
+
+alter table Inventory_Transaction
+add Doc_ID int null
+alter table Inventory_Location 
+add Branch_ID int null
+alter table Inventory_Location 
+add CONSTRAINT fk_Inventory_Location1 FOREIGN KEY (Branch_ID) REFERENCES Branch(Branch_ID)
+
+alter table Inventory_Location 
+add Record_Status varchar(50) null
+
+alter table Inventory_Transaction 
+add Branch_ID int null
+alter table Inventory_Transaction 
+add CONSTRAINT fk_Inventory_Transaction1 FOREIGN KEY (Branch_ID) REFERENCES Branch(Branch_ID)
+
+
+alter table [Receive]
+add Currency_ID int null;
+alter table [Receive]
+add constraint fk_Currency_ID FOREIGN KEY ([Currency_ID]) REFERENCES Currency(Currency_ID);
+
+alter table Receive
+add Order_Date datetime null;
+
+alter table Receive
+add Delivery_Date datetime null
+
+alter table Receive
+add Overall_Status varchar(50) null
+
+alter table Receive
+add Is_Back_To_Back bit null;
+
+alter table Receive
+add Address varchar(500) null;
+
+alter table Withdraw
+add Customer_Company_ID	int	null
+alter table Withdraw
+add constraint fk_Withdraw4 FOREIGN KEY ([Customer_Company_ID]) REFERENCES Customer_Company(Customer_Company_ID);
+
+alter table Withdraw
+add Payment_Term	int	null
+alter table Withdraw
+add constraint fk_Withdraw5 FOREIGN KEY ([Payment_Term]) REFERENCES Global_Lookup_Data(Lookup_Data_ID);
+
+alter table Withdraw
+add Sale_Order_Date	datetime	null
+
+alter table Withdraw
+add Currency_ID	int	null
+alter table Withdraw
+add constraint fk_Withdraw6 FOREIGN KEY ([Currency_ID]) REFERENCES Currency(Currency_ID);
+
+alter table Withdraw
+add Shipping_Date	datetime	null
+alter table Withdraw
+add Shipping_Required	bit	null
+alter table Withdraw
+add Shipping_Address	varchar (500)	null
+
+alter table Withdraw
+add Inventory_Location_ID	int	null
+alter table Withdraw
+add constraint fk_Withdraw7 FOREIGN KEY ([Inventory_Location_ID]) REFERENCES Inventory_Location(Inventory_Location_ID);
+
+alter table Withdraw
+alter column Sale_Order_ID	int	null
+alter table Withdraw
+alter column Company_ID	int	null
+
+
+
+create table User_Session_Data
+(
+User_Session_ID int identity(1,1) not null,
+Session_ID varchar(150) null,
+Profile_D int null,
+Session_Data varchar(max) null,
+Actived bit null,
+Create_By varchar(150) null,
+Create_On datetime null,
+Update_By varchar(150) null,
+Update_On datetime null,
+constraint pk_User_Session_Data Primary KEY (User_Session_ID)
+)
+
+
+/*----Added by sun 19-04-2016 ----*/
+alter table Employment_History
+add Days DECIMAL (18, 2) NULL
+
+SELECT --t.name AS tablename,
+       --c.[name] colname,
+       --tp.[name] type,
+       --c.max_length,
+       --(CASE WHEN pk.pk IS NOT NULL THEN pk.pk ELSE cons.[name] END) AS [key],
+       --cons.fktable, cons.fkcolname,
+         'alter table ['
+       + t.[name]
+       + '] alter column ['
+       + c.name
+       + '] nvarchar('
+       + convert(varchar(10),  c.max_length)
+       + ') null;'
+  FROM sys.tables t
+       INNER JOIN sys.columns c
+          ON c.[object_id] = t.[object_id]
+       INNER JOIN sys.types tp
+          ON c.system_type_id = tp.system_type_id
+       LEFT JOIN (SELECT con.colid,
+                         o.[parent_object_id],
+                         o.[name],
+                         fk.[name] AS fktable,
+                         pkc.[name] AS fkcolname
+                    FROM sys.sysconstraints con
+                         INNER JOIN sys.objects o
+                            ON con.constid = o.[object_id]
+                         LEFT JOIN sys.sysforeignkeys f
+                            ON f.constid = con.constid
+                         LEFT JOIN sys.objects fk
+                            ON f.rkeyid = fk.[object_id]
+                         LEFT JOIN sys.columns pkc
+                            ON pkc.[object_id] = fk.[object_id]
+                               AND pkc.column_id = 1) cons
+          ON cons.parent_object_id = t.[object_id]
+             AND c.column_id = cons.colid
+       LEFT JOIN (SELECT i.name pk, i.object_id, icol.column_id
+                    FROM    sys.indexes i
+                         INNER JOIN
+                            sys.index_columns icol
+                         ON icol.object_id = i.object_id
+                            AND i.index_id = icol.index_id
+                   WHERE i.is_primary_key = 1) pk
+          ON pk.[object_id] = t.[object_id] AND pk.column_id = c.column_id
+ WHERE     tp.[name] <> 'sysname'
+       AND tp.[name] = 'varchar'
+       AND c.name <> 'create_by'
+       AND c.name <> 'update_by'
+       AND c.name <> 'Record_Status'
+       AND c.name <> 'Status'
+       AND c.name <> 'Approval_Type'
+        AND c.name <> 'Module'
+        AND c.name <> 'Action'
+       AND c.name not like '%Email%'
+       AND c.name not like '%Password%'
+       AND c.name not like '%A7%'
+        AND c.name <> 'URL'
+         AND c.name <> 'APIUsername'
+         AND c.name <> 'APISignature'
+       and c.max_length > 10
+       and pk.pk is null
+       and  cons.fktable is null
+       and  cons.fkcolname is null
+       AND t.name NOT IN
+              ('__MigrationHistory',
+               'AspNetRoles',
+               'AspNetUserClaims',
+               'AspNetUserLogins',
+               'AspNetUserRoles',
+               'AspNetUsers',
+               'sysdiagrams')
+ORDER BY t.name, c.column_id
+
+drop table dbo.Extra_Donation
+drop table dbo.Sale_Order_Approval
+drop table dbo.Product_Size
+drop table dbo.Product_Color
+
+alter table Designation
+drop constraint fk_Designation_Employee_Grading;
+alter table Designation
+drop column Employee_Grading_ID;
+drop table dbo.Employee_Grading;
+
+drop table dbo.Conversion_Item
+drop table dbo.Currency_Conversion
+
+drop table dbo.TM_Approval
+drop table dbo.Menu_Assign_Module
+
+alter table Page_Role
+drop constraint fk_Page_Role_Page_Menu_Page
+alter table Page_Role
+drop column Menu_Page_Code
+
+drop table dbo.Menu_Page
+drop table dbo.Menu
+alter table [SubScription]
+drop constraint fk_Subscription_Module
+alter table [SubScription]
+drop column Module_Code
+
+drop table dbo.Module_Detail
+drop table dbo.Module
+drop table Extra_Donation
+
+drop table PREDT
+
+
+drop table Time_Transaction
+drop table Time_Arrangement
+
+alter table Expenses_Application
+add Supervisor int null
+
+alter table Company_Details
+add A7_Group_ID varchar(50) null;
+
+alter table Vendor
+add Taxing_Scheme int null
+
+/*----Added by sun 31-05-2016 ----*/
+
+CREATE TABLE [dbo].[Customer](
+	[Customer_ID] [int] IDENTITY(1,1) NOT NULL,
+	[Company_ID] [int] NULL,
+	[Customer_No] [varchar](150) NULL,
+	[Customer_Name] [varchar](300) NULL,
+	[Person_In_Charge] [varchar](50) NULL,
+	[Email] [varchar](50) NULL,
+	[Mobile_Phone] [varchar](100) NULL,
+	[Office_Phone] [varchar](100) NULL,
+	[Website] [varchar](150) NULL,
+	[Billing_Address] [varchar](500) NULL,
+	[Billing_Street] [varchar](500) NULL,
+	[Billing_City] [varchar](500) NULL,
+	[Billing_Country_ID] [int] NULL,
+	[Billing_State_ID] [int] NULL,
+	[Billing_Postal_Code] [varchar](10) NULL,
+    [Record_Status]		 [varchar](50) NULL,
+	[Create_By] [varchar](150) NULL,
+	[Create_On] [datetime] NULL,
+	[Update_By] [varchar](150) NULL,
+	[Update_On] [datetime] NULL,
+CONSTRAINT [pk_Customer] PRIMARY KEY CLUSTERED ([Customer_ID] ASC),
+CONSTRAINT [fk_Customer_Company] FOREIGN KEY ([Company_ID]) REFERENCES [dbo].[Company] ([Company_ID]),
+CONSTRAINT [fk_Customer_Country] FOREIGN KEY ([Billing_Country_ID]) REFERENCES [dbo].[Country] ([Country_ID]),
+CONSTRAINT [fk_Customer_State] FOREIGN KEY ([Billing_State_ID]) REFERENCES [dbo].[State] ([State_ID]))
+
+GO
+
+CREATE TABLE [dbo].[Job_Cost](
+	[Job_Cost_ID] [int] IDENTITY(1,1) NOT NULL,
+	[Company_ID] [int] NULL,
+	[Indent_No] [varchar](150) NULL,
+	[Indent_Name] [varchar](300) NULL,
+	[Customer_ID] [int] NULL,
+    [Date_Of_Date] [datetime] NULL,
+	[Sell_Price] [decimal](18,2) NULL ,
+	[Delivery_Date] [datetime] NULL,
+	[Term_Of_Deliver] [decimal](18,2) NULL ,
+	[Warranty_Term] [decimal](18,2) NULL ,
+	[Costing] [decimal](18,2) NULL ,
+	[Record_Status]	[varchar](50) NULL,
+	[Create_By] [varchar](150) NULL,
+	[Create_On] [datetime] NULL,
+	[Update_By] [varchar](150) NULL,
+	[Update_On] [datetime] NULL,
+CONSTRAINT [pk_Job_Cost] PRIMARY KEY CLUSTERED ([Job_Cost_ID] ASC),
+CONSTRAINT [fk_Job_Cost_Company] FOREIGN KEY ([Company_ID]) REFERENCES [dbo].[Company] ([Company_ID]),
+CONSTRAINT [fk_Job_Cost_Customer] FOREIGN KEY ([Customer_ID]) REFERENCES [dbo].[Customer] ([Customer_ID]))
+
+GO
+CREATE TABLE [dbo].[Job_Cost_Payment_Term](
+	[Job_Cost_PayMent_Term_ID] [int] IDENTITY(1,1) NOT NULL,
+	[Job_Cost_ID] [int] NULL,
+	[Payment] [decimal](18,2) NULL ,
+	[Payment_Type] [varchar](10) NULL,
+	[Invoice_No] [varchar](150) NULL,
+    [Invoice_Date] [datetime] NULL,
+	[Note] [varchar](300) NULL,
+	[Actual_Price] [decimal](18,2) NULL ,
+	[Create_By] [varchar](150) NULL,
+	[Create_On] [datetime] NULL,
+	[Update_By] [varchar](150) NULL,
+	[Update_On] [datetime] NULL,
+CONSTRAINT [pk_Job_Cost_Payment_Term] PRIMARY KEY CLUSTERED ([Job_Cost_Payment_Term_ID] ASC),
+CONSTRAINT [fk_Job_Cost_PayMent_Term_Job_Cost] FOREIGN KEY ([Job_Cost_ID]) REFERENCES [dbo].[Job_Cost] ([Job_Cost_ID]))
+
+
+alter table Expenses_Application_Document
+add Job_Cost_ID int null;
+
+alter table Expenses_Application_Document
+add constraint fk_Expenses_Application_Document_Job_Cost FOREIGN KEY ([Job_Cost_ID]) REFERENCES Job_Cost(Job_Cost_ID);
+
+alter table Expenses_Application_Document
+add Withholding_Tax [decimal](18,2) null;
+
+/*----init date by Jane 16-06-2016 ----*/
+
+alter table Customer
+add Fax nvarchar(100) null
+
+create table Customer_Temp
+(
+Customer_No nvarchar(100) null,
+Customer_Name nvarchar(300) null,
+Address nvarchar(500) null,
+Biling_Postal_Code varchar(10) null,
+Office_Phone varchar(100) null,
+Fax Varchar(100) null
+)
+
+insert into Customer (
+Company_ID,Customer_No,Customer_Name,Billing_Address,Billing_Postal_Code,Office_Phone,Fax , Record_Status,create_by, create_on, update_by, update_on
+)
+select 4102,Customer_No,Customer_Name,Billing_Address,Billing_Postal_Code,Office_Phone,Fax ,'Active'	
+from Customer_Temp
+
+insert into Job_Cost (Company_ID, Indent_No, Indent_Name, Sell_Price,Customer_ID,Record_Status,create_by, create_on, update_by, update_on)
+select 4102, Indent_No,Indent_Name,Sell_Price ,
+(select  Customer_ID from Customer where lower(Customer.Customer_Name) like '%' + lower(j.Client_Name) + '%'),
+'Active','admin.sbs@bluecube.com.sg', getdate(),'admin.sbs@bluecube.com.sg',getdate()
+from Job_Cost_Temp j
+
+/*----Added by sun 28-06-2016 ----*/
+
+GO
+ALTER TABLE [dbo].[Job_Cost]
+    ADD [Using] bit NULL;
+
+Create Table Expenses_Config_Budget
+(
+Budget_ID int identity(1,1) not null,
+Expenses_Config_ID int null,
+Job_Cost_ID int null,
+Budget decimal(18,2) null,
+constraint pk_Expenses_Config_Budget Primary KEY (Budget_ID),
+constraint fk_Expenses_Config_Budget_1 foreign key (Expenses_Config_ID) references Expenses_Config(Expenses_Config_ID),
+constraint fk_Expenses_Config_Budget_2 foreign key (Job_Cost_ID) references Job_Cost(Job_Cost_ID)
+)
+
+
+/*----Added by sun 09-09-2016 ----*/
+ GO
+ALTER TABLE[dbo].[User_Authentication]
+    ADD [Is_Email] bit NULL;
+	
+  GO
+ALTER TABLE [dbo].[User_Profile]
+    ADD [Is_Email] bit NULL;
+
+  GO
+ALTER TABLE [dbo].[Leave_Config]
+    ADD [Is_Accumulative] bit NULL;
+
+   GO
+ALTER TABLE [dbo].[Leave_Default]
+    ADD [Is_Accumulative] bit NULL;
+
+/*----Added by sun 28-11-2016 ----*/
+
+GO
+ALTER TABLE [dbo].[Expenses_Application_Document]
+    ADD [Tax_Type] varchar(20) NULL;
+
+GO
+ALTER TABLE [dbo].[Employment_History]
+    ADD [CL_Lunch] [bit] NULL;
+GO
+ALTER TABLE [dbo].[Employment_History]
+    ADD [ST_Lunch_Time] [time](7) NULL;
+GO
+ALTER TABLE [dbo].[Employment_History]
+    ADD [ET_Lunch_Time] [time](7) NULL;
+
+    /*----Added by sun 02-12-2016 ----*/
+GO
+ALTER TABLE [dbo].[Expenses_Application]
+    ADD [Company_ID] INT NULL;
+
+ALTER TABLE [dbo].[Expenses_Application] WITH NOCHECK
+ADD CONSTRAINT [fk_Expenses_Application_Company] FOREIGN KEY ([Company_ID]) REFERENCES [dbo].[Company] ([Company_ID]),
+
+alter table Expenses_Application
+drop constraint fk_Expenses_Application_Company
+alter table Expenses_Application
+drop column Company_ID
+
+
+  /*----Added by sun 22-12-2016 ----*/
+
+alter table Expenses_Application_Document
+add Withholding_Tax_Amount [decimal](18,2) null;
+
+alter table Expenses_Application_Document
+add Tax_Amount [decimal](18,2) null;
+
+alter table Expenses_Application_Document
+add Tax_Amount_Type [varchar](10) NULL
+
+alter table Expenses_Application_Document
+add Withholding_Tax_Type [varchar](10) NULL
+
+
+
+/*----Added by sun 08-02-2016 ----*/
+alter table Company_Details  
+add Leave_Status_Date [datetime] NULL,
+
+alter table Company_Details  
+add Leave_Start_Date [datetime] NULL
+
+UPDATE Company_Details  SET Leave_Start_Date = Registration_Date;
+
+/*----Added by sun 09-02-2016 ----*/
+alter table PRM
+add Total_Allowance_Basic_Salary decimal(18,2) null
+
+
+
+
+
+
+/*----Added by sun 05-04-2017 ----*/
+
+ALTER TABLE [dbo].[Approver]
+    ADD [Approval_Flow_Type] [varchar](50) NULL;
+
+ALTER TABLE [dbo].[Request]
+    ADD [Is_Indent] [bit] NULL;
+
+ALTER TABLE [dbo].[Task_Assignment]
+    ADD [Is_Indent] [bit] NULL;
+
+ALTER TABLE [dbo].[Task_Assignment]
+    ADD [Indent_Closed] [bit] NULL;
+
+
+
+ALTER TABLE [dbo].[Company_Details]
+    ADD [Is_Indent] [bit] NULL;
+
+
+ALTER TABLE [dbo].[Job_Cost]
+    ADD [Supervisor] [int] NULL;
+
+
+
+CREATE TABLE [dbo].[Email_Notification] (
+  [Email_ID] INT        IDENTITY (1, 1) NOT NULL,
+  [Company_ID]  [int]          NULL,
+  [Sender]  [varchar] (300) NULL,
+  [Receiver] [varchar] (300) NULL,
+  [CC] [varchar] (500) NULL,
+  [BCC] [varchar] (500) NULL,
+  [Subject]   [nvarchar] (300) NULL,
+  [Message]   [nvarchar] (Max)   NULL,
+  [Exception_Message] [varchar] (Max) NULL,
+  [Status]   [varchar](150) NULL,
+  [Create_By]   [varchar](150) NULL,
+  [Create_On]   [datetime] NULL,
+  [Update_By]   [varchar](150) NULL,
+  [Update_On]   [datetime] NULL,  
+CONSTRAINT [pk_Email_Notification] PRIMARY KEY CLUSTERED ([Email_ID] ASC),
+CONSTRAINT [fk_Email_Notification1] FOREIGN KEY ([Company_ID]) REFERENCES [dbo].[Company] ([Company_ID])
+);
+
+CREATE TABLE [dbo].[Email_Attachment] (
+ [Email_Attachment_ID] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
+ [Email_ID]  [int]          NULL,
+ [Attachment_File_Name] [nvarchar](300) NULL,
+ [Attachment_File]  [varbinary](max) FILESTREAM ,
+CONSTRAINT [pk_Email_Attachment] PRIMARY KEY CLUSTERED ([Email_Attachment_ID] ASC),
+CONSTRAINT [fk_Email_Attachment1] FOREIGN KEY ([Email_ID]) REFERENCES [dbo].[Email_Notification] ([Email_ID])
+);
+
+ALTER TABLE [dbo].[Email_Notification]
+    ADD [Module] VARCHAR (50) NULL;
+
+
+/*----Added by sun 15-05-2017 ----*/
+ALTER TABLE Subscriber
+ALTER COLUMN Subscriber_Email [varchar] (300) NULL ;
+
+ALTER TABLE Subscriber
+ALTER COLUMN Subscribed_On  [datetime] NULL ;
+
+ALTER TABLE Subscriber
+ALTER COLUMN  Subscriber_Status [varchar](50) NULL,
+
+
+/*----Added by sun 26-05-2017 ----*/
+ALTER TABLE [dbo].[Expenses_Application]
+    ADD [Approver] VARCHAR (150) NULL;
+
+ALTER TABLE [dbo].[Expenses_Application]
+    ADD [Next_Approver] VARCHAR (150) NULL;

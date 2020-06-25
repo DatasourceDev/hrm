@@ -1,0 +1,32 @@
+﻿
+@{
+    ViewBag.Title = Resources.ResourceMain.Home;
+}
+
+@using (Html.BeginForm("Index", "Home", FormMethod.Post, new { @class = "form-horizontal validatable", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+  
+
+   
+
+    <div class="main-content">
+        <div class="container-fluid">
+            <div class="row-fluid">
+
+                <div class="area-top clearfix">
+                    <div class="pull-left header">
+                        <h3 class="title">
+                            <i class="icon-home"></i>
+                            @Resources.ResourceMain.Home
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+}
+

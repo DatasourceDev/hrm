@@ -1,0 +1,251 @@
+﻿@model Authentication.Models.UserViewModel
+@using Authentication.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSModel.Common;
+@using Authentication.Models;
+@using SBSResourceAPI;
+
+@{
+   ViewBag.Title = Resource.User;
+}
+<script type="text/javascript">
+
+   $(function () {
+      InitDatepicker();
+
+      var addRowLink = '<a href="@Url.Action("UserInfo", "User", new { pComID = EncryptUtil.Encrypt(Model.Company_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_C) })" class="btn btn-greensea  btn-sm add-row">@Resource.Add_New_User</a>'
+
+      InitDatatable('moduleDataTable', addRowLink, InitDatatableApplyLink({
+         name: "apply",
+         tabAction: null,
+         hasActive: true,
+         hasInactive: true,
+         hasDel: true
+      }), 1, 'asc');
+
+   })
+</script>
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+   <div class="pageheader">
+      <h2>@Resource.User<span></span></h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li class="active">@Resource.User</li>
+         </ol>
+      </div>
+   </div>
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+
+            @using (Html.BeginForm("User", "User", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+            {
+               @Html.AntiForgeryToken()
+
+               <section class="tile color transparent-black filter" id="secfilter">
+                  <div class="tile-header transparent">
+                     <h1 onclick="CollapseHeader(null)" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize filter" id="btncollapse"><i class="fa fa-search  color-white"></i></a>
+                     </div>
+                  </div>
+                  <div class="tile-body">
+                     <div class="row">
+                        <div class="col-md-6">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="search_Name" class="control-label">@Resource.Search</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" id="search_val" name="search_val" value="@Model.search_val">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.search_val)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-6">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Record_Status" class="control-label">@Resource.Status</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Record_Status" name="Record_Status">
+                                    @if (Model.statusList != null)
+                                    {
+                                       foreach (var row in Model.statusList)
+                                       {
+                                          if (Model.Record_Status == row.Value)
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                          }
+                                          else
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                          }
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Record_Status)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-6">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <button type="submit" class="btn btn-default">@Resource.Filter</button>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </section>
+               <section class="tile color transparent-black">
+                  <div class="tile-header transparent">
+                     <h1><strong>@Resource.User</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                     </div>
+                  </div>
+                  <div class="tile-body ">
+                     <div class="table-responsive">
+                        <table class="table table-datatable table-custom" id="moduleDataTable">
+                           <thead>
+                              <tr>
+                                 <th class="no-sort" style="width: 40px;">
+                                    <div class="checkbox check-transparent">
+                                       <input type="checkbox" value="1" id="chkallExpType">
+                                       <label for="chkallExpType"></label>
+                                    </div>
+                                 </th>
+                                 <th class="sort-alpha" style="width: 200px;">@Resource.Company_Name</th>
+                                 <th class="sort-alpha">@Resource.Full_Name</th>
+                                 <th class="sort-alpha">@Resource.Date_Of_Registration</th>
+                                 <th class="sort-alpha">@Resource.Login_Attempt</th>
+                                 <th class="sort-alpha">@Resource.Activate / @Resource.Status</th>
+                                 <th class="sort-alpha">@Resource.Last_Connection</th>
+                                 <th class="no-sort" style="width:110px;">@Resource.Action</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              @if (Model.UserList != null)
+                              {
+                                 var i = 0;
+                                 foreach (var row in Model.UserList)
+                                 {
+                                    var nameTemp = Model.CompanyList.Where(w => w.Company_ID == row.Company_ID).Select(w => w.Name).FirstOrDefault();
+
+                                    if (!string.IsNullOrEmpty(Model.search_val) && nameTemp != null)
+                                    {
+                                       if ((!nameTemp.Contains(Model.search_val)) && (!UserSession.GetUserName(row).Contains(Model.search_val)) && (!row.User_Authentication.Email_Address.Contains(Model.search_val.ToLower())))
+                                       {
+                                          continue;
+                                       }
+                                    }
+                                    else if (!string.IsNullOrEmpty(Model.search_val) && nameTemp == null)
+                                    {
+                                       if ((!UserSession.GetUserName(row).Contains(Model.search_val)) && (!row.User_Authentication.Email_Address.Contains(Model.search_val.ToLower())))
+                                       {
+                                          continue;
+                                       }
+                                    }
+
+                                    <tr>
+                                       <td>
+                                          <div class="checkbox check-transparent">
+                                             <input type="checkbox" value="@row.Profile_ID" name="Profile_IDs" id="Profile_IDs[@i]">
+                                             <label for="Profile_IDs[@i]"></label>
+                                          </div>
+                                       </td>
+
+                                       <td>
+                                          @if (row.Company_ID != null && nameTemp != null)
+                                          {
+                                             @nameTemp;
+                                          }
+                                       </td>
+                                       <td>
+                                          <span style="font-weight:700">@UserSession.GetUserName(row)</span>
+                                          <br />
+                                          <span style="color: rgb(144, 144, 144); ">@row.User_Authentication.Email_Address</span>
+                                       </td>
+
+                                       <td>@DateUtil.ToDisplayDateTime(row.Registration_Date)</td>
+                                       <td class="text-right">
+                                          @if (row.User_Authentication != null)
+                                          {
+                                             @row.User_Authentication.Login_Attempt.ToString("n0")
+                                          }
+                                       </td>
+                                       <td>
+                                          @if (row.User_Status != null && row.User_Authentication != null)
+                                          {
+                                             if (row.User_Authentication.Activated)
+                                             {
+                                                @Resource.Yes;
+                                             }
+                                             else
+                                             {
+                                                @Resource.No;
+                                             }
+                                             @:/
+
+                                             @StatusUtil.Get_Record_Status(row.User_Status)
+                                          }
+                                       </td>
+                                       <td>@DateUtil.ToDisplayDateTime(row.Latest_Connection)</td>
+                                       <td class="actions text-left">
+                                          @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                          {
+                                             <a href="@Url.Action("UserInfo", "User", new { pProID = EncryptUtil.Encrypt(row.Profile_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                          }
+                                          @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_D))
+                                          {
+                                             <a href="@Url.Action("UserInfo", "User", new { pProID = EncryptUtil.Encrypt(row.Profile_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_D) }) " onclick="return confirm('@Resource.Confirm_Delete_Msg');" title="@Resource.Delete">
+                                                <i class="fa fa-times-circle-o fa-2x"></i>
+                                             </a>
+                                          }
+                                       </td>
+                                    </tr>
+                                          i++;
+                                 }
+                              }
+                           </tbody>
+                        </table>
+                     </div>
+                  </div>
+               </section>
+            }
+         </div>
+      </div>
+   </div>
+}

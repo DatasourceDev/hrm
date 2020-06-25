@@ -1,0 +1,632 @@
+﻿@model  HR.Models.PayrollViewModels
+@using HR.Models;
+@using HR.Common;
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+
+@{
+   ViewBag.Title = @Resource.Payroll;
+}
+
+<script type="text/javascript">
+   $(function () {
+      var param = {
+         name: "process",
+         hasProcess: true,
+         hasConfirm: true
+      };
+      InitDatatable("#empDataTable", null, InitDatatableApplyLink(param), 1, 'asc');
+      InitCollapseHeader(true);
+   })
+
+   function StartTour() {
+      $('#btncollapse').click();
+      var strtitle = "Process the payroll";
+      var payTour = new Tour({
+         autoscroll: true,
+         storage: false,
+         steps: [
+         {
+            element: "#Tour_Process_Month",
+            title: strtitle,
+            content: "Default will be current month.Select the month name which you want to process the payroll.",
+            onNext: function () {
+            }
+         },
+         {
+            element: "#Process_Year",
+            title: strtitle,
+            content: "Default will be current year.Select the year which you want to process the payroll.",
+            onNext: function () {
+            }
+         },
+         {
+            element: "#btnFilter",
+            title: strtitle,
+            content: "Click on this button to apply the selected month and year.",
+            onNext: function () {
+            }
+         },
+         {
+            element: "#iEditBtn",
+            title: strtitle,
+            content: "Click on this button to process the payroll.",
+            onNext: function () {
+            }
+         }
+         ],
+         onEnd: function () {
+         }
+      });
+      payTour.init();
+      payTour.start();
+   }
+
+   function showComfirmModal(prm_id) {
+      $('#btnOpenDlgConfirm').get(0).click();
+      $("#hidprmid").val(prm_id);
+   }
+
+   $(function () {
+      $("#btnComfirm").click(function () {
+         ShowMask();
+         $('#btnClose').get(0).click();
+         var prmid = $("#hidprmid").val();
+         theForm.action = '@Url.Action("PayrollConfirm", "Payroll")' + '?pPRMID=' + prmid;
+         theForm.method = 'post';
+         theForm.submit();
+      });
+   });
+
+
+   //Added BY sun 20-08-2015
+   function ChkAll_Onchange() {
+      var chkall = $('#chkall').get(0);
+
+      var rowcount = $('#payrolldataTables > tbody >tr').length;
+      for (var i = 0; i < rowcount; i++) {
+         var chk = $('input[name="empIds"]').get(i);
+         if (chk != null) {
+            if (chkall.checked == true) {
+               chk.checked = true;
+            }
+            else {
+               chk.checked = false;
+            }
+         }
+      }
+   }
+
+   //Added BY sun 20-08-2015
+   function PrintCPFSubmission_Onclick() {
+      $("#btnPrintCPFSubmission").click(function () {
+         var File_Type = "";
+         if ($('input[name="File_Type"]:radio:checked').val() == "TXT") {
+             File_Type = "TXT";
+         }
+         if ($('input[name="File_Type"]:radio:checked').val() == "DTL") {
+             File_Type = "DTL";
+         }
+         if ($('input[name="File_Type"]:radio:checked').val() == "DAT") {
+             File_Type = "DAT";
+         }
+
+         var month = $("#Process_Month").val();
+         var year = $("#Process_Year").val();
+         theForm.action = '@Url.Action("PrintCPFSubmission", "Payroll")' + '?pFileType=' + File_Type;
+         theForm.method = 'post';
+         theForm.submit();
+      });
+      $('#modal-comfirm').modal('hide');
+   }
+
+   function checkValidation() {
+      var processMth = document.getElementById('CPF_ProcessMonth').value;
+      var processYr = document.getElementById('CPF_ProcessYear').value;
+      if (processMth == "-") {
+         alert('@Resource.The @Resource.Process_Month @Resource.Field @Resource.Is_Rrequired_Lower !');
+         return false;
+      }
+
+      if (processYr == "-") {
+         alert('@Resource.The @Resource.Process_Month @Resource.Field @Resource.Is_Rrequired_Lower !');
+         return false;
+      }
+
+      return true;
+   }
+
+</script>
+<div class="pageheader">
+   <h2> @Resource.Payroll</h2>
+   <div class="breadcrumbs">
+      <ol class="breadcrumb">
+         <li>@Resource.You_Are_Here</li>
+         <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+         <li class="active">@Resource.Payroll</li>
+      </ol>
+   </div>
+</div>
+<div class="main">
+   <div class="row">
+      <div class="col-md-12">
+         @if (Model.result != null && Model.result.Code != 0)
+         {
+            if (Model.result.Code < 0)
+            {
+               <div class="alert alert-red">
+                  @if (Model.result.Code == ERROR_CODE.ERROR_18_NO_PAYROLL_RECORDS)
+                  {
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  }
+                  else
+                  {
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  }
+               </div>
+            }
+            else if (Model.result.Code > 0)
+            {
+               if (Model.result.Code == ERROR_CODE.SUCCESS)
+               {
+                  if (string.IsNullOrEmpty(Model.result.Msg))
+                  {
+                     Model.result.Msg = new Success().getSuccess(ERROR_CODE.SUCCESS_CONFIRM);
+                  }
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code == ERROR_CODE.SUCCESS_GENERATE)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+
+            }
+         }
+         <section class="tile color transparent-black filter" id="secfilter">
+            <div class="tile-header transparent">
+               <h1 onclick="CollapseHeader(null)" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+               <div class="controls">
+                  <span class="label label-success tour-guide" onclick="StartTour();" style="cursor:pointer;">@Resource.Guide</span>
+                  <a href="#" class="minimize filter" id="btncollapse"><i class="fa fa-search  color-white"></i></a>
+               </div>
+            </div>
+            <div class="tile-body">
+               @using (Html.BeginForm("Payroll", "Payroll", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+               {
+                  <div class="row">
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <label for="sDepartment" class="control-label">@Resource.Department</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <select class="chosen-select chosen-transparent form-control" id="sDepartment" name="sDepartment">
+                                 @if (Model.departmentList != null)
+                                 {
+                                    foreach (var row in Model.departmentList)
+                                    {
+                                       <option value="@row.Value" @(Model.sDepartment == NumUtil.ParseInteger(row.Value) ? "selected" : "")>@row.Text</option>
+                                    }
+                                 }
+                              </select>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.sDepartment)
+                              </div>
+                           </div>
+
+                        </div>
+                     </div>
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <label for="Process_Month" class="control-label">@Resource.Process_Month</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-8" id="Tour_Process_Month">
+                              <select class="chosen-select chosen-transparent form-control" id="Process_Month" name="Process_Month">
+                                 @if (Model.processDateList != null)
+                                 {
+                                    foreach (var row in Model.processDateList)
+                                    {
+                                       <option value="@row.Value" @(Model.Process_Month == NumUtil.ParseInteger(row.Value) ? "selected" : "")>@row.Text</option>
+                                    }
+                                 }
+                              </select>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Process_Month)
+                              </div>
+                           </div>
+                           <div class="col-sm-4">
+                              <input type="text" class="form-control" name="Process_Year" id="Process_Year" value="@Model.Process_Year">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Process_Year)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <label for="sProcess" class="control-label">@Resource.Process</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-8">
+                              <select class="chosen-select chosen-transparent form-control" id="sProcess" name="sProcess">
+                                 @foreach (var row in Model.processStatusList)
+                                 {
+                                    <option value="@row.Value" @(Model.sProcess == row.Value ? "selected" : "")>@row.Text</option>
+                                 }
+                              </select>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.sProcess)
+                              </div>
+                           </div>
+
+                        </div>
+                     </div>
+                  </div>
+                  <div class="row">
+                     <div class="col-sm-4">
+                        <button id="btnFilter" type="submit" class="btn btn-default">@Resource.Filter</button>
+                        @*<a href="@Url.Action("PayrollImport", "Payroll")" class="btn btn-default">@Resource.Import_Excel</a>*@
+                     </div>
+                     <div class="col-sm-4">
+
+                     </div>
+                  </div>
+               }
+            </div>
+         </section>
+
+         <section class="tile color transparent-black">
+            <div class="tile-header transparent">
+               <h1><strong>@DateUtil.GetFullMonth(Model.Process_Month) @Model.Process_Year </strong></h1>
+               <div class="controls">
+                  <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+               </div>
+            </div>
+            <div class="tile-body">
+               @using (Html.BeginForm("Payroll", "Payroll", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+               {
+                  @Html.AntiForgeryToken()
+                  <input type="hidden" id="Process_Month" name="Process_Month" value="@Model.Process_Month" />
+                  <input type="hidden" id="Process_Year" name="Process_Year" value="@Model.Process_Year" />
+                  <div class="table-responsive">
+                     <table class="table table-datatable table-custom" id="empDataTable">
+                        <thead>
+                           <tr>
+                              <th class="no-sort" style="width: 40px;">
+                                 <div class="checkbox check-transparent">
+                                    <input type="checkbox" value="1" id="chkall">
+                                    <label for="chkall"></label>
+                                 </div>
+                              </th>
+                              <th class="sort-alpha">@Resource.Employee_Name</th>
+                              <th class="sort-alpha">@Resource.Department</th>
+                              <th class="no-sort">@Resource.Payslip_Summary</th>
+                              @*<th class="no-sort" width="40px">@Resource.Action</th>
+                                 <th class="no-sort" width="40px">@Resource.Confirm</th>
+                                 <th class="no-sort" width="40px">@Resource.New</th>*@
+                           </tr>
+                        </thead>
+                        <tbody>
+                           @if (Model != null && Model.payrollList != null && Model.payrollList.Count > 0)
+                           {
+                              var i = 0;
+                              foreach (var row in Model.payrollList)
+                              {
+                                 var payrolldate = DateUtil.ToDate(DateTime.DaysInMonth(Model.Process_Year, Model.Process_Month), Model.Process_Month, Model.Process_Year);
+                                 if (!payrolldate.HasValue)
+                                 {
+                                     continue; 
+                                 }
+                    
+                                 var prms = (from a in row.PRMs where a.Process_Month == Model.Process_Month && a.Process_Year == Model.Process_Year select a);
+                                 var emphist = (new EmploymentHistoryService()).GetEmploymentHistory(row.Employee_Profile_ID, payrolldate.Value);
+                                 if (emphist == null)
+                                 {
+                                    continue;
+                                 }
+                                 if (emphist.Terminate_Date.HasValue)
+                                 {
+                                    if (emphist.Terminate_Date.Value <= DateUtil.ToDate("1/" + Model.Process_Month.ToString() + "/" + Model.Process_Year.ToString()).Value.AddMonths(3))
+                                    {
+                                       continue;
+                                    }
+                                 }
+                                 <tr>
+                                    <td>
+                                       <div class="checkbox check-transparent">
+                                          <input type="checkbox" value="@row.Employee_Profile_ID" name="empIds" id="empIds[@i]">
+                                          <label for="empIds[@i]"></label>
+                                       </div>
+                                    </td>
+                                    <td>
+                                       @if (row.User_Profile != null)
+                                       {
+                                          @UserSession.GetUserName(row.User_Profile)
+                                       }
+                                    </td>
+                                    <td>
+                                       @if (emphist != null && emphist.Department != null)
+                                       {
+                                          @emphist.Department.Name
+                                       }
+                                    </td>
+                                    <td>
+                                       @if (prms.Count() > 0)
+                                       {
+                                          var j = 0;
+                                          foreach (var prm in prms.OrderBy(o => o.Revision_No))
+                                          {
+                                             decimal donation = 0;
+                                             foreach (var prd in prm.PRDs)
+                                             {
+                                                if (prd.PRT.Type == PayrollAllowanceType.Donation)
+                                                {
+                                                   donation = donation + (prd.Amount.HasValue ? prd.Amount.Value : 0);
+                                                }
+                                             }
+
+                                             <div class="row" style="padding-top:0px">
+                                                <div class="col-md-9">
+                                                   <div class="row">
+                                                      <div class="col-md-6">
+                                                         @Resource.Process_Date
+                                                      </div>
+                                                      <div class="col-md-6">
+                                                         @DateUtil.ToDisplayDate(prm.Process_Date_From) - @DateUtil.ToDisplayDate(prm.Process_Date_To)
+                                                      </div>
+                                                   </div>
+                                                   <div class="row">
+                                                      <div class="col-md-6">
+                                                         @Resource.Basic_Salary
+                                                      </div>
+                                                      <div class="col-md-6">
+                                                         @{
+                                             var total_salary = 0M;
+                                             if (prm.Basic_Salary.HasValue && prm.Basic_Salary.Value > 0)
+                                             {
+                                                total_salary = prm.Basic_Salary.Value;
+                                             }
+                                             if (prm.Total_Allowance_Basic_Salary.HasValue && prm.Total_Allowance_Basic_Salary.Value > 0)
+                                             {
+                                                total_salary += prm.Total_Allowance_Basic_Salary.Value;
+                                             }
+                                                         }
+                                                         @if (total_salary > 0)
+                                                         {
+                                                            @(Model.Company_Currency_Code + " $" + NumUtil.FormatCurrency(total_salary))
+                                                         }
+                                                         else
+                                                         {
+                                                            var basicsalary = NumUtil.ParseDecimal(EncryptUtil.Decrypt(emphist.Basic_Salary));
+                                                            if (basicsalary == 0)
+                                                            {
+                                                               basicsalary = NumUtil.ParseDecimal(EncryptUtil.Decrypt(EncryptUtil.Decrypt(emphist.Basic_Salary)));
+                                                            }
+                                                            if (emphist.Basic_Salary_Unit == Term.Hourly)
+                                                            {
+                                                               basicsalary = (prm.No_Of_Hours.HasValue ? prm.No_Of_Hours.Value : 1) * basicsalary;
+                                                            }
+                                                            @(Model.Company_Currency_Code + " $" + NumUtil.FormatCurrency(basicsalary))
+                                                         }
+                                                      </div>
+                                                   </div>
+                                                   <div class="row">
+                                                      <div class="col-md-6">
+                                                         @Resource.Donation
+                                                      </div>
+                                                      <div class="col-md-6">
+                                                         @(Model.Company_Currency_Code + " $" + NumUtil.FormatCurrency(donation, 2))
+                                                      </div>
+                                                   </div>
+                                                   <div class="row">
+                                                      <div class="col-md-6">
+                                                         @Resource.Employer_Contribution
+                                                      </div>
+                                                      <div class="col-md-6">
+                                                         @(Model.Company_Currency_Code + " $" + NumUtil.FormatCurrency(prm.CPF_Emplyer, 2))
+                                                      </div>
+                                                   </div>
+
+                                                   <div class="row">
+                                                      <div class="col-md-6">
+                                                         @Resource.Employee_Contribution
+                                                      </div>
+                                                      <div class="col-md-6">
+                                                         @(Model.Company_Currency_Code + " $" + NumUtil.FormatCurrency(prm.CPF_Employee, 2))
+                                                      </div>
+                                                   </div>
+                                                   <div class="row">
+                                                      <div class="col-md-6">
+                                                         @Resource.Net_Salary
+                                                      </div>
+                                                      <div class="col-md-6">
+                                                         @(Model.Company_Currency_Code + " $" + NumUtil.FormatCurrency(prm.Nett_Wages, 2))
+                                                      </div>
+                                                   </div>
+                                                </div>
+                                                <div class="col-md-1">
+                                                   @if (prm.Process_Status == PayrollStatus.Comfirm)
+                                                   {
+                                                      <a target="_blank" href="@Url.Action("PayrollPrintSlip", "Payroll", new { prm_id = EncryptUtil.Encrypt ( prm.PRM_ID) })" title="@Resource.Print_Preview">
+                                                         <i class="fa fa-print  fa-2x"></i>
+                                                      </a>
+                                                   }
+                                                   else if (prm.Process_Status == PayrollStatus.Process)
+                                                   {
+                                                      <a href="@Url.Action("PayrollInfo", "Payroll", new {
+                                                                                pPrmID = EncryptUtil.Encrypt(prm.PRM_ID),
+                                                                                pEmpID = EncryptUtil.Encrypt(row.Employee_Profile_ID),
+                                                                                pstatus = EncryptUtil.Encrypt(prm.Process_Status),
+                                                                                pmonth = EncryptUtil.Encrypt(Model.Process_Month),
+                                                                                pyear = EncryptUtil.Encrypt(Model.Process_Year) })" title="@Resource.Process">
+                                                         <i class="fa fa-edit fa-2x"></i>
+                                                      </a>
+                                                   }
+                                                </div>
+                                                <div class="col-md-1">
+                                                   @if (prm.Process_Status == PayrollStatus.Process)
+                                                   {
+                                                      <a href="#modal-detail" onclick="showComfirmModal('@prm.PRM_ID')" title="@Resource.Confirm">
+                                                         <i class="fa fa-square-o fa-2x"></i>
+                                                      </a>
+                                                      <a id="btnOpenDlgConfirm" href="#modal-confirm" role="button" data-toggle="modal" style="display:none;"></a>
+                                                   }
+                                                   else
+                                                   {
+                                                      <a><i class="fa fa-check-square-o  fa-2x color-green"></i></a>
+                                                   }
+                                                </div>
+                                                <div class="col-md-1">
+                                                   @if (j == prms.Count() - 1)
+                                                   {
+                                                      if (prm.Process_Status == PayrollStatus.Comfirm)
+                                                      {
+                                                         <a href="@Url.Action("PayrollInfo", "Payroll", new {
+                                                                                pEmpID = EncryptUtil.Encrypt(row.Employee_Profile_ID),
+                                                                                pstatus = EncryptUtil.Encrypt(PayrollStatus.Process),
+                                                                                pmonth = EncryptUtil.Encrypt(Model.Process_Month),
+                                                                                pyear = EncryptUtil.Encrypt(Model.Process_Year) })" title="@Resource.New">
+                                                            <i class="fa fa-plus-square  fa-2x"></i>
+                                                         </a>
+                                                      }
+                                                   }
+                                                </div>
+                                             </div>
+                                             if (prms.Count() > 1 & j < prms.Count() - 1)
+                                             {
+                                                <div style="width: 100% !important; background-color: rgba(255, 255, 255, 0.1) !important;padding:1px;margin-bottom:5px"></div>
+                                             }
+                                             j++;
+                                          }
+                                       }
+                                       else
+                                       {
+                                          <div class="row">
+                                             <div class="col-md-9"></div>
+                                             <div class="col-md-1">
+                                                <a href="@Url.Action("PayrollInfo", "Payroll", new { pEmpID = EncryptUtil.Encrypt(row.Employee_Profile_ID), pstatus = EncryptUtil.Encrypt(PayrollStatus.Pending), pmonth = EncryptUtil.Encrypt(Model.Process_Month), pyear = EncryptUtil.Encrypt(Model.Process_Year) })" title="@Resource.Edit">
+                                                   <i id="iEditBtn" class="fa fa-edit  fa-2x"></i>
+                                                </a>
+                                             </div>
+                                             <div class="col-md-1"></div>
+                                             <div class="col-md-1"></div>
+                                          </div>
+                                       }
+                                    </td>
+
+                                 </tr>
+                                       i++;
+                              }
+                           }
+                        </tbody>
+                        <tfoot>
+                           <tr>
+                              <td colspan="9" class="text-right" style=" font-size: 12px !important; line-height: 37px;">
+
+                                 <a data-toggle="modal" href="#modal-comfirm" class="btn btn-default">@Resource.Export_ESubmission</a>
+                                 <a href="#myModal" class="open-EditTodo btn btn-default" data-target="#CPF_GenerateFile" data-toggle="modal">@Resource.Export_CPF</a>
+                              </td>
+                           </tr>
+                        </tfoot>
+                     </table>
+                  </div>
+               }
+            </div>
+
+         </section>
+
+      </div>
+
+      @using (Html.BeginForm("PayrollConfirm", "Payroll", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "theForm" }))
+      {
+         <div class="modal fade" id="modal-confirm" tabindex="-1" role="dialog" aria-labelledby="modalConfirmLabel" aria-hidden="true">
+            <input type="hidden" id="hidprmid">
+            <div class="modal-dialog">
+               <div class="modal-content">
+                  <div class="modal-header">
+                     <h3 class="modal-title"><strong>@Resource.Confirmation</strong></h3>
+                  </div>
+                  <div class="modal-body">
+                     <div class="row">
+                        <div class="col-md-12">
+                           <div class="form-group">
+                              <div class="col-md-12 text-center">
+                                 <label class="control-label"> @Resource.Message_Do_You_Confirm_Process_Payroll_In_Selected_Employees</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12 text-center">
+                                 <label class="control-label">@Resource.Message_Once_Comfirmed_The_Payroll_Will_Be_Auto_Generated_With_Default_Information</label>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="modal-footer">
+                     <button id="btnClose" type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+                     <button id="btnComfirm" type="button" class="btn btn-primary">@Resource.Yes</button>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="md-overlay"></div><!-- the overlay element -->
+      }
+
+
+      @*Added By sun 20-08-2015*@
+      <div class="modal fade" id="modal-comfirm" tabindex="-1" role="dialog" aria-labelledby="modalConfirmLabel" aria-hidden="true">
+         <input type="hidden" id="hidprmid" name="hidprmid" />
+         <div class="modal-dialog">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h3 class="modal-title"><strong>@Resource.Export_ESubmission</strong></h3>
+               </div>
+               <div class="modal-body">
+                  <div class="row">
+                     <div class="col-md-12">
+                        <div class="form-group">
+                           <label class="col-sm-4 control-label">@Resource.Export_ESubmission</label>
+                           <div class="col-sm-8">
+                              <div class="radio">
+                                 <input type="radio" name="File_Type" id="File_Type_TXT" value="TXT" checked>
+                                 <label for="File_Type_TXT">@Resource.TXT_SymbolDot</label>
+                              </div>
+                              <div class="radio">
+                                 <input type="radio" name="File_Type" id="File_Type_DTL" value="DTL">
+                                 <label for="File_Type_DTL">@Resource.DTL_SymbolDot</label>
+                              </div>
+                              <div class="radio">
+                                 <input type="radio" name="File_Type" id="File_Type_DAT" value="DAT">
+                                 <label for="File_Type_DAT">@Resource.DAT_SymbolDot</label>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="modal-footer">
+                  <button id="btnFilter" type="submit" class="btn btn-default">@Resource.Filter</button>
+                  <a href="@Url.Action("PayrollImport", "Payroll")" class="btn btn-default">@Resource.Import_Excel</a>
+                  <a class="btn btn-blue" data-toggle="modal" onclick="PrintCPFSubmission_Onclick()" id="btnPrintCPFSubmission">@Resource.Export</a>
+                  <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+               </div>
+            </div>
+         </div>
+      </div>
+
+   </div>
+
+</div>

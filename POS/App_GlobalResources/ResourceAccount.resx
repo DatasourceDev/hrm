@@ -1,0 +1,333 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AccessDescription" xml:space="preserve">
+    <value>Access Description</value>
+  </data>
+  <data name="AccessName" xml:space="preserve">
+    <value>Access Name</value>
+  </data>
+  <data name="AccessRight" xml:space="preserve">
+    <value>Access Right</value>
+  </data>
+  <data name="CompanyAddress" xml:space="preserve">
+    <value>Company Address</value>
+  </data>
+  <data name="ConfirmNewPassword" xml:space="preserve">
+    <value>Confirm new password</value>
+  </data>
+  <data name="ContactNo" xml:space="preserve">
+    <value>Contact No</value>
+  </data>
+  <data name="Country" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="CurrentPassword" xml:space="preserve">
+    <value>Current Password</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="ERROR_1" xml:space="preserve">
+    <value>User not found.</value>
+  </data>
+  <data name="ERROR_2_Activate" xml:space="preserve">
+    <value>Activation code expired.</value>
+  </data>
+  <data name="ERROR_3_Activate" xml:space="preserve">
+    <value>Activation code not found.</value>
+  </data>
+  <data name="ERROR_401" xml:space="preserve">
+    <value>Access denied.</value>
+  </data>
+  <data name="ERROR_4_ResetPassword" xml:space="preserve">
+    <value>Reset Password code expired.</value>
+  </data>
+  <data name="ERROR_500" xml:space="preserve">
+    <value>DB Error.</value>
+  </data>
+  <data name="ERROR_501" xml:space="preserve">
+    <value>Email cannot be sent.</value>
+  </data>
+  <data name="ERROR_502" xml:space="preserve">
+    <value>Identity DB Error.</value>
+  </data>
+  <data name="ERROR_5_ResetPassword" xml:space="preserve">
+    <value>Reset Password code not found.</value>
+  </data>
+  <data name="ERROR_6_User" xml:space="preserve">
+    <value>No access right on this user.</value>
+  </data>
+  <data name="ERROR_7_User" xml:space="preserve">
+    <value>User not found.</value>
+  </data>
+  <data name="ERROR_8_User" xml:space="preserve">
+    <value>Not Admin of the Company .</value>
+  </data>
+  <data name="ERROR_9_User" xml:space="preserve">
+    <value>**Email Duplication**</value>
+  </data>
+  <data name="FullName" xml:space="preserve">
+    <value>Full Name</value>
+  </data>
+  <data name="LastConnection" xml:space="preserve">
+    <value>Last Connection</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>New Password</value>
+  </data>
+  <data name="NotActivate" xml:space="preserve">
+    <value>Not Activate</value>
+  </data>
+  <data name="PageRole" xml:space="preserve">
+    <value>Page Role</value>
+  </data>
+  <data name="PageURL" xml:space="preserve">
+    <value>Page URL</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="RegisterCustomer" xml:space="preserve">
+    <value>Register Customer</value>
+  </data>
+  <data name="RegisterCustomerComplete" xml:space="preserve">
+    <value>Thank you for your registration. We will keep in touch with you shortly.</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>Reset Password</value>
+  </data>
+  <data name="ResetPasswordComplete" xml:space="preserve">
+    <value>Reset Password Complete</value>
+  </data>
+  <data name="RoleDescription" xml:space="preserve">
+    <value>Role Description</value>
+  </data>
+  <data name="RoleName" xml:space="preserve">
+    <value>Role Name</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="UserDetail" xml:space="preserve">
+    <value>User Detail</value>
+  </data>
+  <data name="UserInformation" xml:space="preserve">
+    <value>User Information</value>
+  </data>
+  <data name="UsernameOrPasswordInccorect" xml:space="preserve">
+    <value>Username or Password is incorrect</value>
+  </data>
+  <data name="UserRole" xml:space="preserve">
+    <value>User Role</value>
+  </data>
+  <data name="ERROR_10" xml:space="preserve">
+    <value>Unassign User Role first.</value>
+  </data>
+  <data name="ERROR_11" xml:space="preserve">
+    <value>Unassign Access Right first.</value>
+  </data>
+  <data name="ERROR_503" xml:space="preserve">
+    <value>Insert Error.</value>
+  </data>
+  <data name="ERROR_504" xml:space="preserve">
+    <value>Update Error.</value>
+  </data>
+  <data name="ERROR_505" xml:space="preserve">
+    <value>Delete Error.</value>
+  </data>
+  <data name="ERROR_506" xml:space="preserve">
+    <value>Save Error.</value>
+  </data>
+  <data name="ERROR_510" xml:space="preserve">
+    <value>Data Duplicate.</value>
+  </data>
+  <data name="ERROR_511" xml:space="preserve">
+    <value>Data not found.</value>
+  </data>
+  <data name="ERROR_13" xml:space="preserve">
+    <value>Default Currency of company not set.</value>
+  </data>
+  <data name="ERROR_14" xml:space="preserve">
+    <value>Employee history not found.</value>
+  </data>
+  <data name="ERROR_15" xml:space="preserve">
+    <value>There is no approval. Please contact Administrator.</value>
+  </data>
+  <data name="SUCCESS_1" xml:space="preserve">
+    <value>has been submitted successfully.</value>
+  </data>
+  <data name="SUCCESS_2_Create" xml:space="preserve">
+    <value>has been created successfully.</value>
+  </data>
+  <data name="SUCCESS_3_Edit" xml:space="preserve">
+    <value>has been edited successfully.</value>
+  </data>
+  <data name="SUCCESS_4_Delete" xml:space="preserve">
+    <value>has been deleted successfully.</value>
+  </data>
+  <data name="SUCCESS_5_Approve" xml:space="preserve">
+    <value>has been approved successfully.</value>
+  </data>
+  <data name="SUCCESS_6_Reject" xml:space="preserve">
+    <value>has been rejected successfully.</value>
+  </data>
+  <data name="SUCCESS_7_Request_Cancel" xml:space="preserve">
+    <value>has been request canceled successfully.</value>
+  </data>
+  <data name="ERROR_16" xml:space="preserve">
+    <value>Employee profile not found.</value>
+  </data>
+  <data name="ERROR_17" xml:space="preserve">
+    <value>There is no Prefix configuration.</value>
+  </data>
+  <data name="MyProfile" xml:space="preserve">
+    <value>My Profile</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Logout</value>
+  </data>
+  <data name="ERROR_18" xml:space="preserve">
+    <value>There is no Receipt configuration.</value>
+  </data>
+  <data name="ERROR_19" xml:space="preserve">
+    <value>There is an invalid cashier.</value>
+  </data>
+  <data name="ERROR_601" xml:space="preserve">
+    <value>Printer not found.</value>
+  </data>
+  <data name="ERROR_602" xml:space="preserve">
+    <value>Printer Error.</value>
+  </data>
+  <data name="SUCCESS_8_Hold_Bill" xml:space="preserve">
+    <value>has been set on hold successfully.</value>
+  </data>
+  <data name="SUCCESS_9_Void" xml:space="preserve">
+    <value>has been voided successfully.</value>
+  </data>
+</root>

@@ -1,0 +1,965 @@
+﻿@model  HR.Models.LandingViewModel
+@using SBSModel.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+   ViewBag.Title = Resource.Landing;
+   Layout = "~/Views/Shared/_Layout_Landing.cshtml";
+   var imgSrc = Url.Content("~/images/logo.png");
+}
+<link href="~/css/Landing.css" rel="stylesheet">
+@using (Html.BeginForm("Landing_New", "Home", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "msform" }))
+{
+   <div class="tile-body">
+      <!-- progressbar -->
+      <ul id="progressbar">
+         <li class="active">Company Setup</li>
+         <li>Profile Setup</li>
+         <li>Dashboard</li>
+      </ul>
+      <!-- fieldsets -->
+      <fieldset id="fsCompany">
+         <h2 class="fs-title">Complete your company setup</h2>
+         <div class="row" style="height:85%; overflow:auto;">
+            <div class="col-md-12">
+               @if (Model.result != null && Model.result.Code != 0)
+               {
+                  if (Model.result.Code < 0)
+                  {
+                     <div class="alert alert-red">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                     </div>
+                  }
+                  else if (Model.result.Code > 0)
+                  {
+                     <div class="alert alert-success">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                     </div>
+                  }
+               }
+               <section class="tile color transparent-black">
+                  <div class="tile-body">
+                     <input type="hidden" name="Company_ID" value="@Model.Company_ID" />
+                     <input type="hidden" name="operation" value="@Model.operation" />
+                     <input type="hidden" name="Belong_To" value="@Model.Belong_To" />
+
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Company_Name" class="control-label">@Resource.Company_Name</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Company_Name" id="Company_Name" value="@Model.Company_Name">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Company_Name, "", new { @id = "CompanyName_Err" })
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="No_Of_Employees" class="control-label">@Resource.No_Of_Employees</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="No_Of_Employees" id="No_Of_Employees" value="@Model.No_Of_Employees">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.No_Of_Employees)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="CPF_Submission_No" class="control-label">@Resource.Business_Type</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 @*<input type="text" class="form-control" name="CPF_Submission_No" id="CPF_Submission_No" value="@Model.CPF_Submission_No" localizedvalidmaxlength="15">*@
+                                 <select multiple class="chosen-select chosen-transparent form-control" id="Business_Type" name="Business_Type">
+                                    @if (Model.businessCatList != null)
+                                    {
+                                       foreach (var row in Model.businessCatList)
+                                       {
+                                          if (Model.Business_Type != null)
+                                          {
+                                             if (Model.Business_Type.IndexOf(row.Value) >= 0)
+                                             {
+                                                <option value="@row.Value" selected>@row.Desc</option>
+                                             }
+                                             else
+                                             {
+                                                <option value="@(row.Value != null ? row.Value : " ")">@row.Desc</option>
+                                             }
+                                          }
+                                          else
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : " ")">@row.Desc</option>
+                                          }
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Business_Type)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Address" class="control-label">@Resource.Address</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <textarea class="form-control" name="Address" id="Address" rows="5">@Model.Address</textarea>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Address, "", new { @id = "Addr_Err" })
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Country_ID" class="control-label">@Resource.Country</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Country_ID" name="Country_ID" onchange="Country_OnChange(this);">
+                                    @foreach (var row in Model.countryList)
+                                    {
+                                       if (Model.Country_ID == NumUtil.ParseInteger(row.Value))
+                                       {
+                                          <option value="@row.Value" selected>@row.Desc</option>
+                                       }
+                                       else
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : " ")">@row.Desc</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Country_ID, "", new { @id = "Country_Err" })
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Zip_Code" class="control-label">@Resource.Zip_Or_Postal_Code</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Zip_Code" id="Zip_Code" value="@Model.Zip_Code">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Zip_Code, "", new { @id = "ZipCode_Err" })
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="State_ID" class="control-label">@Resource.State_Or_Province</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="State_ID" name="State_ID">
+                                    @if (Model.stateList != null)
+                                    {
+                                       foreach (var row in Model.stateList)
+                                       {
+                                          if (Model.State_ID == NumUtil.ParseInteger(row.Value))
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                          }
+                                          else
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                          }
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.State_ID)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Billing_Address" class="control-label">@Resource.Billing_Address</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <textarea class="form-control" name="Billing_Address" id="Billing_Address" rows="5">@Model.Billing_Address</textarea>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Billing_Address)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Billing_Country_ID" class="control-label">@Resource.Country</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Billing_Country_ID" name="Billing_Country_ID" onchange="Billing_Country_OnChange(this);">
+                                    @if (Model.countryList != null)
+                                    {
+                                       foreach (var row in Model.countryList)
+                                       {
+                                          if (Model.Billing_Country_ID == NumUtil.ParseInteger(row.Value))
+                                          {
+                                             <option value="@row.Value" selected>@row.Desc</option>
+                                          }
+                                          else
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : " ")">@row.Desc</option>
+                                          }
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Billing_Country_ID)
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Billing_Zip_Code" class="control-label">@Resource.Zip_Or_Postal_Code</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Billing_Zip_Code" id="Billing_Zip_Code" value="@Model.Billing_Zip_Code">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Billing_Zip_Code)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Billing_State_ID" class="control-label">@Resource.State_Or_Province</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Billing_State_ID" name="Billing_State_ID">
+                                    @if (Model.stateList != null)
+                                    {
+                                       foreach (var row in Model.stateList)
+                                       {
+                                          if (Model.Billing_State_ID == NumUtil.ParseInteger(row.Value))
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                          }
+                                          else
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                          }
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Billing_State_ID)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Phone" class="control-label">@Resource.Office_Phone</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Phone" id="Phone" value="@Model.Phone">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Phone)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Fax" class="control-label">@Resource.Fax</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Fax" id="Fax" value="@Model.Fax">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Fax)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        @*<div class="col-md-4">
+                               <div class="form-group">
+                                   <div class="col-sm-12">
+                                       <label for="Company_level" class="control-label">@Resource.Company_level</label>
+                                   </div>
+                               </div>
+                               <div class="form-group">
+                                   <div class="col-sm-12">
+                                       <input type="hidden" id="Company_Level" name="Company_Level" value="@Model.Company_Level" />
+                                       <select class="chosen-select chosen-transparent form-control" id="Company_Level" name="Company_Level" disabled>
+                                           @if (Model.LstCompanylevel != null)
+                                           {
+                                               foreach (var row in Model.LstCompanylevel)
+                                               {
+                                                   if (Model.Company_Levelg == row.Value)
+                                                   {
+                                                       <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                   }
+                                                   else
+                                                   {
+                                                       <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                                   }
+                                               }
+                                           }
+                                       </select>
+                                       <div class="validation-error">
+                                           @Html.ValidationMessageFor(m => m.Company_Level)
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>*@
+                     </div>
+                  </div>
+               </section>
+            </div>
+         </div>
+         <div class="md-overlay"></div>
+         <input type="button" name="next" class="next action-button" value="Next" />
+      </fieldset>
+      <fieldset id="fsEmployee" style="margin: 0 auto;">
+         <h2 class="fs-title">Complete your profile</h2>
+         <div class="row" style="height:80%;  overflow:auto;">
+            <div class="col-md-12">
+               @if (Model.result != null && Model.result.Code != 0)
+               {
+                  if (Model.result.Code < 0)
+                  {
+                     <div class="alert alert-red">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                     </div>
+                  }
+                  else if (Model.result.Code > 0)
+                  {
+                     <div class="alert alert-success">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                     </div>
+                  }
+               }
+               <section class="tile color transparent-black">
+                  <div class="tile-body">
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Gender" class="control-label">@Resource.Gender</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Gender" name="Gender">
+                                    @foreach (var row in Model.genderList)
+                                    {
+                                       if (Model.Gender == NumUtil.ParseInteger(row.Value))
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                       }
+                                       else
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Gender)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Marital_Status" class="control-label">@Resource.Marital_Status</label>
+                              </div>
+                           </div>
+                           <div class="form-group" id="divMarital_Status">
+                              <div class="col-md-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Marital_Status" name="Marital_Status">
+                                    @foreach (var row in Model.maritalStatusList.OrderBy(o => int.Parse(o.Value)))
+                                    {
+                                       if (Model.Marital_Status == NumUtil.ParseInteger(row.Value))
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                       }
+                                       else
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Marital_Status)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="DOB" class="control-label">@Resource.DOB</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <input type="text" class="form-control input-datepicker" id="DOB" name="DOB" value="@Model.DOB">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.DOB, "", new { id = "DOB_Err" })
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label class="control-label"></label>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Race" class="control-label">@Resource.Race</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Race" name="Race">
+                                    @foreach (var row in Model.raceList)
+                                    {
+                                       if (Model.Race == NumUtil.ParseInteger(row.Value))
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                       }
+                                       else
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Race)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Nationality_ID" class="control-label">@Resource.Nationality</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Nationality_ID" name="Nationality_ID" onchange="Nationality_Onchange()">
+                                    @foreach (var row in Model.nationalityList)
+                                    {
+                                       if (Model.Nationality_ID == NumUtil.ParseInteger(row.Value))
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                       }
+                                       else
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Nationality_ID)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Residential_Status" class="control-label">@Resource.Residential_Status</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Residential_Status" name="Residential_Status" onchange="Residential_Status_Onchange()">
+                                    @foreach (var row in Model.residentialStatusList)
+                                    {
+                                       if (Model.Residential_Status == row.Value)
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                       }
+                                       else
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Residential_Status)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="NRIC" class="control-label">@Resource.NRIC_Or_Fin_No_SymbolDot</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <input type="text" class="form-control " id="NRIC" name="NRIC" value="@Model.NRIC">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.NRIC, "", new { @id = "NRIC_Err" })
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Branch_ID" class="control-label">@Resource.Branch</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Branch_ID" name="Branch_ID">
+                                    @foreach (var row in Model.branchList)
+                                    {
+                                       if (Model.Branch_ID == NumUtil.ParseInteger(row.Value))
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                       }
+                                       else
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Branch_ID)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Department_ID" class="control-label">@Resource.Department</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Department_ID" name="Department_ID">
+                                    @foreach (var row in Model.departmentList)
+                                    {
+                                       if (Model.Department_ID == NumUtil.ParseInteger(row.Value))
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                       }
+                                       else
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Department_ID)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Designation_ID" class="control-label">@Resource.Designation</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Designation_ID" name="Designation_ID">
+                                    @foreach (var row in Model.desingnationList)
+                                    {
+                                       if (Model.Designation_ID == NumUtil.ParseInteger(row.Value))
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                       }
+                                       else
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Designation_ID)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-4" id="divHistEff">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Effective_Date" class="control-label">@Resource.Hire_Or_Effective_Date</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <input type="text" class="form-control input-datepicker" id="Effective_Date" name="Effective_Date" value="@Model.Effective_Date">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Effective_Date, "", new { id = "Effective_Date_Err" })
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Confirm_Date" class="control-label">@Resource.Confirm_Date</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <input type="text" class="form-control input-datepicker" id="Confirm_Date" name="Confirm_Date" value="@Model.Confirm_Date">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Confirm_Date, "", new { id = "Confirm_Date_Err" })
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="mployee_Type" class="control-label">@Resource.Employment_Type</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Employee_Type" name="Employee_Type" onchange="EmpType_OnChange()">
+                                    @foreach (var row in Model.empTypeList)
+                                    {
+                                       if (row.Desc == "Full-Time")
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                       }
+                                       else
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Employee_Type)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Currency_ID" class="control-label">@Resource.Currency</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Currency_ID" name="Currency_ID">
+                                    @{
+                                       var Com_Cur = Model.currencyList.Select(w => w.Text.Contains(Model.Company_Currency_Code));
+                                    }
+                                    @foreach (var row in Model.currencyList)
+                                    {
+                                       if (Model.Currency_ID != null && Model.Currency_ID == NumUtil.ParseInteger(row.Value))
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                       }
+                                       else
+                                       {
+                                          if (row.Text.Contains(Model.Company_Currency_Code) == true)
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                          }
+                                          else
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                          }
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Currency_ID)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Basic_Salary" class="control-label">@Resource.Basic_Salary</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-5">
+                                 <input type="text" class="form-control" id="Basic_Salary" name="Basic_Salary" value="@Model.Basic_Salary">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Basic_Salary, "", new { id = "Basic_Salary_Err" })
+                                 </div>
+                              </div>
+                              <div class="col-md-7">
+                                 <select class="chosen-select chosen-transparent form-control" id="Basic_Salary_Unit" name="Basic_Salary_Unit">
+                                    @foreach (var row in Model.termList)
+                                    {
+                                       if (Model.Basic_Salary_Unit == row.Value)
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                       }
+                                       else
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Basic_Salary_Unit)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                        </div>
+                     </div>
+                  </div>
+               </section>
+
+            </div>
+         </div>
+
+         <input type="button" name="previous" class="previous action-button" value="Previous" />
+         <input type="button" name="next" class="next action-button" value="Next" />
+      </fieldset>
+      <fieldset style="height:300px">
+         <h2 class="fs-title">Go to dashboard</h2>
+         <section class="tile color transparent-black">
+            <div class="tile-body text-center" style="justify-content: center">
+               Congratulation! <br /><br />
+               You have completed your company information and profile details. <br />
+               Click on the "Let's Go" button to start your HR administration journey now!! <br />
+               <br />
+               <br />
+               <input type="submit" name="submit" class="submit action-button" value="Let's Go'" />
+            </div>
+         </section>
+      </fieldset>
+   </div>
+}
+<!-- jQuery -->
+<script src="http://thecodeplayer.com/uploads/js/jquery-1.9.1.min.js" type="text/javascript"></script>
+<!-- jQuery easing plugin -->
+<script src="http://thecodeplayer.com/uploads/js/jquery.easing.min.js" type="text/javascript"></script>
+<script>
+
+   $(function () {
+      InitDatepicker();
+   });
+   //jQuery time
+   $.noConflict();
+
+   var current_fs, next_fs, previous_fs; //fieldsets
+   var left, opacity, scale; //fieldset properties which we will animate
+   var animating; //flag to prevent quick multi-click glitches
+
+   $(".next").click(function () {
+      current_fs = $(this).parent();
+      //alert(current_fs.attr("id"));
+      if (current_fs.attr("id") == "fsCompany") {
+         var textVal = $("#Company_Name").val();
+         if (textVal == "") {
+            alert("Please enter Company Name.");
+            return false;
+         }
+         textVal = $("#Business_Type").val();
+         //alert(textVal);
+         if (textVal == "" || textVal == null) {
+            alert("Please select Business Type.");
+            return false;
+         }
+         textVal = $("#Address").val();
+         if (textVal == "" || textVal == "-") {
+            alert("Please enter Address.");
+            return false;
+         }
+         textVal = $("#Country_Id").val();
+         if (textVal == "" || textVal == "-") {
+            alert("Please select Country.");
+            return false;
+         }
+         textVal = $("#Zip_Code").val();
+         if (textVal == "" || textVal == "-") {
+            alert("Please enter Postal Code.");
+            return false;
+         }
+         textVal = $("#Phone").val();
+         if (textVal == "" || textVal == "-") {
+            alert("Please enter Office Phone.");
+            return false;
+         }
+      }
+      if (current_fs.attr("id") == "fsEmployee") {
+         var textVal = $("#DOB").val();
+         if (textVal == "") {
+            alert("Please enter Date of Birth.");
+            return false;
+         }
+         textVal = $("#NRIC").val();
+         if (textVal == "") {
+            alert("Please enter NRIC.");
+            return false;
+         }
+         textVal = $("#Branch_ID").val();
+         if (textVal == "" || textVal == "-") {
+            alert("Please enter Branch.");
+            return false;
+         }
+         textVal = $("#Department_ID").val();
+         if (textVal == "" || textVal == "-") {
+            alert("Please enter Deaprtment.");
+            return false;
+         }
+         textVal = $("#Designation_ID").val();
+         if (textVal == "" || textVal == "-") {
+            alert("Please enter Designation.");
+            return false;
+         }
+         textVal = $("#Effective_Date").val();
+         if (textVal == "") {
+            alert("Please enter Hirs/Effective Date.");
+            return false;
+         }
+         textVal = $("#Confirm_Date").val();
+         if (textVal == "") {
+            alert("Please enter Confirm Date.");
+            return false;
+         }
+         textVal = $("#Basic_Salary").val();
+         if (textVal == "") {
+            alert("Please enter Basic Salary.");
+            return false;
+         }
+      }
+      if (animating) return false;
+      animating = true;
+
+      next_fs = $(this).parent().next();
+      //activate next step on progressbar using the index of next_fs
+      $("#progressbar li").eq($("fieldset").index(next_fs)).addClass("active");
+
+      //show the next fieldset
+      next_fs.show();
+      //hide the current fieldset with style
+      current_fs.animate({ opacity: 0 }, {
+         step: function (now, mx) {
+            //as the opacity of current_fs reduces to 0 - stored in "now"
+            //1. scale current_fs down to 80%
+            scale = 1 - (1 - now) * 0.2;
+            //2. bring next_fs from the right(50%)
+            left = (now * 50) + "%";
+            //3. increase opacity of next_fs to 1 as it moves in
+            opacity = 1 - now;
+            current_fs.css({ 'transform': 'scale(' + scale + ')' });
+            next_fs.css({ 'opacity': opacity });
+         },
+         duration: 800,
+         complete: function () {
+            current_fs.hide();
+            animating = false;
+         },
+         //this comes from the custom easing plugin
+         easing: 'easeInOutBack'
+      });
+   });
+
+   $(".previous").click(function () {
+      if (animating) return false;
+      animating = true;
+
+      current_fs = $(this).parent();
+      previous_fs = $(this).parent().prev();
+
+      //de-activate current step on progressbar
+      $("#progressbar li").eq($("fieldset").index(current_fs)).removeClass("active");
+
+      //show the previous fieldset
+      previous_fs.show();
+      //hide the current fieldset with style
+      current_fs.animate({ opacity: 0 }, {
+         step: function (now, mx) {
+            //as the opacity of current_fs reduces to 0 - stored in "now"
+            //1. scale previous_fs from 80% to 100%
+            scale = 0.8 + (1 - now) * 0.2;
+            //2. take current_fs to the right(50%) - from 0%
+            left = ((1 - now) * 50) + "%";
+            //3. increase opacity of previous_fs to 1 as it moves in
+            opacity = 1 - now;
+            current_fs.css({ 'left': left });
+            previous_fs.css({ 'transform': 'scale(' + scale + ')', 'opacity': opacity });
+         },
+         duration: 800,
+         complete: function () {
+            current_fs.hide();
+            animating = false;
+         },
+         //this comes from the custom easing plugin
+         easing: 'easeInOutBack'
+      });
+   });
+
+   //$(".btnLetsGo").click(function () {
+   //    Response.Redirect("~/Home/Index");
+   //})
+
+</script>

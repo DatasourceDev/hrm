@@ -1,0 +1,14 @@
+﻿@using HR.Common
+
+@*Added By sun 24-08-2015*@
+
+@{
+    Layout = null;
+    var directory = new DirectoryInfo(Server.MapPath("~/uploadImages"));
+}
+@foreach (var file in directory.GetFilesByExtensions(".png", ".gif", ".jpg"))
+{
+    <div class="thumbnail">
+        <img src="Thumb?img=@file.Name" alt="thumb" title="@file.Name" />
+    </div>
+}

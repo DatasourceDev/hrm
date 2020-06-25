@@ -1,0 +1,56 @@
+﻿@model  HR.Models.PayrollDetailViewModel
+@using HR.Models;
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+    var userlogin = UserSession.getUser(Request.RequestContext.HttpContext);
+    var i = Model.Index;
+
+    var prcs = Model.prcDonationList;
+    if (prcs.Count > 0)
+    {
+        Model.PRC_ID = NumUtil.ParseInteger(prcs[0].Value);
+        Model.Description = prcs[0].Desc;
+    }
+
+}
+<script type="text/javascript">
+    $(function () {
+        $(".chosen-select").chosen({ disable_search_threshold: 10 });
+        if ('@Model.Row_Type' == '@RowType.DELETE')
+            $('#' + 'extradonationRow-@i').hide();
+    });
+</script>
+<td>
+   @Html.Hidden("Extra_Donation_Rows[" + i + "].CPF_Deduction", Model.CPF_Deduction)
+    @Html.Hidden("Extra_Donation_Rows[" + i + "].Payroll_Detail_ID", Model.Payroll_Detail_ID)
+    @Html.Hidden("Extra_Donation_Rows[" + i + "].PRM_ID", Model.PRM_ID)
+    @Html.Hidden("Extra_Donation_Rows[" + i + "].Row_Type", Model.Row_Type)
+    @Html.Hidden("Extra_Donation_Rows[" + i + "].PRT_ID", Model.PRT_ID)
+
+    <select class="chosen-select chosen-transparent form-control" id="Extra_Donation_Rows_@(i)__PRC_ID" name="Extra_Donation_Rows[@i].PRC_ID" onchange="ExtraDonation_OnChange(this,'@i')">
+        @foreach (var h in Model.prcDonationList)
+        {
+            <option value="@h.Value" @(Model.PRC_ID.HasValue && Model.PRC_ID.Value == NumUtil.ParseInteger(h.Value) ? "selected" : "")>@h.Text</option>
+        }
+    </select>
+    <div class="validation-error">
+        @Html.ValidationMessage("Extra_Donation_Rows[" + i + "].PRC_ID")
+    </div>
+</td>
+<td>
+    <input type="text" class="form-control" id="Extra_Donation_Rows_@(i)__Description" name="Extra_Donation_Rows[@i].Description" value="@Model.Description" readonly>
+</td>
+<td>
+    <input type="text" class="form-control text-right" id="Extra_Donation_Rows_@(i)__Amount" name="Extra_Donation_Rows[@i].Amount" value="@Model.Amount" onchange="SumExtraDonation()" onblur="ValidateDecimal('Extra_Donation_Rows_@(i)__Amount', '@Resource.Amount', false)">
+    <div class="validation-error">
+        @Html.ValidationMessage("Extra_Donation_Rows[" + i + "].Amount", "", new { id = "Extra_Donation_Rows_" + i + "__Amount_Err" })
+    </div>
+</td>
+<td class="actions text-left" style="cursor:pointer">
+    <a data-toggle="modal" onclick="return DeleteExtraDonation('extradonationRow-@i', @i);">
+        <i class="fa fa-times-circle-o fa-2x"></i>
+    </a>
+</td>

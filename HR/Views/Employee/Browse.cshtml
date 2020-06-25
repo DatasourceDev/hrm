@@ -1,0 +1,64 @@
+﻿@using HR.Common
+@using SBSResourceAPI;
+@using SBSModel.Common;
+
+@*Added By sun 24-08-2015*@
+
+@{
+    Layout = null;
+    var media = new DirectoryInfo(Server.MapPath("~/uploadImages"));
+}
+<html>
+<head>
+    <title>@Resource.Image_Browser</title>
+   <link href="@Url.Content("~/assets/css/vendor/bootstrap/bootstrap.css")" rel="stylesheet">
+   <script src="@Url.Content("~/Scripts/jquery-2.0.3.min.js")"></script>
+   <script src="@Url.Content("~/assets/ckeditor/ckeditor.js")"></script>
+
+    <script type="text/javascript">
+        var funcNum = @(Request["CKEditorFuncNum"] + ";")
+        $(function () {
+
+            $('#fileExplorer').load('ImageViewer');
+
+            $('#fileExplorer').on('click', 'img', function () {
+                var fileUrl = '@Request.Url.GetLeftPart(UriPartial.Path)/../../uploadImages/' + $(this).attr('title');
+                window.opener.CKEDITOR.tools.callFunction(funcNum, fileUrl);
+                window.close();
+            }).hover(function () {
+                $(this).css('cursor', 'pointer');
+            });
+        });
+    </script>
+
+    <style>
+        #fileExplorer {
+            float: left;
+            width: 680px;
+            border-left: 1px solid #dff0ff;
+        }
+
+        .thumbnail {
+            float: left;
+            margin: 3px;
+            padding: 3px;
+            border: 1px solid #dff0ff;
+        }
+
+        ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        li {
+            padding: 0;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="fileExplorer"></div>
+</body>
+</html>
+

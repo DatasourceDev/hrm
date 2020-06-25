@@ -1,0 +1,206 @@
+﻿<error errorId="d3ac5b17-4cca-40e2-a90e-e4468fc1583d" application="/LM/W3SVC/44/ROOT" host="LAPTOP-64514UIV" type="System.Web.HttpException" message="The controller for path '/__browserLink/requestData/cbb19a0227914a23bb6914e742616460' was not found or does not implement IController." source="System.Web.Mvc" detail="System.Web.HttpException (0x80004005): The controller for path '/__browserLink/requestData/cbb19a0227914a23bb6914e742616460' was not found or does not implement IController.&#xD;&#xA;   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)&#xD;&#xA;   at System.Web.Mvc.DefaultControllerFactory.CreateController(RequestContext requestContext, String controllerName)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController&amp; controller, IControllerFactory&amp; factory)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContext httpContext, AsyncCallback callback, Object state)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.System.Web.IHttpAsyncHandler.BeginProcessRequest(HttpContext context, AsyncCallback cb, Object extraData)&#xD;&#xA;   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()&#xD;&#xA;   at System.Web.HttpApplication.ExecuteStepImpl(IExecutionStep step)&#xD;&#xA;   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean&amp; completedSynchronously)" user="shirleyliuch@gmail.com" time="2018-04-13T15:03:46.9314024Z" statusCode="404">
+  <serverVariables>
+    <item name="ALL_HTTP">
+      <value string="HTTP_CONNECTION:keep-alive&#xD;&#xA;HTTP_ACCEPT:application/json, text/javascript, */*; q=0.01&#xD;&#xA;HTTP_ACCEPT_ENCODING:gzip, deflate, br&#xD;&#xA;HTTP_ACCEPT_LANGUAGE:en,th;q=0.9&#xD;&#xA;HTTP_COOKIE:ASP.NET_SessionId=qm0xcj0phy4y14etm0geim3b; __schema_version=v18; __hub_token=6dcc209a-9344-48dc-a103-02bee6076f21; __company=FJHU7rvp9LwoMNOKXXFtRA==; __branch=N9xlh1GTsi0Nb5u8ghGeDw==; __terminal=Np+7pejo236koaZgyu8UkQ==; __cashier=mTtB3GE6paiwQvpK3tv0qA==; __master_refresh=false; __cashier_refresh=false; culture=en; __RequestVerificationToken=oVXzdmO-Uk1AXhCYBi9SgiA6BdGGD0LiLRZg4yih7EB_Z3RmR2X2ur5zcH33TKZyidZrGJGW9uyZ8I-mCGmRuvWoMyg1; .AspNet.ApplicationCookie=t8IbT22h6cqBoFQdcVaxt0cVViXnsW0e3hsWXVhYTcKMMrOOW4JSjTt1ptTyGAjLXfBKcrPbCKD6ykxNSHNIGfTqpClZ6l6MODtWBdfMoZme9LUdddlgLprXwiQ1Fucbaxd-nNq4LKglNvd9laaj9-azwKeQm4BBD1HJDY9d4bS6159t65ZxBpgqLm0xWrKsht4UHzO9SlENwDrTecKaALoSzC95whrGS6H1yFLMi5ZDRLbGSjp_htbbtbw2VJrWTMewzitwTi5tF6mCLJJgNllj44z16hZT_nh91SvvACOjwTTDDwnZXwAnvTLHtoZfIHL3opIUu5PPnd-rVs0qiD1V77xAR5_tR38xJregDcrnGx2dfzLhctptqTvndSDJ9pqwc8h4rV83Xa3pSezq9jinxHdDKo1EZ1eUlKnTfaysr0ja; payProcessTour=End&#xD;&#xA;HTTP_HOST:localhost:59485&#xD;&#xA;HTTP_REFERER:http://localhost:59485/Payroll/PayrollInfo?pPrmID=pppN57fawc%2Bv73%2B88udHeg%3D%3D&amp;pEmpID=0OsspzBExRheojYL94mXjA%3D%3D&amp;pstatus=QBRfOiMdhvaTDPDs6LjMTQ%3D%3D&amp;pmonth=ckGtyhSnfhQzF23Y6QqRkQ%3D%3D&amp;pyear=I9XhjiEt5gxRy%2BVK7Wh%2BCw%3D%3D&#xD;&#xA;HTTP_USER_AGENT:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36&#xD;&#xA;HTTP_X_REQUESTED_WITH:XMLHttpRequest&#xD;&#xA;" />
+    </item>
+    <item name="ALL_RAW">
+      <value string="Connection: keep-alive&#xD;&#xA;Accept: application/json, text/javascript, */*; q=0.01&#xD;&#xA;Accept-Encoding: gzip, deflate, br&#xD;&#xA;Accept-Language: en,th;q=0.9&#xD;&#xA;Cookie: ASP.NET_SessionId=qm0xcj0phy4y14etm0geim3b; __schema_version=v18; __hub_token=6dcc209a-9344-48dc-a103-02bee6076f21; __company=FJHU7rvp9LwoMNOKXXFtRA==; __branch=N9xlh1GTsi0Nb5u8ghGeDw==; __terminal=Np+7pejo236koaZgyu8UkQ==; __cashier=mTtB3GE6paiwQvpK3tv0qA==; __master_refresh=false; __cashier_refresh=false; culture=en; __RequestVerificationToken=oVXzdmO-Uk1AXhCYBi9SgiA6BdGGD0LiLRZg4yih7EB_Z3RmR2X2ur5zcH33TKZyidZrGJGW9uyZ8I-mCGmRuvWoMyg1; .AspNet.ApplicationCookie=t8IbT22h6cqBoFQdcVaxt0cVViXnsW0e3hsWXVhYTcKMMrOOW4JSjTt1ptTyGAjLXfBKcrPbCKD6ykxNSHNIGfTqpClZ6l6MODtWBdfMoZme9LUdddlgLprXwiQ1Fucbaxd-nNq4LKglNvd9laaj9-azwKeQm4BBD1HJDY9d4bS6159t65ZxBpgqLm0xWrKsht4UHzO9SlENwDrTecKaALoSzC95whrGS6H1yFLMi5ZDRLbGSjp_htbbtbw2VJrWTMewzitwTi5tF6mCLJJgNllj44z16hZT_nh91SvvACOjwTTDDwnZXwAnvTLHtoZfIHL3opIUu5PPnd-rVs0qiD1V77xAR5_tR38xJregDcrnGx2dfzLhctptqTvndSDJ9pqwc8h4rV83Xa3pSezq9jinxHdDKo1EZ1eUlKnTfaysr0ja; payProcessTour=End&#xD;&#xA;Host: localhost:59485&#xD;&#xA;Referer: http://localhost:59485/Payroll/PayrollInfo?pPrmID=pppN57fawc%2Bv73%2B88udHeg%3D%3D&amp;pEmpID=0OsspzBExRheojYL94mXjA%3D%3D&amp;pstatus=QBRfOiMdhvaTDPDs6LjMTQ%3D%3D&amp;pmonth=ckGtyhSnfhQzF23Y6QqRkQ%3D%3D&amp;pyear=I9XhjiEt5gxRy%2BVK7Wh%2BCw%3D%3D&#xD;&#xA;User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36&#xD;&#xA;X-Requested-With: XMLHttpRequest&#xD;&#xA;" />
+    </item>
+    <item name="APPL_MD_PATH">
+      <value string="/LM/W3SVC/44/ROOT" />
+    </item>
+    <item name="APPL_PHYSICAL_PATH">
+      <value string="E:\Work2\SBSolutions\HRSBS2 (Dev)\HR\" />
+    </item>
+    <item name="AUTH_TYPE">
+      <value string="ApplicationCookie" />
+    </item>
+    <item name="AUTH_USER">
+      <value string="shirleyliuch@gmail.com" />
+    </item>
+    <item name="AUTH_PASSWORD">
+      <value string="*****" />
+    </item>
+    <item name="LOGON_USER">
+      <value string="shirleyliuch@gmail.com" />
+    </item>
+    <item name="REMOTE_USER">
+      <value string="shirleyliuch@gmail.com" />
+    </item>
+    <item name="CERT_COOKIE">
+      <value string="" />
+    </item>
+    <item name="CERT_FLAGS">
+      <value string="" />
+    </item>
+    <item name="CERT_ISSUER">
+      <value string="" />
+    </item>
+    <item name="CERT_KEYSIZE">
+      <value string="" />
+    </item>
+    <item name="CERT_SECRETKEYSIZE">
+      <value string="" />
+    </item>
+    <item name="CERT_SERIALNUMBER">
+      <value string="" />
+    </item>
+    <item name="CERT_SERVER_ISSUER">
+      <value string="" />
+    </item>
+    <item name="CERT_SERVER_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="CERT_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="CONTENT_LENGTH">
+      <value string="0" />
+    </item>
+    <item name="CONTENT_TYPE">
+      <value string="" />
+    </item>
+    <item name="GATEWAY_INTERFACE">
+      <value string="CGI/1.1" />
+    </item>
+    <item name="HTTPS">
+      <value string="off" />
+    </item>
+    <item name="HTTPS_KEYSIZE">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SECRETKEYSIZE">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SERVER_ISSUER">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SERVER_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="INSTANCE_ID">
+      <value string="44" />
+    </item>
+    <item name="INSTANCE_META_PATH">
+      <value string="/LM/W3SVC/44" />
+    </item>
+    <item name="LOCAL_ADDR">
+      <value string="::1" />
+    </item>
+    <item name="PATH_INFO">
+      <value string="/__browserLink/requestData/cbb19a0227914a23bb6914e742616460" />
+    </item>
+    <item name="PATH_TRANSLATED">
+      <value string="E:\Work2\SBSolutions\HRSBS2 (Dev)\HR\__browserLink\requestData\cbb19a0227914a23bb6914e742616460" />
+    </item>
+    <item name="QUERY_STRING">
+      <value string="version=2" />
+    </item>
+    <item name="REMOTE_ADDR">
+      <value string="::1" />
+    </item>
+    <item name="REMOTE_HOST">
+      <value string="::1" />
+    </item>
+    <item name="REMOTE_PORT">
+      <value string="2530" />
+    </item>
+    <item name="REQUEST_METHOD">
+      <value string="GET" />
+    </item>
+    <item name="SCRIPT_NAME">
+      <value string="/__browserLink/requestData/cbb19a0227914a23bb6914e742616460" />
+    </item>
+    <item name="SERVER_NAME">
+      <value string="localhost" />
+    </item>
+    <item name="SERVER_PORT">
+      <value string="59485" />
+    </item>
+    <item name="SERVER_PORT_SECURE">
+      <value string="0" />
+    </item>
+    <item name="SERVER_PROTOCOL">
+      <value string="HTTP/1.1" />
+    </item>
+    <item name="SERVER_SOFTWARE">
+      <value string="Microsoft-IIS/10.0" />
+    </item>
+    <item name="URL">
+      <value string="/__browserLink/requestData/cbb19a0227914a23bb6914e742616460" />
+    </item>
+    <item name="HTTP_CONNECTION">
+      <value string="keep-alive" />
+    </item>
+    <item name="HTTP_ACCEPT">
+      <value string="application/json, text/javascript, */*; q=0.01" />
+    </item>
+    <item name="HTTP_ACCEPT_ENCODING">
+      <value string="gzip, deflate, br" />
+    </item>
+    <item name="HTTP_ACCEPT_LANGUAGE">
+      <value string="en,th;q=0.9" />
+    </item>
+    <item name="HTTP_COOKIE">
+      <value string="ASP.NET_SessionId=qm0xcj0phy4y14etm0geim3b; __schema_version=v18; __hub_token=6dcc209a-9344-48dc-a103-02bee6076f21; __company=FJHU7rvp9LwoMNOKXXFtRA==; __branch=N9xlh1GTsi0Nb5u8ghGeDw==; __terminal=Np+7pejo236koaZgyu8UkQ==; __cashier=mTtB3GE6paiwQvpK3tv0qA==; __master_refresh=false; __cashier_refresh=false; culture=en; __RequestVerificationToken=oVXzdmO-Uk1AXhCYBi9SgiA6BdGGD0LiLRZg4yih7EB_Z3RmR2X2ur5zcH33TKZyidZrGJGW9uyZ8I-mCGmRuvWoMyg1; .AspNet.ApplicationCookie=t8IbT22h6cqBoFQdcVaxt0cVViXnsW0e3hsWXVhYTcKMMrOOW4JSjTt1ptTyGAjLXfBKcrPbCKD6ykxNSHNIGfTqpClZ6l6MODtWBdfMoZme9LUdddlgLprXwiQ1Fucbaxd-nNq4LKglNvd9laaj9-azwKeQm4BBD1HJDY9d4bS6159t65ZxBpgqLm0xWrKsht4UHzO9SlENwDrTecKaALoSzC95whrGS6H1yFLMi5ZDRLbGSjp_htbbtbw2VJrWTMewzitwTi5tF6mCLJJgNllj44z16hZT_nh91SvvACOjwTTDDwnZXwAnvTLHtoZfIHL3opIUu5PPnd-rVs0qiD1V77xAR5_tR38xJregDcrnGx2dfzLhctptqTvndSDJ9pqwc8h4rV83Xa3pSezq9jinxHdDKo1EZ1eUlKnTfaysr0ja; payProcessTour=End" />
+    </item>
+    <item name="HTTP_HOST">
+      <value string="localhost:59485" />
+    </item>
+    <item name="HTTP_REFERER">
+      <value string="http://localhost:59485/Payroll/PayrollInfo?pPrmID=pppN57fawc%2Bv73%2B88udHeg%3D%3D&amp;pEmpID=0OsspzBExRheojYL94mXjA%3D%3D&amp;pstatus=QBRfOiMdhvaTDPDs6LjMTQ%3D%3D&amp;pmonth=ckGtyhSnfhQzF23Y6QqRkQ%3D%3D&amp;pyear=I9XhjiEt5gxRy%2BVK7Wh%2BCw%3D%3D" />
+    </item>
+    <item name="HTTP_USER_AGENT">
+      <value string="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36" />
+    </item>
+    <item name="HTTP_X_REQUESTED_WITH">
+      <value string="XMLHttpRequest" />
+    </item>
+  </serverVariables>
+  <queryString>
+    <item name="version">
+      <value string="2" />
+    </item>
+  </queryString>
+  <cookies>
+    <item name="ASP.NET_SessionId">
+      <value string="qm0xcj0phy4y14etm0geim3b" />
+    </item>
+    <item name="__schema_version">
+      <value string="v18" />
+    </item>
+    <item name="__hub_token">
+      <value string="6dcc209a-9344-48dc-a103-02bee6076f21" />
+    </item>
+    <item name="__company">
+      <value string="FJHU7rvp9LwoMNOKXXFtRA==" />
+    </item>
+    <item name="__branch">
+      <value string="N9xlh1GTsi0Nb5u8ghGeDw==" />
+    </item>
+    <item name="__terminal">
+      <value string="Np+7pejo236koaZgyu8UkQ==" />
+    </item>
+    <item name="__cashier">
+      <value string="mTtB3GE6paiwQvpK3tv0qA==" />
+    </item>
+    <item name="__master_refresh">
+      <value string="false" />
+    </item>
+    <item name="__cashier_refresh">
+      <value string="false" />
+    </item>
+    <item name="culture">
+      <value string="en" />
+    </item>
+    <item name="__RequestVerificationToken">
+      <value string="oVXzdmO-Uk1AXhCYBi9SgiA6BdGGD0LiLRZg4yih7EB_Z3RmR2X2ur5zcH33TKZyidZrGJGW9uyZ8I-mCGmRuvWoMyg1" />
+    </item>
+    <item name=".AspNet.ApplicationCookie">
+      <value string="t8IbT22h6cqBoFQdcVaxt0cVViXnsW0e3hsWXVhYTcKMMrOOW4JSjTt1ptTyGAjLXfBKcrPbCKD6ykxNSHNIGfTqpClZ6l6MODtWBdfMoZme9LUdddlgLprXwiQ1Fucbaxd-nNq4LKglNvd9laaj9-azwKeQm4BBD1HJDY9d4bS6159t65ZxBpgqLm0xWrKsht4UHzO9SlENwDrTecKaALoSzC95whrGS6H1yFLMi5ZDRLbGSjp_htbbtbw2VJrWTMewzitwTi5tF6mCLJJgNllj44z16hZT_nh91SvvACOjwTTDDwnZXwAnvTLHtoZfIHL3opIUu5PPnd-rVs0qiD1V77xAR5_tR38xJregDcrnGx2dfzLhctptqTvndSDJ9pqwc8h4rV83Xa3pSezq9jinxHdDKo1EZ1eUlKnTfaysr0ja" />
+    </item>
+    <item name="payProcessTour">
+      <value string="End" />
+    </item>
+  </cookies>
+</error>

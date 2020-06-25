@@ -1,0 +1,236 @@
+
+insert into Leave_Config (Company_ID,Leave_Name,Leave_Description,Bring_Forward,Bring_Forward_Percent,Upload_Document,Deduct_In_Payroll,Months_To_Expiry,Allowed_Probation,Bring_Forward_Days,Is_Bring_Forward_Days,Create_By,Create_On,Update_By,Update_On) 
+values(
+(select Company_ID from Company_Details where [Name] like '%Bluecube%'), -- Company_ID
+'Annual Leave', -- Leave_Name
+'Annual leave for all employee', -- Leave_Description
+1, -- Bring_Forward
+50, -- Bring_Forward_Percent
+0,-- Upload_Document
+0, -- Deduct_In_Payroll
+6, -- Months_To_Expiry
+0, -- Allowed_Probation
+0, -- Bring_Forward_Days
+0, -- Is_Bring_Forward_Days
+'admin',getdate(),'admin',getdate()
+)
+
+
+insert into Leave_Config_Detail(
+Leave_Config_ID,
+Designation_ID,
+Default_Leave_Amount,
+Year_Service,
+Group_ID)
+values(
+(select Leave_Config_ID from Leave_Config where Leave_Name = 'Annual Leave'), -- Leave_Config_ID
+null, -- Designation_ID
+14, -- Default_Leave_Amount,
+0, -- Year_Service
+1 -- Group_ID
+)
+
+insert into Leave_Config (Company_ID,Leave_Name,Leave_Description,Bring_Forward,Bring_Forward_Percent,Upload_Document,Deduct_In_Payroll,Months_To_Expiry,Allowed_Probation,Bring_Forward_Days,Is_Bring_Forward_Days,Create_By,Create_On,Update_By,Update_On) 
+values(
+(select Company_ID from Company_Details where [Name] like '%Bluecube%'), -- Company_ID
+'Medical Leave', -- Leave_Name
+'Medical leave for all employee', -- Leave_Description
+0, -- Bring_Forward
+0, -- Bring_Forward_Percent
+1,-- Upload_Document
+0, -- Deduct_In_Payroll
+0, -- Months_To_Expiry
+0, -- Allowed_Probation
+0, -- Bring_Forward_Days
+0, -- Is_Bring_Forward_Days
+'admin',getdate(),'admin',getdate()
+)
+insert into Leave_Config_Detail(
+Leave_Config_ID,
+Designation_ID,
+Default_Leave_Amount,
+Year_Service,
+Group_ID)
+values(
+(select Leave_Config_ID from Leave_Config where Leave_Name = 'Medical Leave'), -- Leave_Config_ID
+null, -- Designation_ID
+14, -- Default_Leave_Amount,
+0, -- Year_Service
+1 -- Group_ID
+)
+
+insert into Leave_Config (Company_ID,Leave_Name,Leave_Description,Bring_Forward,Bring_Forward_Percent,Upload_Document,Deduct_In_Payroll,Months_To_Expiry,Allowed_Probation,Bring_Forward_Days,Is_Bring_Forward_Days,Create_By,Create_On,Update_By,Update_On) 
+values(
+(select Company_ID from Company_Details where [Name] like '%Bluecube%'), -- Company_ID
+'Exam Leave', -- Leave_Name
+'Exam leave for all employee', -- Leave_Description
+0, -- Bring_Forward
+0, -- Bring_Forward_Percent
+1,-- Upload_Document
+0, -- Deduct_In_Payroll
+0, -- Months_To_Expiry
+0, -- Allowed_Probation
+0, -- Bring_Forward_Days
+0, -- Is_Bring_Forward_Days
+'admin',getdate(),'admin',getdate()
+)
+
+insert into Leave_Config_Detail(
+Leave_Config_ID,
+Designation_ID,
+Default_Leave_Amount,
+Year_Service,
+Group_ID)
+values(
+(select Leave_Config_ID from Leave_Config where Leave_Name = 'Exam Leave'), -- Leave_Config_ID
+null, -- Designation_ID
+2, -- Default_Leave_Amount,
+0, -- Year_Service
+1 -- Group_ID
+)
+
+insert into Leave_Config (Company_ID,Leave_Name,Leave_Description,Bring_Forward,Bring_Forward_Percent,Upload_Document,Deduct_In_Payroll,Months_To_Expiry,Allowed_Probation,Bring_Forward_Days,Is_Bring_Forward_Days,Create_By,Create_On,Update_By,Update_On) 
+values(
+(select Company_ID from Company_Details where [Name] like '%Bluecube%'), -- Company_ID
+'Child Care Leave', -- Leave_Name
+'Entitled to a child care leave', -- Leave_Description
+0, -- Bring_Forward
+0, -- Bring_Forward_Percent
+0,-- Upload_Document
+0, -- Deduct_In_Payroll
+0, -- Months_To_Expiry
+0, -- Allowed_Probation
+0, -- Bring_Forward_Days
+0, -- Is_Bring_Forward_Days
+'admin',getdate(),'admin',getdate()
+)
+
+insert into Leave_Config_Detail(
+Leave_Config_ID,
+Designation_ID,
+Default_Leave_Amount,
+Year_Service,
+Group_ID)
+values(
+(select Leave_Config_ID from Leave_Config where Leave_Name = 'Child Care Leave'), -- Leave_Config_ID
+null, -- Designation_ID
+6, -- Default_Leave_Amount,
+0, -- Year_Service
+1 -- Group_ID
+)
+
+insert into Leave_Config (Company_ID,Leave_Name,Leave_Description,Bring_Forward,Bring_Forward_Percent,Upload_Document,Deduct_In_Payroll,Months_To_Expiry,Allowed_Probation,Bring_Forward_Days,Is_Bring_Forward_Days,Create_By,Create_On,Update_By,Update_On) 
+values(
+(select Company_ID from Company_Details where [Name] like '%Bluecube%'), -- Company_ID
+'Maternity Leave', -- Leave_Name
+'This leave is entitled to woman who is pregnant or has delivered a child.', -- Leave_Description
+0, -- Bring_Forward
+0, -- Bring_Forward_Percent
+0, -- Upload_Document
+0, -- Deduct_In_Payroll
+0, -- Months_To_Expiry
+0, -- Allowed_Probation
+0, -- Bring_Forward_Days
+0, -- Is_Bring_Forward_Days
+'admin',getdate(),'admin',getdate()
+)
+insert into Leave_Config_Detail(
+Leave_Config_ID,
+Designation_ID,
+Default_Leave_Amount,
+Year_Service,
+Group_ID)
+values(
+(select Leave_Config_ID from Leave_Config where Leave_Name = 'Maternity Leave'), -- Leave_Config_ID
+null, -- Designation_ID
+112, -- Default_Leave_Amount,
+0, -- Year_Service
+1 -- Group_ID
+)
+
+insert into Leave_Config (Company_ID,Leave_Name,Leave_Description,Bring_Forward,Bring_Forward_Percent,Upload_Document,Deduct_In_Payroll,Months_To_Expiry,Allowed_Probation,Bring_Forward_Days,Is_Bring_Forward_Days,Create_By,Create_On,Update_By,Update_On) 
+values(
+(select Company_ID from Company_Details where [Name] like '%Bluecube%'), -- Company_ID
+'Adoption Leave', -- Leave_Name
+'Adoption leave for all employee', -- Leave_Description
+0, -- Bring_Forward
+0, -- Bring_Forward_Percent
+0, -- Upload_Document
+0, -- Deduct_In_Payroll
+0, -- Months_To_Expiry
+0, -- Allowed_Probation
+0, -- Bring_Forward_Days
+0, -- Is_Bring_Forward_Days
+'admin',getdate(),'admin',getdate()
+)
+insert into Leave_Config_Detail(
+Leave_Config_ID,
+Designation_ID,
+Default_Leave_Amount,
+Year_Service,
+Group_ID)
+values(
+(select Leave_Config_ID from Leave_Config where Leave_Name = 'Adoption Leave'), -- Leave_Config_ID
+null, -- Designation_ID
+28, -- Default_Leave_Amount,
+0, -- Year_Service
+1 -- Group_ID
+)
+
+insert into Leave_Config (Company_ID,Leave_Name,Leave_Description,Bring_Forward,Bring_Forward_Percent,Upload_Document,Deduct_In_Payroll,Months_To_Expiry,Allowed_Probation,Bring_Forward_Days,Is_Bring_Forward_Days,Create_By,Create_On,Update_By,Update_On) 
+values(
+(select Company_ID from Company_Details where [Name] like '%Bluecube%'), -- Company_ID
+'Paternity Leave', -- Leave_Name
+'Paternity leave for father', -- Leave_Description
+0, -- Bring_Forward
+0, -- Bring_Forward_Percent
+0, -- Upload_Document
+0, -- Deduct_In_Payroll
+0, -- Months_To_Expiry
+0, -- Allowed_Probation
+0, -- Bring_Forward_Days
+0, -- Is_Bring_Forward_Days
+'admin',getdate(),'admin',getdate()
+)
+insert into Leave_Config_Detail(
+Leave_Config_ID,
+Designation_ID,
+Default_Leave_Amount,
+Year_Service,
+Group_ID)
+values(
+(select Leave_Config_ID from Leave_Config where Leave_Name = 'Paternity Leave'), -- Leave_Config_ID
+null, -- Designation_ID
+7, -- Default_Leave_Amount,
+0, -- Year_Service
+1 -- Group_ID
+)
+insert into Leave_Config (Company_ID,Leave_Name,Leave_Description,Bring_Forward,Bring_Forward_Percent,Upload_Document,Deduct_In_Payroll,Months_To_Expiry,Allowed_Probation,Bring_Forward_Days,Is_Bring_Forward_Days,Create_By,Create_On,Update_By,Update_On) 
+values(
+(select Company_ID from Company_Details where [Name] like '%Bluecube%'), -- Company_ID
+'Unpaid Infant Care Leave', -- Leave_Name
+'Unpaid Infant Care leave for father and mother', -- Leave_Description
+0, -- Bring_Forward
+0, -- Bring_Forward_Percent
+0, -- Upload_Document
+1, -- Deduct_In_Payroll
+0, -- Months_To_Expiry
+0, -- Allowed_Probation
+0, -- Bring_Forward_Days
+0, -- Is_Bring_Forward_Days
+'admin',getdate(),'admin',getdate()
+)
+
+insert into Leave_Config_Detail(
+Leave_Config_ID,
+Designation_ID,
+Default_Leave_Amount,
+Year_Service,
+Group_ID)
+values(
+(select Leave_Config_ID from Leave_Config where Leave_Name = 'Unpaid Infant Care Leave'), -- Leave_Config_ID
+null, -- Designation_ID
+6, -- Default_Leave_Amount,
+0, -- Year_Service
+1 -- Group_ID
+)

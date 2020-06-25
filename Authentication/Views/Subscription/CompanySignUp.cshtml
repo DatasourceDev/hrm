@@ -1,0 +1,371 @@
+﻿@model Authentication.Models.SignUpViewModel
+@using Authentication.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@{
+    ViewBag.Title = Resource.FrontEnd_Sign_Up;
+    Layout = "~/Views/Shared/_Layout_Front.cshtml";
+    var err = ViewData.ModelState.SelectMany(m => m.Value.Errors, (m, error) => (m.Key)).Distinct().ToList();
+}
+
+<script type="text/javascript">
+    function Input_Onblur(ctlname) {
+        var val = $("#" + ctlname).val();
+        if (val == null || val == '') {
+            MandatoryColor(ctlname);
+        }
+        else {
+            MandatoryRemoveColor(ctlname);
+        }
+    }
+
+    $(function () {
+        @foreach (var ctl in ViewData.ModelMetadata.Properties)
+        {
+            if (ctl.ModelType.BaseType.ToString().Contains("System.Array"))
+            {
+
+            }
+            else
+            {
+                if (ctl.IsRequired)
+                {
+                    var ctlname = ctl.PropertyName;
+                    ctlname = ctlname.Replace("[", "_");
+                    ctlname = ctlname.Replace("]", "_");
+                    ctlname = ctlname.Replace(".", "_");
+                    @:if ($("#@ctlname").get(0) != null) { $("#@ctlname").get(0).setAttribute('onblur', "Input_Onblur('@ctlname')"); }
+
+                    if (ctl.Model == null)
+                    {
+                        @:MandatoryColor('@ctlname');
+                            }
+                }
+            }
+
+            if (ctl.ModelType.BaseType.ToString().Contains("System.Decimal"))
+            {
+                var ctlname = ctl.PropertyName;
+                ctlname = ctlname.Replace("[", "_");
+                ctlname = ctlname.Replace("]", "_");
+                ctlname = ctlname.Replace(".", "_");
+                @:InitAmountControl('@ctlname');
+                    }
+
+        }
+        @if (err != null && err.Count > 0)
+        {
+            foreach (var ctl in err)
+            {
+                var ctlname = ctl;
+                ctlname = ctlname.Replace("[", "_");
+                ctlname = ctlname.Replace("]", "_");
+                ctlname = ctlname.Replace(".", "_");
+                    @:ErrorColor('@ctlname');
+                        }
+        }
+    });
+
+
+    function ShowMask() {
+        setTimeout(function () {
+
+            var modal = $('<div id="loading-bg"  />');
+            modal.addClass("modal-loading");
+            $('body').append(modal);
+            var loading = $(".loading");
+            loading.show();
+            var top = Math.max($(window).height() / 2 - loading[0].offsetHeight / 2, 0);
+            var left = Math.max($(window).width() / 2 - loading[0].offsetWidth / 2, 0);
+            loading.css({ top: top, left: left });
+        }, 200);
+    }
+
+    function CloseMask() {
+        setTimeout(function () {
+
+            $("#loading-bg").remove();
+            var loading = $(".loading");
+            loading.hide();
+        }, 200);
+    }
+    function Country_OnChange(opt) {
+        var cID = $('#Country_ID').val();
+        Combo_Reload('State_ID', '@ComboTypeEnum.State', cID)
+
+    }
+</script>
+<style>
+    .validation-error {
+        text-shadow: 2px 2px #ccc;
+    }
+</style>
+
+<div class="loading" align="center" style="z-index:9999">
+    <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/images/loader.gif">
+</div>
+<div id="breadcrumbs" class="breadcrumbs  bg-breadcrumb">
+    <div class="container">
+        <ol class="breadcrumb">
+            <li><a href="@Url.Action("Front", "Front", new { })">@Resource.Home</a></li>
+            <li>@Resource.Subscription</li>
+            <li class="active">@Resource.Sign_Up</li>
+        </ol>
+        <h2><strong>@Resource.Sign_Up</strong></h2>
+    </div>
+</div>
+
+<section class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                
+                @if (Model.result != null && Model.result.Code != 0)
+                {
+
+                    if (Model.result.Code < 0)
+                    {
+                        <div class="alert alert-red">
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        </div>
+                    }
+                    else if (Model.result.Code > 0)
+                    {
+                        <div class="alert alert-success">
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        </div>
+                    }
+                }
+                <!-- tile widget -->
+                <section class="tile color transparent-black">
+
+                    <div class="tile-widget nopadding color transparent-white rounded-top-corners">
+                        <!-- Nav tabs -->
+                        <!-- / Nav tabs -->
+                    </div>
+                    <!-- /tile widget -->
+                    
+                    <div class="tile-body tab-content rounded-bottom-corners">
+                        @using (Html.BeginForm("CompanySignUp", "Subscription", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                        {
+                              <input type="hidden" name="A7_Group_ID" value="@Model.A7_Group_ID" />
+    <input type="hidden" name="A7_User_ID" value="@Model.A7_User_ID" />
+                            @Html.AntiForgeryToken()
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="First_Name" class="control-label">@Resource.First_Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <input type="text" class="form-control" name="First_Name" id="First_Name" value="@Model.First_Name">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.First_Name)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="Middle_Name" class="control-label">@Resource.Middle_Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <input type="text" class="form-control" name="Middle_Name" id="Middle_Name" value="@Model.Middle_Name">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Middle_Name)
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="Last_Name" class="control-label">@Resource.Last_Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <input type="text" class="form-control" name="Last_Name" id="Last_Name" value="@Model.Last_Name">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Last_Name)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="Phone" class="control-label">@Resource.Phone</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <input type="text" class="form-control" name="Phone" id="Phone" value="@Model.Phone">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Phone)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="Email" class="control-label">@Resource.Email</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <input type="text" class="form-control" name="Email" id="Email" value="@Model.Email">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Email)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="Company_Name" class="control-label">@Resource.Company_Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <input type="text" class="form-control" name="Company_Name" id="Company_Name" value="@Model.Company_Name">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Company_Name)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                </div>
+                                <div class="col-md-4">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="Address" class="control-label">@Resource.Address</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <textarea class="form-control" name="Address" id="Address" rows="5">@Model.Address</textarea>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Address)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="Country_ID" class="control-label">@Resource.Country</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <select class="chosen-select chosen-transparent form-control" id="Country_ID" name="Country_ID" onchange="Country_OnChange(this);">
+                                                @foreach (var row in Model.countryList)
+                                                {
+                                                    if (Model.Country_ID == NumUtil.ParseInteger(row.Value))
+                                                    {
+                                                        <option value="@row.Value" selected>@row.Desc</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@(row.Value != null ? row.Value : " ")">@row.Desc</option>
+                                                    }
+                                                }
+                                            </select>
+
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Country_ID)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="Zip_Code" class="control-label">@Resource.Postal_Code</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <input type="text" class="form-control" name="Zip_Code" id="Zip_Code" value="@Model.Zip_Code">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Zip_Code)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="State_ID" class="control-label">@Resource.State</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <select class="chosen-select chosen-transparent form-control" id="State_ID" name="State_ID">
+                                                @foreach (var row in Model.stateList)
+                                                {
+                                                    if (Model.State_ID == NumUtil.ParseInteger(row.Value))
+                                                    {
+                                                        <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.State_ID)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <section class="tile color transparent-white">
+                                        <div class="tile-body">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <div class="col-sm-12 text-right">
+                                                            <button type="submit" class="btn btn-primary" style="width:200px;height:40px;">@Resource.Sign_Up</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        }
+                        <!-- / Tab panes -->
+                    </div>
+                    
+                </section>
+            </div>
+        </div>
+    </div>
+</section>
+

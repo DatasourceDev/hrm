@@ -1,0 +1,500 @@
+﻿@model  HR.Models.ConfigulationViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+   ViewBag.Title = @Resource.General_Configuration;
+}
+
+@if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A))
+{
+   <script type="text/javascript">
+      $(function () {
+
+
+         $('.btn-file :file').on('fileselect', function (event, numFiles, label) {
+
+            var input = $(this).parents('.input-group').find(':text'),
+                log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+            console.log(log);
+
+            if (input.length) {
+               input.val(log);
+            } else {
+               if (log) alert(log);
+            }
+
+         });
+         //Added by sun 30-06-2016
+         $("#btnUpload").click(function () {
+            var filename = $('#uploadfile').val();
+            var ext = '';
+            if (filename != null) {
+               var k = filename.lastIndexOf('.');
+               if (k >= 0) {
+                  ext = filename.substring(k + 1).toLowerCase();
+               }
+            }
+
+            var sizeIsnull = $('#uploadfile')[0].files[0];
+            if (sizeIsnull != undefined) {
+               var fsize = $('#uploadfile')[0].files[0].size;
+               if (fsize > 2097150) {
+                  alert('@Resource.Message_Please_Upload_File_Size_Is_Less_Than_2_MB');
+                  $('#uploadfile').after($('#uploadfile').clone(true)).remove();
+                  $('#uploadfile').parents('.input-group').find(':text').val('');
+                  return false;
+               }
+
+               if (ext != 'jpg' && ext != 'jpeg' && ext != 'png' && ext != 'gif') {
+                  alert('@Resource.Message_Please_Upload_File_Image');
+                  return;
+               }
+               var blah = new FormData();
+               blah.append("file", $("#uploadfile")[0].files[0]);
+               ShowMask();
+               $.ajax({
+                  async: true,
+                  type: 'POST',
+                  url: '@Url.Action("UploadCompanyLogo", "Upload", new { pCompanyID = Model.Company_ID })',
+                  data: blah,
+                  dataType: 'json',
+                  cache: false,
+                  contentType: false,
+                  processData: false,
+                  success: function (data) {
+                     if (data != null) {
+                        $("#img").get(0).src = data.img;
+                        $('#btnCloseUploadLogo').get(0).click();
+                        //$('#User_Photo').val('');
+
+                     }
+                     CloseMask();
+                  }
+               });
+            }
+         });
+
+         InitDatepicker();
+         //check all checkboxes
+         $('table thead input[type="checkbox"]').change(function () {
+            $(this).parents('table').find('tbody input[type="checkbox"]').prop('checked', $(this).prop('checked'));
+         });
+
+         $('.input-datemonthpicker').datetimepicker({
+            icons: {
+               time: "fa fa-clock-o",
+               date: "fa fa-calendar",
+               up: "fa fa-arrow-up",
+               down: "fa fa-arrow-down"
+            },
+            format: 'DD/MM',
+            useCurrent: false,
+            pickTime: false
+         });
+
+         $('.input-datemonthpicker').on("dp.show", function (e) {
+
+            for (var i = 0; i < $('.bootstrap-datetimepicker-widget').length  ; i++) {
+               var d = $('.bootstrap-datetimepicker-widget').get(i);
+               if (d != null) {
+                  if (d.style.display != null && d.style.display != "" && d.style.display != "none") {
+                     var top = parseInt(d.style.top.replace("px", ""));
+                     var newtop = top - 45;
+                     $('.bootstrap-datetimepicker-widget').css('top', newtop + 'px');
+                     break;
+                  }
+               }
+            }
+         });
+
+         var module = '@Model.tabAction';
+         if ('@string.IsNullOrEmpty(Model.tabAction)' == "True") {
+            module = "company";
+         }
+         
+          if ('@(Request.QueryString["tabAction"])' != null && '@(Request.QueryString["tabAction"])' != '')
+          {
+              module = '@(Request.QueryString["tabAction"])';
+          }
+         var liID = "li-" + module;
+         var tabID = module + "-tab";
+         $("#" + liID).addClass("active");
+         $("#" + tabID).addClass("active");
+
+         if ('@ViewData.ModelState.IsValid' == "False") {
+            if ('@Model.tabAction' == "branch") {
+               $('#btnAddBranch').get(0).click();
+            }
+            else if ('@Model.tabAction' == "department") {
+               $('#btnAddDepartment').get(0).click();
+            }
+            else if ('@Model.tabAction' == "designation") {
+               $('#btnAddDesignation').get(0).click();
+            }
+            else if ('@Model.tabAction' == "grade") {
+               $('#btnAddGrade').get(0).click();
+            }
+         }
+
+          @*var addRowLink = '<a href="@Url.Action("ModuleSignUp", "Subscription", new {  pComID = EncryptUtil.Encrypt(Model.Company_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_C) }).Replace(ModuleDomain.HR, ModuleDomain.Authentication)" class="btn btn-greensea  btn-sm add-row">@Resource.Add_An_Item</a>'*@
+          var addRowLink = '<a href="@Url.Action("DetailSignUp", "Subscription", new {  pComID = EncryptUtil.Encrypt(Model.Company_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_C) })" class="btn btn-greensea  btn-sm add-row">@Resource.Add_An_Item</a>'
+         InitDatatable('moduleDataTable', addRowLink, null, 0, 'asc');
+
+         var addRowLink2 = '<a href="#" class="btn btn-greensea  btn-sm add-row" onclick="AddBranch_Onclick()">@Resource.Add_An_Item</a>'
+         InitDatatable('branchDataTable', addRowLink2, InitDatatableApplyLink({
+            name: "apply",
+            tabAction: "branch",
+            hasActive: true,
+            hasInactive: true,
+            hasDel: true,
+            confirmAlert: true
+         }), 0, 'asc');
+
+         var addRowLink3 = '<a href="#" class="btn btn-greensea btn-sm add-row" onclick="AddDepartment_Onclick()">@Resource.Add_An_Item</a>'
+         InitDatatable('departmentDataTable', addRowLink3, InitDatatableApplyLink({
+            name: "apply",
+            tabAction: "department",
+            hasActive: true,
+            hasInactive: true,
+            hasDel: null,
+            confirmAlert: true
+         }), 0, 'asc');
+
+         var addRowLink4 = '<a href="#" class="btn btn-greensea btn-sm add-row" onclick="AddDesignation_Onclick()">@Resource.Add_An_Item</a>'
+         InitDatatable('designationDataTable', addRowLink4, InitDatatableApplyLink({
+            name: "apply",
+            tabAction: "designation",
+            hasActive: true,
+            hasInactive: true,
+            hasDel: null,
+            confirmAlert: true
+         }), 0, 'asc');
+
+         var addRowLink5 = '<a href="@Url.Action("ExchangeRateInfo", "Configuration", new { pComID = EncryptUtil.Encrypt(Model.Company_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_C) })" class="btn btn-greensea  btn-sm add-row">@Resource.Add_An_Item</a>'
+         InitDatatable('ExchangeDataTable', addRowLink5, null, 0, 'desc');
+      })
+      $(document).on('change', '.btn-file :file', function () {
+         var input = $(this),
+         numFiles = input.get(0).files ? input.get(0).files.length : 1,
+         label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+         input.trigger('fileselect', [numFiles, label]);
+      });
+
+
+    
+
+     
+
+   </script>
+   <div class="pageheader">
+      <h2>@Resource.General_Configuration<span></span></h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home" )">@Resource.DashBoard</a></li>
+            <li class="active">@Resource.General_Configuration</li>
+         </ol>
+      </div>
+   </div>
+
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+            <section class="tile color transparent-black">
+               <div class="tile-widget nopadding color transparent-white rounded-top-corners">
+                  <ul class="nav nav-tabs tabdrop">
+                     <li id="li-company"><a href="#company-tab" data-toggle="tab">@Resource.Company</a></li>
+                     <li id="li-branch"><a href="#branch-tab" data-toggle="tab">@Resource.Branch</a></li>
+                     @*<li id="li-pattern"><a href="#pattern-tab" data-toggle="tab">@Resource.Pattern</a></li>*@
+                     <li id="li-department"><a href="#department-tab" data-toggle="tab">@Resource.Department</a></li>
+                     <li id="li-designation"><a href="#designation-tab" data-toggle="tab">@Resource.Designation</a></li>
+                     <li id="li-fiscal"><a href="#fiscal-tab" data-toggle="tab">@Resource.Fiscal_Year</a></li>
+                     <li id="li-working"><a href="#working-tab" data-toggle="tab">@Resource.Working_Days</a></li>
+                     <li id="li-exchange"><a href="#exchange-tab" data-toggle="tab">@Resource.Exchange_Rate</a></li>
+                  </ul>
+               </div>
+               <div class="tile-body tab-content rounded-bottom-corners">
+                  @{ Html.RenderPartial("_CompanyInfo", Model);}
+                  @{ Html.RenderPartial("_Branch", Model);}
+                  @*@{ Html.RenderPartial("_Pattern", Model);}*@
+                  @{ Html.RenderPartial("_Department", Model);}
+                  @{ Html.RenderPartial("_Designation", Model);}
+                  @{ Html.RenderPartial("_Fiscal", Model);}
+                  @{ Html.RenderPartial("_WorkingDays", Model);}
+                  @{ Html.RenderPartial("_Exchange", Model);}
+               </div>
+            </section>
+         </div>
+      </div>
+
+      <div class="modal fade" id="modal-branch" tabindex="-1" role="dialog" aria-labelledby="modalConfirmLabelBranch" aria-hidden="true">
+         @using (Html.BeginForm("Configuration", "Configuration", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+         {
+            @Html.HiddenFor(m => m.Branch_ID)
+            <div class="modal-dialog">
+               <div class="modal-content">
+                  <div class="modal-header">
+                     <h3 class="modal-title" id="modalConfirmLabelBranch"><strong>@Resource.Branch</strong></h3>
+                  </div>
+                  <div class="modal-body">
+                     <div class="row">
+                        <div class="col-sm-12">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Branch_Code" class="control-label">@Resource.Branch_Code</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Branch_Code" id="Branch_Code" value="@Model.Branch_Code">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Branch_Code)
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Branch_Name" class="control-label">@Resource.Branch_Name</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Branch_Name" id="Branch_Name" value="@Model.Branch_Name">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Branch_Name)
+                                 </div>
+                              </div>
+                           </div>
+
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Branch_Desc" class="control-label">@Resource.Branch_Desc</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <textarea class="form-control" name="Branch_Desc" id="Branch_Desc" rows="5">@Model.Branch_Desc</textarea>
+
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Branch_Desc)
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Branch_Desc" class="control-label">@Resource.Status</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select form-control" id="Branch_Status" name="Branch_Status">
+                                    @foreach (var row in Model.statusList)
+                                                {
+                                                    if (Model.Branch_Status == row.Value)
+                                                    {
+                                 <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                    }
+                                                    else
+                                                    {
+                                 <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                                    }
+                                                }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Branch_Status)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="modal-footer">
+                     <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+                     @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U) && Model.rights.Contains(UserSession.RIGHT_C))
+                            {
+                  <button id="btnBranchSave" type="submit" class="btn btn-primary" name="tabAction" value="branch" onclick="return Confirm_Alert($('#Branch_ID').val());">@Resource.Save_Change</button>
+                            }
+                  </div>
+               </div>
+            </div>
+         }
+      </div>
+      <div class="modal fade" id="modal-department" tabindex="-1" role="dialog" aria-labelledby="modalConfirmLabelDepartment" aria-hidden="true">
+         @using (Html.BeginForm("Configuration", "Configuration", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "theFormOne" }))
+         {
+            @Html.HiddenFor(m => m.Department_ID)
+
+            <div class="modal-dialog">
+               <div class="modal-content">
+                  <div class="modal-header">
+                     <h3 class="modal-title" id="modalConfirmLabelDepartment"><strong>@Resource.Department</strong></h3>
+                  </div>
+                  <div class="modal-body">
+                     <div class="row">
+                        <div class="col-sm-12">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Department_Name" class="control-label">@Resource.Department_Name</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Department_Name" id="Department_Name" value="@Model.Department_Name">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Department_Name)
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Department_Status" class="control-label">@Resource.Status</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select form-control" id="Department_Status" name="Department_Status">
+                                    @foreach (var row in Model.statusList)
+                                    {
+                                       if (Model.Department_Status == row.Value)
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                       }
+                                       else
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Department_Status)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="modal-footer">
+                     <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+                     <button id="btnDepartmentSave" type="button" class="btn btn-primary" name="tabAction" value="department">@Resource.Save_Change</button>
+                  </div>
+               </div>
+            </div>
+         }
+      </div>
+      <div class="modal fade" id="modal-designation" tabindex="-1" role="dialog" aria-labelledby="modalConfirmLabelDesignation" aria-hidden="true">
+         @using (Html.BeginForm("Configuration", "Configuration", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "theForm" }))
+         {
+            @Html.HiddenFor(m => m.Designation_ID)
+
+            <div class="modal-dialog">
+               <div class="modal-content">
+                  <div class="modal-header">
+                     <h3 class="modal-title" id="modalConfirmLabelDesignation"><strong>@Resource.Designation</strong></h3>
+                  </div>
+                  <div class="modal-body">
+                     <div class="row">
+                        <div class="col-sm-12">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Designation_Name" class="control-label">@Resource.Designation_Name</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Designation_Name" id="Designation_Name" value="@Model.Designation_Name">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Designation_Name)
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Designation_Status" class="control-label">@Resource.Status</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select form-control" id="Designation_Status" name="Designation_Status">
+                                    @foreach (var row in Model.statusList)
+                                    {
+                                       if (Model.Designation_Status == row.Value)
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                       }
+                                       else
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Designation_Status)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="modal-footer">
+                     <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+                     <button id="btnDesignationSave" type="button" class="btn btn-primary" name="tabAction" value="designation">@Resource.Save_Change</button>
+                  </div>
+               </div>
+            </div>
+         }
+      </div>
+      <div class="modal fade" id="modal-uploadLogo" tabindex="-1" role="dialog" aria-labelledby="modalConfirmLabelLogo" aria-hidden="true">
+         <div class="modal-dialog">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h3 class="modal-title" id="modalConfirmLabelLogo"><strong>@Resource.Upload_Company_Logo</strong></h3>
+               </div>
+               <div class="modal-body">
+                  <div class="row">
+                     <div class="col-md-12">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <div class="input-group">
+                                 <span class="input-group-btn">
+                                    <span class="btn btn-primary btn-file">
+                                       <i class="fa fa-upload"></i>
+                                       <input id="uploadfile" type="file" name="uploadfile" accept="image/jpeg, image/jpg, image/png, image/gif">
+                                    </span>
+                                 </span>
+                                 <input type="text" class="form-control" readonly>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="modal-footer">
+                  <button id="btnCloseUploadLogo" type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+                  <button type="button" class="btn btn-primary" id="btnUpload">@Resource.Upload_File</button>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div class="md-overlay"></div>
+   </div>
+
+}

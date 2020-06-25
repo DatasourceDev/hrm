@@ -1,0 +1,29 @@
+﻿@model  HR.Models.BankDetailViewModel
+@using SBSResourceAPI;
+
+
+@if (Model.BankDetailList != null)
+{
+    foreach (var row in Model.BankDetailList)
+    {
+        bool DisplayOnReports = Convert.ToBoolean(row.Display_On_Reports);
+        <tr class="status-info">
+
+            <td>
+                @row.Bank_Account_Number
+            </td>
+            <td>@row.Bank_Name </td>
+            <td align="center">@Html.CheckBoxFor(m => DisplayOnReports, new { disabled = "disabled" })</td>
+            <td>@row.Bank_Account_Owner </td>
+            <td align="center">
+                <a data-toggle="modal" href="#editModalContainerID" onclick="showModal('#editModalContainerID', '#editModalBodyID', @row.Bank_Detail_ID, @row.Company_ID)">
+                    @Resource.Edit
+                </a> |
+                <a data-toggle="modal" onclick="return DeleteBankdetail(@row.Bank_Detail_ID,@row.Company_ID );">
+                    @* function in file CompanyInfo.cshtml *@
+                    @Resource.Delete
+                </a>
+            </td>
+        </tr>
+    }
+}

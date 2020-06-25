@@ -1,0 +1,644 @@
+﻿@using System.Web.Configuration
+@using HR.Models;
+@using HR.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Models;
+@using SBSResourceAPI;
+@{
+   ViewBag.Title = Resource.Front_Page;
+   ViewBag.ReturnUrl = Url.Action("Index", "Home");
+   Layout = null;
+}
+
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+<!--<![endif]-->
+<head>
+   <!-- BASICS -->
+   <meta charset="utf-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+   <title>@Resource.SBS</title>
+   <meta name="description" content="">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <link rel="icon" type="image/ico" href="@Url.Content("~/assets/images/favicon.ico")" />
+   @HtmlUtil.InitFrontJS()
+   @HtmlUtil.InitFrontCSS()
+   <script type="text/javascript" src="//cdn.jsdelivr.net/jquery.slick/1.6.0/slick.min.js"></script>
+   <script src="@Url.Content("~/frontpage/assets/js/vendor/text-rotator/jquery.simple-text-rotator.js")"></script>
+   <script src="@Url.Content("~/frontpage/assets/js/vendor/owl-carousel/owl.carousel.min.js")"></script>
+   <script src="@Url.Content("~/frontpage/assets/js/vendor/nivo-lightbox/nivo-lightbox.min.js")"></script>
+   <script src="@Url.Content("~/frontpage/assets/js/vendor/tweet-js/jquery.tweet.min.js")"></script>
+   <script src="@Url.Content("~/frontpage/assets/js/vendor/vticker/jquery.vticker.min.js")"></script>
+   <script src="@Url.Content("~/frontpage/assets/js/vendor/jflickrfeed/jflickrfeed.min.js")"></script>
+   <script src="@Url.Content("~/frontpage/assets/js/vendor/appear/jquery.appear.js")"></script>
+   <script src="@Url.Content("~/frontpage/assets/js/vendor/parallax/jquery.parallax-1.1.3.js")"></script>
+
+   <style>
+      .thumbnailLogo {
+         height: 90px;
+         line-height: 90px;
+      }
+
+      /*.thumbnailLogo img {
+                max-height: 100%;
+                max-width: 100%;
+            }*/
+      * {
+         box-sizing: border-box;
+      }
+
+      .sliderslick {
+         width: 85%;
+         margin: 30px auto;
+      }
+
+      .slick-slide {
+         margin: 0px 20px;
+      }
+
+         .slick-slide img {
+            width: 100%;
+         }
+
+      .slick-prev:before,
+      .slick-next:before {
+         color: black;
+      }
+   </style>
+   <script type="text/javascript">
+      function Solution_Onclick() {
+         $("#secSolution").show();
+      }
+      $(document).on('ready', function () {
+         $(".regular").slick({
+            dots: true,
+            infinite: true,
+            slidesToShow: 4,
+            slidesToScroll: 3,
+            autoplay: true,
+            arrows: false
+         });
+      });
+
+      function Subscribe() {
+         var email = $("#Email").val();
+         if (email != null && email.trim() != '') {
+            $.ajax({
+               type: 'POST',
+               url: '@Url.Action("Subscribe", "Front")',
+               contentType: 'application/json; charset=utf-8',
+               data: JSON.stringify({ email: email }),
+               dataType: 'json',
+               success: function (data) {
+                  if (data != null) {
+                     alert(data.message);
+                  }
+               }
+            });
+         } else {
+            alert("Enter your email address to start receiving");
+         }
+      }
+   </script>
+</head>
+
+<body>
+   <!-- Preloader -->
+   <div class="mask"><div id="loader"></div></div>
+   <!-- BEGIN NAVBAR -->
+   <div class="navbar navbar-fixed-top" role="navigation" data-0="line-height:80px; height:80px;-webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);" data-300="line-height:40px; height:40px;-webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">
+      <div class="container">
+         <!-- Branding -->
+         <div class="navbar-header">
+            <a class="navbar-brand" href="@Url.Action("Front", "Front")">
+            </a>
+            <div class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+               <a href="#">
+                  <i class="fa fa-bars"></i>
+               </a>
+            </div>
+         </div>
+         <!-- Branding end -->
+         <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+               <li>
+                  <a href="@Url.Action("Front", "Front")" data-0="padding: 30px 25px 22px;border-bottom-width:4px;" data-100="padding: 24px 25px 16px;border-bottom-width:3px;" data-200="padding: 15px 25px 12px;border-bottom-width:2px;" data-300="padding: 15px 25px 10px;border-bottom-width:1px;">@Resource.FrontEnd_Home</a>
+               </li>
+               <li>
+                  <a href="@Url.Action("Feature", "Front")" data-0="padding: 30px 25px 22px;border-bottom-width:4px;" data-100="padding: 24px 25px 16px;border-bottom-width:3px;" data-200="padding: 15px 25px 12px;border-bottom-width:2px;" data-300="padding: 15px 25px 10px;border-bottom-width:1px;">@Resource.FrontEnd_Feature</a>
+               </li>
+               <li>
+                  <a href="@Url.Action("Pricing", "Front")" data-0="padding: 30px 25px 22px;border-bottom-width:4px;" data-100="padding: 24px 25px 16px;border-bottom-width:3px;" data-200="padding: 15px 25px 12px;border-bottom-width:2px;" data-300="padding: 15px 25px 10px;border-bottom-width:1px;">@Resource.FrontEnd_Pricing</a>
+               </li>
+               <li>
+                  <a href="@Url.Action("FreeTrial", "Front")" data-0="padding: 30px 25px 22px;border-bottom-width:4px;" data-100="padding: 24px 25px 16px;border-bottom-width:3px;" data-200="padding: 15px 25px 12px;border-bottom-width:2px;" data-300="padding: 15px 25px 10px;border-bottom-width:1px;">@Resource.FrontEnd_FreeTrial</a>
+               </li>
+               <li>
+                  <a href="@Url.Action("Support", "Front")" data-0="padding: 30px 25px 22px;border-bottom-width:4px;" data-100="padding: 24px 25px 16px;border-bottom-width:3px;" data-200="padding: 15px 25px 12px;border-bottom-width:2px;" data-300="padding: 15px 25px 10px;border-bottom-width:1px;">@Resource.FrontEnd_Support</a>
+               </li>
+               <li>
+                  <a href="@Url.Action("Login", "Account")" data-0="padding: 30px 25px 22px;border-bottom-width:4px;" data-100="padding: 24px 25px 16px;border-bottom-width:3px;" data-200="padding: 15px 25px 12px;border-bottom-width:2px;" data-300="padding: 15px 25px 10px;border-bottom-width:1px;">@Resource.FrontEnd_Login</a>
+               </li>
+               @*<li class="search"><input type="text" placeholder="&#61442;" data-0="margin-top:23px" data-300="margin-top:10px"></li>*@
+            </ul>
+         </div><!--/.navbar-collapse -->
+      </div>
+   </div>
+   <!-- END NAVBAR -->
+   <!-- BEGIN SLIDER -->
+   <div id="slider" class="slider bg-1">
+      @*<div class="navigation">
+             <button type="button" class="btn prev"><i class="fa fa-chevron-left"></i></button>
+             <button type="button" class="btn next"><i class="fa fa-chevron-right"></i></button>
+         </div>*@
+      <div class="owl-carousel owl-theme">
+         <div class="item">
+            <div class="container">
+               <div class="row">
+                  <div style="margin:0px auto; width:100% ">
+                     <p style="margin:0px auto; text-align: center; margin-top:30px;" class="lead caption" data-animation="fadeInLeft">
+                        <font style="font-size:30px;">A clever way to manage your administrative works</font><br />
+                        <font style="font-size:30px;">at your fingertips</font>
+                     </p>
+                  </div>
+                  <div class="col-xs-6">
+                     @*<a href="@Url.Action("CompanySignUp", "Subscription")" target=" _blank" class="btn btn-lg btn-bordered caption" data-animation="fadeInUp" data-delay="1800">@Resource.Purchase</a>*@
+                  </div>
+                  @*<div class="col-xs-6 text-right"><img src="~/Images/banner-home.jpg" class="caption" data-animation="bounceIn" data-delay="1000"></div>*@
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <!-- END SLIDER -->
+   <!-- FEAUTRED -->
+   <section class="section featured bg-gray">
+      <div class="container">
+         <div class="row">
+            <div class="col-md-10">
+               <p class="lead"> <span class="el-active">Everything that you need to successfully manage your administration. At only <span style="background-color:#ffd800; padding:5px 5px;">USD0.05</span> per employee daily!</span></p>
+               <p>From generating payroll, tracking of leave or managing staffs' expense claims. SBSolutions HRM provides a suite of Human Resource modules to streamline administration processes in organisation</p>
+            </div>
+            <div class="col-md-2">
+               <a href="@Url.Action("FreeTrial", "Front")" class="btn btn-lg btn-theme uppercase divided">@Resource.Try_Now<span class="btn-side"><i class="fa fa-chevron-right"></i></span></a>
+            </div>
+         </div>
+      </div>
+   </section>
+   <!-- END FEATURED -->
+   <div class="row">
+      <div class="container">
+         <!-- WHAT YOU CAN GET -->
+         <section class="section">
+            <div class="container">
+               <div class="row">
+                  <div class="col-md-12">
+                     <h1 class="headline"><strong>@Resource.FrontEnd_What</strong> @Resource.FrontEnd_YouCanGet</h1>
+                     <p class="lead text-center less-width">It should be inexpensive for any organisation to manage their human resource administration processes. SBSolution HRM is easy to use and offers the 4 core modules to support any businesses across all industries.</p>
+                     <div class="row">
+                        <div class="col-md-3">
+                           <div class="highlight appear-el" data-animation="fadeInLeft" style="height:275px;">
+                              <a onclick="Solution_Onclick()" style="cursor:pointer">
+                                 <div class="thumbnailLogo">
+                                    <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/icon-employee.png" class="logo" style="height:60px;">
+                                 </div>
+                              </a>
+                              <h5 class="uppercase"><strong>@Resource.FrontEnd_Employee</strong></h5>
+                              <div class="row">
+                                 Stores all relevant and important information about your employee and access to this information whenever, wherever you are
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-3">
+                           <div class="highlight appear-el" data-animation="fadeInLeft" style="height:275px;">
+                              <div class="thumbnailLogo">
+                                 <a onclick="Solution_Onclick()" style="cursor:pointer">
+                                    <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/icon-leave.png" class="logo" style="height:60px;">
+                                 </a>
+                              </div>
+                              <h5 class="uppercase"><strong>@Resource.FrontEnd_Leave</strong></h5>
+                              <div class="row">
+                                 Employee can track, manage and apply leave anytime, anywhere and at any devices including mobile devices
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-3">
+                           <div class="highlight appear-el" data-animation="fadeInUp" style="height:275px;">
+                              <div class="thumbnailLogo">
+                                 <a onclick="Solution_Onclick()" style="cursor:pointer">
+                                    <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/icon-expense.png" class="logo" style="height:60px;">
+                                 </a>
+                              </div>
+                              <h5 class="uppercase"><strong>@Resource.FrontEnd_Expense</strong></h5>
+                              <div class="row">
+                                 Review employees' monthly expenses and manage operation cost effectively. Keep track and manage expenditures to avoid overspending
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-3">
+                           <div class="highlight appear-el" data-animation="fadeInDown" style="height:275px;">
+                              <div class="thumbnailLogo">
+                                 <a onclick="Solution_Onclick()" style="cursor:pointer">
+                                    <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/icon-payroll.png" class="logo" style="height:60px;">
+                                 </a>
+                              </div>
+                              <h5 class="uppercase"><strong>@Resource.FrontEnd_Payroll</strong></h5>
+                              <div class="row">
+                                 Manage and send payslip to all your staff electronically and generate reports that are compliance for MOM and IRAS
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </section>
+         <!-- END WHAT YOU CAN GET -->
+      </div>
+   </div>
+   <div class="separator"></div>
+   <div class="row">
+      <div class="container">
+         <!-- LATEST PROJECTS -->
+         <section class="section" id="latest-projects">
+            <div class="row">
+               <div class="col-md-3">
+                  <h3 class="no-top-margin uppercase"><strong>Modules</strong> Features</h3>
+                  <p>We never stop innovating</p>
+                  <p>Besides making it more affordable for organisations. We have never stopped improving functionalities to bring convenience to our users</p>
+                  <div class="btn-group custom-navigation">
+                     <button type="button" class="btn prev"><i class="fa fa-chevron-left"></i></button>
+                     <button type="button" class="btn next"><i class="fa fa-chevron-right"></i></button>
+                  </div>
+               </div>
+               <div class="col-md-9">
+                  <div class="owl-carousel owl-theme">
+                     <div class="item appear-el" data-animation="fadeIn">
+                        <figure>
+                           <div class="img-view">
+                              <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/Home/1.Features-employee-setup.jpg" alt="Place description here">
+                              <div class="overlay">
+                                 <div class="overlay-controls">
+                                    <a href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/1.Features-employee-setup.jpg" data-nivobox="true" data-lightbox-gallery="gallery1">
+                                       <i class="fa fa-arrows-alt"></i>
+                                    </a>
+                                    <a href="#"><i class="fa fa-chain"></i></a>
+                                 </div>
+                              </div>
+                           </div>
+                        </figure>
+                     </div>
+                     <div class="item appear-el" data-animation="fadeIn">
+                        <figure>
+                           <div class="img-view">
+                              <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/2.Features-ExpenseApproval.jpg" alt="Place description here">
+                              <div class="overlay">
+                                 <div class="overlay-controls">
+                                    <a href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/2.Features-ExpenseApproval.jpg" data-nivobox=" true" data-lightbox-gallery="gallery1">
+                                       <i class="fa fa-arrows-alt"></i>
+                                    </a>
+                                    <a href="#"><i class="fa fa-chain"></i></a>
+                                 </div>
+                              </div>
+                           </div>
+                        </figure>
+                     </div>
+                     <div class="item appear-el" data-animation="fadeIn">
+                        <figure>
+                           <div class="img-view">
+                              <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/4.Features-CPF-fomula.jpg" alt=" place description here">
+                              <div class="overlay">
+                                 <div class="overlay-controls">
+                                    <a href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/4.Features-CPF-fomula.jpg" data-nivobox="true" data-lightbox-gallery="gallery1">
+                                       <i class="fa fa-arrows-alt"></i>
+                                    </a>
+                                    <a href="#"><i class="fa fa-chain"></i></a>
+                                 </div>
+                              </div>
+                           </div>
+                        </figure>
+                     </div>
+
+                     <div class="item appear-el" data-animation="fadeIn">
+                        <figure>
+                           <div class="img-view">
+                              <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/5.Features-PAT.jpg" alt=" place description here">
+                              <div class="overlay">
+                                 <div class="overlay-controls">
+                                    <a href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/5.Features-PAT.jpg" data-nivobox="true" data-lightbox-gallery="gallery1">
+                                       <i class="fa fa-arrows-alt"></i>
+                                    </a>
+                                    <a href="#"><i class="fa fa-chain"></i></a>
+                                 </div>
+                              </div>
+                           </div>
+                        </figure>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </section>
+         <!-- END LATEST PROJECTS-->
+      </div>
+
+   </div>
+   <div class="row before-footer">
+      <div class="container">
+         <div class="container">
+            <section class="section" id="start-trial">
+               <div class="container">
+                  <div class="row">
+                     <div class="col-md-12">
+                        <h3 class="headline text-center">Start your <font color="#FDD933">30 days free</font> trial</h3>
+                        <div class="row">
+                           <p class="lead text-center less-width">
+                              "Cheap HR software are not neccesarary always good.
+                              After 30 days of free trail, I am certain that SBSolution HRM will defintely meet my requirement
+                              Clean interface, yet comprehensive functions."
+                              - Steven Chia, Managing Director
+                           </p>
+                           <div class="col-md-12">
+                              <p style="margin:0 auto; display:block;" class="text-center">
+                                 <a href="@Url.Action("FreeTrial", "Front")" class="btn btn-lg btn-theme uppercase divided">@Resource.Try_Now<span class="btn-side"><i class="fa fa-chevron-right"></i></span></a>
+                              </p>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </section>
+         </div>
+      </div>
+   </div>
+   <div class="row">
+      <div class="container">
+         <!--Start Our Client-->
+         <section class="section" id="our-client">
+            <div class="row">
+               <div class="col-md-3">
+                  <h3 class="no-top-margin uppercase"><strong>Our</strong> Clients</h3>
+                  <p>With more than 1,500 customers have trusted SBSolution HRM to manage their HR administration processes. Try it now!</p>
+
+                  @*<div class="btn-group custom-navigation">
+                         <button type="button" class="btn prev"><i class="fa fa-chevron-left"></i></button>
+                         <button type="button" class="btn next"><i class="fa fa-chevron-right"></i></button>
+                     </div>*@
+
+               </div>
+               <div class="col-md-9">
+                  <section class="regular sliderslick">
+                     <div>
+                        <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/Client/logo-brickthrough.jpg">
+                     </div>
+                     <div>
+                        <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/Client/logo-toasties.jpg">
+                     </div>
+                     <div>
+                        <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/Client/logo-boxboss.jpg">
+                     </div>
+                     <div>
+                        <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/Client/logo-De-Paramount-Valet-Private-Limited.png">
+                     </div>
+                     <div>
+                        <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/Client/logo-Gee-Hoe-Seng.jpg">
+                     </div>
+                     <div>
+                        <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/Client/logo-lumileds.jpg">
+                     </div>
+                     <div>
+                        <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/Client/logo-Sun-Jin-Hong-Construction.jpg">
+                     </div>
+                  </section>
+                  @*<div class="owl-carousel owl-theme">
+
+                         <div class="item appear-el" data-animation="fadeIn">
+                             <figure>
+
+                                 <div class="img-view">
+
+                                     <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/1.Features-employee-setup.jpg" alt="Place description here">
+
+                                     <div class="overlay">
+
+                                         <div class="overlay-controls">
+                                             <a href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/1.Features-employee-setup.jpg" data-nivobox="true" data-lightbox-gallery="gallery1">
+                                                 <i class="fa fa-arrows-alt"></i>
+                                             </a>
+                                             <a href="#"><i class="fa fa-chain"></i></a>
+                                         </div>
+
+                                     </div>
+                                 </div>
+                             </figure>
+                         </div>
+
+                         <div class="item appear-el" data-animation="fadeIn">
+                             <figure>
+
+                                 <div class="img-view">
+
+                                     <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/2.Features-ExpenseApproval.jpg" alt="Place description here">
+
+                                     <div class="overlay">
+
+                                         <div class="overlay-controls">
+                                             <a href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/2.Features-ExpenseApproval.jpg" data-nivobox=" true" data-lightbox-gallery="gallery1">
+                                                 <i class="fa fa-arrows-alt"></i>
+                                             </a>
+                                             <a href="#"><i class="fa fa-chain"></i></a>
+                                         </div>
+
+                                     </div>
+
+                                 </div>
+
+                             </figure>
+                         </div>
+
+                         <div class="item appear-el" data-animation="fadeIn">
+                             <figure>
+
+                                 <div class="img-view">
+
+                                     <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/4.Features-CPF-fomula.jpg" alt=" place description here">
+
+                                     <div class="overlay">
+
+                                         <div class="overlay-controls">
+                                             <a href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/4.Features-CPF-fomula.jpg" data-nivobox="true" data-lightbox-gallery="gallery1">
+                                                 <i class="fa fa-arrows-alt"></i>
+                                             </a>
+                                             <a href="#"><i class="fa fa-chain"></i></a>
+                                         </div>
+
+                                     </div>
+
+                                 </div>
+
+                             </figure>
+                         </div>
+
+                         <div class="item appear-el" data-animation="fadeIn">
+                             <figure>
+
+                                 <div class="img-view">
+
+                                     <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/5.Features-PAT.jpg" alt=" place description here">
+
+                                     <div class="overlay">
+
+                                         <div class="overlay-controls">
+                                             <a href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/5.Features-PAT.jpg" data-nivobox="true" data-lightbox-gallery="gallery1">
+                                                 <i class="fa fa-arrows-alt"></i>
+                                             </a>
+                                             <a href="#"><i class="fa fa-chain"></i></a>
+                                         </div>
+                                     </div>
+                                 </div>
+
+                             </figure>
+                         </div>
+
+                     </div>*@
+               </div>
+            </div>
+         </section>
+
+
+         @*<section class="section" id="">
+
+                <div class="row">
+
+                    <div class="col-md-3">
+
+                        <h3 class="no-top-margin uppercase"><strong>Our</strong> Clients</h3>
+                        <p>With more than 1,500 customers have trusted SBSolution HRM to manage their HR administration processes. Try it now!</p>
+
+
+                        <div class="btn-group custom-navigation">
+                            <button type="button" class="btn prev"><i class="fa fa-chevron-left"></i></button>
+                            <button type="button" class="btn next"><i class="fa fa-chevron-right"></i></button>
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-9">
+
+                        <div class="owl-carousel owl-theme">
+
+                            <div class="owl-wrapper-outer">
+                                <div class="owl-wrapper">
+                                    <div class="owl-item" style="width: 212px;">
+                                        <div class="item appear-el animated fadeIn" data-animation="fadeIn">
+                                            <a href="#"><img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/Client/logo-brickthrough.jpg" alt="" /></a>
+                                        </div>
+                                    </div>
+                                    <div class="owl-item" style="width: 212px;">
+                                        <div class="item appear-el animated fadeIn" data-animation="fadeIn">
+                                            <a href="#"><img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/Client/logo-toasties.jpg" alt="" /></a>
+                                        </div>
+                                    </div>
+                                    <div class="owl-item" style="width: 212px;">
+                                        <div class="item appear-el animated fadeIn" data-animation="fadeIn">
+                                            <a href="#"><img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/Client/logo-boxboss.jpg" alt="" /></a>
+                                        </div>
+                                    </div>
+                                    <div class="owl-item" style="width: 212px;">
+                                        <div class="item appear-el animated fadeIn" data-animation="fadeIn">
+                                            <a href="#"><img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/Client/logo-De-Paramount-Valet-Private-Limited.png" alt="" /></a>
+                                        </div>
+                                    </div>
+                                    <div class="owl-item" style="width: 212px;">
+                                        <div class="item appear-el animated fadeIn" data-animation="fadeIn">
+                                            <a href="#"><img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/Client/logo-Gee-Hoe-Seng.jpg" alt="" /></a>
+                                        </div>
+                                    </div><div class="owl-item" style="width: 212px;">
+                                        <div class="item appear-el animated fadeIn" data-animation="fadeIn">
+                                            <a href="#"><img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/Client/logo-lumileds.jpg" alt=" " /></a>
+                                        </div>
+                                    </div><div class="owl-item" style="width: 212px;">
+                                        <div class="item appear-el animated fadeIn" data-animation="fadeIn">
+                                            <a href="#"><img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/images/home/Client/logo-Sun-Jin-Hong-Construction.jpg" alt="" /></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>*@
+         <!--End our client-->
+      </div>
+   </div>
+
+   <!-- FOOTER -->
+   <footer id="footer">
+      <div class="footer-main">
+         <div class="container">
+            <div class="row">
+               <div class="col-md-4">
+                  <div class="widget widget-about">
+                     <div class="">
+                        <h4><strong>@Resource.FrontEnd_Solutions</strong> HRM</h4>
+                        <p>
+                           An online Human Resource Management System specially designed and built for start-ups, sole-proprietorships, and small to medium sized organizations. Made affordable to all types of business with its easy-to-use functionalities.
+                           Companies could be freed from expensive HRM software, tedious HR processes and gaining higher focus on key business and sales strategy.
+                        </p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-md-4">
+                  <div class="widget widget-about">
+                     <div class="">
+                        <h4 class=""><strong>@Resource.FrontEnd_ContactUS</strong> Us</h4>
+                        <p><strong>Phone:</strong> +65 66965457</p>
+                        <p><strong>Email:</strong> support@sbsolutions.com.sg</p>
+                        <p><strong>Partnership:</strong> partners@sbsolutions.com.sg</p>
+                        <p><strong>Address:</strong> 520 Sims Avenue #02-04 Singapore 387580</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-md-4">
+                  <div class="widget widget-about">
+                     <div class="">
+                        <h4><strong>@Resource.FrontEnd_Join</strong> @Resource.FrontEnd_OurCom</h4>
+                        <p>Subscribe to our newsletter and stay up to date with the latest news and promotions!</p>
+                        <input type="text" class="footer-form-control" name="Email" id="Email" value="" style="width:220px;" placeholder="Enter your email address"><button type="submit" class="footer-btn btn-primary" style="height:34px;" onclick="Subscribe();">Subscribe</button>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-md-3">
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <div class="footer-bottom">
+         <div class="container">
+            <div class="row">
+               <div class="col-md-4 copyright">
+                  &copy; Copyright 2013 by <a href="@Url.Action("Front","Front" , new { step="" })">BlueCube Media Pte Ltd.</a> All Rights Reserved.
+               </div>
+               <div class="col-md-8">
+               </div>
+            </div>
+         </div>
+      </div>
+   </footer>
+   <!-- END FOOTER -->
+   <!-- SCROLL TOP -->
+   <div class="scroll-top">
+      <a href="#">
+         <i class="fa fa-angle-up"></i>
+      </a>
+   </div>
+   <!-- END SCROLL TOP -->
+</body>
+</html>

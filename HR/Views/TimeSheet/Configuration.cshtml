@@ -1,0 +1,273 @@
+﻿@model  HR.Models.TimeSheetConfigurationViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+@using SBSWorkFlowAPI.Constants;
+@{
+   ViewBag.Title = Resource.Time_Sheet_Configuration;
+}
+@if ((Model.rights != null && Model.rights.Contains(Operation.A)))
+{
+   <div class="pageheader">
+      <h2>@Resource.Time_Sheet_Configuration<span></span></h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home" )">@Resource.DashBoard</a></li>
+            <li class="active">@Resource.Time_Sheet_Configuration</li>
+         </ol>
+      </div>
+   </div>
+
+   <script type="text/javascript">
+      $(function () {
+         InitDatepicker();
+
+         var module = '@Model.tabAction';
+         if ('@string.IsNullOrEmpty(Model.tabAction)' == "True") {
+            module = "approval";
+         }
+         var liID = "li-" + module;
+         var tabID = module + "-tab";
+         $("#" + liID).addClass("active");
+         $("#" + tabID).addClass("active");
+
+         var addRow01Link = '<a href="@UrlUtil.Action(Url,"Approval", "Approval", new{
+            operation = EncryptUtil.Encrypt(Operation.C),
+            md = EncryptUtil.Encrypt(ModuleCode.Time),
+            atype = EncryptUtil.Encrypt(SBSWorkFlowAPI.Constants.ApprovalType.TimeSheet)
+            })" id="addRow4" class="btn btn-greensea  btn-sm add-row">@Resource.Add_An_Item</a>';
+         InitDatatable('approvalDataTable', addRow01Link, InitDatatableApplyLink({
+            name: "apply",
+            tabAction: "approval",
+            hasDel: true,
+            confirmAlert: true
+         }), 1, 'asc');
+
+      });
+   </script>
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+
+            <section class="tile color transparent-black">
+               <div class="tile-widget nopadding color transparent-white rounded-top-corners">
+                  <ul class="nav nav-tabs tabdrop">
+                     <li id="li-approval"><a href="#approval-tab" data-toggle="tab">@Resource.Time_Sheet_Approval</a></li>
+                  </ul>
+               </div>
+               <div class="tile-body tab-content ">
+                  <div id="approval-tab" class="tab-pane fade in">
+                     @using (Html.BeginForm("Configuration", "TimeSheet", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                     {
+                        @Html.AntiForgeryToken()
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile color transparent filter" id="secfilter4">
+                                 <div class="tile-header transparent">
+                                    <h1 onclick="CollapseHeader(null, 'btncollapse4', 'secfilter4')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                                    <div class="controls">
+                                       <a href="#" class="minimize filter" id="btncollapse4"><i class="fa fa-search  color-white"></i></a>
+                                    </div>
+                                 </div>
+                                 <div class="tile-body">
+                                    <div class="row">
+                                       <div class="col-md-6">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="Approval_Department" class="control-label">@Resource.Department</label>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-6">
+                                       </div>
+                                    </div>
+                                    <div class="row">
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <select class="chosen-select chosen-transparent form-control" id="Approval_Department" name="Approval_Department">
+                                                   @if (Model.departmentList != null)
+                                                   {
+                                                      foreach (var row in Model.departmentList)
+                                                      {
+                                                         if (Model.Approval_Department == NumUtil.ParseInteger(row.Value))
+                                                         {
+                                                            <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                         }
+                                                         else
+                                                         {
+                                                            <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                                         }
+                                                      }
+                                                   }
+                                                </select>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-4">
+                                       </div>
+                                    </div>
+                                    <div class="row">
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <button type="submit" class="btn btn-default" name="tabAction" value="approval">@Resource.Filter</button>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile transparent">
+                                 <div class="tile-header transparent">
+                                    <h1><strong>@Resource.Time_Sheet_Approval</strong></h1>
+                                    <div class="controls">
+                                       <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                    </div>
+                                 </div>
+                                 <div class="tile-body">
+                                    <div class="table-responsive">
+                                       <table class="table table-datatable table-custom" id="approvalDataTable">
+                                          <thead>
+                                             <tr>
+                                                <th class="no-sort" style="width: 40px;">
+                                                   <div class="checkbox check-transparent">
+                                                      <input type="checkbox" value="1" id="chkallLevApproval">
+                                                      <label for="chkallLevApproval"></label>
+                                                   </div>
+                                                </th>
+                                                <th class="sort-alpha">@Resource.Department</th>
+                                                <th class="sort-alpha">@Resource.Employee</th>
+                                                <th class="sort-alpha">@Resource.Approver</th>
+                                                <th class="no-sort" width="110px">@Resource.Action</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             @if (Model.ApprovalList != null)
+                                             {
+                                                var l = 0;
+                                                foreach (var row in Model.ApprovalList)
+                                                {
+                                                   if (row.Departments != null && Model.Approval_Department.HasValue)
+                                                   {
+                                                      if (!row.Departments.Select(s => s.User_Department_ID).Contains(Model.Approval_Department.Value))
+                                                      {
+                                                         continue;
+                                                      }
+                                                   }
+                                                   <tr>
+                                                      <td>
+                                                         <div class="checkbox check-transparent">
+                                                            <input type="checkbox" value="@row.Approval_Flow_ID" name="timeSteets" id="timeSteets[@l]">
+                                                            <label for="timeSteets[@l]"></label>
+                                                         </div>
+                                                      </td>
+                                                      <td>
+                                                         @if (row.Departments != null)
+                                                         {
+                                                            var dService = new DepartmentService();
+                                                            foreach (var drow in row.Departments)
+                                                            {
+                                                               @drow.Name
+                                                               <br />
+                                                            }
+                                                         }
+                                                      </td>
+                                                      <td>
+                                                         @if (row.Applicable_Employee != null)
+                                                         {
+                                                            var eService = new EmployeeService();
+                                                            foreach (var erow in row.Applicable_Employee)
+                                                            {
+                                                               if (erow.Is_Applicable.HasValue && erow.Is_Applicable.Value)
+                                                               {
+                                                                  @erow.Name
+                                                                  <br />
+                                                               }
+                                                            }
+                                                         }
+                                                      </td>
+                                                      <td>
+                                                         @if (row.Approvers != null)
+                                                         {
+                                                            var uService = new UserService();
+                                                            foreach (var arow in row.Approvers)
+                                                            {
+                                                               if (arow.Approval_Flow_Type == ApproverFlowType.Employee || string.IsNullOrEmpty(arow.Approval_Flow_Type))
+                                                               {
+                                                                  @arow.Name
+                                                               }
+                                                               else if (arow.Approval_Flow_Type == ApproverFlowType.Job_Cost)
+                                                               {
+                                                                  @Resource.Job_Cost
+                                                               }
+                                                               <br />
+                                                            }
+                                                         }
+                                                      </td>
+                                                      <td class="actions text-left">
+                                                         @if (Model.rights != null && Model.rights.Contains(Operation.U))
+                                                         {
+                                                            <a href="@UrlUtil.Action(Url,"Approval", "Approval", new
+                                                                                     {
+                                                                                         pAID = EncryptUtil.Encrypt(row.Approval_Flow_ID),
+                                                                                         operation = EncryptUtil.Encrypt(Operation.U),
+                                                                                        md = EncryptUtil.Encrypt(ModuleCode.Time),
+                                                                                         atype = EncryptUtil.Encrypt(SBSWorkFlowAPI.Constants.ApprovalType.TimeSheet)
+                                                                                    })" title="@Resource.Edit" style="text-decoration:none">
+                                                               <i class="fa fa-edit fa-2x"></i>
+                                                            </a>
+                                                         }
+                                                         @if (Model.rights != null && Model.rights.Contains(Operation.D))
+                                                         {
+                                                            <a href="@UrlUtil.Action(Url,"Approval", "Approval", new
+                                                                                    {
+                                                                                        pAID = EncryptUtil.Encrypt(row.Approval_Flow_ID),
+                                                                                        operation = EncryptUtil.Encrypt(Operation.D),
+                                                                                        md = EncryptUtil.Encrypt(ModuleCode.Inventory),
+                                                                                        atype = EncryptUtil.Encrypt(SBSWorkFlowAPI.Constants.ApprovalType.TimeSheet)
+                                                                                    })" onclick="return confirm('@Resource.Confirm_Delete_Msg');" title="@Resource.Delete">
+                                                               <i class="fa fa-times-circle-o fa-2x"></i>
+                                                            </a>
+                                                         }
+                                                      </td>
+                                                   </tr>
+                                                         l++;
+                                                }
+                                             }
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                     }
+                  </div>
+               </div>
+            </section>
+         </div>
+      </div>
+   </div>
+}

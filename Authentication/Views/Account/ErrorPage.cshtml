@@ -1,0 +1,36 @@
+﻿@model Authentication.Models.ErrorPageViewModel
+@using SBSResourceAPI;
+
+@{
+    ViewBag.Title = Resource.Error_Page;
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.globalMenu').hide();
+    });
+</script>
+    <!-- Page content -->
+        <div class="main">
+            <div class="row">
+                <div class="col-md-12">
+                    <!-- tile -->
+                    <section class="tile transparent">
+                        <div class="jumbotron bg-transparent-black-3">
+                            <div class="container text-center">
+                                <h1 class="error">@Resource.Error <strong>@(Model.code.ToString().Replace("-", ""))</strong></h1>
+                                <p style="font-size:16px">@Html.Raw(Model.msg)</p>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <p>
+                                            <a class="btn btn-greensea btn-large" href="@Url.Action("Index", "Home")" style="width:180px"><i class="fa fa-home"></i> @Resource.Return_To_Home</a>
+                                            <a class="btn btn-red btn-large" href="@Url.Action("Logout", "Account")" style="width:180px"><i class="fa fa-user-times"></i> @Resource.Log_Out</a>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+            </div>
+        </div>

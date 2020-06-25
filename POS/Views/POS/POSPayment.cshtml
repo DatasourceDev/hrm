@@ -1,0 +1,867 @@
+﻿@using POS.Common;
+@using POS.Models;
+@using SBSModel.Common;
+@using SBSModel.Models;
+@model  POS.Models.POSViewModel
+@{
+    ViewBag.Title = @Resources.ResourcePOS.POS;
+    var serviceCharge = Model.Service_Charge_Rate.HasValue ? Model.Service_Charge_Rate.Value : 0;
+
+    var gstRate = Model.valGST.HasValue ? Model.valGST.Value : 0;
+}
+
+
+<script type="text/javascript">
+    $(function () {
+        var percen = '@serviceCharge';
+        if (isDecimal(percen) == true)
+            percen = formatCurrency(percen);
+        else
+            percen = formatNumber(percen);
+        $('#Service_Charge_Rate_Label').html('Svc. Charge' + " (" + percen + "%)");
+
+        var gstpercen = '@gstRate';
+        if (isDecimal(gstpercen) == true)
+            gstpercen = formatCurrency(gstpercen);
+        else
+            gstpercen = formatNumber(gstpercen);
+        $('#GST_Rate_Label').html('GST' + " (" + gstpercen + "% Inclusive)");
+
+        $('#Text_Search_Member').on("keyup", function () {
+            var txtSearch = $(this).val();
+
+            $("tr.parent").each(function (index) {
+
+                $tr = $(this);
+                var showRow = true;
+
+                $tr.find("td.val").each(function () {
+                    var val = $(this).text();
+
+                    val.indexOf(txtSearch);
+
+                    if (val.toLowerCase().indexOf(txtSearch.toLowerCase()) < 0) {
+                        showRow = false;
+                        return true;
+                    }
+                    else {
+                        showRow = (showRow || true);
+                        return false;
+                    }
+                });
+                if (!showRow) {
+                    $tr.hide();
+                } else {
+                    $tr.show();
+                }
+
+            });
+        });
+    });
+
+    function clearMemberSearch() {
+        $('#Is_Text_Search_Member').val(true);
+        $('#Text_Search_Member').val('');
+
+        $('#Customer_Name').val('');
+        $('#Contact_No').val('');
+        $('#Customer_Email').val('');
+        $('#Remark').val('');
+
+        theForm.submit();
+    };
+
+</script>
+
+<div class="main-content" id="divReceipt" style="color:#fff;">
+    <div class="container-fluid padded">
+        <div class="row-fluid">
+            <div class="span5">
+                <div class="box" style="background: rgba(0,0,0,0.7)">
+                    <div id="divSelProduct">
+                        @{
+                            Html.RenderPartial("POSSelectProduct", Model);
+                        }
+
+
+
+                    </div>
+                    <div class="control-group">
+                        <hr class="divider" />
+                        @if (Model.Business_Type == BusinessType.FoodAndBeverage)
+                        {
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    @Html.LabelFor(m => m.Table_No, new { @class = "display-text-medium" })
+                                </div>
+                                <div class="span6 text-right">
+                                    @Html.TextBox("Table_No", Model.Table_No, new { @class = "display-text display-text-amount display-text-medium", Readonly = true })
+                                </div>
+                            </div>
+                            <hr class="divider" />
+                        }
+
+                        <div class="row-fluid">
+                            <div class="span6">
+                                @Html.LabelFor(m => m.Total_Amount, new { @class = "display-text-medium" })
+                            </div>
+                            <div class="span6">
+                                <div class="span10 text-right">
+                                    @Html.TextBox("Total_Amount", Model.Total_Amount, new { style = "display:none;", Readonly = true })
+                                    @Html.TextBox("Total_Amount_Label", (Model.Total_Amount).ToString("n2"), new { @class = "display-text display-text-amount display-text-medium", Readonly = true })
+                                </div>
+                                <div class="span2 text-right">
+                                    <input type="text" value="@Model.Currency_Code" class="display-text display-text-medium" readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="divider" />
+                        <div class="row-fluid">
+                            <div class="span6">
+                                @Html.LabelFor(m => m.Select_Member_Discount, new { @class = "display-text-medium" })
+                            </div>
+                            <div class="span6 ">
+                                <div class="span10 text-right">
+                                    <input type="hidden" name="Select_Member_Discount_Type" id="Select_Member_Discount_Type" value="@Model.Select_Member_Discount_Type" />
+                                    @Html.TextBox("Select_Member_Discount", Model.Select_Member_Discount, new { style = "display:none;", Readonly = true })
+                                    @Html.TextBox("Select_Member_Discount_Label", ((Model.Select_Member_Discount.HasValue ? Model.Select_Member_Discount.Value : 0).ToString("n2")), new { @class = "display-text display-text-amount display-text-medium", Readonly = true })
+                                </div>
+                                <div class="span2 text-right">
+                                    @if (Model.Select_Member_Discount_Type == DiscountType.Amount)
+                                    {
+                                        @Html.TextBox("Select_Member_Discount_Type_Label", Model.Currency_Code, new { @class = "display-text display-text-medium", Readonly = true })
+                                    }
+                                    else
+                                    {
+                                        @Html.TextBox("Select_Member_Discount_Type_Label", "%", new { @class = "display-text display-text-medium", Readonly = true })
+                                    }
+                                </div>
+
+                            </div>
+                        </div>
+                        <hr class="divider" />
+                        <div class="row-fluid">
+                            <div class="span6">
+                                @Html.LabelFor(m => m.Discount, new { @class = "display-text-medium" })
+                            </div>
+                            <div class="span6">
+                                <div class="span10 text-right">
+                                    @Html.TextBox("Discount", Model.Discount, new { style = "display:none;", Readonly = true })
+                                    @Html.TextBox("Discount_Label", (Model.Discount).ToString("n2"), new { @class = "display-text display-text-amount display-text-medium", Readonly = true })
+                                </div>
+                                <div class="span2 text-right">
+                                    @if (Model.Discount_Type == DiscountType.Amount)
+                                    {
+                                        @Html.TextBox("Discount_Type_Label", Model.Currency_Code, new { @class = "display-text display-text-medium", Readonly = true })
+                                    }
+                                    else
+                                    {
+                                        @Html.TextBox("Discount_Type_Label", "%", new { @class = "display-text display-text-medium", Readonly = true })
+                                    }
+                                </div>
+
+                            </div>
+                        </div>
+                        <hr class="divider" />
+                        <div class="row-fluid">
+                            <div class="span6">
+                                <label id="GST_Rate_Label" class="display-text-medium">GST (@Model.valGST % Inclusive)</label>
+                            </div>
+                            <div class="span6">
+                                <div class="span10 text-right">
+                                    @Html.TextBox("Total_GST_Amount", Model.Total_GST_Amount, new { style = "display:none;", Readonly = true })
+                                    @Html.TextBox("Total_GST_Amount_Label", (Model.Total_GST_Amount).ToString("n2"), new { @class = "display-text display-text-amount display-text-medium", Readonly = true })
+                                </div>
+                                <div class="span2 text-right">
+                                    <input type="text" value="@Model.Currency_Code" class="display-text display-text-medium" readonly />
+                                </div>
+
+                            </div>
+                        </div>
+                        <hr class="divider" />
+
+
+                        <div class="row-fluid">
+                            <div class="span6">
+                                <label id="Service_Charge_Rate_Label" class="display-text-medium">Svc. Charge (0%)</label>
+                            </div>
+                            <div class="span6">
+                                <div class="span10 text-right">
+                                    @Html.TextBox("Service_Charge_Amount", Model.Service_Charge_Amount, new { style = "display:none;", Readonly = true })
+                                    @Html.TextBox("Service_Charge_Amount_Label", (Model.Service_Charge_Amount).ToString("n2"), new { @class = "display-text display-text-amount display-text-medium", Readonly = true })
+                                </div>
+                                <div class="span2 text-right">
+                                    <input type="text" value="@Model.Currency_Code" class="display-text display-text-medium" readonly />
+                                </div>
+
+                            </div>
+                        </div>
+                        <hr class="divider" />
+                        <div class="row-fluid" id="divSurcharge">
+                            <div class="span8">
+                                <label id="Surcharge_Percen_Label" class="display-text-medium">@Resources.ResourcePOS.Surcharge (0%)</label>
+                            </div>
+
+                            <div class="span4">
+                                <div class="span9 text-right">
+                                    @Html.TextBox("Surcharge_Percen", Model.Surcharge_Percen, new { style = "display:none;", Readonly = true })
+                                    @Html.TextBox("Surcharge_Amount", Model.Surcharge_Amount, new { style = "display:none;", Readonly = true })
+                                    @Html.TextBox("Surcharge_Amount_Label", "0.00", new { @class = "display-text display-text-amount display-text-medium", Readonly = true })
+                                </div>
+                                <div class="span3 text-right">
+                                    <input type="text" value="@Model.Currency_Code" class="display-text display-text-medium" readonly />
+                                </div>
+
+                            </div>
+                        </div>
+                        <hr class="divider" />
+                        <div class="row-fluid">
+                            <div class="span6">
+                                @Html.LabelFor(m => m.Net_Amount, new { @class = "display-text-medium" })
+                            </div>
+                            <div class="span6">
+                                <div class="span10 text-right">
+                                    @Html.TextBox("Net_Amount", Model.Net_Amount, new { style = "display:none;", Readonly = true })
+                                    @Html.TextBox("Net_Amount_Label", (Model.Net_Amount).ToString("n2"), new { @class = "display-text display-text-amount display-text-medium", Readonly = true })
+                                </div>
+                                <div class="span2 text-right">
+                                    <input type="text" value="@Model.Currency_Code" class="display-text display-text-medium" readonly />
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                        <hr class="divider" />
+                        <div class="row-fluid">
+                            <div class="span6">
+                                <div class="span6">
+                                    @Html.LabelFor(m => m.Cash_Payment, new { @class = "display-text-medium" })
+                                </div>
+                                <div class="span4 text-right">
+                                    @Html.TextBox("Cash_Payment", Model.Cash_Payment, new { style = "display:none;", Readonly = true })
+                                    @Html.TextBox("Cash_Payment_Label", (Model.Cash_Payment).ToString("n2"), new { @class = "display-text display-text-amount display-text-medium", Readonly = true })
+                                </div>
+                                <div class="span2 text-right">
+                                    <input type="text" value="@Model.Currency_Code" class="display-text display-text-medium" readonly />
+                                </div>
+                            </div>
+                            <div class="span6">
+                                <div class="span4">
+                                    @Html.LabelFor(m => m.Nets_Payment, new { @class = "display-text-medium" })
+                                </div>
+                                <div class="span6 text-right">
+                                    @Html.TextBox("Nets_Payment", Model.Nets_Payment, new { style = "display:none;", Readonly = true })
+                                    @Html.TextBox("Nets_Payment_Label", (Model.Nets_Payment).ToString("n2"), new { @class = "display-text display-text-amount display-text-medium", Readonly = true })
+                                </div>
+                                <div class="span2 text-right">
+                                    <input type="text" value="@Model.Currency_Code" class="display-text display-text-medium" readonly />
+                                </div>
+                            </div>
+                        </div>
+                        <hr class="divider" />
+                        @if (Model.Master | Model.Visa)
+                        {
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <div class="span4">
+                                        @Html.LabelFor(m => m.Visa_Payment, new { @class = "display-text-medium" })
+                                    </div>
+                                    <div class="span6 text-right">
+                                        @Html.TextBox("Visa_Payment", Model.Visa_Payment, new { style = "display:none;", Readonly = true })
+                                        @Html.TextBox("Visa_Payment_Label", (Model.Visa_Payment).ToString("n2"), new { @class = "display-text display-text-amount display-text-medium", Readonly = true })
+                                    </div>
+                                    <div class="span2 text-right">
+                                        <input type="text" value="@Model.Currency_Code" class="display-text display-text-medium" readonly />
+                                    </div>
+                                </div>
+                                <div class="span6">
+                                    <div class="span5">
+                                        @Html.LabelFor(m => m.Master_Card_Payment, new { @class = "display-text-medium" })
+                                    </div>
+                                    <div class="span5 text-right">
+                                        @Html.TextBox("Master_Card_Payment", Model.Master_Card_Payment, new { style = "display:none;", Readonly = true })
+                                        @Html.TextBox("Master_Card_Payment_Label", (Model.Master_Card_Payment).ToString("n2"), new { @class = "display-text display-text-amount display-text-medium", Readonly = true })
+                                    </div>
+                                    <div class="span2 text-right">
+                                        <input type="text" value="@Model.Currency_Code" class="display-text display-text-medium" readonly />
+                                    </div>
+                                </div>
+
+                            </div>
+                            <hr class="divider" />
+                        }
+
+                        @if (Model.AMEX | Model.DinersClub)
+                        {
+                            <div class="row-fluid">
+                                @if (Model.AMEX)
+                                {
+                                    <div class="span6">
+                                        <div class="span4">
+                                            @Html.LabelFor(m => m.AMEX_Payment, new { @class = "display-text-medium" })
+                                        </div>
+                                        <div class="span6 text-right">
+                                            @Html.TextBox("AMEX_Payment", Model.AMEX_Payment, new { style = "display:none;", Readonly = true })
+                                            @Html.TextBox("AMEX_Payment_Label", (Model.AMEX_Payment).ToString("n2"), new { @class = "display-text display-text-amount display-text-medium", Readonly = true })
+                                        </div>
+                                        <div class="span2 text-right">
+                                            <input type="text" value="@Model.Currency_Code" class="display-text display-text-medium" readonly />
+                                        </div>
+                                    </div>
+
+                                }
+                                @if (Model.DinersClub)
+                                {
+                                    <div class="span6">
+                                        <div class="span5">
+                                            @Html.LabelFor(m => m.Diners_Club_Payment, new { @class = "display-text-medium" })
+                                        </div>
+                                        <div class="span5 text-right">
+                                            @Html.TextBox("Diners_Club_Payment", Model.Diners_Club_Payment, new { style = "display:none;", Readonly = true })
+                                            @Html.TextBox("Diners_Club_Payment_Label", (Model.Diners_Club_Payment).ToString("n2"), new { @class = "display-text display-text-amount display-text-medium", Readonly = true })
+                                        </div>
+                                        <div class="span2 text-right">
+                                            <input type="text" value="@Model.Currency_Code" class="display-text display-text-medium" readonly />
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <hr class="divider" />
+                        }
+                        <div class="row-fluid">
+                            @if (Model.JCB)
+                            {
+                                <div class="span6">
+                                    <div class="span4">
+                                        @Html.LabelFor(m => m.JCB_Payment, new { @class = "display-text-medium" })
+                                    </div>
+                                    <div class="span6 text-right">
+                                        @Html.TextBox("JCB_Payment", Model.JCB_Payment, new { style = "display:none;", Readonly = true })
+                                        @Html.TextBox("JCB_Payment_Label", (Model.JCB_Payment).ToString("n2"), new { @class = "display-text display-text-amount display-text-medium", Readonly = true })
+                                    </div>
+                                    <div class="span2 text-right">
+                                        <input type="text" value="@Model.Currency_Code" class="display-text display-text-medium" readonly />
+                                    </div>
+                                </div>
+                            }
+                            <div class="span6">
+                                <div class="span6">
+                                    @Html.LabelFor(m => m.Redeem_Credits, new { @class = "display-text-medium" })
+                                </div>
+                                <div class="span4 text-right">
+                                    @Html.TextBox("Redeem_Credits", Model.Redeem_Credits, new { style = "display:none;", Readonly = true })
+                                    @Html.TextBox("Redeem_Credits_Label", ((Model.Redeem_Credits.HasValue ? Model.Redeem_Credits.Value : 0).ToString("n2")), new { @class = "display-text display-text-amount display-text-medium", Readonly = true })
+                                </div>
+                                <div class="span2 text-right">
+                                    <input type="text" value="@Model.Currency_Code" class="display-text display-text-medium" readonly />
+                                </div>
+                            </div>
+
+                        </div>
+                        <hr class="divider" />
+
+                        @Html.TextBox("Changes", (Model.Changes), new { @class = "display-text display-text-amount display-text-medium", style = "display:none", Readonly = true })
+                    </div>
+                    <div class="control-group" style="overflow-x:auto">
+                        <table style="width:99%" class="table-button">
+                            <tr>
+                                <td>
+                                    @if (string.IsNullOrEmpty(Model.Status))
+                                    {
+                                        <a id="btnBack" data-toggle="modal" class="btn btn-white btn-large"><p>Back</p></a>
+                                    }
+                                    else
+                                    {
+                                        if (Model.Status == "Paid")
+                                        {
+                                            <a id="btnBack" data-toggle="modal" class="btn btn-lightblue btn-large"><p>New Sale</p></a>
+
+                                        }
+                                        else
+                                        {
+                                            <a id="btnBack" data-toggle="modal" class="btn btn-white btn-large"><p>Back</p></a>
+
+                                        }
+
+                                    }
+                                </td>
+                                <td>
+                                    @if (Model.Status == ReceiptStatus.BackOrder || Model.Status == ReceiptStatus.Paid)
+                                    {
+                                        <a id="btnHoldBill" data-toggle="modal" disabled="disabled" class="btn btn-white btn-large" style="background-color:#D1CDCE;">
+                                            <p>Hold Bill</p>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a id="btnHoldBill" data-toggle="modal" class="btn btn-white btn-large">
+                                            <p>Hold Bill</p>
+                                        </a>
+                                    }
+                                </td>
+                                <td>
+                                    @if (Model.Status == ReceiptStatus.BackOrder || Model.Status == ReceiptStatus.Paid)
+                                    {
+                                        <a id="btnHoldBillPrint" data-toggle="modal" disabled="disabled" class="btn btn-white btn-large" style="background-color: #D1CDCE; width: 176px">
+                                            <p>Hold Bill &amp;<br /> Print Receipt</p>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a id="btnHoldBillPrint" data-toggle="modal" class="btn btn-white btn-large">
+                                            <p>Hold Bill &amp;<br /> Print Receipt</p>
+                                        </a>
+                                    }
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="span7">
+                <div class="box" style="background: rgba(0,0,0,0.2);">
+                    <div class="box-content padded">
+                        @if (Model.result != null && Model.result.Code != 0)
+                        {
+                            if (Model.result.Code < 0)
+                            {
+                                <div class="control-group">
+                                    <div class="alert alert-error">
+                                        @UserSession.GetMsg(Model.result.Code, Model.result.Msg, Model.result.Field)
+                                        <br />
+                                    </div>
+                                </div>
+                            }
+                            else if (Model.result.Code > 0)
+                            {
+                                <div class="control-group">
+                                    <div class="alert alert-success">
+                                        @UserSession.GetMsg(Model.result.Code, Model.result.Msg, Model.result.Field)
+                                        <br />
+                                    </div>
+                                </div>
+                            }
+                        }
+
+
+
+                        <div class="control-group">
+                            <div class="span12">
+                                <p class="pbtnbar">
+                                    <a id="btnMember" class="btn btn-white btn-white btn-large table-button btn-action" data-toggle="modal">
+                                        <span>
+                                            <img src="~/Images/button_member.png" />
+                                        </span>
+                                        <br />
+                                        <span>Member Card</span>
+                                    </a>
+                                    <a id="btnWalkIn" class="btn btn-white btn-white btn-large table-button btn-action" data-toggle="modal">
+                                        <span>
+                                            <img src="~/Images/button_customer.png" />
+                                        </span>
+                                        <br />
+                                        <span>Customer</span>
+                                    </a>
+                                    <a id="btnDiscount" class="btn btn-white btn-white btn-large table-button btn-action" data-toggle="modal">
+                                        <span>
+                                            <img src="~/Images/button_discount.png" />
+                                        </span>
+                                        <br />
+                                        <span>Discount</span>
+                                    </a>
+
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="control-group" id="pnlCal" style="min-height: 400px;">
+                            <div class="span5">
+                                <div class="row-fluid">
+                                    <div class="span12">
+                                        <div class="control-group">
+                                            @Html.TextBox("Text_Label1", "Balance Due", new { @class = "display-text", Readonly = true, tabindex = -1 })
+                                        </div>
+                                        <div class="control-group">
+                                            @Html.TextBox("Text1", "", new { style = "text-align:right;width:75%;", Readonly = true })
+                                            <input type="text" value="@Model.Currency_Code" class="display-text display-text-amount display-text-medium" style="width:40px;" readonly />
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row-fluid">
+                                    <div class="span12">
+                                        <div class="control-group">
+                                            @Html.TextBox("Text_Label2", "Amount Received", new { @class = "display-text", Readonly = true, tabindex = -1 })
+                                        </div>
+                                        <div class="control-group">
+                                            @Html.TextBox("Text2", "", new { maxlength = "14", style = "text-align:right;width:75%;", @onchange = "Text2_Onchange()" })
+                                            @Html.TextBox("Text2_Discount_Type_Label", Model.Currency_Code, new { @class = "display-text", style = "width:40px;", Readonly = true, tabindex = -1 })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row-fluid">
+                                    <div class="span12">
+                                        <div class="control-group">
+                                            @Html.TextBox("Text_Label3", "Change", new { @class = "display-text", Readonly = true, tabindex = -1 })
+                                        </div>
+                                        <div class="control-group">
+                                            @Html.TextBox("Text3", "", new { style = "text-align:right;width:75%;", Readonly = true })
+                                            <input type="text" value="@Model.Currency_Code" class="display-text display-text-amount display-text-medium" style="width:40px;" readonly />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row-fluid" style="display:none;">
+                                    <div class="span12">
+                                        <div class="control-group">
+                                            @Html.TextBox("Text_Label4", "Remaining Balance", new { @class = "display-text", Readonly = true, tabindex = -1 })
+                                        </div>
+                                        <div class="control-group">
+                                            @Html.TextBox("Text4", "", new { style = "text-align:right;width:80%;", Readonly = true })
+                                            <input type="text" value="@Model.Currency_Code" class="display-text display-text-amount display-text-medium" style="width:30px;" readonly />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row-fluid">
+                                    <div class="span12">
+                                        <div class="control-group" style="padding-left:6px;">
+
+                                            @if (Model.Status == ReceiptStatus.Paid || Model.Status == ReceiptStatus.Void)
+                                            {
+                                                @Html.CheckBoxFor(m => m.Combine_Payment, new { @onchange = "", Readonly = true, disabled = "disabled" })
+                                                <span class="spancer"></span>
+                                                @Html.LabelFor(m => m.Combine_Payment, new { @class = "control-label" })
+                                            }
+                                            else
+                                            {
+
+                                                @Html.CheckBoxFor(m => m.Combine_Payment, new { @onchange = "ChkCombinePayment_Onchange()" })
+                                                <span class="spancer"></span>
+                                                @Html.LabelFor(m => m.Combine_Payment, new { @class = "control-label" })
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row-fluid">
+                                    <div class="span12">
+                                        <div class="control-group" style="padding-left:6px;">
+                                            @if (string.IsNullOrEmpty(Model.Status))
+                                            {
+                                                @Html.CheckBoxFor(m => m.Back_Order, new { @onchange = "ChkBackOrder_Onchange()" })
+                                                <span class="spancer"></span>
+                                                @Html.LabelFor(m => m.Back_Order, new { @class = "control-label-x2" })
+                                            }
+                                            else
+                                            {
+                                                @Html.CheckBoxFor(m => m.Back_Order, new { @onchange = "", Readonly = true, disabled = "disabled" })
+                                                <span class="spancer"></span>
+                                                @Html.LabelFor(m => m.Back_Order, new { @class = "control-label-x2" })
+
+                                            }
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="span7" id="pnlNumber">
+                                <div style="padding-top:32px;overflow-x:auto;">
+                                    <p class="pnumber">
+                                        <a onclick="Text2_Number_Onclick('1')" data-toggle="modal" class="btn btn-middle  btn-transparent-black">1</a>
+                                        <a onclick="Text2_Number_Onclick('2')" data-toggle="modal" class="btn btn-middle  btn-transparent-black">2</a>
+                                        <a onclick="Text2_Number_Onclick('3')" data-toggle="modal" class="btn btn-middle  btn-transparent-black">3</a>
+                                        <a onclick="Text2_Number_Onclick('0')" data-toggle="modal" class="btn btn-middle  btn-transparent-black">0</a>
+                                        </>
+                                    <p class="pnumber">
+                                        <a onclick="Text2_Number_Onclick('4')" data-toggle="modal" class="btn btn-middle btn-transparent-black">4</a>
+                                        <a onclick="Text2_Number_Onclick('5')" data-toggle="modal" class="btn btn-middle btn-transparent-black">5</a>
+                                        <a onclick="Text2_Number_Onclick('6')" data-toggle="modal" class="btn btn-middle btn-transparent-black">6</a>
+                                        <a id="btn00" onclick="Text2_Number_Onclick('00')" data-toggle="modal" class="btn btn-middle btn-transparent-black">00</a>
+                                    </p>
+                                    <p class="pnumber">
+                                        <a onclick="Text2_Number_Onclick('7')" data-toggle="modal" class="btn btn-middle btn-transparent-black">7</a>
+                                        <a onclick="Text2_Number_Onclick('8')" data-toggle="modal" class="btn btn-middle btn-transparent-black">8</a>
+                                        <a onclick="Text2_Number_Onclick('9')" data-toggle="modal" class="btn btn-middle btn-transparent-black">9</a>
+                                        <a id="btn000" onclick="Text2_Number_Onclick('000')" data-toggle="modal" class="btn btn-middle btn-transparent-black">000</a>
+                                    </p>
+                                    <p class="pnumber">
+                                        <a onclick="Text2_Number_Onclick('C')" data-toggle="modal" class="btn btn-middle btn-transparent-black">C</a>
+                                        <a onclick="Text2_Number_Onclick('.')" data-toggle="modal" class="btn btn-middle btn-transparent-black">.</a>
+                                        <a id="btnDiscountTypePercen" onclick="Discount_Type_Onclick('@DiscountType.Percen')" class="btn btn-middle btn-transparent-black" data-toggle="modal">
+                                            %
+                                        </a>
+                                        <a id="btnDiscountTypeAmount" onclick="Discount_Type_Onclick('@DiscountType.Amount')" class="btn btn-middle btn-transparent-black" data-toggle="modal">
+                                            @Model.Currency_Code
+                                        </a>
+                                        <a id="btnProceedCredit" data-toggle="modal" class="btn btn-lightblue btn-middle btn-transparent-black" style="width:146px;">Proceed</a>
+                                        <a id="btnPayment" onclick="Payment_Onclick()" class="btn btn-lightblue btn-middle btn-transparent-black" data-toggle="modal" style="width:146px;">
+                                            Payment
+                                        </a>
+                                    </p>
+
+                                </div>
+                            </div>
+                            <div class="span7" id="pnlMember">
+                                <div class="row-fluid">
+                                    <div class="span12">
+                                        <div class="control-group">
+                                            <a id="btnOpenMember" class="btn btn-white btn-white btn-small table-button" data-toggle="modal" style="width: 130px;display:none;" href="#modal-member">
+                                                <p> New Member</p>
+                                            </a>
+                                            <a id="btnNewMember" class="btn btn-white btn-white btn-small table-button" data-toggle="modal" style="width: 130px;" onclick="NewMember_Onclick();">
+                                                <p> New Member</p>
+                                            </a>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="row-fluid">
+                                    <div class="span12">
+                                        <div class="control-group text-center">
+                                            <div class="box" style="background:rgba(0,0,0,0.2);top:0; bottom:0;margin-bottom:0px;">
+                                                @Html.TextBox("Text_Search_Member", "", new { style = "width:85%;" })
+                                                <input type="hidden" name="Select_Member_ID" id="Select_Member_ID" value="@Model.Select_Member_ID" />
+
+                                                <input type="hidden" name="Select_Birthday" id="Select_Birthday" value="@(Model.Select_Birthday.ToString())" />
+                                                <input type="hidden" name="Is_Text_Search_Member" id="Is_Text_Search_Member" value="" />
+                                                <a class="icon icon-remove " onclick="clearMemberSearch();"></a>
+                                            </div>
+                                        </div>
+                                        <div class="control-group">
+                                            <div class="box" style="background:rgba(0,0,0,0.2);top: 0; bottom: 0; margin-bottom: 0px;height:280px;overflow-y:auto ">
+                                                <table cellpadding="1" cellspacing="1" class="table responsive table-no-boder" style="width: 100%; border: none;">
+                                                    @if (Model.MemberList != null)
+                                                    {
+
+                                                        foreach (var member in Model.MemberList)
+                                                        {
+                                                            var memsel = "";
+                                                            if (Model.Select_Member_ID == member.Member_ID)
+                                                            {
+                                                                memsel = "highlight";
+                                                            }
+                                                            <tr style="cursor:pointer" onclick="EditMember_Onclick('@member.Member_ID')" class="@memsel parent">
+                                                                <td>
+                                                                    <table cellpadding="1" cellspacing="1" class="table-no-boder" style="width: 100%; border: none;">
+                                                                        <tr>
+                                                                            <td style="width:100px;font-weight:700;">Card ID</td>
+                                                                            <td class="val">@member.Member_Card_No</td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td style="width:100px;font-weight:700;">Name</td>
+                                                                            <td class="val">@member.Member_Name</td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td style="width:100px;font-weight:700;">Phone No</td>
+                                                                            <td class="val">@member.Phone_No</td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td style="width:100px;font-weight:700;">NRIC No.</td>
+                                                                            <td class="val">@member.NRIC_No</td>
+                                                                        </tr>
+                                                                    </table>
+                                                                    <hr class="divider" />
+                                                                </td>
+
+                                                            </tr>
+                                                        }
+                                                    }
+
+                                                </table>
+                                                <div class="control-group text-right">
+                                                    @if (Model.Select_Member_ID.HasValue && Model.Select_Member_ID.Value > 0)
+                                                    {
+                                                        <a onclick="Payment_Onclick()" class="btn btn-lightblue btn-middle btn-transparent-black" data-toggle="modal" style="width:146px;">
+                                                            Payment
+                                                        </a>
+                                                    }
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+                            </div>
+                            <div class="span7" id="pnlCustomerDetails">
+
+                                <div class="row-fluid">
+                                    <div class="span12">
+                                        <div id="divCustomerName">
+                                            <div class="control-group">
+                                                @Html.TextBox("Customer_Name_Label", Resources.ResourcePOS.CustomerName, new { @class = "display-text as-label", Readonly = true, tabindex = -1 })
+                                            </div>
+                                            <div class="control-group">
+                                                @if (string.IsNullOrEmpty(Model.Status))
+                                                {
+
+                                                    @Html.TextBoxFor(m => m.Customer_Name, new { style = "width:80%;", maxLength = "30" })
+                                                }
+                                                else
+                                                {
+                                                    @Html.TextBoxFor(m => m.Customer_Name, new { style = "width:80%;", Readonly = true })
+                                                }
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                                <div class="row-fluid">
+                                    <div class="span12">
+                                        <div id="divContactNo">
+                                            <div class="control-group">
+                                                @Html.TextBox("Contact_No_Label", Resources.ResourcePOS.ContactNo, new { @class = "display-text", Readonly = true })
+                                            </div>
+                                            <div class="control-group">
+                                                @if (string.IsNullOrEmpty(Model.Status))
+                                                {
+
+                                                    @Html.TextBoxFor(m => m.Contact_No, new { style = "width:80%;", maxLength = "30" })
+                                                }
+                                                else
+                                                {
+                                                    @Html.TextBoxFor(m => m.Contact_No, new { style = "width:80%;", Readonly = true })
+                                                }
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="row-fluid">
+                                    <div class="span12">
+                                        <div id="divCustomerEmail">
+                                            <div class="control-group">
+                                                @Html.TextBox("Customer_Email_Label", Resources.ResourcePOS.Email, new { @class = "display-text", Readonly = true })
+                                            </div>
+                                            <div class="control-group">
+                                                @if (string.IsNullOrEmpty(Model.Status))
+                                                {
+
+                                                    @Html.TextBoxFor(m => m.Customer_Email, new { style = "width:80%;", maxLength = "50" })
+                                                }
+                                                else
+                                                {
+                                                    @Html.TextBoxFor(m => m.Customer_Email, new { style = "width:80%;", Readonly = true })
+                                                }
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="row-fluid">
+                                    <div class="span12">
+                                        <div id="divRemark">
+                                            <div class="control-group">
+                                                @Html.TextBox("Remark_Label", Resources.ResourcePOS.Remark, new { @class = "display-text", Readonly = true })
+                                            </div>
+                                            <div class="control-group">
+                                                @if (string.IsNullOrEmpty(Model.Status))
+                                                {
+                                                    @Html.TextAreaFor(m => m.Remark, new { style = "width:80%;", rows = "4" })
+                                                }
+                                                else
+                                                {
+                                                    @Html.TextAreaFor(m => m.Remark, new { style = "width:80%;", rows = "4", Readonly = true })
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                        <div class="control-group">
+                            <div class="span12">
+                                <p class="pbtnbar">
+                                    <a id="btnCash" class="btn btn-white btn-large btn-action" data-toggle="modal">
+                                        <span>
+                                            <img src="~/Images/button_cash.png" />
+                                        </span>
+                                        <br />
+                                        <span>Cash</span>
+                                    </a>
+                                    <a id="btnNets" class="btn btn-white btn-large table-button btn-action" data-toggle="modal">
+                                        <span>
+                                            <img src="~/Images/button_nets.png" />
+                                        </span>
+                                        <br />
+                                        <span>Nets</span>
+                                    </a>
+                                    @if (Model.Master == true)
+                                    {
+
+                                        <a id="btnMasterCard" class="btn btn-white btn-large table-button btn-action" data-toggle="modal">
+                                            <span>
+                                                <img src="~/Images/button_master.png" />
+                                            </span>
+                                            <br />
+                                            <span>MasterCard</span>
+                                        </a>
+                                    }
+                                    @if (Model.Visa == true)
+                                    {
+                                        <a id="btnVisa" class="btn btn-white btn-large table-button btn-action" data-toggle="modal">
+                                            <span>
+                                                <img src="~/Images/button_visa.png" />
+                                            </span>
+                                            <br />
+                                            <span>Visa</span>
+                                        </a>
+                                    }
+                                    @if (Model.AMEX == true)
+                                    {
+                                        <a id="btnAMEX" class="btn btn-white btn-large table-button btn-action" data-toggle="modal">
+                                            <span>
+                                                <img src="~/Images/button_amex.png" />
+                                            </span>
+                                            <br />
+                                            <span>AMEX</span>
+                                        </a>
+                                    }
+                                    @if (Model.DinersClub == true)
+                                    {
+                                        <a id="btnDiners" class="btn btn-white btn-large table-button btn-action" data-toggle="modal">
+                                            <span>
+                                                <img src="~/Images/button_diners.png" />
+                                            </span>
+                                            <br />
+                                            <span>Diner's Club</span>
+                                        </a>
+                                    }
+                                    @if (Model.JCB == true)
+                                    {
+                                        <a id="btnJCB" class="btn btn-white btn-large table-button btn-action" data-toggle="modal">
+                                            <span>
+                                                <img src="~/Images/button_jcb.png" />
+                                            </span>
+                                            <br />
+                                            <span>JCB</span>
+                                        </a>
+                                    }
+
+                                </p>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+
+
+
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,35 @@
+﻿@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@{
+    ViewBag.Title = Resource.Session_Timeout;
+    var currrentdate = StoredProcedure.GetCurrentDate();
+    var displaydate = DateUtil.ToDisplayFullDateTime(currrentdate);
+}
+
+<!-- Page content -->
+
+<div class="main">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- tile -->
+            <section class="tile transparent">
+                <div class="jumbotron bg-transparent-black-3">
+                    <div class="container text-center">
+                        <h1 class="error"><strong>@Resource.Session_Timeout</strong></h1>
+                        <p>@displaydate <br />@Resource.Message_For_Your_Secureity_You_Session_Has_Been_Timed_Out</p>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <p>
+                                    <a class="btn btn-greensea btn-large" href="@Url.Action("Login", "Account")" style="width:180px"><i class="fa fa-user"></i>@Resource.Login</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+        </div>
+    </div>
+</div>

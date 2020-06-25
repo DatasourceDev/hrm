@@ -1,0 +1,77 @@
+﻿@using POS.Common;
+@using POS.Models;
+@using SBSModel.Common;
+@using SBSModel.Models;
+@model  POS.Models.POSViewModel
+
+<script type="text/javascript">
+    function FilterCategory_Onclick() {
+        //if (($('#Category_LV').val() != "") || ($('#TextSearch').val() != "")) {
+            $('#Ch_Category_Di').val(true);
+            ShowProgress();
+            theForm.action = '@Url.Action("POS", "POS")';
+            theForm.method = 'post';
+            theForm.submit();
+        //} else {
+        //    alert("Not data please select data or key words! ");
+        //    return false;
+        //}
+    }
+</script>
+    <div id="modal-category" class="modal hide fade">
+        <div class="modal-body">
+            <div class="control-group text-center">
+                <label class="control-label" style="font-weight: 600; font-size: 20px;">@Resources.ResourcePOS.Category</label>
+            </div>
+
+            <div class="control-group" style="padding-left:20px;   padding-right:85px;">
+                <div class="span4">
+                    <div class="control-group">
+                        @Html.DropDownListFor(m => m.Category_LV, new SelectList(Model.CategoryLVList, "Value", "Text"), new { style = "width:100%;", @class = "control-label" })
+                    </div>
+                </div>
+                <div class="span6">
+                    <div class="control-group">
+                        @Html.TextBoxFor(m => m.TextSearch, "", new { style = "width:98%", @class = "bg-white" })
+                    </div>
+                    <div class="validation-error">
+                        @Html.ValidationMessageFor(model => model.TextSearch)
+                    </div>
+                </div>
+                <div class="span2">
+                    <div class="control-group">
+                        <button type="submit" class="btn btn-white" style="width:100%" name="searchAction" value="1" onclick="return FilterCategory_Onclick()">@Resources.ResourceMain.Filter</button>
+                        @Html.HiddenFor(m => m.Ch_Category_Di)
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <ul class="nav nav-pills">
+                    @if (Model.productCategory != null)
+                {
+                    int i = 0;
+                    foreach (var row in Model.productCategory)
+                    {
+                        var active = "";
+                        if (Model.Product_Category_ID == row.Product_Category_ID)
+                        {
+                            active = "active";
+                        }
+                        <li style="width: 230px; height: 70px; ">
+                                <a href="#" class="@active" data-dismiss="modal" onclick="SelectCategory(@i, @row.Product_Category_ID);">
+                                    <div class="btn btn-white btn-large" style="width:180px;">
+                                        <p>
+                                            @row.Category_Name
+                                        </p>
+                                    </div>
+                                </a>
+                            </li>
+                        i++;
+                    }
+                }
+                </ul>
+            </div>
+
+        </div>
+</div>

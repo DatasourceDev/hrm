@@ -1,0 +1,174 @@
+﻿@model  HR.Models.EmployeeViewModels
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+
+@{
+   var admin = Model.adminRights != null ? Model.adminRights.Contains(Model.operation) : false;
+   var self = Model.Profile_ID == Model.User_Login_Profile_ID ? true : false;
+   var hr = Model.hrRights != null ? Model.hrRights.Contains(Model.operation) : false;
+}
+
+<script type="text/javascript">
+   function AddBankInfo_Onclick() {
+      var rowcount = $('#bankDataTable > tbody >tr').length;
+      var data = { pIndex: rowcount };
+      ShowMask();
+      $.ajax({
+         url: '@Url.Action("AddNewBankInfo", "Employee")',
+         //Passes the content of an input up
+         data: data,
+         contentType: "application/json; charset=utf-8",
+         success: function (data) {
+            var str = '<tr  id="brow-' + rowcount + '">';
+            str = str + data + '</tr>';
+            $('#bankDataTable > tbody').append(str);
+            CloseMask();
+         }
+      });
+   };
+
+   function DeleteBankInfo_Onclick(rowid, index) {
+      if (confirm('@Resource.Confirm_Delete_Msg')) {
+         $('#Bank_Info_Rows_' + index + '__Row_Type').val('@RowType.DELETE');
+         $('#' + rowid).hide();
+
+         if ($('#Bank_Info_Rows_' + index + '__Selected').get(0) != null && $('#Bank_Info_Rows_' + index + '__Selected').get(0).checked == true) {
+            var rowcount = $('#bankDataTable > tbody >tr').length;
+            for (var i = 0; i < rowcount; i++) {
+               var rowtype = $('#Bank_Info_Rows_' + i + '__Row_Type').val();
+               if (rowtype != '@RowType.DELETE') {
+                  if ($('#Bank_Info_Rows_' + i + '__Selected').get(0) != null) {
+                     $('#Bank_Info_Rows_' + i + '__Selected').get(0).checked = true;
+                     break;
+                  }
+               }
+            }
+         }
+      }
+   };
+</script>
+
+<div id="bank-tab" class="tab-pane fade in">
+   <div class="row">
+      <div class="col-md-12">
+         <section class="tile transparent">
+            <div class="tile-header transparent">
+               <h1><strong>@Resource.Bank_Info</strong></h1>
+               <div class="controls">
+                  <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+               </div>
+            </div>
+            <div class="tile-body">
+               <div class="row">
+                  <div class="col-md-12 text-center">
+                     <a class="btn btn-greensea  btn-sm add-row" onclick="AddBankInfo_Onclick()">@Resource.Add_An_Item</a>
+                  </div>
+               </div>
+               <div class="table-responsive">
+                  <table class="table table-datatable table-custom" id="bankDataTable">
+                     <thead>
+                        <tr>
+                           <th class="no-sort"></th>
+                           <th class="sort-alpha">@Resource.Bank_Name</th>
+                           <th class="sort-alpha">@Resource.Bank_Account</th>
+                           <th class="sort-alpha">@Resource.Payment_Type</th>
+                           <th class="sort-alpha">@Resource.Effective_Date</th>
+                           <th class="no-sort" style="width:80px">@Resource.Action</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        @if (Model.Bank_Info_Rows != null)
+                        {
+                           var i = 0;
+                           foreach (var row in Model.Bank_Info_Rows)
+                           {
+                              <tr id="brow-@i">
+                                 <td class="text-center">
+                                    @if (Model.Bank_Info_Rows[i].Row_Type == RowType.DELETE)
+                                    {
+                                       <script type="text/javascript">
+                                          $(function () {
+                                             $('#' + 'brow-@i').hide();
+                                          });
+                                       </script>
+                                    }
+                                    @if (Model.Bank_Info_Rows[i].Row_Type == null)
+                                    {
+                                       @Html.Hidden("Bank_Info_Rows[" + i + "].Row_Type", RowType.EDIT)
+                                    }
+                                    else
+                                    {
+                                       @Html.Hidden("Bank_Info_Rows[" + i + "].Row_Type", Model.Bank_Info_Rows[i].Row_Type)
+                                    }
+                                    @Html.Hidden("Bank_Info_Rows[" + i + "].Banking_Info_ID", Model.Bank_Info_Rows[i].Banking_Info_ID)
+                                    <div class="radio">
+                                       @if ((Model.Bank_Info_Rows[i].Selected.HasValue && Model.Bank_Info_Rows[i].Selected.Value) | (Model.Bank_Info_Selected != null && Model.Bank_Info_Selected.Value == i))
+                                       {
+                                          <input type="radio" name="Bank_Info_Selected" id="Bank_Info_Rows_@(i)__Selected" value="@i" checked>
+                                       }
+                                       else
+                                       {
+                                          <input type="radio" name="Bank_Info_Selected" id="Bank_Info_Rows_@(i)__Selected" value="@i">
+                                       }
+                                       <label for="Bank_Info_Rows_@(i)__Selected" style="margin-right:0px"></label>
+                                    </div>
+                                    <div class="validation-error">
+                                       @Html.ValidationMessage("Bank_Info_Rows[" + i + "].Selected")
+                                    </div>
+                                 </td>
+                                 <td>
+                                    <input type="text" class="form-control" id="Bank_Info_Rows_@(i)__Bank_Name" name="Bank_Info_Rows[@i].Bank_Name" value="@Model.Bank_Info_Rows[i].Bank_Name" onblur="ValidateRequire('Bank_Info_Rows_@(i)__Bank_Name', '@Resource.Bank_Name', true)">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessage("Bank_Info_Rows[" + i + "].Bank_Name", "", new { @id = "Bank_Info_Rows_" + i + "__Bank_Name_Err" })
+                                    </div>
+                                 </td>
+                                 <td>
+                                    <input type="text" class="form-control" id="Bank_Info_Rows_@(i)__Bank_Account" name="Bank_Info_Rows[@i].Bank_Account" value="@Model.Bank_Info_Rows[i].Bank_Account" onblur="ValidateRequire('Bank_Info_Rows_@(i)__Bank_Account', '@Resource.Bank_Account', true)">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessage("Bank_Info_Rows[" + i + "].Bank_Account", "", new { @id = "Bank_Info_Rows_" + i + "__Bank_Account_Err" })
+                                    </div>
+                                 </td>
+                                 <td>
+                                    <select class="chosen-select chosen-transparent form-control" id="Bank_Info_Rows_@(i)__Payment_Type" name="Bank_Info_Rows[@i].Payment_Type">
+                                       @if (Model.paymentTypeList != null)
+                                       {
+                                          foreach (var prow in Model.paymentTypeList)
+                                          {
+                                             if (Model.Bank_Info_Rows[i].Payment_Type == NumUtil.ParseInteger(prow.Value))
+                                             {
+                                                <option value="@prow.Value" selected>@prow.Text</option>
+                                             }
+                                             else
+                                             {
+                                                <option value="@(prow.Value != null ? prow.Value : "0")">@prow.Text</option>
+                                             }
+                                          }
+                                       }
+                                    </select>
+                                 </td>
+                                 <td>
+                                    <input type="text" class="form-control input-datepicker" id="Bank_Info_Rows_@(i)__Effective_Date" name="Bank_Info_Rows[@i].Effective_Date" value="@Model.Bank_Info_Rows[i].Effective_Date" onblur="ValidateRequire('Bank_Info_Rows_@(i)__Effective_Date', '@Resource.Effective_Date', true)">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessage("Bank_Info_Rows[" + i + "].Effective_Date", "", new { @id = "Bank_Info_Rows_" + i + "__Effective_Date_Err" })
+                                    </div>
+                                 </td>
+                                 <td class="actions text-center" style="cursor:pointer">
+                                    <a data-toggle="modal" onclick="return DeleteBankInfo_Onclick('brow-@i', @i);">
+                                       <i class="fa fa-times-circle-o fa-2x"></i>
+                                    </a>
+                                 </td>
+                              </tr>
+                                       i++;
+                           }
+                        }
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+         </section>
+      </div>
+   </div>
+</div>

@@ -1,0 +1,918 @@
+﻿@model  HR.Models.PayrollConfigurationViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+   ViewBag.Title = @Resource.Payroll_Configuration;
+}
+
+
+<!-- Custom Modals -->
+<!-- /Custom Modals -->
+
+<div class="pageheader">
+   <h2>@Resource.Payroll_Configuration<span></span></h2>
+   <div class="breadcrumbs">
+      <ol class="breadcrumb">
+         <li>@Resource.You_Are_Here</li>
+         <li><a href="@Url.Action("Index", "Home" )">@Resource.DashBoard</a></li>
+         <li class="active">@Resource.Payroll_Configuration</li>
+      </ol>
+   </div>
+</div>
+
+<script type="text/javascript">
+   $(function () {
+      InitDatepicker();
+   });
+</script>
+
+<script type="text/javascript">
+   $(function () {
+      var module = '@Model.tabAction';
+      if ('@string.IsNullOrEmpty(Model.tabAction)' == "True") {
+         module = "allowance";
+      }
+      var liID = "li-" + module;
+      var tabID = module + "-tab";
+      $("#" + liID).addClass("active");
+      $("#" + tabID).addClass("active");
+
+      if ('@ViewData.ModelState.IsValid' == "False") {
+         if ('@Model.tabAction' == "allowance") {
+            $('#btnAddAllowance').get(0).click();
+         }
+      }
+
+      var addRowLink = '<a href="#" class="btn btn-greensea  btn-sm add-row" onclick="AddAllowance_Onclick()">@Resource.Add_An_Item</a>'
+      InitDatatable('allowanceDataTable', addRowLink, InitDatatableApplyLink({
+         name: "apply",
+         tabAction: "allowance",
+         hasDel: true,
+         confirmAlert: true
+      }), 1, 'asc', 2, 'asc');
+
+      InitDatatable('donationDataTable', null, null, 1, 'asc', 0, 'asc');
+
+      InitDatatable('cpfDataTable', null, null, 1, 'asc', 0, 'asc');
+
+      var addRow04Link = '<a href="@Url.Action("Authorization", "Payroll", new { operation = EncryptUtil.Encrypt(UserSession.RIGHT_C) })" id="addRow4" class="btn btn-greensea  btn-sm add-row">@Resource.Add_An_Item</a>'
+      InitDatatable('authenDataTable', addRow04Link, InitDatatableApplyLink({
+         name: "apply",
+         tabAction: "authen",
+         hasDel: true,
+         confirmAlert: true
+      }), 0, 'asc');
+      /*************************************************/
+      /************* Authen DATATABLE *************/
+      /*************************************************/
+   })
+
+   function StartTour() {
+      var strtitle = "Payroll Configuration";
+      var EpconfigTour = new Tour({
+         storage: false,
+         steps: [
+         {
+            element: "#li-allowance",
+            title: strtitle,
+            content: "You can create the allowance/deduction type here.",
+            onNext: function () {
+               Manage_Tab("allowance");
+            }
+         },
+         {
+            element: "#li-donation",
+            title: strtitle,
+            content: "This donation will be set up by system based on MOM formula.",
+            onNext: function () {
+               Manage_Tab("donation");
+            }
+         },
+         {
+            element: "#li-cpf",
+            title: strtitle,
+            content: "This CPR will be set up by system based on MOM formula.",
+            onNext: function () {
+               Manage_Tab("cpf");
+            }
+         }
+         ],
+         onEnd: function () {
+
+         }
+      });
+      EpconfigTour.init();
+      EpconfigTour.start();
+   }
+
+   function Manage_Tab(tName) {
+      switch (tName) {
+         case "allowance":
+            $("#allowance-tab").removeClass("active");
+            $("#li-allowance").removeClass("active");
+            $("#donation-tab").addClass("active");
+            $("#li-donation").addClass("active");
+            break;
+         case "donation":
+            $("#donation-tab").removeClass("active");
+            $("#li-donation").removeClass("active");
+            $("#cpf-tab").addClass("active");
+            $("#li-cpf").addClass("active");
+            break;
+         case "cpf":
+            $("#cpf-tab").removeClass("active");
+            $("#li-cpf").removeClass("active");
+            $("#allowance-tab").addClass("active");
+            $("#li-allowance").addClass("active");
+      }
+   }
+
+   function AddAllowance_Onclick() {
+      $('#btnAddAllowance').get(0).click();
+      $('#Allowance_PRC_ID').val('');
+
+      $('#Allowance_Name').val('');
+      $('#Allowance_Description').val('');
+      $('#Allowance_CPF_DeductableY').get(0).checked = true;
+      $('#Allowance_CPF_DeductableN').get(0).checked = false;
+      $('#Allowance_PRT_ID').val('');
+      $('#Allowance_PRT_ID').trigger("chosen:updated");
+
+      $('#Allowance_Departments').val([]);
+      $('#Allowance_Departments').trigger("chosen:updated");
+   }
+
+   function EditAllowance_Onclick(prc_id, name, desc, awType, cpf_deductable, department) {
+      $('#btnAddAllowance').get(0).click();
+      $('#Allowance_PRC_ID').val(prc_id);
+
+      $('#Allowance_Name').val(name);
+      $('#Allowance_Description').val(desc);
+
+      if (cpf_deductable == "True") {
+         $('#Allowance_CPF_DeductableY').get(0).checked = true;
+         $('#Allowance_CPF_DeductableN').get(0).checked = false;
+      }
+      else {
+         $('#Allowance_CPF_DeductableY').get(0).checked = false;
+         $('#Allowance_CPF_DeductableN').get(0).checked = true;
+      }
+
+
+      $('#Allowance_PRT_ID').val(awType);
+      $('#Allowance_PRT_ID').trigger("chosen:updated");
+
+      $("#Allowance_Departments").val(department);
+      $('#Allowance_Departments').trigger("chosen:updated");
+   }
+
+
+
+</script>
+
+@using (Html.BeginForm("Configuration", "Payroll", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+   @Html.AntiForgeryToken()
+   @Html.HiddenFor(m => m.Allowance_PRC_ID)
+   @Html.HiddenFor(m => m.operation)
+   <div class="modal fade" id="modal-allowance" tabindex="-1" role="dialog" aria-labelledby="modalConfirmLabelAllowance" aria-hidden="true">
+      <div class="modal-dialog">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h3 class="modal-title" id="modalConfirmLabelAllowance"><strong>@Resource.Allowance_Or_Deduction</strong></h3>
+            </div>
+            <div class="modal-body">
+               <div class="row">
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <label for="Allowance_Name" class="control-label">@Resource.Name</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <input type="text" class="form-control" name="Allowance_Name" id="Allowance_Name" value="@Model.Allowance_Name">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Allowance_Name)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <label for="Allowance_PRT_ID" class="control-label">@Resource.Type</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <select class="chosen-select form-control" id="Allowance_PRT_ID" name="Allowance_PRT_ID">
+                              @foreach (var row in Model.prtList)
+                              {
+                                 if (row.Value != null && !string.IsNullOrEmpty(row.Value))
+                                 {
+                                    if ((Model.Allowance_PRT_ID.HasValue ? Model.Allowance_PRT_ID.Value : 0) == NumUtil.ParseInteger(row.Value))
+                                    {
+                                       <option value="@(row.Value != null ? row.Value : " ")" selected>@row.Text</option>
+                                    }
+                                    else
+                                    {
+                                       <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                    }
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Allowance_PRT_ID)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <label for="Allowance_Departments" class="control-label">@Resource.Department</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <select multiple class="chosen-select form-control" id="Allowance_Departments" name="Allowance_Departments">
+                              @foreach (var row in Model.departmentList)
+                              {
+                                 if (row.Value != null && !string.IsNullOrEmpty(row.Value))
+                                 {
+                                    <option value="@row.Value">@row.Text</option>
+                                 }
+                              }
+                           </select>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-8">
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <label for="Allowance_Description" class="control-label">@Resource.Description</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <input class="form-control" name="Allowance_Description" id="Allowance_Description" value="@Model.Allowance_Description">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Allowance_Description)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <label class="control-label">@Resource.CPF_Deductable</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-sm-6">
+                           <div class="radio ">
+                              @if (Model.Allowance_CPF_Deductable)
+                              {
+                                 <input type="radio" name="Allowance_CPF_Deductable" id="Allowance_CPF_DeductableY" value="true" checked>
+                              }
+                              else
+                              {
+                                 <input type="radio" name="Allowance_CPF_Deductable" id="Allowance_CPF_DeductableY" value="true">
+                              }
+
+                              <label for="Allowance_CPF_DeductableY">@Resource.Yes</label>
+                           </div>
+                        </div>
+                        <div class="col-sm-6">
+                           <div class="radio ">
+                              @if (Model.Allowance_CPF_Deductable)
+                              {
+
+                                 <input type="radio" name="Allowance_CPF_Deductable" id="Allowance_CPF_DeductableN" value="false">
+                              }
+                              else
+                              {
+
+                                 <input type="radio" name="Allowance_CPF_Deductable" id="Allowance_CPF_DeductableN" value="false" checked>
+                              }
+                              <label for="Allowance_CPF_DeductableN">@Resource.No</label>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+               <button type="submit" class="btn btn-primary" name="tabAction" value="allowance" onclick="return Confirm_Alert($('#Allowance_PRC_ID').val());">@Resource.Save_Change</button>
+            </div>
+         </div>
+      </div>
+   </div>
+}
+
+<div class="main">
+   <div class="row">
+      <div class="col-md-12">
+
+         @if (Model.result != null && Model.result.Code != 0)
+         {
+            if (Model.result.Code < 0)
+            {
+               <div class="alert alert-red">
+                  @Html.Raw(AppConst.GetMsg(Model.result))
+               </div>
+            }
+            else if (Model.result.Code > 0)
+            {
+               <div class="alert alert-success">
+                  @Html.Raw(AppConst.GetMsg(Model.result))
+               </div>
+            }
+         }
+         <!-- tile widget -->
+         <section class="tile color transparent-black">
+
+            <div class="tile-widget nopadding color transparent-white rounded-top-corners">
+               <!-- Nav tabs -->
+               <ul class="nav nav-tabs tabdrop">
+                  <li id="li-allowance"><a href="#allowance-tab" data-toggle="tab">@Resource.Allowance_Or_Deduction</a></li>
+                  <li id="li-donation"><a href="#donation-tab" data-toggle="tab">@Resource.Donation</a></li>
+                  <li id="li-cpf"><a href="#cpf-tab" data-toggle="tab">@Resource.CPF_Formula</a></li>
+                  @*<li id="li-authen"><a href="#authen-tab" data-toggle="tab">@Resource.Authorization</a></li>*@
+                  @*<li id="li-notification"><a href="#notification-tab" data-toggle="tab">@Resource.Notification_Scheduler</a></li>*@
+               </ul>
+               <!-- / Nav tabs -->
+            </div>
+            <!-- /tile widget -->
+
+            <div class="tile-body tab-content rounded-bottom-corners">
+               <div id="allowance-tab" class="tab-pane fade in">
+                  @using (Html.BeginForm("Configuration", "Payroll", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                  {
+                     @Html.AntiForgeryToken()
+                     @*@Html.HiddenFor(m => m.operation)*@
+                     <div class="row">
+                        <div class="col-md-12">
+                           <section class="tile color transparent filter" id="secfilter1">
+                              <div class="tile-header transparent">
+                                 <h1 onclick="CollapseHeader(null, 'btncollapse1', 'secfilter1')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                                 <div class="controls">
+                                    <span class="label label-success tour-guide" onclick="StartTour();" style="cursor:pointer;">@Resource.Guide</span>
+                                    <a href="#" class="minimize filter" id="btncollapse1"><i class="fa fa-search  color-white"></i></a>
+                                 </div>
+                              </div>
+                              <div class="tile-body">
+                                 <div class="row">
+                                    <div class="col-md-6">
+                                       <div class="form-group">
+                                          <div class="col-sm-12">
+                                             <label for="search_Allowance_Type" class="control-label">@Resource.Allowance_Type</label>
+                                          </div>
+                                       </div>
+                                       <div class="form-group">
+                                          <div class="col-sm-12">
+                                             <select class="chosen-select chosen-transparent form-control" id="search_Allowance_Type" name="search_Allowance_Type">
+                                                @foreach (var row in Model.prtList)
+                                                {
+                                                   if ((Model.search_Allowance_Type.HasValue ? Model.search_Allowance_Type.Value : 0) == NumUtil.ParseInteger(row.Value))
+                                                   {
+                                                      <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                   }
+                                                   else
+                                                   {
+                                                      <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                                   }
+                                                }
+                                             </select>
+                                             <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.search_Allowance_Type)
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                       <div class="form-group">
+                                          <div class="col-sm-12">
+                                             <label for="search_Department" class="control-label">@Resource.Department</label>
+                                          </div>
+                                       </div>
+                                       <div class="form-group">
+                                          <div class="col-sm-12">
+                                             <select class="chosen-select chosen-transparent form-control" id="search_Department" name="search_Department">
+                                                @foreach (var row in Model.departmentList)
+                                                {
+                                                   if ((Model.search_Department.HasValue ? Model.search_Department.Value : 0) == NumUtil.ParseInteger(row.Value))
+                                                   {
+                                                      <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                   }
+                                                   else
+                                                   {
+                                                      <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                                   }
+                                                }
+                                             </select>
+                                             <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.search_Department)
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                                 <div class="row">
+                                    <div class="col-md-6">
+                                       <div class="form-group">
+                                          <div class="col-sm-12">
+                                             <button type="submit" class="btn btn-default">@Resource.Filter</button>
+                                             <a id="btnAddAllowance" href="#modal-allowance" class="btn btn-default" role="button" data-toggle="modal" style="display:none;">@Resource.Add_An_Item</a>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </section>
+                        </div>
+                     </div>
+
+                     <div class="row">
+                        <div class="col-md-12">
+                           <section class="tile transparent">
+
+                              <div class="tile-header transparent">
+                                 <h1><strong>@Resource.Allowance_Or_Deduction</strong></h1>
+                                 <div class="controls">
+                                    <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                 </div>
+                              </div>
+
+
+                              <div class="tile-body">
+                                 <div class="table-responsive">
+                                    <table class="table table-datatable table-custom" id="allowanceDataTable">
+                                       <thead>
+                                          <tr>
+                                             <th class="no-sort" style="width: 40px;">
+                                                <div class="checkbox check-transparent">
+                                                   <input type="checkbox" value="1" id="chkallAllowance">
+                                                   <label for="chkallAllowance"></label>
+                                                </div>
+                                             </th>
+                                             <th class="sort-alpha">@Resource.Name</th>
+                                             <th class="sort-alpha">@Resource.Type</th>
+                                             <th class="sort-alpha">@Resource.CPF_Deductable</th>
+                                             <th class="sort-alpha">@Resource.Department</th>
+                                             <th class="no-sort" width="110px">@Resource.Action</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody>
+                                          @{var i = 0;}
+                                          @foreach (var row in Model.PRCList)
+                                          {
+                                             var cpf = (row.CPF_Deductable.HasValue ? row.CPF_Deductable.Value : false).ToString();
+                                             var department = Newtonsoft.Json.JsonConvert.SerializeObject(row.PRC_Department.Select(s => s.Department_ID));
+                                             <tr>
+                                                <td>
+                                                   <div class="checkbox check-transparent">
+                                                      <input type="checkbox" value="@row.PRC_ID" name="allowances" id="allowances[@i]">
+                                                      <label for="allowances[@i]"></label>
+                                                   </div>
+                                                </td>
+                                                <td>@row.Name</td>
+                                                <td>@row.PRT.Name</td>
+                                                <td>
+                                                   @if (row.CPF_Deductable.HasValue && row.CPF_Deductable.Value)
+                                                   {
+                                                      @Resource.Yes;
+                                                   }
+                                                   else
+                                                   {
+                                                      @Resource.No;
+                                                   }
+                                                </td>
+                                                <td>
+                                                   @foreach (var drow in row.PRC_Department)
+                                                   {
+                                                      if (drow.Department != null)
+                                                      {
+                                                         @drow.Department.Name <br />
+                                                      }
+                                                   }
+
+                                                </td>
+                                                <td class="actions text-left">
+                                                   <a href="#" onclick="EditAllowance_Onclick('@row.PRC_ID','@row.Name', '@row.Description', '@row.PRT_ID', '@cpf',@department)"><i class="fa fa-edit fa-2x"></i></a>
+                                                   <a href="@Url.Action("Configuration", "Payroll", new { Allowance_PRC_ID = row.PRC_ID, apply = UserSession.RIGHT_D, tabAction = "allowance" })" onclick="return confirm('@Resource.Confirm_Delete_Msg');" title="Delete">
+                                                      <i class="fa fa-times-circle-o fa-2x"></i>
+                                                   </a>
+                                                </td>
+                                             </tr>
+                                                   i++;
+                                          }
+                                       </tbody>
+                                    </table>
+                                 </div>
+
+                              </div>
+                           </section>
+                        </div>
+                     </div>
+                  }
+               </div>
+               <div id="donation-tab" class="tab-pane fade in">
+                  <div class="row">
+                     <div class="col-md-12">
+                        <section class="tile color transparent filter" id="secfilter2">
+                           <div class="tile-header transparent">
+                              <h1 onclick="CollapseHeader(null, 'btncollapse2', 'secfilter2')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                              <div class="controls">
+                                 <a href="#" class="minimize filter" id="btncollapse2"><i class="fa fa-search  color-white"></i></a>
+                              </div>
+                           </div>
+                           <div class="tile-body">
+                              @using (Html.BeginForm("Configuration", "Payroll", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                              {
+                                 @Html.HiddenFor(m => m.operation)
+                                 <div class="row">
+                                    <div class="col-md-6">
+                                       <div class="form-group">
+                                          <div class="col-sm-12">
+                                             <label for="search_Race" class="control-label">@Resource.Race</label>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                                 <div class="row">
+                                    <div class="col-md-6">
+                                       <div class="form-group">
+                                          <div class="col-sm-12">
+                                             <select class="chosen-select chosen-transparent form-control" id="search_Race" name="search_Race">
+                                                @foreach (var row in Model.raceList)
+                                                {
+                                                   if ((Model.search_Race.HasValue ? Model.search_Race.Value : 0) == NumUtil.ParseInteger(row.Value))
+                                                   {
+                                                      <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                   }
+                                                   else
+                                                   {
+                                                      <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                                   }
+                                                }
+                                             </select>
+                                             <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.search_Race)
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                                 <div class="row">
+                                    <div class="col-md-6">
+                                       <div class="form-group">
+                                          <div class="col-sm-12">
+                                             <button type="submit" class="btn btn-default" name="tabAction" value="donation">@Resource.Filter</button>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                              }
+                           </div>
+                        </section>
+                     </div>
+                  </div>
+                  <div class="row">
+                     <div class="col-md-12">
+                        <section class="tile transparent">
+
+                           <div class="tile-header transparent">
+                              <h1><strong>@Resource.Selected_Donation_Formula</strong></h1>
+                              <div class="controls">
+                                 <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                              </div>
+                           </div>
+
+
+                           <div class="tile-body">
+                              <div class="table-responsive">
+                                 <table class="table table-datatable table-custom" id="donationDataTable">
+                                    <thead>
+                                       <tr>
+                                          <th class="sort-alpha">@Resource.Formula_Name</th>
+                                          <th class="sort-alpha">@Resource.Race</th>
+                                          <th class="sort-alpha">@Resource.Formula_Desc</th>
+                                          <th class="sort-alpha">@Resource.Select</th>
+                                          <th class="no-sort" width="110px">@Resource.Action</th>
+                                       </tr>
+                                    </thead>
+                                    <tbody>
+                                       @foreach (var row in Model.DonationFormulaList)
+                                       {
+                                          <tr>
+                                             <td>@row.Formula_Name</td>
+                                             <td>
+                                                @if (row.Global_Lookup_Data != null)
+                                                {
+                                                   @row.Global_Lookup_Data.Name
+                                                }
+                                             </td>
+                                             <td>@row.Formula_Desc</td>
+                                             <td class="text-center">
+                                                @if (Model.Donation_Selected_Formula_IDs != null && Model.Donation_Selected_Formula_IDs.Select(s => s.Donation_Formula_ID).Contains(row.Donation_Formula_ID))
+                                                {
+                                                   <i class="fa fa-check"></i>
+                                                }
+                                             </td>
+                                             <td class="actions text-left">
+                                                @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                {
+                                                   <a href="@Url.Action("SelectedDonationFormula", "Payroll", new { pFID = EncryptUtil.Encrypt(row.Donation_Formula_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })"><i class="fa fa-edit fa-2x"></i></a>
+                                                }
+                                             </td>
+                                          </tr>
+                                       }
+                                    </tbody>
+                                 </table>
+                              </div>
+
+                           </div>
+                        </section>
+                     </div>
+                  </div>
+               </div>
+               <div id="cpf-tab" class="tab-pane fade in">
+                  <div class="row">
+                     <div class="col-md-12">
+                        <section class="tile color transparent filter" id="secfilter3">
+                           <div class="tile-header transparent">
+                              <h1 onclick="CollapseHeader(null, 'btncollapse3', 'secfilter3')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                              <div class="controls">
+                                 <a href="#" class="minimize filter" id="btncollapse3"><i class="fa fa-search  color-white"></i></a>
+                              </div>
+                           </div>
+                           <div class="tile-body">
+                              @using (Html.BeginForm("Configuration", "Payroll", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                              {
+                                 @Html.HiddenFor(m => m.operation)
+                                 <div class="row">
+                                    <div class="col-md-6">
+                                       <div class="form-group">
+                                          <div class="col-sm-12">
+                                             <label for="search_Cpf_Year" class="control-label">@Resource.Year</label>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                                 <div class="row">
+                                    <div class="col-md-6">
+                                       <div class="form-group">
+                                          <div class="col-sm-12">
+                                             <input type="text" class="form-control" name="search_Cpf_Year" id="search_Cpf_Year" value="@Model.search_Cpf_Year">
+                                             <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.search_Cpf_Year)
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+
+                                 </div>
+                                 <div class="row">
+                                    <div class="col-md-6">
+                                       <div class="form-group">
+                                          <div class="col-sm-12">
+                                             <button type="submit" class="btn btn-default" name="tabAction" value="cpf">@Resource.Filter</button>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                              }
+                           </div>
+                        </section>
+                     </div>
+                  </div>
+                  <div class="row">
+                     <div class="col-md-12">
+                        <section class="tile transparent">
+
+                           <div class="tile-header transparent">
+                              <h1><strong>@Resource.Selected_CPF_Formula</strong></h1>
+                              <div class="controls">
+                                 <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                              </div>
+                           </div>
+
+
+                           <div class="tile-body">
+                              <div class="table-responsive">
+                                 <table class="table table-datatable table-custom" id="cpfDataTable">
+                                    <thead>
+                                       <tr>
+                                          <th class="sort-alpha">@Resource.Formula_Name</th>
+                                          <th class="sort-numeric">@Resource.Year</th>
+                                          <th class="sort-alpha">@Resource.Formula_Desc</th>
+                                          <th class="sort-alpha">@Resource.Select</th>
+                                          <th class="no-sort" width="110px">@Resource.Action</th>
+                                       </tr>
+                                    </thead>
+                                    <tbody>
+                                       @foreach (var row in Model.CpfFormulaList)
+                                       {
+                                          <tr>
+                                             <td>@row.Formula_Name</td>
+                                             <td>
+                                                @row.Year
+                                             </td>
+                                             <td>@row.Formula_Desc</td>
+                                             <td class="text-center">
+                                                @if (Model.CPF_Selected_Formula_ID == row.CPF_Formula_ID)
+                                                {
+                                                   <i class="fa fa-check"></i>
+                                                }
+                                             </td>
+                                             <td class="actions text-left">
+                                                @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                {
+                                                   <a href="@Url.Action("SelectedCPFFormula", "Payroll", new { pFID = EncryptUtil.Encrypt(row.CPF_Formula_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })"><i class="fa fa-edit fa-2x"></i></a>
+                                                }
+                                             </td>
+                                          </tr>
+                                       }
+                                    </tbody>
+                                 </table>
+                              </div>
+
+                           </div>
+                        </section>
+                     </div>
+                  </div>
+               </div>
+               @*<div id="authen-tab" class="tab-pane fade in">
+                      @using (Html.BeginForm("Configuration", "Payroll", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                      {
+                          @Html.AntiForgeryToken()
+                          <div class="row">
+                              <div class="col-md-12">
+                                  <section class="tile color transparent filter" id="secfilter4">
+                                      <div class="tile-header transparent">
+                                          <h1 onclick="CollapseHeader(null, 'btncollapse4', 'secfilter4')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                                          <div class="controls">
+                                              <a href="#" class="minimize filter" id="btncollapse4"><i class="fa fa-search  color-white"></i></a>
+                                          </div>
+                                      </div>
+                                      <div class="tile-body">
+                                          <div class="row">
+                                              <div class="col-md-6">
+                                                  <div class="form-group">
+                                                      <div class="col-sm-12">
+                                                          <label for="search_Authen_Department" class="control-label">@Resource.Department</label>
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                          <div class="row">
+                                              <div class="col-md-6">
+                                                  <div class="form-group">
+                                                      <div class="col-sm-12">
+                                                          <select class="chosen-select chosen-transparent form-control" id="search_Authen_Department" name="search_Authen_Department">
+                                                              @foreach (var row in Model.departmentList)
+                                                              {
+                                                                  if ((Model.search_Authen_Department.HasValue ? Model.search_Authen_Department.Value : 0) == NumUtil.ParseInteger(row.Value))
+                                                                  {
+                                                                      <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                                  }
+                                                                  else
+                                                                  {
+                                                                      <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                                                  }
+                                                              }
+                                                          </select>
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                          <div class="row">
+                                              <div class="col-md-6">
+                                                  <div class="form-group">
+                                                      <div class="col-sm-12">
+                                                          <button type="submit" class="btn btn-default" name="tabAction" value="authen">@Resource.Filter</button>
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </section>
+                              </div>
+                          </div>
+                          <div class="row">
+                              <div class="col-md-12">
+                                  <section class="tile transparent">
+
+                                      <div class="tile-header transparent">
+                                          <h1><strong>@Resource.Authorization</strong></h1>
+                                          <div class="controls">
+                                              <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                          </div>
+                                      </div>
+
+
+                                      <div class="tile-body">
+                                          <div class="table-responsive">
+                                              <table class="table table-datatable table-custom" id="authenDataTable">
+                                                  <thead>
+                                                      <tr>
+                                                          <th class="no-sort" style="width: 40px;">
+                                                              <div class="checkbox check-transparent">
+                                                                  <input type="checkbox" value="1" id="chkallAuthen">
+                                                                  <label for="chkallAuthen"></label>
+                                                              </div>
+                                                          </th>
+                                                          <th class="sort-alpha">@Resource.Department</th>
+                                                          <th class="sort-alpha">@Resource.Employee</th>
+                                                          <th class="sort-alpha">@Resource.HR</th>
+                                                          <th class="no-sort" width="110px">@Resource.Action</th>
+                                                      </tr>
+                                                  </thead>
+                                                  <tbody>
+                                                      @{var j = 0;}
+                                                      @foreach (var row in Model.PRGList)
+                                                      {
+                                                          <tr>
+                                                              <td>
+                                                                  <div class="checkbox check-transparent">
+                                                                      <input type="checkbox" value="@row.PRG_ID" name="authorizations" id="authorizations[@j]">
+                                                                      <label for="authorizations[@j]"></label>
+                                                                  </div>
+                                                              </td>
+                                                              <td>
+                                                                  @if (row.PREDLs != null)
+                                                                  {
+                                                                      foreach (var drow in row.PREDLs.OrderBy(o => o.Department.Name))
+                                                                      {
+                                                                          @drow.Department.Name
+                                                                          <br />
+                                                                      }
+                                                                  }
+                                                              </td>
+                                                              <td>
+                                                                  @if (row.PRELs != null)
+                                                                  {
+                                                                      foreach (var erow in row.PRELs.OrderBy(o => o.Employee_Profile.User_Profile.First_Name).ThenBy(o => o.Employee_Profile.User_Profile.Last_Name))
+                                                                      {
+                                                                         @UserSession.GetUserName(erow.Employee_Profile.User_Profile)
+                                                                          <br />
+                                                                      }
+                                                                  }
+                                                              </td>
+                                                              <td>
+                                                                  @if (row.PRALs != null)
+                                                                  {
+                                                                      foreach (var erow in row.PRALs.OrderBy(o => o.Employee_Profile.User_Profile.First_Name).ThenBy(o => o.Employee_Profile.User_Profile.Last_Name))
+                                                                      {
+                                                                          @UserSession.GetUserName(erow.Employee_Profile.User_Profile)
+                                                                          <br />
+                                                                      }
+                                                                  }
+                                                              </td>
+                                                              <td class="actions text-left">
+                                                                  @if (Model.rights.Contains(UserSession.RIGHT_U))
+                                                                  {
+                                                                      <a href="@Url.Action("Authorization", "Payroll", new { pPRGID = EncryptUtil.Encrypt(row.PRG_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })"><i class="fa fa-edit fa-2x"></i></a>
+                                                                  }
+                                                                  @if (Model.rights.Contains(UserSession.RIGHT_D))
+                                                                  {
+                                                                      <a href="@Url.Action("Authorization", "Payroll", new { pPRGID = EncryptUtil.Encrypt(row.PRG_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_D) })" onclick="return confirm('@Resource.Confirm_Delete_Msg');" title="Delete"><i class="fa fa-times-circle-o fa-2x"></i></a>
+                                                                  }
+                                                              </td>
+                                                          </tr>
+                                                                  j++;
+                                                      }
+                                                  </tbody>
+                                              </table>
+                                          </div>
+
+                                      </div>
+                                  </section>
+                              </div>
+                          </div>
+                      }
+                  </div>*@
+
+               @*Added by sun 08-02-2016*@
+               @*<div id="notification-tab" class="tab-pane fade in">
+                      @using (Html.BeginForm("NotificationScheduler", "Payroll", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                      {
+                          @Html.AntiForgeryToken()
+                          { Html.RenderPartial("_NotificationScheduler", Model); }
+                      }
+                  </div>*@
+               <!-- / Tab panes -->
+            </div>
+
+         </section>
+      </div>
+   </div>
+</div>

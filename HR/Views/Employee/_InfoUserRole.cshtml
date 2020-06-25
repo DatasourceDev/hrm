@@ -1,0 +1,236 @@
+﻿@model  HR.Models.EmployeeViewModels
+@using SBSModel.Models;
+@using HR.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+
+@{
+   var admin = Model.adminRights != null ? Model.adminRights.Contains(Model.operation) : false;
+   var self = Model.Profile_ID == Model.User_Login_Profile_ID ? true : false;
+   var hr = Model.hrRights != null ? Model.hrRights.Contains(Model.operation) : false;
+   List<int> addedRole = new List<int>();
+   List<int> addedModule = new List<int>();
+}
+
+<script type="text/javascript">
+   function step2_Onclick() {
+      var optTrue = 0;
+      optTrue = $('input[name="Users_Assign_Role"]:checked').length;
+      if (optTrue == 0) {
+         ValidateManual('Users_Assign_Role', '@Resource.Message_Is_Required')
+         Scroll_Top();
+      } else {
+         Manage_Tab('info');
+      }
+   }
+</script>
+
+<div id="role-tab" class="tab-pane fade in">
+   <div class="row">
+      <div class="col-md-12">
+         <section class="tile transparent">
+            <div class="tile-header transparent">
+               <h1><strong>@Resource.User_Role</strong></h1>
+               <div class="controls">
+                  <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+               </div>
+            </div>
+            <div class="tile-body">
+               <div class="col-md-12">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <div class="validation-error">
+                           @Html.ValidationMessageFor(m => m.Users_Assign_Role, "", new { @id = "Users_Assign_Role_Err" })
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="table-responsive">
+                  <table class="table table-datatable table-custom" id="roleDataTable">
+                     <thead>
+                        <tr>
+                           <th class="no-sort" style="width: 40px;">
+                              <div class="checkbox">
+                                 <input type="checkbox" value="1" id="chkall">
+                                 <label for="chkall"></label>
+                              </div>
+                           </th>
+                           <th class="sort-alpha">@Resource.Role_Name</th>
+                           <th class="sort-alpha">@Resource.Role_Desc</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        @if (Model.SubscriptionList != null && Model.UserRoleList != null)
+                        {
+                           var i = 0;
+                           var authenrole = Model.UserRoleList.Where(w => w.User_Role_ID == Role.ROLE_MAIN_MASTER_ADMIN | w.User_Role_ID == Role.ROLE_FRANCHISE_ADMIN | w.User_Role_ID == Role.ROLE_WHITE_LABEL_ADMIN | w.User_Role_ID == Role.ROLE_CUSTOMER_ADMIN).ToList();
+                           if (authenrole.Count > 0)
+                           {
+                              foreach (var row in authenrole)
+                              {
+                                 if (row.User_Role_ID == Role.ROLE_MAIN_MASTER_ADMIN)
+                                 {
+                                    if (Model.Company_Level == Companylevel.Mainmaster)
+                                    {
+                                       <tr>
+                                          <td>
+                                             <div class="checkbox">
+                                                @if (Model.Users_Assign_Role != null && Model.Users_Assign_Role.Contains(row.User_Role_ID))
+                                                {
+                                                   <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' checked />
+                                                }
+                                                else
+                                                {
+                                                   <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' />
+                                                }
+                                                <label for="Users_Assign_Role[@i]"></label>
+                                             </div>
+                                          </td>
+                                          <td>@row.Role_Name</td>
+                                            <td>@Html.Raw(row.Role_Description)</td>
+                                       </tr>
+                                                addedRole.Add(row.User_Role_ID);
+                                                i++;
+                                    }
+                                 }
+                                 else if (row.User_Role_ID == Role.ROLE_FRANCHISE_ADMIN)
+                                 {
+                                    if (Model.Company_Level == Companylevel.Mainmaster | Model.Company_Level == Companylevel.Franchise)
+                                    {
+                                       <tr>
+                                          <td>
+                                             <div class="checkbox">
+                                                @if (Model.Company_Level == Companylevel.Franchise)
+                                                {
+                                                   if (Model.Users_Assign_Role != null && Model.Users_Assign_Role.Contains(row.User_Role_ID))
+                                                   {
+                                                      <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' checked />
+                                                   }
+                                                   else
+                                                   {
+                                                      <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' />
+                                                   }
+                                                }
+                                                else
+                                                {
+                                                   <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' disabled />
+                                                }
+                                                <label for="Users_Assign_Role[@i]"></label>
+                                             </div>
+                                          </td>
+                                          <td>@row.Role_Name</td>
+                                            <td>@Html.Raw(row.Role_Description)</td>
+                                       </tr>
+                                                addedRole.Add(row.User_Role_ID);
+                                                i++;
+                                    }
+                                 }
+                                 else if (row.User_Role_ID == Role.ROLE_WHITE_LABEL_ADMIN)
+                                 {
+                                    if (Model.Company_Level == Companylevel.Mainmaster | Model.Company_Level == Companylevel.Franchise | Model.Company_Level == Companylevel.Whitelabel)
+                                    {
+                                       <tr>
+                                          <td>
+                                             <div class="checkbox">
+                                                @if (Model.Company_Level == Companylevel.Whitelabel)
+                                                {
+                                                   if (Model.Users_Assign_Role != null && Model.Users_Assign_Role.Contains(row.User_Role_ID))
+                                                   {
+                                                      <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' checked />
+                                                   }
+                                                   else
+                                                   {
+                                                      <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' />
+                                                   }
+                                                }
+                                                else
+                                                {
+                                                   <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' disabled />
+                                                }
+                                                <label for="Users_Assign_Role[@i]"></label>
+                                             </div>
+                                          </td>
+                                          <td>@row.Role_Name</td>
+                                            <td>@Html.Raw(row.Role_Description)</td>
+                                       </tr>
+                                                addedRole.Add(row.User_Role_ID);
+                                                i++;
+                                    }
+                                 }
+                                 else
+                                 {
+                                    <tr>
+                                       <td>
+                                          <div class="checkbox">
+                                             @if (Model.Users_Assign_Role != null && Model.Users_Assign_Role.Contains(row.User_Role_ID))
+                                             {
+                                                <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' checked />
+                                             }
+                                             else
+                                             {
+                                                <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' />
+                                             }
+
+                                             <label for="Users_Assign_Role[@i]"></label>
+                                          </div>
+                                       </td>
+                                       <td>@row.Role_Name</td>
+                                         <td>@Html.Raw(row.Role_Description)</td>
+                                    </tr>
+                                             addedRole.Add(row.User_Role_ID);
+                                             i++;
+                                 }
+                              }
+                           }
+                           foreach (var m in Model.SubscriptionList.Select(s => s.SBS_Module_Detail).Distinct().ToList())
+                           {
+                              var userrole = Model.UserRoleList.Where(w => w.Page_Role.Where(w1 => w1.Page.Module_Detail_ID == m.Module_Detail_ID).FirstOrDefault() != null).OrderBy(o => o.Role_Name).ToList();
+                              userrole = userrole.Where(w => !authenrole.Select(s => s.User_Role_ID).Contains(w.User_Role_ID)).ToList();
+                              if (userrole.Count > 0)
+                              {
+                                 <tr>
+                                    <td></td>
+                                    <td>
+                                       <h4><strong>@m.Module_Detail_Name</strong></h4>
+                                    </td>
+                                    <td></td>
+                                 </tr>
+                                 foreach (var row in userrole)
+                                 {
+                                    if (!addedRole.Contains(row.User_Role_ID))
+                                    {
+                                       <tr>
+                                          <td>
+                                             <div class="checkbox">
+                                                @if (Model.Users_Assign_Role != null && Model.Users_Assign_Role.Contains(row.User_Role_ID))
+                                                {
+                                                   <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' checked />
+                                                }
+                                                else
+                                                {
+                                                   <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' />
+                                                }
+                                                <label for="Users_Assign_Role[@i]"></label>
+                                             </div>
+                                          </td>
+                                          <td>@row.Role_Name</td>
+                                           <td>@Html.Raw(row.Role_Description)</td>
+                                       </tr>
+                                                addedRole.Add(row.User_Role_ID);
+                                                i++;
+                                    }
+                                 }
+                              }
+                           }
+                        }
+
+
+                     </tbody>
+
+                  </table>
+               </div>
+            </div>
+         </section>
+      </div>
+   </div>
+</div>

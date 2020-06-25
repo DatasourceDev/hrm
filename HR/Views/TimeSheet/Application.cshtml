@@ -1,0 +1,634 @@
+﻿@model  HR.Models.TimeSheetViewModel
+@using SBSModel.Models;
+@using System.Text;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Constants;
+@{
+   ViewBag.Title = @Resource.Time_Sheet;
+   var userlogin = UserUtil.getUser(Request.RequestContext.HttpContext);
+
+   var isReadonly = false;
+   if (Model.Time_Sheet_ID.HasValue && Model.Time_Sheet_ID.Value > 0 && Model.ApprStatus != WorkflowStatus.Draft)
+      isReadonly = true;
+
+   if (Model.operation == Operation.U && !Model.rights.Contains(Operation.U) && Model.ApprStatus != WorkflowStatus.Draft)
+      isReadonly = true;
+   else if (!Model.rights.Contains(Operation.C) && Model.ApprStatus != WorkflowStatus.Draft)
+      isReadonly = true;
+
+   var infoColsapan = "col-md-12";
+}
+@{
+   var curstatus = "";
+   if (!string.IsNullOrEmpty(Model.Cancel_Status) && Model.Cancel_Status != WorkflowStatus.Cancellation_Rejected && Model.Cancel_Status != WorkflowStatus.Canceling)
+   {
+      curstatus = StatusUtil.Get_Overall_Status(Model.Cancel_Status);
+   }
+   else
+   {
+      if (Model.Overall_Status == WorkflowStatus.Pending || Model.Overall_Status == WorkflowStatus.Approved)
+      {
+         curstatus = Resource.Pending;
+      }
+      else
+      {
+         curstatus = StatusUtil.Get_Overall_Status(Model.Overall_Status);
+      }
+   }
+}
+@functions{
+   public string GenTimelineItem(string status, string approval = null, bool IsIndent = false)
+   {
+      var li = new StringBuilder();
+      li.AppendLine("<li class='color transparent-black'>");
+      if (status == WorkflowStatus.Approved | status == WorkflowStatus.Closed | status == WorkflowStatus.Cancellation_Approved | status == WorkflowStatus.Cancelled)
+         li.AppendLine("<div class='pointer green'>");
+      else if (status == WorkflowStatus.Rejected | status == WorkflowStatus.Cancellation_Rejected)
+         li.AppendLine("<div class='pointer red'>");
+      else
+         li.AppendLine("<div class='pointer slategray'>");
+
+      if (string.IsNullOrEmpty(status) | status == WorkflowStatus.Canceling | status == WorkflowStatus.Pending)
+      {
+         li.AppendLine("<i class='fa fa-spinner'></i>");
+      }
+      else if (status == WorkflowStatus.Rejected | status == WorkflowStatus.Cancellation_Rejected)
+      {
+         li.AppendLine("<i class='fa fa-times'></i>");
+      }
+      else if (status == WorkflowStatus.Approved | status == WorkflowStatus.Cancellation_Approved)
+      {
+         li.AppendLine("<i class='fa fa-check'></i>");
+      }
+      else if (status == WorkflowStatus.Cancelled | status == WorkflowStatus.Closed)
+      {
+         li.AppendLine("<i class='fa fa-power-off'></i>");
+      }
+      li.AppendLine("</div>");
+
+      li.AppendLine("<div class='el-container'>");
+      li.AppendLine("<div class='content'>");
+      li.AppendLine(" <h1>");
+      li.AppendLine("<strong>");
+
+      if (string.IsNullOrEmpty(status) | status == WorkflowStatus.Pending)
+      {
+         li.AppendLine(Resource.Time_Sheet + " " + Resource.Message_Is_Pending);
+      }
+      else if (status == WorkflowStatus.Canceling)
+      {
+         li.AppendLine(Resource.Time_Sheet + " " + Resource.Message_Is_Canceling);
+      }
+      else if (status == WorkflowStatus.Rejected)
+      {
+         li.AppendLine(Resource.Time_Sheet + " " + Resource.Message_Is_Rejected);
+      }
+      else if (status == WorkflowStatus.Approved)
+      {
+         li.AppendLine(Resource.Time_Sheet + " " + Resource.Message_Is_Approved);
+      }
+      else if (status == WorkflowStatus.Closed)
+      {
+         li.AppendLine(Resource.Time_Sheet + " " + Resource.Message_Is_Closed);
+      }
+      else if (status == WorkflowStatus.Cancelled)
+      {
+         li.AppendLine(Resource.Time_Sheet + " " + Resource.Message_Is_Cancelled);
+      }
+      else if (status == WorkflowStatus.Cancellation_Approved)
+      {
+         li.AppendLine(Resource.Time_Sheet + " " + Resource.Message_Is_Cancellation_Approved);
+      }
+      else if (status == WorkflowStatus.Cancellation_Rejected)
+      {
+         li.AppendLine(Resource.Time_Sheet + " " + Resource.Message_Is_Cancellation_Rejected);
+      }
+      li.AppendLine(" </strong>");
+      li.AppendLine(" </h1>");
+      if (!string.IsNullOrEmpty(approval))
+      {
+         li.AppendLine(" <p>" + Resource.Approver + " " + approval + "</p>");
+      }
+      if (IsIndent)
+      {
+         li.AppendLine(" <p> " + Resource.By + " " + Resource.Job_Cost + " </p>");
+      }
+      li.AppendLine(" </div>");
+      li.AppendLine(" </div>");
+      li.AppendLine(" </li>");
+      return li.ToString();
+   }
+}
+
+
+@if (Model.operation == Operation.U && Model.ApprStatus != WorkflowStatus.Draft)
+{
+   infoColsapan = "col-md-8";
+}
+
+@if ((Model.rights != null && Model.rights.Contains(Operation.A)))
+{
+   <script type="text/javascript">
+      $(function () {
+         InitDatepicker();
+         if ('@Model.isRejectPopUp' == 'true' || '@Model.isRejectPopUp' == 'True' || '@Model.isRejectPopUp' == true) {
+            $('#btnReject').get(0).click();
+         }
+
+         if ('@isReadonly.ToString().ToLower()' == 'true') {
+            Disable('divApplication');
+         }
+
+         if ('@Model.operation' == '@Operation.C') {
+            applicationConfig();
+         }
+
+         $('#Date_Of_Date').change(function () {
+            if ('@Model.operation' == '@Operation.C') {
+               applicationConfig();
+            }
+         });
+      });
+
+      function OpenReject_Onclick() {
+         $('#btnReject').get(0).click();
+      }
+
+      function applicationConfig() {
+         if (($('#Clock_In').val() == null | $('#Clock_In').val() == '') & ($('#Clock_Out').val() == null | $('#Clock_Out').val() == '')) {
+            ShowMask();
+            $.ajax({
+               type: "GET",
+               url: "ApplicationConfig",
+               data: { pDateOfDate: $('#Date_Of_Date').val() },
+               //dataType: "script"
+            }).done(function (msg) {
+               //alert(msg);
+               $('#appConfig').html(msg);
+               CloseMask();
+            });
+         }
+      }
+   </script>
+
+   <div id="appConfig"></div>
+   <div class="pageheader">
+      @if (Model.Time_Sheet_ID > 0)
+      {
+         <h2>@Resource.Time_Sheet_Details (@curstatus)</h2>
+      }
+      else
+      {
+         <h2>@Resource.Add_New_Time_Sheet</h2>
+      }
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            @if (Model.ApprStatus == "Manage")
+            {
+               <li><a href="@Url.Action("TimeSheetManagement", "TimeSheet")">@Resource.Time_Sheet_Management</a></li>
+               <li class="active">@Resource.Time_Sheet</li>
+            }
+            else
+            {
+               <li><a href="@Url.Action("Record", "TimeSheet")">@Resource.My_Time_Sheet</a></li>
+               <li class="active">@Resource.Time_Sheet</li>
+            }
+         </ol>
+      </div>
+   </div>
+   using (Html.BeginForm("Application", "TimeSheet", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data" }))
+   {
+      @Html.AntiForgeryToken()
+      @Html.HiddenFor(m => m.Time_Sheet_ID)
+      @Html.HiddenFor(m => m.Employee_Profile_ID)
+      @Html.HiddenFor(m => m.Overall_Status)
+      @Html.HiddenFor(m => m.ApprStatus)
+      @Html.HiddenFor(m => m.Supervisor_Name)
+      @Html.HiddenFor(m => m.Supervisor)
+      @Html.HiddenFor(m => m.Request_ID)
+      @Html.HiddenFor(m => m.Request_Cancel_ID)
+      @Html.HiddenFor(m => m.tabAction)
+      @Html.HiddenFor(m => m.Cancel_Status)
+      <input type="hidden" id="operation" name="operation" value="@Model.operation" />
+      <div class="main">
+         <div class="row">
+            <div class="col-md-12">
+               @if (Model.result != null && Model.result.Code != 0)
+               {
+                  if (Model.result.Code < 0)
+                  {
+                     <div class="alert alert-red">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                     </div>
+                  }
+                  else if (Model.result.Code > 0)
+                  {
+                     <div class="alert alert-success">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                     </div>
+                  }
+               }
+            </div>
+         </div>
+
+         <div class="row">
+            @if (Model.operation == Operation.U && Model.ApprStatus != WorkflowStatus.Draft)
+            {
+               <div class="col-md-4">
+                  <section class="tile color transparent-black">
+                     <div class="tile-header transparent">
+                        <h1><strong>@Resource.Time_Sheet_Approval (@curstatus)</strong></h1>
+                        <div class="controls">
+                           <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                        </div>
+                     </div>
+                     <div class="tile-body">
+                        <div class="row">
+                           <div class="col-md-12 sm-left">
+                              <h1 class="timeline-heading"><strong>@Resource.Start</strong></h1>
+                              <ol class="timeline">
+                                 @if (Model.Time_Sheet_Request != null && Model.Time_Sheet_Request.Count > 0)
+                                 {
+                                    foreach (var rrow in Model.Time_Sheet_Request)
+                                    {
+                                       if (rrow.Task_Assignment != null && rrow.Task_Assignment.Count > 0)
+                                       {
+                                          foreach (var row in rrow.Task_Assignment)
+                                          {
+                                             var IsIndent = false;
+                                             if (row.Is_Indent.HasValue && row.Is_Indent.Value)
+                                             {
+                                                IsIndent = row.Is_Indent.Value;
+                                             }
+                                             if (rrow.Request_Type == "Cancel")
+                                             {
+
+                                                if (row.Status == WorkflowStatus.Closed)
+                                                {
+                                                   @Html.Raw(GenTimelineItem(WorkflowStatus.Cancelled, row.Name, IsIndent))
+                                                }
+                                                else if (row.Status == WorkflowStatus.Approved)
+                                                {
+                                                   @Html.Raw(GenTimelineItem(WorkflowStatus.Cancellation_Approved, row.Name, IsIndent))
+                                                }
+                                                else if (row.Status == WorkflowStatus.Rejected)
+                                                {
+                                                   @Html.Raw(GenTimelineItem(WorkflowStatus.Cancellation_Rejected, row.Name, IsIndent))
+                                                }
+                                                else
+                                                {
+                                                   @Html.Raw(GenTimelineItem(WorkflowStatus.Canceling, row.Name, IsIndent))
+                                                }
+                                             }
+                                             else
+                                             {
+                                                @Html.Raw(GenTimelineItem(row.Status, row.Name, IsIndent))
+                                             }
+                                          }
+                                       }
+                                       else
+                                       {
+                                          if (rrow.Request_Type == "Cancel")
+                                          {
+                                             if (rrow.Status == WorkflowStatus.Closed)
+                                             {
+                                                @Html.Raw(GenTimelineItem(WorkflowStatus.Cancelled))
+                                             }
+                                             else if (rrow.Status == WorkflowStatus.Approved)
+                                             {
+                                                @Html.Raw(GenTimelineItem(WorkflowStatus.Cancellation_Approved))
+                                             }
+                                             else if (rrow.Status == WorkflowStatus.Rejected)
+                                             {
+                                                @Html.Raw(GenTimelineItem(WorkflowStatus.Cancellation_Rejected))
+                                             }
+                                             else
+                                             {
+                                                @Html.Raw(GenTimelineItem(WorkflowStatus.Canceling))
+                                             }
+                                          }
+                                          else
+                                          {
+                                             @Html.Raw(GenTimelineItem(rrow.Status, null))
+                                          }
+                                       }
+                                    }
+                                 }
+                                 else
+                                 {
+                                    string appname = null;
+                                    if (Model.Supervisor.HasValue)
+                                    {
+                                       appname = Model.Supervisor_Name;
+                                    }
+                                    @Html.Raw(GenTimelineItem(Model.Overall_Status, appname))
+
+                                 }
+
+                                 @if (!string.IsNullOrEmpty(Model.Cancel_Status))
+                                 {
+                                    string appname = null;
+                                    if (Model.Supervisor.HasValue && Model.Overall_Status == WorkflowStatus.Closed)
+                                    {
+                                       appname = Model.Supervisor_Name;
+                                    }
+                                    if (!Model.Request_Cancel_ID.HasValue)
+                                    {
+                                       @Html.Raw(GenTimelineItem(Model.Cancel_Status, appname))
+                                    }
+                                 }
+                              </ol>
+                              <h1 class="timeline-heading"><strong>@Resource.End</strong></h1>
+                           </div>
+                        </div>
+                     </div>
+                  </section>
+               </div>
+            }
+            <div class="@infoColsapan">
+               <section class="tile color transparent-black">
+                  <div class="tile-header transparent">
+                     <h1><strong>@Resource.Time_Sheet_Info</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                     </div>
+                  </div>
+                  <div class="tile-body">
+                     <div id="divApplication">
+                        <div class="row">
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <label for="Date_Of_Date" class="control-label">@Resource.Date_Of_Date</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <input type="text" class="form-control input-datepicker" name="Date_Of_Date" id="Date_Of_Date" value="@Model.Date_Of_Date">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Date_Of_Date)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <label for="Job_Cost_ID" class="control-label">@Resource.Job</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <select class="chosen-select chosen-transparent form-control" id="Job_Cost_ID" name="Job_Cost_ID">
+                                       @if (Model.JobCostlst != null)
+                                       {
+                                          foreach (var row in Model.JobCostlst)
+                                          {
+                                             if (Model.Job_Cost_ID == NumUtil.ParseInteger(row.Value))
+                                             {
+                                                <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                             }
+                                             else
+                                             {
+                                                <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                             }
+                                          }
+                                       }
+                                    </select>
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Job_Cost_ID)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-md-4">
+                              <div class="row">
+                                 <div class="col-md-10">
+                                    <div class="form-group">
+                                       <div class="col-md-12">
+                                          <label for="Clock_In" class="control-label">@Resource.Clock_In</label>
+                                       </div>
+                                    </div>
+                                    <div class="form-group">
+                                       <div class="col-md-12">
+                                          <input type="text" class="form-control input-timepicker" name="Clock_In" id="Clock_In" value="@Model.Clock_In">
+                                          <div class="validation-error">
+                                             @Html.ValidationMessageFor(m => m.Clock_In)
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                              <div class="row">
+                                 <div class="col-md-10">
+                                    <div class="form-group">
+                                       <div class="col-md-12">
+                                          <label for="Clock_Out" class="control-label">@Resource.Clock_Out</label>
+                                       </div>
+                                    </div>
+                                    <div class="form-group">
+                                       <div class="col-md-12">
+                                          <input type="text" class="form-control input-timepicker" name="Clock_Out" id="Clock_Out" value="@Model.Clock_Out">
+                                          <div class="validation-error">
+                                             @Html.ValidationMessageFor(m => m.Clock_Out)
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-6">
+                              <div class="row">
+                                 <div class="col-md-12">
+                                    <div class="form-group">
+                                       <div class="col-md-12">
+                                          <label for="Note" class="control-label">@Resource.Note</label>
+                                       </div>
+                                    </div>
+                                    <div class="form-group">
+                                       <div class="col-md-12">
+                                          <textarea type="text " class="form-control" name="Note" id="Note" rows="5">@Model.Note</textarea>
+                                          <div class="validation-error">
+                                             @Html.ValidationMessageFor(m => m.Note)
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </section>
+            </div>
+         </div>
+
+         @if (Model.rights.Contains(Operation.C) && Model.operation == Operation.C || Model.ApprStatus == WorkflowStatus.Draft)
+         {
+            <div class="row">
+               <div class="col-md-12">
+                  <section class="tile color transparent-white">
+                     <div class="tile-body">
+                        <div class="row">
+                           <div class="col-md-12">
+                              <button type="submit" class="btn btn-primary" name="pStatus" value="@WorkflowStatus.Draft">@Resource.Save_As_Draft</button>
+                              <button type="submit" class="btn btn-primary" name="pStatus" value="Save">@Resource.Submit</button>
+                              <a href="@Url.Action("Record", "TimeSheet", new { })" cl class="btn btn-default">@Resource.Cancel</a>
+                           </div>
+                        </div>
+                     </div>
+                  </section>
+               </div>
+            </div>
+         }
+         @if (Model.ApprStatus != WorkflowStatus.Draft)
+         {
+            if (Model.ApprStatus == "Manage")
+            {
+               if (Model.rights.Contains(Operation.U))
+               {
+                  var showApprovalBar = false;
+                  int? emploginID = null;
+                  if (userlogin.Employee_Profile != null)
+                  {
+                     emploginID = userlogin.Employee_Profile.FirstOrDefault().Employee_Profile_ID;
+                  }
+                  <div class="row">
+                     <div class="col-md-12">
+                        <section class="tile color transparent-white">
+                           <div class="tile-body">
+                              <div class="row">
+                                 <div class="col-md-12">
+                                    @if (Model.Time_Sheet_Request != null && Model.Time_Sheet_Request.Count > 0)
+                                    {
+                                       int? rid = null;
+                                       if (!string.IsNullOrEmpty(Model.Cancel_Status)) { rid = Model.Request_Cancel_ID; }
+                                       else { rid = Model.Request_ID; }
+                                       var request = Model.Time_Sheet_Request.Where(w => w.Request_ID == rid).FirstOrDefault();
+                                       if (request != null && request.Task_Assignment != null)
+                                       {
+                                          var task = request.Task_Assignment.Where(w => w.Record_Status == WfRecordStatus.Active && w.Profile_ID == userlogin.Profile_ID).OrderBy(o => o.Approval_Level).FirstOrDefault();
+                                          if (task != null)
+                                          {
+                                             showApprovalBar = true;
+                                             if (request.Status == WorkflowStatus.Rejected)
+                                             {
+                                                showApprovalBar = false;
+                                             }
+                                          } 
+                                       }
+                                    }
+                                    else
+                                    {
+                                       if (Model.Supervisor.HasValue && Model.Supervisor == emploginID)
+                                       {
+                                          if (!string.IsNullOrEmpty(Model.Cancel_Status))
+                                          {
+                                             if (Model.Cancel_Status == WorkflowStatus.Canceling) { showApprovalBar = true; }
+                                          }
+                                          else
+                                          {
+                                             if (Model.Overall_Status == WorkflowStatus.Pending | Model.Overall_Status == WorkflowStatus.Approved) { showApprovalBar = true; }
+                                          }
+                                       }
+                                    }
+
+                                    @if (showApprovalBar)
+                                    {
+                                       if (Model.Cancel_Status == WorkflowStatus.Canceling)
+                                       {
+                                          <button type="submit" class="btn btn-primary" name="pStatus" value="@WorkflowStatus.Approved">@Resource.Approve @Resource.Cancel</button>
+                                          <a id="btnReject" href="#modal-reject" role="button" data-toggle="modal" class="btn btn-primary">@Resource.Reject @Resource.Cancel</a>
+                                       }
+                                       else
+                                       {
+                                          <button type="submit" class="btn btn-primary" name="pStatus" value="@WorkflowStatus.Approved">@Resource.Approve</button>
+                                          <a id="btnReject" href="#modal-reject" role="button" data-toggle="modal" class="btn btn-primary">@Resource.Reject</a>
+                                       }
+
+                                    }
+                                    <a href="@Url.Action("TimeSheetManagement", "TimeSheet", new { tabAction = Model.tabAction })" class="btn btn-default">@Resource.Cancel</a>
+                                 </div>
+                              </div>
+                           </div>
+                        </section>
+                     </div>
+                  </div>
+
+                  <div class="modal fade" id="modal-reject" tabindex="-1" role="dialog" aria-labelledby="modalConfirmLabel" aria-hidden="true">
+                     <div class="modal-dialog">
+                        <div class="modal-content">
+                           <div class="modal-header">
+                              <h3 class="modal-title" id="modalConfirmLabel"><strong>@Resource.Reject</strong></h3>
+                           </div>
+                           <div class="modal-body">
+                              <div class="row">
+                                 <div class="col-sm-12">
+                                    <div class="form-group">
+                                       <div class="col-sm-12">
+                                          <label for="Remarks" class="control-label">@Resource.Remark</label>
+                                       </div>
+                                    </div>
+                                    <div class="form-group">
+                                       <div class="col-sm-12">
+                                          <textarea class="form-control" name="Remark_Rej" id="Remark_Rej" rows="5">@Model.Remark_Rej</textarea>
+                                          <div class="validation-error">
+                                             @Html.ValidationMessageFor(m => m.Remark_Rej)
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="modal-footer">
+                              <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+                              <button type="submit" class="btn btn-primary" name="pStatus" value="@WorkflowStatus.Rejected">@Resource.Reject</button>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="md-overlay"></div>
+               }
+            }
+            else
+            {
+               if (Model.operation == Operation.U & Model.rights.Contains(Operation.U))
+               {
+                  <div class="row">
+                     <div class="col-md-12">
+                        <section class="tile color transparent-white">
+                           <div class="tile-body">
+                              <div class="row">
+                                 <div class="col-md-12">
+                                    @if (string.IsNullOrEmpty(Model.Cancel_Status))
+                                    {
+                                       if (Model.Overall_Status != WorkflowStatus.Rejected)
+                                       {
+                                          <button type="submit" class="btn btn-primary" name="pStatus" value="@WorkflowStatus.Cancelled">@Resource.Time_Sheet_Request_Cancel</button>
+                                       }
+                                    }
+                                    else if (Model.Cancel_Status == WorkflowStatus.Cancellation_Rejected)
+                                    {
+                                       if (Model.Overall_Status == WorkflowStatus.Closed)
+                                       {
+                                          <button type="submit" class="btn btn-primary" name="pStatus" value="@WorkflowStatus.Cancelled">@Resource.Time_Sheet_Request_Cancel</button>
+                                       }
+                                    }
+                                    <a href="@Url.Action("Record", "TimeSheet", new { })" cl class="btn btn-default">@Resource.Cancel</a>
+                                 </div>
+                              </div>
+                           </div>
+                        </section>
+                     </div>
+                  </div>
+               }
+            }
+         }
+      </div>
+   }
+}

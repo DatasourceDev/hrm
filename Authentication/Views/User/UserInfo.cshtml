@@ -1,0 +1,737 @@
+﻿@model Authentication.Models.UserViewModel
+@using Authentication.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSModel.Common;
+@using Authentication.Models;
+@using SBSResourceAPI;
+@{
+   ViewBag.Title = Resource.User_Info;
+   List<int> addedRole = new List<int>();
+}
+
+@if (Model.pageAction == "main" | Model.pageAction == "error_relationship")
+{
+   <script type="text/javascript">
+
+      $(function () {
+
+         if ('@Model.Is_Email' == 'true' || '@Model.Is_Email' == 'True') {
+            $('#divEmail').show();
+            $('#divUserName').hide();
+
+            if ('@Model.Email' == '') {
+               $('#Email_chosen').addClass('mandatory-validation');
+               $('#Email').addClass('mandatory-validation');
+            }
+
+         } else {
+            $('#divUserName').show();
+            $('#divEmail').hide();
+
+            if ('@Model.User_Name' == '') {
+               $('#User_Name_chosen').addClass('mandatory-validation');
+               $('#User_Name').addClass('mandatory-validation');
+            }
+         }
+
+         $('input[name="Email"]').on('change', function () {
+            Email_OnChange();
+         });
+
+         $('input[name="User_Name"]').on('change', function () {
+            User_Name_OnChange();
+         });
+
+         $('input[name="Is_Email"]').on('change', function () {
+            var radioValue = $('input[name="Is_Email"]:checked').val();
+            //alert(radioValue);
+            if (radioValue == "true") {
+               $('#divEmail').show();
+               $('#divUserName').hide();
+               $('#Is_Email').val(true);
+
+               Email_OnChange();
+            } else {
+               $('#divUserName').show();
+               $('#divEmail').hide();
+               $('#Is_Email').val(false);
+
+               User_Name_OnChange();
+            }
+         });
+
+         InitDatepicker();
+
+         //check all checkboxes
+         $('table thead input[type="checkbox"]').change(function () {
+            var opts = $(this).parents('table').find('tbody input[type="checkbox"]');
+            if (opts != null) {
+               for (var i = 0; i < opts.length; i++) {
+                  var opt = opts.get(i);
+                  if (opt != null && opt.disabled == false)
+                     opt.checked = $(this).prop('checked');
+               }
+            }
+         });
+
+         var module = '@Model.tabAction';
+         if ('@string.IsNullOrEmpty(Model.tabAction)' == "True") {
+            module = "account";
+         }
+         var liID = "li-" + module;
+         var tabID = module + "-tab";
+         $("#" + liID).addClass("active");
+         $("#" + tabID).addClass("active");
+
+         // ---------------------------------------------- User Info --------------------------// Added by Moet on 10-Aug-2016
+         //$("#btnSave").click(function () {
+         //   //ShowMask();
+         //   var bFlag = $("#Chk_No_Email").val();
+         //   var UserName = $("#User_Name").val();
+         //   if (bFlag == "true" && UserName == "") {
+         //      alert("Please enter the user name of you tick 'If no email' check box.");
+         //      return false;
+         //   }
+         //});
+      });
+
+      //function NoEmail_OnChange(objChkBox) {
+      //   if (objChkBox.checked == true) {
+      //      $('#divUserName').show();
+      //   }
+      //   else {
+      //      $('#divUserName').hide();
+      //   }
+      //}
+      function Email_OnChange() {
+
+         if ($('#Email').val() != "") {
+            $('#Email_chosen').removeClass('mandatory-validation');
+            $('#Email').removeClass('mandatory-validation');
+         } else {
+            $('#Email_chosen').addClass('mandatory-validation');
+            $('#Email').addClass('mandatory-validation');
+         }
+
+      }
+
+      function User_Name_OnChange() {
+
+         if ($('#User_Name').val() != "") {
+            $('#User_Name_chosen').removeClass('mandatory-validation');
+            $('#User_Name').removeClass('mandatory-validation');
+         } else {
+            $('#User_Name_chosen').addClass('mandatory-validation');
+            $('#User_Name').addClass('mandatory-validation');
+         }
+
+      }
+   </script>
+}
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+   <div class="pageheader">
+      <h2>
+         @if (Model.Profile_ID.HasValue && Model.Profile_ID.Value > 0)
+         {
+            @Resource.User_Details;
+         }
+         else
+         {
+            @Resource.Add_New_User;
+         }
+         <span></span>
+      </h2>
+
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li><a href="@Url.Action("User", "User")">@Resource.User</a></li>
+            <li class="active">@Resource.User_Info</li>
+         </ol>
+      </div>
+   </div>
+
+   using (Html.BeginForm("UserInfo", "User", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+   {
+
+      @Html.AntiForgeryToken()
+      <input type="hidden" id="Profile_ID" name="Profile_ID" value="@Model.Profile_ID" />
+      <input type="hidden" id="operation" name="operation" value="@Model.operation" />
+      <input type="hidden" id="Company_Level" name="Company_Level" value="@Model.Company_Level" />
+      <input type="hidden" id="Company_ID" name="Company_ID" value="@Model.Company_ID" />
+      <input type="hidden" id="User_Authentication_ID" name="User_Authentication_ID" value="@Model.User_Authentication_ID" />
+      <input type="hidden" name="Is_Email" id="Is_Email" value="@Model.Is_Email.ToString()" />
+      <div class="main">
+         <div class="row">
+            <div class="col-md-12">
+
+
+               @if (Model.rights != null)
+               {
+                  foreach (var row in Model.rights)
+                  {
+                     <input type="hidden" id="rights" name="rights" value="@row" />
+                  }
+               }
+               @if (Model.adminRights != null)
+               {
+                  foreach (var row in Model.adminRights)
+                  {
+                     <input type="hidden" id="adminRights" name="adminRights" value="@row" />
+                  }
+               }
+               @if (Model.result != null && Model.result.Code != 0)
+               {
+
+                  if (Model.result.Code < 0)
+                  {
+                     <div class="alert alert-red">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                     </div>
+                  }
+                  else if (Model.result.Code > 0)
+                  {
+                     <div class="alert alert-success">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                     </div>
+                  }
+               }
+
+               <!-- tile widget -->
+               <section class="tile color transparent-black">
+                  <div class="tile-widget nopadding color transparent-white rounded-top-corners">
+                     <!-- Nav tabs -->
+                     <ul class="nav nav-tabs tabdrop">
+                        <li id="li-account"><a href="#account-tab" data-toggle="tab">@Resource.User_Account</a></li>
+                        <li id="li-access"><a href="#access-tab" data-toggle="tab">@Resource.Access_Right</a></li>
+                        <li id="li-role"><a href="#role-tab" data-toggle="tab">@Resource.User_Role</a></li>
+                     </ul>
+                  </div>
+
+                  <div class="tile-body tab-content rounded-bottom-corners">
+                     <div id="account-tab" class="tab-pane fade in">
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile transparent">
+                                 <div class="tile-header transparent">
+                                    <h1><strong>@Resource.User_Info</strong></h1>
+                                    <div class="controls">
+                                       <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                    </div>
+                                 </div>
+                                 <div class="tile-body">
+                                    <div class="row">
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-md-12">
+                                                <label for="First_Name" class="control-label">@Resource.First_Name</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-md-12">
+                                                <input type="text" class="form-control" name="First_Name" id="First_Name" value="@Model.First_Name">
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.First_Name)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-md-12">
+                                                <label for="Middle_Name" class="control-label">@Resource.Middle_Name</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-md-12">
+                                                <input type="text" class="form-control" name="Middle_Name" id="Middle_Name" value="@Model.Middle_Name">
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.Middle_Name)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-md-12">
+                                                <label for="Last_Name" class="control-label">@Resource.Last_Name</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-md-12">
+                                                <input type="text" class="form-control" name="Last_Name" id="Last_Name" value="@Model.Last_Name">
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.Last_Name)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                    <div class="row">
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-md-12">
+                                                <label for="Mobile_No" class="control-label">@Resource.Phone</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-md-12">
+                                                <input type="text" class="form-control" name="Phone" id="Phone" value="@Model.Phone">
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.Phone)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       @*<div class="col-md-4">
+                                              <div class="form-group">
+                                                  <div class="col-md-12">
+                                                      <label for="Email" class="control-label">@Resource.Email</label>
+                                                  </div>
+                                              </div>
+                                              <div class="form-group">
+                                                  <div class="col-md-12">
+                                                      <input type="text" class="form-control" name="Email" id="Email" value="@Model.Email">
+                                                      <div class="validation-error">
+                                                          @Html.ValidationMessageFor(m => m.Email)
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                          </div>*@
+
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-md-12">
+                                                <label for="User_Status" class="control-label">@Resource.Status</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-md-12">
+                                                <select class="chosen-select chosen-transparent form-control" id="User_Status" name="User_Status">
+                                                   @if (Model.statusList != null)
+                                                   {
+                                                      foreach (var row in Model.statusList)
+                                                      {
+                                                         if (Model.User_Status == row.Value)
+                                                         {
+                                                            <option value="@(row.Value != null ? row.Value : " ")" selected>@row.Text</option>
+                                                         }
+                                                         else
+                                                         {
+                                                            <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                                         }
+                                                      }
+                                                   }
+                                                </select>
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.User_Status)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+
+                                    <div class="row">
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-md-12">
+                                                <label class="control-label">@Resource.Preferred_User_Id_Method</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-md-4">
+                                                <div class="radio radio-transparent">
+                                                   @if (Model.Is_Email)
+                                                    {
+                                                        <input type="radio" name="Is_Email" id="Is_Email" value="true" checked>
+                                                    }
+                                                   else
+                                                   {
+                                                    <input type="radio" name="Is_Email" id="Is_Email" value="true">
+                                                   }
+                                                    <label for="Is_Email">@Resource.Email</label>
+                                                </div>
+                                             </div>
+                                             <div class="col-md-8">
+                                                <div class="radio radio-transparent">
+                                                   @if (Model.Is_Email)
+                                                   {
+                                                      <input type="radio" name="Is_Email" id="Is_Email_N" value="false">
+                                                   }
+                                                   else
+                                                   {
+                                                      <input type="radio" name="Is_Email" id="Is_Email_N" value="false" checked>
+                                                   }
+                                                   <label for="Is_Email_N">@Resource.UserName (@Resource.If_Employee_Does_Not_Have_Email) </label>
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-4" id="divEmail">
+                                          <div class="form-group">
+                                             <div class="col-md-12">
+                                                <label for="Email" class="control-label">@Resource.Email</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-md-12">
+                                                <input type="text" class="form-control" name="Email" id="Email" value="@Model.Email">
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.Email, "", new { @id = "Email_Err" })
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-4" id="divUserName">
+                                          <div class="form-group">
+                                             <div class="col-md-12">
+                                                <label for="User_Name" class="control-label">@Resource.User_Name</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-md-12">
+                                                <input type="text" class="form-control" name="User_Name" id="User_Name" value="@Model.User_Name">
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.User_Name)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                    <br />
+                                    @if (Model.operation == UserSession.RIGHT_U && Model.Profile_ID.HasValue)
+                                    {
+                                       <div class="row">
+                                          <div class="col-md-12">
+                                             @if (Model.Activated)
+                                             {
+                                                <a href="@Url.Action("Sendresetpassword", "Account", new { pid = EncryptUtil.Encrypt(Model.Profile_ID) })" class="btn btn-default" data-toggle="blank" target="_blank">@Resource.Send_Email_To_Change_Password</a>
+                                                <a href="@Url.Action("Resetpassword", "Account", new { uid = Model.User_Authentication_ID})" class="btn btn-default" data-toggle="blank" target="_blank">@Resource.Reset_Password</a>
+                                             }
+                                             @if (!Model.Activated)
+                                             {
+                                                <a href="@Url.Action("Sendnewactivation", "Account", new { pid = EncryptUtil.Encrypt(Model.Profile_ID) })" class="btn btn-default" data-toggle="blank" target="_blank">@Resource.Send_Email_To_Activation</a>
+                                                <a href="@Url.Action("Activationlink", "Account", new { pid = EncryptUtil.Encrypt(Model.Profile_ID) })" class="btn btn-default" data-toggle="blank" target="_blank">@Resource.Activate</a>
+                                             }
+                                          </div>
+                                       </div>
+                                    }
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                     </div>
+                     <div id="access-tab" class="tab-pane fade in">
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile transparent">
+                                 <div class="tile-header transparent">
+                                    <h1><strong>@Resource.Access_Right</strong></h1>
+                                    <div class="controls">
+                                    </div>
+                                 </div>
+                                 <div class="tile-body">
+                                    <div class="table-responsive">
+                                       <table class="table table-datatable table-custom" id="accessDataTable">
+                                          <thead>
+                                             <tr>
+                                                <th class="no-sort" style="width: 40px;">
+                                                </th>
+                                                <th class="sort-alpha">@Resource.Module</th>
+                                                <th class="sort-alpha">@Resource.Module_Desc</th>
+                                                <th class="sort-alpha">@Resource.Total_License</th>
+                                                <th class="sort-alpha">@Resource.Unassigned_License</th>
+                                                <th class="sort-alpha">@Resource.Action</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             @if (Model.SubscriptionList != null)
+                                             {
+                                                for (var i = 0; i < Model.SubscriptionList.Count(); i++)
+                                                {
+                                                   var row = Model.SubscriptionList[i];
+                                                   var unassignuser = row.No_Of_Users.Value;
+                                                   if (row.User_Assign_Module != null)
+                                                   {
+                                                      unassignuser -= row.User_Assign_Module.Count();
+                                                   }
+                                                   <tr>
+                                                      <td>
+                                                         <div class="checkbox">
+                                                            @if (unassignuser > 0)
+                                                            {
+                                                               <input type="checkbox" name="User_Assign_Module" value="@row.Subscription_ID" id="User_Assign_Module_@i" @(Model.User_Assign_Module != null && Model.User_Assign_Module.Contains(row.Subscription_ID) ? "checked" : "") />
+                                                            }
+                                                            else
+                                                            {
+                                                               <input type="checkbox" id="User_Assign_Module_@i" @(Model.User_Assign_Module != null && Model.User_Assign_Module.Contains(row.Subscription_ID) ? "checked" : "") disabled />
+
+                                                            }
+                                                            <label for="User_Assign_Module_@i"></label>
+                                                         </div>
+                                                         @if (unassignuser == 0)
+                                                         {
+                                                            <input type="hidden" name="User_Assign_Module" value="@row.Subscription_ID" />
+                                                         }
+                                                      </td>
+                                                      <td>@row.SBS_Module_Detail.Module_Detail_Name</td>
+                                                      <td>@row.SBS_Module_Detail.Module_Detail_Description</td>
+                                                      <td class="text-right">@NumUtil.FormatCurrency(row.No_Of_Users)</td>
+                                                      <td class="text-right">@unassignuser</td>
+                                                      <td class="actions">
+                                                         @if (unassignuser == 0)
+                                                         {
+                                                            <a href="@Url.Action("ModuleSignUp", "Subscription", new { pComID = EncryptUtil.Encrypt(Model.Company_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_C) })"><i class="fa fa-user-plus fa-2x"></i></a>
+                                                         }
+                                                         @*else
+                                                            {
+                                                                <a href="@Url.Action("ModuleSignUp", "Subscription", new { pComID = EncryptUtil.Encrypt(Model.Company_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_C) })" style="pointer-events: none; cursor: default; "><i class="fa fa-user-plus fa-2x"></i></a>
+                                                            }*@
+                                                      </td>
+                                                   </tr>
+                                                }
+                                             }
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div id="role-tab" class="tab-pane fade in">
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile transparent">
+                                 <div class="tile-header transparent">
+                                    <h1><strong>@Resource.User_Role</strong></h1>
+                                    <div class="controls">
+                                       <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                    </div>
+                                 </div>
+                                 <div class="tile-body">
+                                    <div class="table-responsive">
+                                       <table class="table table-datatable table-custom" id="roleDataTable">
+                                          <thead>
+                                             <tr>
+                                                <th class="no-sort" style="width: 40px;">
+                                                   <div class="checkbox">
+                                                      <input type="checkbox" value="1" id="chkall">
+                                                      <label for="chkall"></label>
+                                                   </div>
+                                                </th>
+                                                <th class="sort-alpha">@Resource.Role_Name</th>
+                                                <th class="sort-alpha">@Resource.Role_Desc</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             @if (Model.SubscriptionList != null && Model.UserRoleList != null)
+                                             {
+                                                var i = 0;
+                                                var authenrole = Model.UserRoleList.Where(w => w.User_Role_ID == Role.ROLE_MAIN_MASTER_ADMIN | w.User_Role_ID == Role.ROLE_FRANCHISE_ADMIN | w.User_Role_ID == Role.ROLE_WHITE_LABEL_ADMIN | w.User_Role_ID == Role.ROLE_CUSTOMER_ADMIN).ToList();
+                                                if (authenrole.Count > 0)
+                                                {
+                                                   foreach (var row in authenrole)
+                                                   {
+                                                      if (row.User_Role_ID == Role.ROLE_MAIN_MASTER_ADMIN)
+                                                      {
+                                                         if (Model.Company_Level == Companylevel.Mainmaster)
+                                                         {
+                                                            <tr>
+                                                               <td>
+                                                                  <div class="checkbox">
+                                                                     @if (Model.Users_Assign_Role != null && Model.Users_Assign_Role.Contains(row.User_Role_ID))
+                                                                     {
+                                                                        <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' checked />
+                                                                     }
+                                                                     else
+                                                                     {
+                                                                        <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' />
+                                                                     }
+                                                                     <label for="Users_Assign_Role[@i]"></label>
+                                                                  </div>
+                                                               </td>
+                                                               <td>@row.Role_Name</td>
+                                                               <td>@row.Role_Description</td>
+                                                            </tr>
+                                                                     addedRole.Add(row.User_Role_ID);
+                                                                     i++;
+                                                         }
+                                                      }
+                                                      else if (row.User_Role_ID == Role.ROLE_FRANCHISE_ADMIN)
+                                                      {
+                                                         if (Model.Company_Level == Companylevel.Mainmaster | Model.Company_Level == Companylevel.Franchise)
+                                                         {
+                                                            <tr>
+                                                               <td>
+                                                                  <div class="checkbox">
+                                                                     @if (Model.Company_Level == Companylevel.Franchise)
+                                                                     {
+                                                                        if (Model.Users_Assign_Role != null && Model.Users_Assign_Role.Contains(row.User_Role_ID))
+                                                                        {
+                                                                           <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' checked />
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                           <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' />
+                                                                        }
+                                                                     }
+                                                                     else
+                                                                     {
+                                                                        <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' disabled />
+                                                                     }
+                                                                     <label for="Users_Assign_Role[@i]"></label>
+                                                                  </div>
+                                                               </td>
+                                                               <td>@row.Role_Name</td>
+                                                               <td>@row.Role_Description</td>
+                                                            </tr>
+                                                                     addedRole.Add(row.User_Role_ID);
+                                                                     i++;
+                                                         }
+                                                      }
+                                                      else if (row.User_Role_ID == Role.ROLE_WHITE_LABEL_ADMIN)
+                                                      {
+                                                         if (Model.Company_Level == Companylevel.Mainmaster | Model.Company_Level == Companylevel.Franchise | Model.Company_Level == Companylevel.Whitelabel)
+                                                         {
+                                                            <tr>
+                                                               <td>
+                                                                  <div class="checkbox">
+                                                                     @if (Model.Company_Level == Companylevel.Whitelabel)
+                                                                     {
+                                                                        if (Model.Users_Assign_Role != null && Model.Users_Assign_Role.Contains(row.User_Role_ID))
+                                                                        {
+                                                                           <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' checked />
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                           <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' />
+                                                                        }
+                                                                     }
+                                                                     else
+                                                                     {
+                                                                        <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' disabled />
+                                                                     }
+                                                                     <label for="Users_Assign_Role[@i]"></label>
+                                                                  </div>
+                                                               </td>
+                                                               <td>@row.Role_Name</td>
+                                                               <td>@row.Role_Description</td>
+                                                            </tr>
+                                                                     addedRole.Add(row.User_Role_ID);
+                                                                     i++;
+                                                         }
+                                                      }
+                                                      else
+                                                      {
+                                                         <tr>
+                                                            <td>
+                                                               <div class="checkbox">
+                                                                  @if (Model.Users_Assign_Role != null && Model.Users_Assign_Role.Contains(row.User_Role_ID))
+                                                                  {
+                                                                     <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' checked />
+                                                                  }
+                                                                  else
+                                                                  {
+                                                                     <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' />
+                                                                  }
+
+                                                                  <label for="Users_Assign_Role[@i]"></label>
+                                                               </div>
+                                                            </td>
+                                                            <td>@row.Role_Name</td>
+                                                            <td>@row.Role_Description</td>
+                                                         </tr>
+                                                                  addedRole.Add(row.User_Role_ID);
+                                                                  i++;
+                                                      }
+                                                   }
+                                                }
+                                                foreach (var m in Model.SubscriptionList)
+                                                {
+                                                   var module = m.SBS_Module_Detail;
+                                                   var userrole = Model.UserRoleList.Where(w => w.Page_Role.Where(w1 => w1.Page.Module_Detail_ID == m.Module_Detail_ID).FirstOrDefault() != null).OrderBy(o => o.Role_Name).ToList();
+                                                   userrole = userrole.Where(w => !authenrole.Select(s => s.User_Role_ID).Contains(w.User_Role_ID)).ToList();
+                                                   if (userrole.Count > 0)
+                                                   {
+                                                      <tr>
+                                                         <td></td>
+                                                         <td>
+                                                            <h4><strong>@module.Module_Detail_Name</strong></h4>
+                                                         </td>
+                                                         <td></td>
+                                                      </tr>
+                                                      foreach (var row in userrole)
+                                                      {
+                                                         if (!addedRole.Contains(row.User_Role_ID))
+                                                         {
+                                                            <tr>
+                                                               <td>
+                                                                  <div class="checkbox">
+                                                                     @if (Model.Users_Assign_Role != null && Model.Users_Assign_Role.Contains(row.User_Role_ID))
+                                                                     {
+                                                                        <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' checked />
+                                                                     }
+                                                                     else
+                                                                     {
+                                                                        <input type="checkbox" name="Users_Assign_Role" id="Users_Assign_Role[@i]" value='@row.User_Role_ID' />
+                                                                     }
+                                                                     <label for="Users_Assign_Role[@i]"></label>
+                                                                  </div>
+                                                               </td>
+                                                               <td>@row.Role_Name</td>
+                                                               <td>@row.Role_Description</td>
+                                                            </tr>
+                                                                     addedRole.Add(row.User_Role_ID);
+                                                                     i++;
+                                                         }
+                                                      }
+                                                   }
+                                                }
+                                             }
+
+
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </section>
+            </div>
+         </div>
+      </div>
+
+      <div class="row">
+         <div class="col-md-12">
+            <section class="tile color transparent-white">
+               <div class="tile-body">
+                  <div class="row">
+                     <div class="col-md-12">
+                        @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U) | Model.rights.Contains(UserSession.RIGHT_C))
+                        {
+                           if (Model.operation == UserSession.RIGHT_U && Model.Profile_ID.HasValue)
+                           {
+                              <button type="submit" class="btn btn-primary" id="btnSave" name="pageAction" value="saveEdit">@Resource.Save</button>
+                           }
+                           else
+                           {
+                              <button type="submit" class="btn btn-primary" id="btnSave" name="pageAction" value="saveAdd">@Resource.Save</button>
+                           }
+                        }
+                        <a href="@Url.Action("User", "User")" class="btn btn-default">@Resource.Back</a>
+                     </div>
+                  </div>
+               </div>
+            </section>
+         </div>
+      </div>
+   }
+}

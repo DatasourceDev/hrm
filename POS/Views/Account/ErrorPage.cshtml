@@ -1,0 +1,29 @@
+﻿@model POS.Models.ErrorPageViewModel
+
+@{
+    ViewBag.Title = "ErrorPage";
+}
+<div class="container">
+
+    <div class="row-fluid">
+        <div class="span8 offset2">
+            <div class="error-box">
+                <div class="message-small">@Html.DisplayNameFor(model => model.URL): @Html.DisplayFor(model => model.URL)</div>
+            </div>
+        </div>
+    </div>
+    <div class="row-fluid">
+        <div class="span8 offset2">
+            <div class="error-box">
+                <div class="message-big">@Html.DisplayFor(model => model.code)</div>
+            </div>
+        </div>
+    </div>
+    <div class="row-fluid">
+        <div class="span8 offset2">
+            <div class="error-box">
+                <div class="message-small">@Html.DisplayFor(model => model.msg)</div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,23 @@
+﻿@model Authentication.Models.MessagePageViewModel
+@using SBSResourceAPI;
+@{
+    ViewBag.Title = Resource.Sign_Up;
+}
+
+<div class="main">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- tile -->
+            <section class="tile transparent">
+                <div class="jumbotron bg-transparent-black-3">
+                    <div class="container text-center">
+                        <h1 class="error"><strong>Thanks for singing up.</strong></h1><br />
+                        <h2>To activate your account please check your inbox and click on the link found in the email we just sent you.</h2>
+                        <p><a class="btn btn-greensea btn-large" href="@Url.Action("Login", "Account")"><i class="fa fa-home"></i> @Resource.Return_To_Login</a></p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+</div>

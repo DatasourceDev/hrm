@@ -1,0 +1,116 @@
+﻿@model  HR.Models.ConfigulationViewModel
+@using SBSModel.Models;
+@using HR.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+
+<script type="text/javascript">
+    $(function () {
+
+    });
+
+    function AddBranch_Onclick() {
+        $('#btnAddBranch').get(0).click();
+        $('#Branch_ID').val('');
+
+        $('#Branch_Code').val('');
+        $('#Branch_Name').val('');
+        $('#Branch_Desc').val('');
+        $('#Branch_Status').val('@RecordStatus.Active');
+        $('#Branch_Status').trigger("chosen:updated");
+    }
+    function EditBranch_Onclick(branch_id, code, name, desc, status) {
+        $('#btnAddBranch').get(0).click();
+        $('#Branch_ID').val(branch_id);
+
+        $('#Branch_Code').val(code);
+        $('#Branch_Name').val(name);
+        $('#Branch_Desc').val(desc);
+        $('#Branch_Status').val(status);
+        $('#Branch_Status').trigger("chosen:updated");
+    }
+</script>
+<div id="branch-tab" class="tab-pane fade in ">
+    @using (Html.BeginForm("Configuration", "Configuration", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        <a id="btnAddBranch" href="#modal-branch" role="button" data-toggle="modal" style="display:none;"></a>
+        <div class="row">
+            <div class="col-md-12">
+                <section class="tile transparent">
+
+                    <div class="tile-header transparent">
+                        <h1><strong>@Resource.Branch</strong></h1>
+                        <div class="controls">
+                            <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                        </div>
+                    </div>
+
+
+                    <div class="tile-body">
+                        <div class="table-responsive">
+                            <table class="table table-datatable table-custom" id="branchDataTable">
+                                <thead>
+                                    <tr>
+                                        <th class="no-sort" style="width: 40px;">
+                                            <div class="checkbox check-transparent">
+                                                <input type="checkbox" value="1" id="chkallBranch">
+                                                <label for="chkallBranch"></label>
+                                            </div>
+                                        </th>
+                                        <th class="sort-alpha">@Resource.Branch_Code</th>
+                                        <th class="sort-alpha">@Resource.Branch_Name</th>
+                                        <th class="sort-alpha">@Resource.Branch_Desc</th>
+                                        <th class="sort-alpha">@Resource.Status</th>
+                                        <th class="no-sort" width="110px">@Resource.Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{var i = 0;}
+                                    @if (Model.BranchList != null)
+                                    {
+                                        foreach (var row in Model.BranchList)
+                                        {
+
+                                            <tr>
+                                                <td>
+                                                    <div class="checkbox check-transparent">
+                                                        <input type="checkbox" value="@row.Branch_ID" name="branches" id="branches[@i]">
+                                                        <label for="branches[@i]"></label>
+                                                    </div>
+                                                </td>
+                                                <td>@row.Branch_Code</td>
+                                                <td>@row.Branch_Name</td>
+                                                <td>@row.Branch_Desc</td>
+                                                <td>@StatusUtil.Get_Record_Status(row.Record_Status)</td>
+                                                <td class="actions text-left">
+                                                    @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                    {
+                                                        <a href="#" onclick="EditBranch_Onclick('@row.Branch_ID','@row.Branch_Code', '@row.Branch_Name', '@row.Branch_Desc','@row.Record_Status')" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                                    }
+                                                    @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_D))
+                                                    {
+                                                        <a href="@Url.Action("Configuration", "Configuration", new { Branch_ID = row.Branch_ID, apply = UserSession.RIGHT_D, tabAction = "branch" })" onclick="return confirm('@Resource.Confirm_Delete_Msg');" title="@Resource.Delete">
+                                                            <i class="fa fa-times-circle-o fa-2x"></i>
+                                                        </a>
+                                                    }
+                                                </td>
+                                            </tr>
+                                                    i++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    }
+</div>
+
+
+
+
+

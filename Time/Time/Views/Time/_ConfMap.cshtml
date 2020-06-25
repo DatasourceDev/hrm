@@ -1,0 +1,182 @@
+﻿@model  Time.Models.TimeConfViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using Time.Models;
+@using SBSResourceAPI;
+<div id="map-tab" class="tab-pane fade in">
+   <script type="text/javascript">
+      function AddMap() {
+         var rowcount = $('#mDataTable > tbody >tr').length;
+         var data = { pIndex: rowcount, pDID: '@(Model.Search_Device_ID.HasValue ? Model.Search_Device_ID.Value : 0 )' };
+         ShowMask();
+         $.ajax({
+            url: '@Url.Action("ConfAddMap", "Time")',
+            //Passes the content of an input up
+            data: data,
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+               var str = '<tr class="status-info" id="itemRow-' + rowcount + '">';
+               str = str + data + '</tr>';
+               $('#mDataTable > tbody').append(str);
+               CloseMask();
+            }
+         });
+      }
+
+
+      function DeleteMap(rowid, index) {
+         if (confirm('@Resource.Confirm_Delete_Msg')) {
+            $('#Map_Rows_' + index + '__Row_Type').val('@RowType.DELETE');
+            $('#' + rowid).hide();
+         }
+      }
+
+      function Employee_Onchange(index) {
+         var empID = $('#Map_Rows_' + index + '__Employee_Profile_ID').val();
+         var email = $('#cEmp-' + empID).val();
+         $('#Map_Rows_' + index + '__Employee_Email').val(email);
+      }
+
+   </script>
+   @using (Html.BeginForm("Configuration", "Time", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+   {
+      @Html.AntiForgeryToken()
+
+      <div class="row">
+         <div class="col-md-12">
+            <section class="tile color transparent filter" id="secfilter2">
+               <div class="tile-header transparent">
+                  <h1 onclick="CollapseHeader(null, 'btncollapse2', 'secfilter2')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                  <div class="controls">
+                     <a href="#" class="minimize filter" id="btncollapse2"><i class="fa fa-search color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body">
+                  <div class="row">
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <select class="chosen-select chosen-transparent form-control" id="Search_Device_ID" name="Search_Device_ID" onchange="$('#btnFilter').get(0).click();">
+                                 @if (Model.cDevicelist != null)
+                                 {
+                                    foreach (var row in Model.cDevicelist)
+                                    {
+                                       <option value="@row.Value" @(Model.Search_Device_ID == NumUtil.ParseInteger(row.Value) ? "selected" : "")>@row.Text</option>
+                                    }
+                                 }
+                              </select>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Search_Device_ID)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-4" style="display:none;">
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <button id="btnFilter" type="submit" class="btn btn-default" name="tabAction" value="map">@Resource.Filter</button>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </section>
+         </div>
+      </div>
+
+   }
+   @using (Html.BeginForm("Configuration", "Time", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+   {
+      @Html.AntiForgeryToken()
+      @Html.HiddenFor(m => m.Map_Device_ID)
+      <div class="row">
+         <div class="col-md-12">
+            <section class="tile transparent">
+               <div class="tile-header transparent">
+                  <h1><strong>@Resource.Device_Employee_Mapping</strong></h1>
+                  <div class="controls">
+                     <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body">
+                  <div class="row">
+                     @*<div class="col-md-12 text-center">
+                            <a class="btn btn-greensea  btn-sm add-row" id="" onclick="AddMap();">@Resource.Add_An_Item</a>
+                        </div>*@
+                     @for (var i = 0; i < Model.cEmplist.Count(); i++)
+                     {
+                        var row = Model.cEmplist[i];
+                        <input type="hidden" id="cEmp-@row.Value" value="@row.Desc" />
+                     }
+                  </div>
+                  <div class="table-responsive">
+                     <table class="table table-datatable table-custom" id="mDataTable">
+                        <thead>
+                           <tr>
+                              <th class="sort-alpha">@Resource.Employee_Code (@Resource.Device)</th>
+                              <th class="sort-alpha">@Resource.Employee_Name</th>
+                              <th class="sort-alpha">@Resource.Email</th>
+                              @*<th class="no-sort" width="110px">@Resource.Action</th>*@
+                           </tr>
+                        </thead>
+                        <tbody>
+                           @if (Model.cEmpDevicelist != null)
+                           {
+                              for (int i = 0; i < Model.cEmpDevicelist.Count(); i++)
+                              {
+                                 var row = Model.Map_Rows.Where(w => w.Device_Employee_Pin == Model.cEmpDevicelist[i].Pin).FirstOrDefault();
+                                 if (row == null)
+                                 {
+                                    row = new TimeConfMapViewModel() { Device_ID = Model.Search_Device_ID, Row_Type = RowType.ADD };
+                                 }
+                                 <tr class="status-info" id="itemRow-@i">
+                                    @{ Html.RenderPartial("_ConfMapRow", new TimeConfMapViewModel()
+                                                 {
+                                                    Index = i,
+                                                    Row_Type = row.Row_Type,
+                                                    Device_ID = row.Device_ID,
+                                                    Employee_Map_ID = row.Employee_Map_ID,
+                                                    Device_Employee_Pin = Model.cEmpDevicelist[i].Pin,
+                                                    Device_Employee_Name = Model.cEmpDevicelist[i].FirstName + " " + Model.cEmpDevicelist[i].MiddleName + " " + Model.cEmpDevicelist[i].LastName,
+                                                    Employee_Profile_ID = row.Employee_Profile_ID,
+                                                    Employee_Email = row.Employee_Email,
+                                                    cEmplist = Model.cEmplist,
+                                                 });
+                                    }
+                                 </tr>
+                              }
+                           }
+                        </tbody>
+                        <tfoot>
+                           <tr class="table-footer-summary" style="font-size:12px">
+                              <td colspan="4">
+                                 <br />
+                                 <div class="validation-error">
+                                    @Html.ValidationMessage("Map_Rows")
+                                 </div>
+                              </td>
+                              <td></td>
+                           </tr>
+                        </tfoot>
+                     </table>
+                  </div>
+               </div>
+            </section>
+         </div>
+      </div>
+      <div class="row">
+         <div class="col-md-12">
+            <section class="tile color transparent-white" style="padding-left:15px;">
+               <div class="tile-body">
+                  <div class="row">
+                     <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary" name="tabAction" value="map">@Resource.Save</button>
+                     </div>
+                  </div>
+               </div>
+            </section>
+         </div>
+      </div>
+
+   }
+</div>

@@ -1,0 +1,191 @@
+﻿@using POS.Common;
+@using POS.Models;
+@using SBSModel.Common;
+@using SBSModel.Models;
+@model  POS.Models.POSProductViewModel
+
+@{
+    //use RID as count. no.
+    var i = Model.Index;
+    var iService = new InventoryService();
+}
+
+
+<td class="cell-product text-center">
+    @Html.CheckBox("chk" + i, new { onclick = "TopMenu();" })
+    @if ((Model.Product_Attribute != null && Model.Product_Attribute.Count > 0))
+    {
+        var iattr = 1;
+        <a data-toggle="modal" href="#modal-attr" id="btnAttr" style="display:none;"></a>
+        <div id="modal-attr" class="modal hide fade">
+            <div class="modal-body">
+                <div class="control-group text-center">
+                    <table style="width:100%">
+                        <tr style="border-top:none">
+                            @foreach (var attr in Model.Product_Attribute)
+                            {
+                                <td style="border-top:none;vertical-align:top">
+                                    <div class="control-group">
+                                        <span style="font-weight:600;font-size:20px;">Choose @attr.Attribute_Name</span>
+                                    </div>
+                                </td>
+                            }
+                        </tr>
+                        <tr style="border-top:none">
+
+                            @foreach (var attr in Model.Product_Attribute)
+                            {
+                                <td style="border-top:none;vertical-align:top">
+
+                                    <div class="control-group">
+                                        @if (attr.Product_Attribute_Value != null)
+                                        {
+                                            int ival = 1;
+                                            <ul class="nav nav-pills">
+                                                @foreach (var val in attr.Product_Attribute_Value)
+                                                {
+                                                    var id = "btn-" + attr.Attribute_Name + "-" + ival;
+                                                    <li style="padding: 5px;margin:5px;">
+                                                        <a href="#" onclick="SelectAttr( {productIndex: '@i',valcnt: '@attr.Product_Attribute_Value.Count',id: '@id',attrIndex: '@iattr',attrName: '@attr.Attribute_Name',valID: '@val.Attribute_Value_ID',attrValue: '@val.Attribute_Value'});">
+                                                            <div class="btn btn-white btn-large" id="@id" style="width:100px;">
+                                                                <p>
+                                                                    @val.Attribute_Value
+                                                                </p>
+                                                            </div>
+                                                        </a>
+                                                    </li>
+                                                    ival++;
+
+                                                }
+                                            </ul>
+                                        }
+                                    </div>
+                                </td>
+                                        iattr++;
+                            }
+                        </tr>
+                    </table>
+                </div>
+
+
+
+                <div class="control-group text-center">
+                    <a href="#" style="width:130px;" data-dismiss="modal" onclick="AttrbuteAdd_Onclick('@i')">
+                        <div class="btn btn-white btn-large" style="width:70px;">
+                            <p>
+                                Add
+                            </p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</td>
+<td class="cell-product" style="padding: 0px; border: none; width: 120px; background-color: #fff;" onclick="selectRow(@i)">
+    @if (!string.IsNullOrEmpty(Model.Image))
+    {
+        var productimg = String.Format("data:image/gif;base64,{0}", Model.Image);
+        <div class="product-item-pic" style="background-image: url('@productimg') ;"></div>
+    }
+    else
+    {
+        <div class="product-item-nopic" style="background-image: url('@Url.Content("~/Images/product.png")');"></div>
+    }
+</td>
+
+<td class="cell-product" onclick="selectRow(@i)">
+
+    @if (string.IsNullOrEmpty(Model.Row_Type))
+    {
+        if (Model.ID.HasValue && Model.ID > 0)
+        {
+                 @Html.Hidden("Product_Rows[" + i + "].Row_Type", RowType.EDIT)
+        }
+        else
+        {
+              @Html.Hidden("Product_Rows[" + i + "].Row_Type", RowType.ADD)
+        }
+    }
+    else
+    {
+         @Html.Hidden("Product_Rows[" + i + "].Row_Type", Model.Row_Type)
+    }
+    <input type="hidden" name="Product_Rows[@i].ID" value="@(Model.ID.HasValue ? Model.ID.Value :0)">
+    <input type="hidden" name="Product_Rows[@i].Image" value="@Model.Image">
+    <input type="hidden" name="Product_Rows[@i].Product_ID" value="@Model.Product_ID">
+    <input type="hidden" name="Product_Rows[@i].Name" value="@Model.Name">
+    <input type="hidden" name="Product_Rows[@i].Product_Name" value="@Model.Product_Name">
+    <input type="hidden" name="Product_Rows[@i].Receipt_ID" value="@Model.Receipt_ID">
+    <input type="hidden" name="Product_Rows[@i].Receipt_Product_Local_ID" value="@Model.Receipt_Product_Local_ID">
+    <input type="hidden" name="Product_Rows[@i].Receipt_Local_ID" value="@Model.Receipt_Local_ID">
+
+    <span id="productName-@i" class="display-text-medium">@Model.Name</span>
+    <span id="productColor-@i" class="display-text-medium"></span>
+    <span id="productSize-@i" class="display-text-medium"></span>
+
+    @Html.Hidden("Product_Rows[" + i + "].Attr1_2", Model.Attr1)
+    @Html.Hidden("Product_Rows[" + i + "].Attr2_2", Model.Attr2)
+    @Html.Hidden("Product_Rows[" + i + "].Attr3_2", Model.Attr3)
+    @Html.Hidden("Product_Rows[" + i + "].Attr4_2", Model.Attr4)
+    @Html.Hidden("Product_Rows[" + i + "].Attr5_2", Model.Attr5)
+
+    
+    @Html.Hidden("Product_Rows[" + i + "].Attr1_Name")
+    @Html.Hidden("Product_Rows[" + i + "].Attr2_Name")
+    @Html.Hidden("Product_Rows[" + i + "].Attr3_Name")
+    @Html.Hidden("Product_Rows[" + i + "].Attr4_Name")
+    @Html.Hidden("Product_Rows[" + i + "].Attr5_Name")
+
+
+    @Html.Hidden("Product_Rows[" + i + "].Attr1", Model.Attr1)
+    @Html.Hidden("Product_Rows[" + i + "].Attr2", Model.Attr2)
+    @Html.Hidden("Product_Rows[" + i + "].Attr3", Model.Attr3)
+    @Html.Hidden("Product_Rows[" + i + "].Attr4", Model.Attr4)
+    @Html.Hidden("Product_Rows[" + i + "].Attr5", Model.Attr5)
+
+</td>
+<td class="cell-product" style="width:60px">
+    <a data-toggle="modal" href="#modal-set-qty" onclick="$('#Set_Qty_Index').val(@i);">
+        @Html.Hidden("Product_Rows[" + i + "].Qty", Model.Qty)
+        @Html.Hidden("Product_Rows[" + i + "].Qty2", Model.Qty)
+        <div class="btn btn-white btn-small">
+            <p>
+                @Html.TextBox("Product_Rows[" + i + "].Qty_Label", Model.Qty.ToString("n0"), new { @class = "display-text display-text-amount", @readonly = true })
+                @Html.TextBox("Product_Rows[" + i + "].Qty_Label2", Model.Qty.ToString("n0"), new { @class = "display-text display-text-amount", @readonly = true, style = "display:none;" })
+            </p>
+        </div>
+    </a>
+</td>
+<td class="cell-product" style="width:60px;text-align:right" onclick="selectRow(@i)">
+    @Html.Hidden("Product_Rows[" + i + "].Price", Model.Price)
+    @Html.Hidden("Product_Rows[" + i + "].Discount", Model.Discount)
+    @Html.Hidden("Product_Rows[" + i + "].Discount2", Model.Discount)
+    @Html.Hidden("Product_Rows[" + i + "].Discount_Type", DiscountType.Amount)
+
+    @if (Model.Discount.HasValue && Model.Discount.Value > 0)
+    {
+        var price = (Model.Price);
+        var discount = Model.Discount.HasValue ? Model.Discount.Value : 0;
+        <span id="Product_Rows_@(i)__Price_Label" class="display-text-medium" style="text-decoration:line-through">@Model.Price.ToString("n2")</span>
+        <span id="Product_Rows_@(i)__Price_Label2" class="display-text-medium">@((price - discount).ToString("n2"))</span>
+
+    }
+    else
+    {
+        <span id="Product_Rows_@(i)__Price_Label" class="display-text-medium">@Model.Price.ToString("n2")</span>
+        <span id="Product_Rows_@(i)__Price_Label2" class="display-text-medium" style="display:none;">@Model.Price.ToString("n2")</span>
+    }
+
+</td>
+<td class="cell-product">
+    <a data-toggle="modal" onclick="DeleteProduct(@i);">
+        <div class="btn btn-white btn-small" style="width:30px;">
+            <p>
+                <i class="icon icon-trash"></i>
+            </p>
+        </div>
+    </a>
+</td>
+
+

@@ -1,0 +1,339 @@
+﻿@model Authentication.Models.CustomerViewModels
+@using Authentication.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSModel.Common;
+@using Authentication.Models;
+@using SBSResourceAPI;
+
+@{
+   ViewBag.Title = Resource.Customer_Info;
+}
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+   <script type="text/javascript">
+      $(function () {
+         InitDatepicker();
+      });
+
+      function Billing_Country_OnChange(opt) {
+         var cID = $('#Billing_Country_ID').val();
+         Combo_Reload('Billing_State_ID', '@ComboTypeEnum.State', cID)
+      }
+
+   </script>
+
+   <div class="pageheader">
+      <h2>@Resource.Customer_Info<span></span></h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li><a href="@Url.Action("Customer", "Customer")">@Resource.Customer</a></li>
+            <li class="active">@Resource.Customer_Info</li>
+         </ol>
+      </div>
+   </div>
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+            @using (Html.BeginForm("CustomerInfo", "Customer", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+            {
+               @Html.AntiForgeryToken()
+               <section class="tile color transparent-black">
+
+                  <div class="tile-header transparent">
+                     <h1><strong>@Resource.Customer_Info</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                     </div>
+                  </div>
+                  <div class="tile-body">
+                     <input type="hidden" name="Company_ID" value="@Model.Company_ID" />
+                     <input type="hidden" name="operation" value="@Model.operation" />
+                     <input type="hidden" name="Customer_ID" value="@Model.Customer_ID" />
+
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Customer_No" class="control-label">@Resource.Customer_No</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Customer_No" id="Customer_No" value="@Model.Customer_No">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Customer_No)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Customer_Name" class="control-label">@Resource.Customer_Name</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Customer_Name" id="Customer_Name" value="@Model.Customer_Name">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Customer_Name)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Person_In_Charge" class="control-label">@Resource.Person_In_Charge</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Person_In_Charge" id="Person_In_Charge" value="@Model.Person_In_Charge">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Person_In_Charge)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Billing_Address" class="control-label">@Resource.Address</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <textarea class="form-control" name="Billing_Address" id="Billing_Address" rows="5">@Model.Billing_Address</textarea>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Billing_Address)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-8">
+                           <div class="row">
+                              <div class="col-md-6">
+                                 <div class="form-group">
+                                    <div class="col-sm-12">
+                                       <label for="Billing_Country_ID" class="control-label">@Resource.Country</label>
+                                    </div>
+                                 </div>
+                                 <div class="form-group">
+                                    <div class="col-sm-12">
+
+                                       <select class="chosen-select chosen-transparent form-control" id="Billing_Country_ID" name="Billing_Country_ID" onchange="Billing_Country_OnChange(this);">
+                                          @if (Model.Countrylst != null)
+                                          {
+                                             foreach (var row in Model.Countrylst)
+                                             {
+                                                if (Model.Billing_Country_ID == NumUtil.ParseInteger(row.Value))
+                                                {
+                                                   <option value="@row.Value" selected>@row.Desc</option>
+                                                }
+                                                else
+                                                {
+                                                   <option value="@(row.Value != null ? row.Value : " ")">@row.Desc</option>
+                                                }
+                                             }
+                                          }
+                                       </select>
+                                       <div class="validation-error">
+                                          @Html.ValidationMessageFor(m => m.Billing_Country_ID)
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                              <div class="col-md-6">
+                                 <div class="form-group">
+                                    <div class="col-sm-12">
+                                       <label for="Billing_State_ID" class="control-label">@Resource.State</label>
+                                    </div>
+                                 </div>
+                                 <div class="form-group">
+                                    <div class="col-sm-12">
+                                       <select class="chosen-select chosen-transparent form-control" id="Billing_State_ID" name="Billing_State_ID">
+                                          @if (Model.Statelst != null)
+                                          {
+                                             foreach (var row in Model.Statelst)
+                                             {
+                                                if (Model.Billing_State_ID == NumUtil.ParseInteger(row.Value))
+                                                {
+                                                   <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                }
+                                                else
+                                                {
+                                                   <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                                }
+                                             }
+                                          }
+                                       </select>
+                                       <div class="validation-error">
+                                          @Html.ValidationMessageFor(m => m.Billing_State_ID)
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+
+                           </div>
+                           <div class="row">
+                              <div class="col-md-6">
+                                 <div class="form-group">
+                                    <div class="col-sm-12">
+                                       <label for="Billing_City" class="control-label">@Resource.City</label>
+                                    </div>
+                                 </div>
+                                 <div class="form-group">
+                                    <div class="col-sm-12">
+                                       <input type="text" class="form-control" name="Billing_City" id="Billing_City" value="@Model.Billing_City">
+                                       <div class="validation-error">
+                                          @Html.ValidationMessageFor(m => m.Billing_City)
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                              <div class="col-md-6">
+                                 <div class="form-group">
+                                    <div class="col-sm-12">
+                                       <label for="Billing_Postal_Code" class="control-label">@Resource.Postal_Code</label>
+                                    </div>
+                                 </div>
+                                 <div class="form-group">
+                                    <div class="col-sm-12">
+                                       <input type="text" class="form-control" name="Billing_Postal_Code" id="Billing_Postal_Code" value="@Model.Billing_Postal_Code">
+                                       <div class="validation-error">
+                                          @Html.ValidationMessageFor(m => m.Billing_Postal_Code)
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Office_Phone" class="control-label">@Resource.Office_Phone</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Office_Phone" id="Office_Phone" value="@Model.Office_Phone">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Office_Phone)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Mobile_Phone" class="control-label">@Resource.Mobile_Phone</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Mobile_Phone" id="Mobile_Phone" value="@Model.Mobile_Phone">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Mobile_Phone)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Email" class="control-label">@Resource.Email_Address</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Email" id="Email" value="@Model.Email">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Email)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Record_Status" class="control-label">@Resource.Status</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Record_Status" name="Record_Status">
+                                    @if (Model.Statuslst != null)
+                                    {
+                                       foreach (var row in Model.Statuslst)
+                                       {
+                                          if (Model.Record_Status == row.Value)
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                          }
+                                          else
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                          }
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Record_Status)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <!-- / Tab panes -->
+                  </div>
+               </section>
+               <div class="row">
+                  <div class="col-md-12">
+                     <section class="tile color transparent-white" style="padding-left:15px;">
+                        <div class="tile-body">
+                           <div class="row">
+                              <div class="col-md-12 text-left">
+                                 @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U) | Model.rights.Contains(UserSession.RIGHT_C))
+                                 {
+                                    <button type="submit" class="btn btn-primary">@Resource.Save</button>
+                                 }
+                                 <a href="@Url.Action("Customer", "Customer")" class="btn btn-default">@Resource.Back</a>
+                              </div>
+                           </div>
+                        </div>
+                     </section>
+                  </div>
+               </div>
+            }
+         </div>
+      </div>
+   </div>
+}

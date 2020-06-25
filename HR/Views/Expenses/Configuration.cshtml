@@ -1,0 +1,694 @@
+﻿@model  HR.Models.ExpensesConfigurationViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+@using SBSWorkFlowAPI.Constants;
+@{
+   ViewBag.Title = @Resource.Expenses_Configuration;
+}
+
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+   <script type="text/javascript">
+      $(function () {
+
+         var module = '@Model.tabAction';
+         if ('@string.IsNullOrEmpty(Model.tabAction)' == "True") {
+            module = "category";
+         }
+         if ('@(Request.QueryString["tabAction"])' != null && '@(Request.QueryString["tabAction"])' != '') {
+            module = '@(Request.QueryString["tabAction"])';
+         }
+
+         var liID = "li-" + module;
+         var tabID = module + "-tab";
+         $("#" + liID).addClass("active");
+         $("#" + tabID).addClass("active");
+
+         var addRowLink = '<a href="@Url.Action("ExpensesType", "Expenses", new {
+                                  operation = EncryptUtil.Encrypt(UserSession.RIGHT_C),
+                                  atype = EncryptUtil.Encrypt(ApprovalType.Expense)
+                              })" id="addRow" class="btn btn-greensea  btn-sm add-row">@Resource.Add_An_Item</a>'
+         InitDatatable('expensesTypeDataTable', addRowLink, InitDatatableApplyLink({
+            name: "apply",
+            tabAction: "expenses",
+            hasDel: true,
+            confirmAlert: true
+         }), 1, 'asc');
+
+         var addRow01Link = '<a href="@Url.Action("Approval", "Approval", new {
+                                    operation = EncryptUtil.Encrypt(UserSession.RIGHT_C),
+                                    atype = EncryptUtil.Encrypt(ApprovalType.Expense)
+                                })" id="addRow4" class="btn btn-greensea  btn-sm add-row">@Resource.Add_An_Item</a>';
+         InitDatatable('approvalDataTable', addRow01Link, InitDatatableApplyLink({
+            name: "apply",
+            tabAction: "approval",
+            hasDel: true,
+            confirmAlert: true
+         }), 1, 'asc');
+
+         var addRow02Link = '<a href="@Url.Action("ExpensesCategory", "Expenses", new {
+                                    operation = EncryptUtil.Encrypt(UserSession.RIGHT_C),
+                                    atype = EncryptUtil.Encrypt(ApprovalType.Expense)
+                                })" id="addRow5" class="btn btn-greensea  btn-sm add-row">@Resource.Add_An_Item</a>';
+         InitDatatable('ecateDataTable', addRow02Link, InitDatatableApplyLink({
+            name: "apply",
+            tabAction: "category",
+            hasActive: true,
+            hasInactive: true,
+            hasDel: true,
+            confirmAlert: true
+         }), 1, 'asc');
+      })
+
+      function Manage_Tab(tName) {
+         switch (tName) {
+            case "category":
+               $("#category-tab").removeClass("active");
+               $("#li-category").removeClass("active");
+               $("#expenses-tab").addClass("active in");
+               $("#li-expenses").addClass("active");
+               break;
+            case "expenses":
+               $("#expenses-tab").removeClass("active");
+               $("#li-expenses").removeClass("active");
+               $("#approval-tab").addClass("active in");
+               $("#li-approval").addClass("active");
+               break;
+            case "approval":
+               $("#approval-tab").removeClass("active");
+               $("#li-approval").removeClass("active");
+               $("#category-tab").addClass("active in");
+               $("#li-category").addClass("active");
+         }
+      }
+
+      function StartTour() {
+         var strtitle = "Expense Configuration";
+         var EpconfigTour = new Tour({
+            storage: false,
+            steps: [
+            {
+               element: "#li-category",
+               title: strtitle,
+               content: "You can create the expense category here to do proper tracking your expenses with your accounting system.",
+               onNext: function () {
+                  Manage_Tab("category");
+               },
+            },
+            {
+               element: "#li-expenses",
+               title: strtitle,
+               content: "You can create new expense type or modify the existing type here.",
+               onNext: function () {
+                  Manage_Tab("expenses");
+               }, 
+            },
+            {
+               element: "#li-approval",
+               title: strtitle,
+               content: "You can setup the expense approval workflow here.",
+               onNext: function () {
+                  Manage_Tab("approval");
+               }
+            }
+            ],
+            onEnd: function () {
+
+            }
+         });
+         EpconfigTour.init();
+         EpconfigTour.start();
+      }
+
+      function Manage_Tour(tName) {
+
+         if (tName == "ExpType") {
+            triggerExpTypeTour();
+         } else if (tName == "ExpApproval") {
+            triggerExpApprovalTour();
+         }
+      }
+
+      function triggerExpTypeTour() {
+         var strtitle = "Expnese Type Set up";
+         var ETypeTour = new Tour({
+            autoscroll: true,
+            storage: false,
+            steps: [
+            {
+               element: "#hExpType",
+               title: strtitle,
+               content: "You can see the list of expense type here.",
+               onNext: function () {
+
+               }
+            },
+            {
+               element: "#addRow",
+               title: strtitle,
+               content: "Click here to create new expense type.",
+               onNext: function () {
+
+               }
+            },
+            {
+               element: "#thExpTypeAction",
+               title: strtitle,
+               content: "If you want to modify the existing expense type, click here.",
+               onNext: function () {
+
+               }
+            }
+            ],
+            onEnd: function () {
+            }
+         });
+         ETypeTour.init();
+         ETypeTour.start();
+      }
+
+      function triggerExpApprovalTour() {
+         var strtitle = "Expenses Approval Workflow Set up";
+         var EAppListTour = new Tour({
+            autoscroll: true,
+            storage: false,
+            steps: [
+            {
+               element: "#hExpApp",
+               title: strtitle,
+               content: "You can see the list of approval workflow here.",
+               onNext: function () {
+               }
+            },
+            {
+               element: "#addRow4",
+               title: strtitle,
+               content: "If you want to add new expenses approval workflow, click here.",
+               onNext: function () {
+               }
+            },
+            {
+               element: "#thExpAppAction",
+               title: strtitle,
+               content: "If you want to modify the existing approval workflow, click here.",
+               onNext: function () {
+               }
+            }
+            ],
+            onEnd: function () {
+            }
+         });
+         EAppListTour.init();
+         EAppListTour.start();
+      }
+
+   </script>
+   <div class="pageheader">
+      <h2>@Resource.Expenses_Configuration<span></span></h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home" )">@Resource.DashBoard</a></li>
+            <li class="active">@Resource.Expenses_Configuration</li>
+         </ol>
+      </div>
+   </div>
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+            <!-- tile widget -->
+            <section class="tile color transparent-black">
+               <div class="tile-widget nopadding color transparent-white rounded-top-corners">
+                  <!-- Nav tabs -->
+                  <ul class="nav nav-tabs tabdrop">
+                     <li id="li-category"><a href="#category-tab" data-toggle="tab">@Resource.Expenses_Category</a></li>
+                     <li id="li-expenses"><a href="#expenses-tab" data-toggle="tab">@Resource.Expenses_Type</a></li>
+                     <li id="li-approval"><a href="#approval-tab" data-toggle="tab">@Resource.Expenses_Approval</a></li>
+                  </ul>
+                  <!-- / Nav tabs -->
+               </div>
+               <!-- /tile widget -->
+               <div class="tile-body tab-content rounded-bottom-corners">
+                  <div id="category-tab" class="tab-pane fade in">
+                     @using (Html.BeginForm("Configuration", "Expenses", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                     {
+                        @Html.AntiForgeryToken()
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile transparent">
+                                 <div class="tile-header transparent">
+                                    <h1 id="hExpCat"><strong>@Resource.Expenses_Category</strong></h1>
+                                    <div class="controls">
+                                       <span class="label label-success tour-guide" onclick="StartTour();" style="cursor:pointer;">@Resource.Guide</span>
+                                       <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                    </div>
+                                 </div>
+                                 <div class="tile-body ">
+                                    <div class="table-responsive transparent">
+                                       <table class="table table-datatable table-custom" id="ecateDataTable">
+                                          <thead>
+                                             <tr>
+                                                <th class="no-sort" style="width: 40px;">
+                                                   <div class="checkbox check-transparent">
+                                                      <input type="checkbox" value="1" id="chkallExpCat">
+                                                      <label for="chkallExpCat"></label>
+                                                   </div>
+                                                </th>
+                                                <th class="sort-alpha">@Resource.Category_Name</th>
+                                                <th class="sort-alpha">@Resource.Category_Desc</th>
+                                                <th class="sort-alpha">@Resource.Status</th>
+                                                <th id="thExpCatAction" class="no-sort" width="110px">@Resource.Action</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             @if (Model.ExpensesCategoryList != null)
+                                             {
+                                                var i = 0;
+                                                foreach (var row in Model.ExpensesCategoryList)
+                                                {
+                                                   <tr>
+                                                      <td>
+                                                         <div class="checkbox check-transparent">
+                                                            <input type="checkbox" value="@row.Expenses_Category_ID" name="Expenses" id="Expenses[@i]">
+                                                            <label for="Expenses[@i]"></label>
+                                                         </div>
+                                                      </td>
+                                                      <td>
+                                                         @row.Category_Name
+                                                      </td>
+                                                      <td>@row.Category_Description</td>
+                                                      <td>
+                                                         @if (row.Record_Status != null)
+                                                         {
+                                                            @StatusUtil.Get_Record_Status(row.Record_Status)
+                                                         }
+                                                      </td>
+                                                      <td class="actions text-left">
+                                                         @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                         {
+                                                            <a href="@Url.Action("ExpensesCategory", "Expenses", new { eCid = EncryptUtil.Encrypt( row.Expenses_Category_ID), operation = EncryptUtil.Encrypt( UserSession.RIGHT_U) })" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                                         }
+                                                         @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_D))
+                                                         {
+                                                            <a href="@Url.Action("ExpensesCategory", "Expenses", new { eCid = EncryptUtil.Encrypt( row.Expenses_Category_ID), operation = EncryptUtil.Encrypt( UserSession.RIGHT_D) })" onclick="return confirm('@Resource.Confirm_Delete_Msg');" title="@Resource.Delete">
+                                                               <i class="fa fa-times-circle-o fa-2x"></i>
+                                                            </a>
+                                                         }
+                                                      </td>
+                                                   </tr>
+                                                         i++;
+                                                }
+                                             }
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                     }
+                  </div>
+                  <div id="expenses-tab" class="tab-pane fade in">
+                     @using (Html.BeginForm("Configuration", "Expenses", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                     {
+                        @Html.AntiForgeryToken()
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile transparent filter" id="secfilter1">
+                                 <div class="tile-header transparent">
+                                    <h1 onclick="CollapseHeader(null, 'btncollapse1', 'secfilter1')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                                    <div class="controls">
+                                       <span class="label label-success tour-guide" onclick="Manage_Tour('ExpType');" style="cursor:pointer">@Resource.Guide</span>
+                                       <a href="#" class="minimize filter" id="btncollapse1"><i class="fa fa-search  color-white"></i></a>
+                                    </div>
+                                 </div>
+                                 <div class="tile-body">
+                                    <div class="row">
+                                       <div class="col-md-6">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="search_Expenses_Type" class="control-label">@Resource.Expenses_Type</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <div class="form-group">
+                                                   <div class="col-sm-12">
+                                                      <input type="text" class="form-control" id="search_Expenses_Type" name="search_Expenses_Type" value="@Model.search_Expenses_Type">
+                                                   </div>
+                                                </div>
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.search_Expenses_Type)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-6">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="search_Expenses_Type_Department" class="control-label">@Resource.Department</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <select class="chosen-select chosen-transparent form-control" id="search_Expenses_Type_Department" name="search_Expenses_Type_Department">
+                                                   @if (Model.departmentList != null)
+                                                   {
+                                                      foreach (var row in Model.departmentList)
+                                                      {
+                                                         if (Model.search_Expenses_Type_Department == NumUtil.ParseInteger(row.Value))
+                                                         {
+                                                            <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                         }
+                                                         else
+                                                         {
+                                                            <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                                         }
+                                                      }
+                                                   }
+                                                </select>
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.search_Expenses_Type_Department)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-4"></div>
+                                    </div>
+                                    <div class="row">
+                                       <div class="col-md-6">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <button type="submit" class="btn btn-default" name="tabAction" value="expenses">@Resource.Filter</button>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile transparent">
+                                 <div class="tile-header transparent">
+                                    <h1 id="hExpType"><strong>@Resource.Expenses_Type</strong></h1>
+                                    <div class="controls">
+                                       <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                    </div>
+                                 </div>
+                                 <div class="tile-body ">
+                                    <div class="table-responsive transparent">
+                                       <table class="table table-datatable table-custom" id="expensesTypeDataTable">
+                                          <thead>
+                                             <tr>
+                                                <th class="no-sort" style="width: 40px;">
+                                                   <div class="checkbox check-transparent">
+                                                      <input type="checkbox" value="1" id="chkallExpType">
+                                                      <label for="chkallExpType"></label>
+                                                   </div>
+                                                </th>
+                                                <th class="sort-alpha">@Resource.Expenses</th>
+                                                <th class="sort-alpha">@Resource.Expenses_Desc</th>
+                                                <th class="sort-alpha">@Resource.Claimable_Type</th>
+                                                <th class="sort-alpha">@Resource.Department</th>
+                                                <th id="thExpTypeAction" class="no-sort" width="110px">@Resource.Action</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             @if (Model.ExpensesTypeList != null)
+                                             {
+                                                var k = 0;
+                                                foreach (var row in Model.ExpensesTypeList)
+                                                {
+                                                   <tr>
+                                                      <td>
+                                                         <div class="checkbox check-transparent">
+                                                            <input type="checkbox" value="@row.Expenses_Config_ID" name="Expenses" id="Expenses[@k]">
+                                                            <label for="Expenses[@k]"></label>
+                                                         </div>
+                                                      </td>
+                                                      <td>
+                                                         @row.Expenses_Name
+                                                      </td>
+                                                      <td>@Html.DisplayFor(rowitem => row.Expenses_Description)</td>
+                                                      <td>
+                                                         @if (row.Claimable_Type != null)
+                                                         {
+                                                            if (row.Claimable_Type == ClaimableType.Per_Department)
+                                                            {
+                                                               @Resource.Per_Department
+                                                            }
+                                                            else if (row.Claimable_Type == ClaimableType.Per_Employee)
+                                                            {
+                                                               @Resource.Per_Employee
+                                                            }
+                                                            else
+                                                            {
+                                                               @row.Claimable_Type
+                                                            }
+                                                         }
+                                                      </td>
+                                                      <td>@Html.DisplayFor(rowitem => row.Department.Name)</td>
+                                                      <td class="actions text-left">
+                                                         @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                         {
+                                                            <a href="@Url.Action("ExpensesType", "Expenses", new { eid = EncryptUtil.Encrypt( row.Expenses_Config_ID), operation = EncryptUtil.Encrypt( UserSession.RIGHT_U) })" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                                         }
+                                                         @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_D))
+                                                         {
+                                                            <a href="@Url.Action("ExpensesType", "Expenses", new { eid = EncryptUtil.Encrypt( row.Expenses_Config_ID), operation = EncryptUtil.Encrypt( UserSession.RIGHT_D) })" onclick="return confirm('@Resource.Confirm_Delete_Msg');" title="@Resource.Delete">
+                                                               <i class="fa fa-times-circle-o fa-2x"></i>
+                                                            </a>
+                                                         }
+                                                      </td>
+                                                   </tr>
+                                                         k++;
+                                                }
+                                             }
+                                          </tbody>
+                                       </table>
+                                    </div>
+
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                     }
+                  </div>
+                  <div id="approval-tab" class="tab-pane fade in">
+                     @using (Html.BeginForm("Configuration", "Expenses", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                     {
+                        @Html.AntiForgeryToken()
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile transparent filter" id="secfilter2">
+                                 <div class="tile-header transparent">
+                                    <h1 onclick="CollapseHeader(null, 'btncollapse2', 'secfilter2')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                                    <div class="controls">
+                                       <span class="label label-success tour-guide" onclick="Manage_Tour('ExpApproval');" style="cursor:pointer;">@Resource.Guide</span>
+                                       <a href="#" class="minimize filter" id="btncollapse2"><i class="fa fa-search  color-white"></i></a>
+                                    </div>
+                                 </div>
+                                 <div class="tile-body">
+                                    <div class="row">
+                                       <div class="col-md-6">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="search_Approval_Department" class="control-label">@Resource.Department</label>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-6">
+                                       </div>
+                                    </div>
+                                    <div class="row">
+                                       <div class="col-md-6">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <select class="chosen-select chosen-transparent form-control" id="search_Approval_Department" name="search_Approval_Department">
+                                                   @if (Model.departmentList != null)
+                                                   {
+                                                      foreach (var row in Model.departmentList)
+                                                      {
+                                                         if (Model.search_Approval_Department == NumUtil.ParseInteger(row.Value))
+                                                         {
+                                                            <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                         }
+                                                         else
+                                                         {
+                                                            <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                                         }
+                                                      }
+                                                   }
+                                                </select>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-6">
+                                       </div>
+                                    </div>
+                                    <div class="row">
+                                       <div class="col-md-6">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <button type="submit" class="btn btn-default" name="tabAction" value="approval">@Resource.Filter</button>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-6">
+                                       </div>
+                                    </div>
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile transparent">
+                                 <div class="tile-header transparent">
+                                    <h1 id="hExpApp"><strong>@Resource.Expenses_Approval</strong></h1>
+                                    <div class="controls">
+                                       <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                    </div>
+                                    <div>
+                                       @Resource.ExpenseNote
+                                    </div>
+                                 </div>
+                                 <div class="tile-body">
+                                    <div class="table-responsive">
+                                       <table class="table table-datatable table-custom" id="approvalDataTable">
+                                          <thead>
+                                             <tr>
+                                                <th class="no-sort" style="width: 40px;">
+                                                   <div class="checkbox check-transparent">
+                                                      <input type="checkbox" value="1" id="chkallExpenseAppr">
+                                                      <label for="chkallExpenseAppr"></label>
+                                                   </div>
+                                                </th>
+                                                <th class="sort-alpha">@Resource.Department</th>
+                                                <th class="sort-alpha">@Resource.Employee</th>
+                                                <th class="sort-alpha">@Resource.Approver</th>
+                                                <th id="thExpAppAction" class="no-sort" width="110px">@Resource.Action</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             @if (Model.ApprovalList != null)
+                                             {
+                                                var j = 0;
+                                                foreach (var row in Model.ApprovalList)
+                                                {
+                                                   if (row.Departments != null && Model.search_Approval_Department.HasValue)
+                                                   {
+                                                      if (!row.Departments.Select(s => s.User_Department_ID).Contains(Model.search_Approval_Department.Value))
+                                                      {
+                                                         continue;
+                                                      }
+                                                   }
+                                                   <tr>
+                                                      <td>
+                                                         <div class="checkbox check-transparent">
+                                                            <input type="checkbox" value="@row.Approval_Flow_ID" name="ExpenseApprs" id="ExpenseApprs[@j]">
+                                                            <label for="ExpenseApprs[@j]"></label>
+                                                         </div>
+                                                      </td>
+                                                      <td>
+                                                         @if (row.Departments != null)
+                                                         {
+                                                            var dService = new DepartmentService();
+                                                            foreach (var drow in row.Departments)
+                                                            {
+                                                               @drow.Name
+                                                               <br />
+                                                            }
+                                                         }
+                                                      </td>
+                                                      <td>
+                                                         @if (row.Applicable_Employee != null)
+                                                         {
+                                                            var eService = new EmployeeService();
+                                                            foreach (var erow in row.Applicable_Employee)
+                                                            {
+                                                               if (erow.Is_Applicable.HasValue && erow.Is_Applicable.Value)
+                                                               {
+                                                                  @erow.Name
+                                                                  <br />
+                                                               }
+                                                            }
+                                                         }
+                                                      </td>
+                                                      <td>
+                                                         @if (row.Approvers != null)
+                                                         {
+                                                            var uService = new UserService();
+                                                            foreach (var arow in row.Approvers)
+                                                            {
+                                                               if (arow.Approval_Flow_Type == ApproverFlowType.Employee || string.IsNullOrEmpty(arow.Approval_Flow_Type))
+                                                               {
+                                                                  @arow.Name
+                                                               }
+                                                               else if (arow.Approval_Flow_Type == ApproverFlowType.Job_Cost)
+                                                               {
+                                                                  @Resource.Indent
+                                                               }
+                                                               <br />
+                                                            }
+                                                         }
+                                                      </td>
+                                                      <td class="actions text-left">
+                                                         @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                         {
+                                                            <a href="@Url.Action("Approval", "Approval", new {
+                                                                                            pAID = EncryptUtil.Encrypt(row.Approval_Flow_ID),
+                                                                                            operation = EncryptUtil.Encrypt(UserSession.RIGHT_U),
+                                                                                            atype = EncryptUtil.Encrypt(ApprovalType.Expense)
+                                                                                        })" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                                         }
+                                                         @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_D))
+                                                         {
+                                                            <a href="@Url.Action("Approval", "Approval", new {
+                                                                                            pAID = EncryptUtil.Encrypt(row.Approval_Flow_ID),
+                                                                                            operation = EncryptUtil.Encrypt(UserSession.RIGHT_D),
+                                                                                            atype = EncryptUtil.Encrypt(ApprovalType.Expense)
+                                                                                        })" onclick="return confirm('@Resource.Confirm_Delete_Msg');" title="@Resource.Delete">
+                                                               <i class="fa fa-times-circle-o fa-2x"></i>
+                                                            </a>
+                                                         }
+                                                      </td>
+                                                   </tr>
+                                                         j++;
+                                                }
+                                             }
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                     }
+                  </div>
+                  <!-- / Tab panes -->
+               </div>
+            </section>
+         </div>
+      </div>
+   </div>
+}

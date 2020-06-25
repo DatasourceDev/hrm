@@ -1,0 +1,360 @@
+﻿@model  HR.Models.PayrollConfigurationViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+    ViewBag.Title = @Resource.Payroll_Configuration;
+}
+
+<div class="pageheader">
+    <h2>@Resource.Payroll_Configuration<span></span></h2>
+    <div class="breadcrumbs">
+        <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home" )">@Resource.DashBoard</a></li>
+            <li class="active">@Resource.Payroll_Configuration</li>
+        </ol>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        InitDatepicker();
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+
+        var module = '@Model.tabAction';
+        if ('@string.IsNullOrEmpty(Model.tabAction)' == "True") {
+            module = "donation";
+        }
+        var liID = "li-" + module;
+        var tabID = module + "-tab";
+        $("#" + liID).addClass("active");
+        $("#" + tabID).addClass("active");
+
+        if ('@ViewData.ModelState.IsValid' == "False") {
+            if ('@Model.tabAction' == "allowance") {
+                $('#btnAddAllowance').get(0).click();
+            }
+        }
+
+        var addRowLink = '<a href="@Url.Action("DonationFormula", "Payroll", new { operation = EncryptUtil.Encrypt(UserSession.RIGHT_C) })" id="addRow01" class="btn btn-greensea  btn-sm add-row">@Resource.Add_An_Item</a>';
+        InitDatatable('donationDataTable', addRowLink, InitDatatableApplyLink({
+            name: "apply",
+            tabAction: "donation",
+            hasDel: true,
+            confirmAlert: true
+        }), 1, 'asc');
+
+        var addRow02Link = '<a href="@Url.Action("CPFFormula", "Payroll", new { operation =  EncryptUtil.Encrypt( UserSession.RIGHT_C) })" id="addRow02" class="btn btn-greensea  btn-sm add-row">@Resource.Add_An_Item</a>';
+        InitDatatable('cpfDataTable', addRow02Link, InitDatatableApplyLink({
+            name: "apply",
+            tabAction: "cpf",
+            hasDel: true,
+            confirmAlert: true
+        }), 1, 'asc');
+    })
+
+</script>
+
+
+<div class="md-overlay"></div><!-- the overlay element -->
+<div class="main">
+    <div class="row">
+        <div class="col-md-12">
+            
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+
+                if (Model.result.Code < 0)
+                {
+                    <div class="alert alert-red">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                    </div>
+                }
+                else if (Model.result.Code > 0)
+                {
+                    <div class="alert alert-success">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                    </div>
+                }
+            }
+            <!-- tile widget -->
+            <section class="tile color transparent-black">
+                <div class="tile-widget nopadding color transparent-white rounded-top-corners">
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs tabdrop">
+                        <li id="li-donation"><a href="#donation-tab" data-toggle="tab">@Resource.Donation</a></li>
+                        <li id="li-cpf"><a href="#cpf-tab" data-toggle="tab">@Resource.CPF_Formula</a></li>
+                    </ul>
+                    <!-- / Nav tabs -->
+                </div>
+                <!-- /tile widget -->
+                
+                <div class="tile-body tab-content rounded-bottom-corners">
+                    <div id="donation-tab" class="tab-pane fade in">
+                        @using (Html.BeginForm("ConfigurationMaster", "Payroll", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                        {
+                            @*@Html.HiddenFor(m => m.operation)*@
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <section class="tile color transparent filter" id="secfilter1">
+                                        <div class="tile-header transparent">
+                                            <h1 onclick="CollapseHeader(null, 'btncollapse1', 'secfilter1')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                                            <div class="controls">
+                                                <a href="#" class="minimize filter" id="btncollapse1"><i class="fa fa-search  color-white"></i></a>
+                                            </div>
+                                        </div>
+                                        <div class="tile-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <div class="col-sm-12">
+                                                            <label for="search_Race" class="control-label">@Resource.Race</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <div class="col-sm-12">
+                                                            <select class="chosen-select chosen-transparent form-control" id="search_Race" name="search_Race">
+                                                                @foreach (var row in Model.raceList)
+                                                                {
+                                                                    if ((Model.search_Race.HasValue ? Model.search_Race.Value : 0) == NumUtil.ParseInteger(row.Value))
+                                                                    {
+                                                                        <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                                                    }
+                                                                }
+                                                            </select>
+                                                            <div class="validation-error">
+                                                                @Html.ValidationMessageFor(m => m.search_Race)
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <div class="col-sm-12">
+                                                            <button type="submit" class="btn btn-default" name="tabAction" value="donation">@Resource.Filter</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <section class="tile transparent">
+                                        
+                                        <div class="tile-header transparent">
+                                            <h1><strong>@Resource.Donation_Formula</strong></h1>
+                                            <div class="controls">
+                                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                            </div>
+                                        </div>
+                                        
+                                        
+                                        <div class="tile-body">
+
+                                            <div class="table-responsive">
+                                                <table class="table table-datatable table-custom" id="donationDataTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="no-sort" style="width: 40px;">
+                                                                <div class="checkbox check-transparent">
+                                                                    <input type="checkbox" value="1" id="chkallDonation">
+                                                                    <label for="chkallDonation"></label>
+                                                                </div>
+                                                            </th>
+                                                            <th class="sort-alpha">@Resource.Formula_Name</th>
+                                                            <th class="sort-alpha">@Resource.Race</th>
+                                                            <th class="sort-alpha">@Resource.Formula_Desc</th>
+                                                            <th class="no-sort" width="110px">@Resource.Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @{var i = 0;}
+                                                        @foreach (var row in Model.DonationFormulaList)
+                                                        {
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="checkbox check-transparent">
+                                                                        <input type="checkbox" value="@row.Donation_Formula_ID" name="donations" id="donations[@i]">
+                                                                        <label for="donations[@i]"></label>
+                                                                    </div>
+                                                                </td>
+                                                                <td>@row.Formula_Name</td>
+                                                                <td>
+                                                                    @if (row.Global_Lookup_Data != null)
+                                                                    {
+                                                                        @row.Global_Lookup_Data.Name
+                                                                    }
+                                                                </td>
+                                                                <td>@row.Formula_Desc</td>
+                                                                <td class="actions text-left">
+                                                                    @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                                    {
+                                                                        <a href="@Url.Action("DonationFormula", "Payroll", new { pFID = EncryptUtil.Encrypt(row.Donation_Formula_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                                                    }
+                                                                    @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_D))
+                                                                    {
+                                                                        <a href="@Url.Action("DonationFormula", "Payroll", new { pFID = EncryptUtil.Encrypt(row.Donation_Formula_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_D) })" onclick="return confirm('@Resource.Confirm_Delete_Msg');" title="@Resource.Delete">
+                                                                            <i class="fa fa-times-circle-o fa-2x"></i>
+                                                                        </a>
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                                    i++;
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                           
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div id="cpf-tab" class="tab-pane fade in">
+                        @using (Html.BeginForm("ConfigurationMaster", "Payroll", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                        {
+                            @*@Html.HiddenFor(m => m.operation)*@
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <section class="tile color transparent filter" id="secfilter2">
+                                        <div class="tile-header transparent">
+                                            <h1 onclick="CollapseHeader(null, 'btncollapse2', 'secfilter2')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                                            <div class="controls">
+                                                <a href="#" class="minimize filter" id="btncollapse2"><i class="fa fa-search  color-white"></i></a>
+                                            </div>
+                                        </div>
+                                        <div class="tile-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <div class="col-sm-12">
+                                                            <label for="search_Cpf_Year" class="control-label">@Resource.Year</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <div class="col-sm-12">
+                                                            <input type="text" class="form-control" name="search_Cpf_Year" id="search_Cpf_Year" value="@Model.search_Cpf_Year">
+                                                            <div class="validation-error">
+                                                                @Html.ValidationMessageFor(m => m.search_Cpf_Year)
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <div class="col-sm-12">
+                                                            <button type="submit" class="btn btn-default" name="tabAction" value="cpf">@Resource.Filter</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <section class="tile transparent">
+                                        
+                                        <div class="tile-header transparent">
+                                            <h1><strong>@Resource.CPF_Formula</strong></h1>
+                                            <div class="controls">
+                                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                            </div>
+                                        </div>
+                                        
+                                        
+                                        <div class="tile-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-datatable table-custom" id="cpfDataTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="no-sort" style="width: 40px;">
+                                                                <div class="checkbox check-transparent">
+                                                                    <input type="checkbox" value="1" id="chkallCPF">
+                                                                    <label for="chkallCPF"></label>
+                                                                </div>
+                                                            </th>
+                                                            <th class="sort-alpha">@Resource.Formula_Name</th>
+                                                            <th class="sort-numeric">@Resource.Year</th>
+                                                            <th class="sort-alpha">@Resource.Formula_Desc</th>
+                                                            <th class="no-sort" width="110px">@Resource.Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @{var j = 0;}
+                                                        @foreach (var row in Model.CpfFormulaList)
+                                                        {
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="checkbox check-transparent">
+                                                                        <input type="checkbox" value="@row.CPF_Formula_ID" name="cpf_formulas" id="cpf_formulas[@j]">
+                                                                        <label for="cpf_formulas[@j]"></label>
+                                                                    </div>
+                                                                </td>
+                                                                <td>@row.Formula_Name</td>
+                                                                <td>
+                                                                    @row.Year
+                                                                </td>
+                                                                <td>@row.Formula_Desc</td>
+                                                                <td class="actions text-left">
+                                                                    @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                                    {
+                                                                        <a href="@Url.Action("CPFFormula", "Payroll", new { pFID = EncryptUtil.Encrypt(row.CPF_Formula_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                                                    }
+                                                                    @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_D))
+                                                                    {
+                                                                        <a href="@Url.Action("CPFFormula", "Payroll", new { pFID = EncryptUtil.Encrypt(row.CPF_Formula_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_D) })" onclick="return confirm('@Resource.Confirm_Delete_Msg');" title="@Resource.Delete">
+                                                                            <i class="fa fa-times-circle-o fa-2x"></i>
+                                                                        </a>
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                                    j++;
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                           
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <!-- / Tab panes -->
+                </div>
+               
+            </section>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,484 @@
+﻿@model HR.Models.PRGViewModel
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+
+@{
+    ViewBag.Title = Resource.Authorization;
+}
+
+<script type="text/javascript">
+    $(function () {
+        //check all checkboxes
+        $('table thead input[type="checkbox"]').change(function () {
+            $(this).parents('table').find('tbody input[type="checkbox"]').prop('checked', $(this).prop('checked'));
+            DepartmentALL_Onchange();
+        });
+
+
+        //initialize chosen
+        $('.dataTables_length select').chosen({ disable_search_threshold: 10 });
+
+        // Add custom class
+        $('div.dataTables_filter input').addClass('form-control');
+        $('div.dataTables_length select').addClass('form-control');
+
+        $("#btnMoveRightAll").click(function (event) {
+            var selectFrom = "#ListOfEmployees";
+            var moveTo = "#ApplicableFor";
+
+            var selectedItems = $(selectFrom + " option").toArray();
+            $(moveTo).append(selectedItems);
+            $(selectFrom + " option").remove;
+            $(moveTo + " option").remove;
+            if ($(selectFrom + " option").length > 0) {
+                $(selectFrom + " option").get(0).setAttribute("selected", '');
+            }
+        });
+
+        $("#btnMoveRight").click(function (event) {
+            var selectFrom = "#ListOfEmployees";
+            var moveTo = "#ApplicableFor";
+
+            var selectedItems = $(selectFrom + " :selected").toArray();
+            $(moveTo).append(selectedItems);
+            $(selectFrom + " :selected").remove;
+            $(moveTo + " :selected").remove;
+            if ($(selectFrom + " option").length > 0) {
+                $(selectFrom + " option").get(0).setAttribute("selected", '');
+            }
+        });
+
+        $("#btnMoveLeft").click(function (event) {
+            var selectFrom = "#ApplicableFor";
+            var moveTo = "#ListOfEmployees";
+
+            var selectedItems = $(selectFrom + " :selected").toArray();
+            $(moveTo).append(selectedItems);
+            $(selectFrom + " :selected").remove;
+            $(moveTo + " :selected").remove;
+            if ($(selectFrom + " option").length > 0) {
+                $(selectFrom + " option").get(0).setAttribute("selected", '');
+            }
+        });
+
+        $("#btnMoveLeftAll").click(function (event) {
+            var selectFrom = "#ApplicableFor";
+            var moveTo = "#ListOfEmployees";
+
+            var selectedItems = $(selectFrom + " option").toArray();
+            $(moveTo).append(selectedItems);
+            $(selectFrom + " option").remove;
+            $(moveTo + " option").remove;
+            if ($(selectFrom + " option").length > 0) {
+                $(selectFrom + " option").get(0).setAttribute("selected", '');
+            }
+        });
+
+
+        $("#btnSave").click(function (event) {
+
+            if ('@Model.PRG_ID' > 0)
+                if (!Confirm_Alert('@Model.PRG_ID')) {
+                    return;
+                }
+
+            var left = $("#ApplicableFor option");
+            var right = $("#ListOfEmployees option");
+
+            if (left != null && left.length > 0) {
+                for (var i = 0; i < left.length; i++) {
+                    $('#theForm').append('<input type="hidden" name="Application_For" value="' + left.get(i).value + '" />');
+                }
+            }
+            if (right != null && right.length > 0) {
+                for (var i = 0; i < right.length; i++) {
+                    $('#theForm').append('<input type="hidden" name="Not_Application_For" value="' + right.get(i).value + '" />');
+                }
+            }
+            theForm.action = '@Url.Action("Authorization", "Payroll")';
+            theForm.method = 'post';
+            theForm.submit();
+        });
+    })
+
+    function DepartmentALL_Onchange(index, Department_ID) {
+
+        @for (var i = 0; i < (Model.departmentList != null ? Model.departmentList.Count() : 0); i++)
+        {
+            @:Department_Onchange('@i', '@Model.departmentList[i].Value');
+                                                }
+
+
+    }
+
+    function Department_Onchange(index, Department_ID) {
+        var chk = $("#Departments-" + index);
+        if (chk != null) {
+            var checked = chk.is(':checked');
+            if (checked) {
+                var option = ""
+
+                @for(var i= 0; i< (Model.EmpList != null ? Model.EmpList.Count(): 0);i++ )
+                    {
+                        @:if (parseInt('@Model.EmpList[i].Department_ID') == Department_ID) { var dup = false; if ($("#ListOfEmployees option").length > 0) { for (var j = 0; j < $("#ListOfEmployees option").length ; j++) { if ($("#ListOfEmployees option").get(j).value == '@Model.EmpList[i].Employee_Profile_ID') { dup = true; break; } } } if ($("#ApplicableFor option").length > 0) { for (var j = 0; j < $("#ApplicableFor option").length ; j++) { if ($("#ApplicableFor option").get(j).value == '@Model.EmpList[i].Employee_Profile_ID') { dup = true; break; } } } if (!dup) { if ('@i' == '0') { option += '<option value="' + '@Model.EmpList[i].Employee_Profile_ID' + '" selected>' + '@(Model.EmpList[i].Name + " (" + Model.EmpList[i].Email + ")")' + '</option>'; } else { option += '<option value="' + '@Model.EmpList[i].Employee_Profile_ID' + '">' + '@(Model.EmpList[i].Name + " (" + Model.EmpList[i].Email + ")")' + '</option>'; } } }
+                                                                                                                                                                                                                                                                                                        }
+                $("#ListOfEmployees").append(option);
+            }
+            else {
+                var selectedItems = $("#ApplicableFor option");
+                if (selectedItems != null) {
+                    for (var j = 0; j < selectedItems.length; j++) {
+                        @for(var i= 0; i< (Model.EmpList != null ? Model.EmpList.Count(): 0);i++ )
+                          {
+                               @:if ('@Model.EmpList[i].Employee_Profile_ID' == selectedItems.get(j).value & parseInt('@Model.EmpList[i].Department_ID') == Department_ID) selectedItems.get(j).remove();
+                                                                                                                              }
+                    }
+                }
+
+                var selectedItems = $("#ListOfEmployees option");
+                if (selectedItems != null) {
+                    for (var j = 0; j < selectedItems.length; j++) {
+                        @for(var i= 0; i< (Model.EmpList != null ? Model.EmpList.Count(): 0);i++ )
+                        {
+                            @:if ('@Model.EmpList[i].Employee_Profile_ID' == selectedItems.get(j).value & parseInt('@Model.EmpList[i].Department_ID') == Department_ID) selectedItems.get(j).remove();
+                                                                                                                            }
+                    }
+                }
+            }
+        }
+    }
+
+    function AddNewPRAL() {
+        var rowcount = $('#aDataTable > tbody >tr').length;
+        var data = { pIndex: rowcount };
+        $.ajax({
+            url: '@Url.Action("AddNewPRAL", "Payroll")',
+            //Passes the content of an input up
+            data: data,
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                var str = '<tr id="arow-' + rowcount + '">';
+                str = str + data + '</tr>';
+                $('#aDataTable > tbody').append(str);
+            }
+        });
+    }
+
+
+    function DeletePRAL(rowid, index) {
+        if (confirm('@Resource.Confirm_Delete_Msg')) {
+            $('#PRAL_Rows_' + index + '__Row_Type').val('@RowType.DELETE');
+            $('#' + rowid).hide();
+        }
+
+    }
+
+    function PRAL_Onchange(index) {
+        var empID = $('#PRAL_Rows_' + index + '__Employee_Profile_ID').val();
+        @for(var i= 0; i < (Model.EmpList != null ? Model.EmpList.Count(): 0); i++ )
+        {
+            @:if ('@Model.EmpList[i].Employee_Profile_ID' == empID) $('#PRAL_Rows_' + index + '__Email').val('@Model.EmpList[i].Email');
+                           }
+
+    }
+
+
+</script>
+<!-- page header -->
+<div class="pageheader">
+    <h2> @Resource.Authorization</h2>
+    <div class="breadcrumbs">
+        <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li><a href="@Url.Action("Configuration", "Payroll")">@Resource.Configuration</a></li>
+            <li class="active">@Resource.Authorization</li>
+
+
+        </ol>
+    </div>
+
+</div>
+
+
+@using (Html.BeginForm("Authorization", "Payroll", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "theForm" }))
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="operation" value="@Model.operation" />
+    <input type="hidden" name="PRG_ID" value="@Model.PRG_ID" />
+    <div class="main">
+
+        
+        <div class="row">
+            
+            <div class="col-md-12">
+                <!-- tile  -->
+                @if (Model.result != null && Model.result.Code != 0)
+                {
+
+                    if (Model.result.Code < 0)
+                    {
+                        <div class="alert alert-red">
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        </div>
+                    }
+                    else if (Model.result.Code > 0)
+                    {
+                        <div class="alert alert-success">
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        </div>
+                    }
+                }
+                <section class="tile color transparent-black">
+                    
+                    <div class="tile-header transparent">
+                        <h1><strong>@Resource.Authorization</strong></h1>
+                        <div class="controls">
+                            <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="tile-body ">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="tile-header transparent">
+                                    <h1><strong>@Resource.Department</strong></h1>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tile-header transparent">
+                                    <h1><strong>@Resource.List_Of_Employees</strong></h1>
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tile-header transparent">
+                                    <h1><strong>@Resource.Applicable_For</strong></h1>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Departments)
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-datatable table-custom" id="empDataTable" style="height:300px;overflow-y:auto">
+                                        <thead>
+                                            <tr>
+                                                <th class="no-sort" style="width: 40px;">
+                                                    <div class="checkbox check-transparent">
+                                                        <input type="checkbox" value="1" id="chkall">
+                                                        <label for="chkall"></label>
+                                                    </div>
+                                                </th>
+                                                <th>@Resource.ALL</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (Model != null && Model.departmentList != null && Model.departmentList.Count > 0)
+                                            {
+                                                var i = 0;
+                                                foreach (var row in Model.departmentList)
+                                                {
+                                                    <tr>
+
+                                                        <td>
+                                                            <div class="checkbox check-transparent">
+                                                                @if (Model.Departments != null && Model.Departments.Contains(NumUtil.ParseInteger(row.Value)))
+                                                                {
+                                                                    <input type="checkbox" value="@row.Value" id="Departments-@i" name="Departments" onchange="Department_Onchange(@i, '@row.Value')" checked>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <input type="checkbox" value="@row.Value" id="Departments-@i" name="Departments" onchange="Department_Onchange(@i, '@row.Value')">
+                                                                }
+
+                                                                <label for="Departments-@i"></label>
+                                                            </div>
+                                                        </td>
+                                                        <td>@row.Text</td>
+                                                    </tr>
+
+                                                                i++;
+                                                }
+                                            }
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group" style="padding-left:15px;padding-right:15px;">
+                                    <select class="chosen-transparent form-control" id="ListOfEmployees" multiple="multiple" style="height:300px;overflow-y:scroll">
+                                        @foreach (var emp in Model.EmpList)
+                                        {
+                                            if (Model.Not_Application_For != null && Model.Not_Application_For.Contains(emp.Employee_Profile_ID.Value))
+                                            {
+                                                <option value="@emp.Employee_Profile_ID">@(emp.Name + " (" + emp.Email + ")")</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-1 text-center">
+                                <div class="form-group">
+                                    <button type="button" id="btnMoveLeftAll" class="btn btn-default"><i class="fa  fa-angle-double-left "></i></button>
+                                </div>
+                                <div class="form-group">
+                                    <button type="button" id="btnMoveLeft" class="btn btn-default"><i class="fa fa-angle-left"></i></button>
+                                </div>
+                                <div class="form-group">
+                                    <button type="button" id="btnMoveRight" class="btn btn-default"><i class="fa fa-angle-right"></i></button>
+                                </div>
+                                <div class="form-group">
+                                    <button type="button" id="btnMoveRightAll" class="btn btn-default"><i class="fa  fa-angle-double-right "></i></button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group" style="padding-left:15px;padding-right:15px;">
+                                    <select class="chosen-transparent form-control" id="ApplicableFor" multiple="multiple" style="height:300px;overflow-y:scroll">
+                                        @foreach (var emp in Model.EmpList)
+                                        {
+                                            if (Model.Application_For != null && Model.Application_For.Contains(emp.Employee_Profile_ID.Value))
+                                            {
+                                                <option value="@emp.Employee_Profile_ID">@(emp.Name + " (" + emp.Email + ")")</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-md-12">
+
+                                <section class="tile transparent">
+                                    <div class="tile-header transparent">
+                                        <h1><strong>@Resource.HR</strong></h1>
+                                        <div class="controls">
+                                            <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="tile-body ">
+                                        <div class="validation-error">
+                                            @Html.ValidationMessageFor(m => m.PRAL_Rows)
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12 text-center">
+                                                <a class="btn btn-greensea  btn-sm add-row" onclick="AddNewPRAL()">@Resource.Add_An_Item</a>
+                                            </div>
+
+                                        </div>
+                                        <div class="table-responsive">
+
+                                            <table class="table table-datatable table-custom" id="aDataTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="sort-alpha">@Resource.Employee_Name</th>
+                                                        <th class="sort-alpha">@Resource.Email</th>
+                                                        <th class="no-sort" width="110px">@Resource.Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @if (Model.PRAL_Rows != null)
+                                                    {
+                                                        var i = 0;
+                                                        foreach (var row in Model.PRAL_Rows)
+                                                        {
+
+                                                            <tr id="arow-@i">
+                                                                <td>
+                                                                    @if (Model.PRAL_Rows[i].Row_Type == RowType.DELETE)
+                                                                    {
+                                                                        <script type="text/javascript">
+                                                                            $(function () {
+                                                                                $('#' + 'arow-@i').hide();
+                                                                            });
+                                                                        </script>
+                                                                    }
+                                                                    @Html.Hidden("PRAL_Rows[" + i + "].I", i)
+                                                                    <input type="hidden" class="form-control" id="PRAL_Rows_@(i)__I" name="PRAL_Rows[@i].I" value="@i">
+
+                                                                    @Html.Hidden("PRAL_Rows[" + i + "].Row_Type", Model.PRAL_Rows[i].Row_Type)
+
+                                                                    @Html.Hidden("PRAL_Rows[" + i + "].PRAL_ID", Model.PRAL_Rows[i].PRAL_ID)
+
+                                                                    <select class="chosen-select chosen-transparent form-control" id="PRAL_Rows_@(i)__Employee_Profile_ID" name="PRAL_Rows[@i].Employee_Profile_ID" onchange="PRAL_Onchange(@i);">
+                                                                        @foreach (var drow in Model.EmpList)
+                                                                        {
+                                                                            if (Model.PRAL_Rows[i].Employee_Profile_ID == drow.Employee_Profile_ID)
+                                                                            {
+                                                                                <option value="@drow.Employee_Profile_ID" selected>@drow.Name</option>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <option value="@drow.Employee_Profile_ID">@drow.Name</option>
+                                                                            }
+                                                                        }
+                                                                    </select>
+                                                                    <div class="validation-error">
+                                                                        @Html.ValidationMessage("PRAL_Rows[" + i + "].Employee_Profile_ID")
+                                                                    </div>
+                                                                </td>
+
+
+                                                                <td>
+                                                                    <input type="text" class="form-control" id="PRAL_Rows_@(i)__Email" name="PRAL_Rows[@i].Email" value="@Model.PRAL_Rows[i].Email" readonly>
+                                                                    <div class="validation-error">
+                                                                        @Html.ValidationMessage("PRAL_Rows[" + i + "].Email")
+                                                                    </div>
+                                                                </td>
+                                                                <td class="actions text-left" style="cursor:pointer">
+                                                                    <a data-toggle="modal" onclick="return DeletePRAL('arow-@i', @i);">
+                                                                        <i class="fa fa-times-circle-o fa-2x"></i>
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                                        i++;
+
+
+                                                        }
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                   
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+                   
+                </section>
+                
+            </div>
+            
+        </div>
+        
+
+        <div class="row">
+            <div class="col-md-12">
+                <section class="tile color transparent-white">
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                @if (Model.departmentList.Count() > 0)
+                                {
+                                    <button id="btnSave" type="button" class="btn btn-primary">@Resource.Save</button>
+                                }
+                                <a href="@Url.Action("Configuration", "Payroll", new { tabAction = "authen" })" class="btn btn-default">@Resource.Back</a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+}
+

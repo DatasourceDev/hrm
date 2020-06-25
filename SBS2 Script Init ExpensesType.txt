@@ -1,0 +1,327 @@
+-- Medical Claim (Total $360 per year, Cap $30/claim) - Mileage No, Claim Type Per Employee, Allow over amount per year No, Allowed Probation No
+
+insert into Expenses_Config (   Department_ID   ,Company_ID  ,Expenses_Name  ,Expenses_Description  ,Claimable_Type  ,Allowed_Probation  ,Allowed_Over_Amount_Per_Year    ,Is_MileAge  ,UOM_ID  ,Amount_Per_UOM  ,Expenses_Category_ID
+) VALUES (
+  null   -- Department_ID
+  ,(select Company_ID from Company_Details where [Name] like '%Bluecube%')   -- Company_ID
+  ,'Medical Claim'  -- Expenses_Name
+  ,''  -- Expenses_Description
+  ,'Per Employeee'  -- Claimable_Type
+  ,0  -- Allowed_Probation
+  ,0  -- Allowed_Over_Amount_Per_Year
+  ,0  -- Is_MileAge
+  ,null   -- UOM_ID
+  ,null   -- Amount_Per_UOM
+  ,null   -- Expenses_Category_ID
+)
+
+insert into Expenses_Config_Detail (Expenses_Config_ID,Designation_ID,Amount_Per_Year,Select_Pecentage,Select_Amount
+  ,Amount,Pecentage,Year_Service,Group_ID  ,Amount_Per_Month,Select_Per_Month
+) VALUES (
+  (select Expenses_Config_ID from Expenses_Config where Expenses_Name = 'Medical Claim')   -- Expenses_Config_ID
+  ,null   -- Designation_ID
+  ,360   -- Amount_Per_Year
+  ,0  -- Select_Pecentage
+  ,1  -- Select_Amount
+  ,30   -- Amount
+  ,0   -- Pecentage
+  ,0   -- Year_Service
+  ,1   -- Group_ID
+  ,0   -- Amount_Per_Month
+  ,0  -- Select_Per_Month
+)
+
+-- Entertainment Claim (Total $1,200 per year, No Cap) - Mileage No, Claim Type Per Employee, Allow over amount per year No, Allowed Probation No
+insert into Expenses_Config (   Department_ID   ,Company_ID  ,Expenses_Name  ,Expenses_Description  ,Claimable_Type  ,Allowed_Probation  ,Allowed_Over_Amount_Per_Year    ,Is_MileAge  ,UOM_ID  ,Amount_Per_UOM  ,Expenses_Category_ID
+) VALUES (
+  null   -- Department_ID
+  ,(select Company_ID from Company_Details where [Name] like '%Bluecube%')   -- Company_ID
+  ,'Entertainment Claim'  -- Expenses_Name
+  ,''  -- Expenses_Description
+  ,'Per Employeee'  -- Claimable_Type
+  ,0  -- Allowed_Probation
+  ,0  -- Allowed_Over_Amount_Per_Year
+  ,0  -- Is_MileAge
+  ,null   -- UOM_ID
+  ,null   -- Amount_Per_UOM
+  ,null   -- Expenses_Category_ID
+)
+
+insert into Expenses_Config_Detail (Expenses_Config_ID,Designation_ID,Amount_Per_Year,Select_Pecentage,Select_Amount
+  ,Amount,Pecentage,Year_Service,Group_ID  ,Amount_Per_Month,Select_Per_Month
+) VALUES (
+  (select Expenses_Config_ID from Expenses_Config where Expenses_Name = 'Entertainment Claim')   -- Expenses_Config_ID
+  ,null   -- Designation_ID
+  ,1200   -- Amount_Per_Year
+  ,0  -- Select_Pecentage
+  ,1  -- Select_Amount
+  ,1200   -- Amount
+  ,0   -- Pecentage
+  ,0   -- Year_Service
+  ,1   -- Group_ID
+  ,0   -- Amount_Per_Month
+  ,0  -- Select_Per_Month
+)
+
+-- Transportation Claim (Total $100 per month, No Cap) - Mileage Yes, Claim Type Per Employee, Allow over amount per year No, Allowed Probation No  
+insert into Expenses_Config (   Department_ID   ,Company_ID  ,Expenses_Name  ,Expenses_Description  ,Claimable_Type  ,Allowed_Probation  ,Allowed_Over_Amount_Per_Year    ,Is_MileAge  ,UOM_ID  ,Amount_Per_UOM  ,Expenses_Category_ID
+) VALUES (
+  null   -- Department_ID
+  ,(select Company_ID from Company_Details where [Name] like '%Bluecube%')   -- Company_ID
+  ,'Transportation Claim'  -- Expenses_Name
+  ,''  -- Expenses_Description
+  ,'Per Employeee'  -- Claimable_Type
+  ,0  -- Allowed_Probation
+  ,0  -- Allowed_Over_Amount_Per_Year
+  ,1  -- Is_MileAge
+  ,(select Lookup_Data_ID from Global_Lookup_Data where Description like '%Mile%')   -- UOM_ID
+  ,5   -- Amount_Per_UOM
+  ,null   -- Expenses_Category_ID
+)
+
+insert into Expenses_Config_Detail (Expenses_Config_ID,Designation_ID,Amount_Per_Year,Select_Pecentage,Select_Amount
+  ,Amount,Pecentage,Year_Service,Group_ID  ,Amount_Per_Month,Select_Per_Month
+) VALUES (
+  (select Expenses_Config_ID from Expenses_Config where Expenses_Name = 'Transportation Claim')   -- Expenses_Config_ID
+  ,null   -- Designation_ID
+  ,0   -- Amount_Per_Year
+  ,0  -- Select_Pecentage
+  ,1  -- Select_Amount
+  ,100   -- Amount
+  ,0   -- Pecentage
+  ,0   -- Year_Service
+  ,1   -- Group_ID
+  ,100   -- Amount_Per_Month
+  ,1  -- Select_Per_Month
+)
+
+-- Staff Training (Total $0, No Cap) - Mileage No, Claim Type Per Employee, Allow over amount per year No, Allowed Probation Yes
+insert into Expenses_Config (   Department_ID   ,Company_ID  ,Expenses_Name  ,Expenses_Description  ,Claimable_Type  ,Allowed_Probation  ,Allowed_Over_Amount_Per_Year    ,Is_MileAge  ,UOM_ID  ,Amount_Per_UOM  ,Expenses_Category_ID
+) VALUES (
+  null   -- Department_ID
+  ,(select Company_ID from Company_Details where [Name] like '%Bluecube%')   -- Company_ID
+  ,'Staff Training'  -- Expenses_Name
+  ,''  -- Expenses_Description
+  ,'Per Employeee'  -- Claimable_Type
+  ,1  -- Allowed_Probation
+  ,0  -- Allowed_Over_Amount_Per_Year
+  ,0  -- Is_MileAge
+  ,null   -- UOM_ID
+  ,null   -- Amount_Per_UOM
+  ,null   -- Expenses_Category_ID
+)
+
+insert into Expenses_Config_Detail (Expenses_Config_ID,Designation_ID,Amount_Per_Year,Select_Pecentage,Select_Amount
+  ,Amount,Pecentage,Year_Service,Group_ID  ,Amount_Per_Month,Select_Per_Month
+) VALUES (
+  (select Expenses_Config_ID from Expenses_Config where Expenses_Name = 'Staff Training')   -- Expenses_Config_ID
+  ,null   -- Designation_ID
+  ,0   -- Amount_Per_Year
+  ,0  -- Select_Pecentage
+  ,1  -- Select_Amount
+  ,0   -- Amount
+  ,0   -- Pecentage
+  ,0   -- Year_Service
+  ,1   -- Group_ID
+  ,0   -- Amount_Per_Month
+  ,0  -- Select_Per_Month
+)
+
+-- Mobile Communication (Total $100 per month, Cap $100/claim) - Mileage No, Claim Type Per Employee, Allow over amount per year No, Allowed Probation No
+insert into Expenses_Config (   Department_ID   ,Company_ID  ,Expenses_Name  ,Expenses_Description  ,Claimable_Type  ,Allowed_Probation  ,Allowed_Over_Amount_Per_Year    ,Is_MileAge  ,UOM_ID  ,Amount_Per_UOM  ,Expenses_Category_ID
+) VALUES (
+  null   -- Department_ID
+  ,(select Company_ID from Company_Details where [Name] like '%Bluecube%')   -- Company_ID
+  ,'Mobile Communication'  -- Expenses_Name
+  ,''  -- Expenses_Description
+  ,'Per Employeee'  -- Claimable_Type
+  ,0  -- Allowed_Probation
+  ,0  -- Allowed_Over_Amount_Per_Year
+  ,0  -- Is_MileAge
+  ,null   -- UOM_ID
+  ,null   -- Amount_Per_UOM
+  ,null   -- Expenses_Category_ID
+)
+
+insert into Expenses_Config_Detail (Expenses_Config_ID,Designation_ID,Amount_Per_Year,Select_Pecentage,Select_Amount
+  ,Amount,Pecentage,Year_Service,Group_ID  ,Amount_Per_Month,Select_Per_Month
+) VALUES (
+  (select Expenses_Config_ID from Expenses_Config where Expenses_Name = 'Mobile Communication')   -- Expenses_Config_ID
+  ,null   -- Designation_ID
+  ,0   -- Amount_Per_Year
+  ,0  -- Select_Pecentage
+  ,1  -- Select_Amount
+  ,100   -- Amount
+  ,0   -- Pecentage
+  ,0   -- Year_Service
+  ,1   -- Group_ID
+  ,100   -- Amount_Per_Month
+  ,1  -- Select_Per_Month
+)
+
+-- Stationery (Total $50 per month, No Cap) - Mileage No, Claim Type Per Employee, Allow over amount per year No, Allowed Probation Yes
+insert into Expenses_Config (   Department_ID   ,Company_ID  ,Expenses_Name  ,Expenses_Description  ,Claimable_Type  ,Allowed_Probation  ,Allowed_Over_Amount_Per_Year    ,Is_MileAge  ,UOM_ID  ,Amount_Per_UOM  ,Expenses_Category_ID
+) VALUES (
+  null   -- Department_ID
+  ,(select Company_ID from Company_Details where [Name] like '%Bluecube%')   -- Company_ID
+  ,'Stationery'  -- Expenses_Name
+  ,''  -- Expenses_Description
+  ,'Per Employeee'  -- Claimable_Type
+  ,1  -- Allowed_Probation
+  ,0  -- Allowed_Over_Amount_Per_Year
+  ,0  -- Is_MileAge
+  ,null   -- UOM_ID
+  ,null   -- Amount_Per_UOM
+  ,null   -- Expenses_Category_ID
+)
+
+insert into Expenses_Config_Detail (Expenses_Config_ID,Designation_ID,Amount_Per_Year,Select_Pecentage,Select_Amount
+  ,Amount,Pecentage,Year_Service,Group_ID  ,Amount_Per_Month,Select_Per_Month
+) VALUES (
+  (select Expenses_Config_ID from Expenses_Config where Expenses_Name = 'Stationery')   -- Expenses_Config_ID
+  ,null   -- Designation_ID
+  ,0   -- Amount_Per_Year
+  ,0  -- Select_Pecentage
+  ,1  -- Select_Amount
+  ,50   -- Amount
+  ,0   -- Pecentage
+  ,0   -- Year_Service
+  ,1   -- Group_ID
+  ,50   -- Amount_Per_Month
+  ,1  -- Select_Per_Month
+)
+
+-- Overseas Travel (Total $0, No Cap) - Mileage No, Claim Type Per Employee, Allow over amount per year No, Allowed Probation Yes
+
+insert into Expenses_Config (   Department_ID   ,Company_ID  ,Expenses_Name  ,Expenses_Description  ,Claimable_Type  ,Allowed_Probation  ,Allowed_Over_Amount_Per_Year    ,Is_MileAge  ,UOM_ID  ,Amount_Per_UOM  ,Expenses_Category_ID
+) VALUES (
+  null   -- Department_ID
+  ,(select Company_ID from Company_Details where [Name] like '%Bluecube%')   -- Company_ID
+  ,'Overseas Travel'  -- Expenses_Name
+  ,''  -- Expenses_Description
+  ,'Per Employeee'  -- Claimable_Type
+  ,1  -- Allowed_Probation
+  ,0  -- Allowed_Over_Amount_Per_Year
+  ,0  -- Is_MileAge
+  ,null   -- UOM_ID
+  ,null   -- Amount_Per_UOM
+  ,null   -- Expenses_Category_ID
+)
+
+insert into Expenses_Config_Detail (Expenses_Config_ID,Designation_ID,Amount_Per_Year,Select_Pecentage,Select_Amount
+  ,Amount,Pecentage,Year_Service,Group_ID  ,Amount_Per_Month,Select_Per_Month
+) VALUES (
+  (select Expenses_Config_ID from Expenses_Config where Expenses_Name = 'Overseas Travel')   -- Expenses_Config_ID
+  ,null   -- Designation_ID
+  ,0   -- Amount_Per_Year
+  ,0  -- Select_Pecentage
+  ,1  -- Select_Amount
+  ,0   -- Amount
+  ,0   -- Pecentage
+  ,0   -- Year_Service
+  ,1   -- Group_ID
+  ,0   -- Amount_Per_Month
+  ,0  -- Select_Per_Month
+)
+
+-- Hardware & Software (Total $0, No Cap) - Mileage No, Claim Type Per Employee, Allow over amount per year No, Allowed Probation Yes
+
+insert into Expenses_Config (   Department_ID   ,Company_ID  ,Expenses_Name  ,Expenses_Description  ,Claimable_Type  ,Allowed_Probation  ,Allowed_Over_Amount_Per_Year    ,Is_MileAge  ,UOM_ID  ,Amount_Per_UOM  ,Expenses_Category_ID
+) VALUES (
+  null   -- Department_ID
+  ,(select Company_ID from Company_Details where [Name] like '%Bluecube%')   -- Company_ID
+  ,'Hardware & Software'  -- Expenses_Name
+  ,''  -- Expenses_Description
+  ,'Per Employeee'  -- Claimable_Type
+  ,1  -- Allowed_Probation
+  ,0  -- Allowed_Over_Amount_Per_Year
+  ,0  -- Is_MileAge
+  ,null   -- UOM_ID
+  ,null   -- Amount_Per_UOM
+  ,null   -- Expenses_Category_ID
+)
+
+insert into Expenses_Config_Detail (Expenses_Config_ID,Designation_ID,Amount_Per_Year,Select_Pecentage,Select_Amount
+  ,Amount,Pecentage,Year_Service,Group_ID  ,Amount_Per_Month,Select_Per_Month
+) VALUES (
+  (select Expenses_Config_ID from Expenses_Config where Expenses_Name = 'Hardware & Software')   -- Expenses_Config_ID
+  ,null   -- Designation_ID
+  ,0   -- Amount_Per_Year
+  ,0  -- Select_Pecentage
+  ,1  -- Select_Amount
+  ,0   -- Amount
+  ,0   -- Pecentage
+  ,0   -- Year_Service
+  ,1   -- Group_ID
+  ,0   -- Amount_Per_Month
+  ,0  -- Select_Per_Month
+)
+
+
+-- Meal Claim (Total $0, No Cap) - Mileage No, Claim Type Per Employee, Allow over amount per year No, Allowed Probation Yes
+
+insert into Expenses_Config (   Department_ID   ,Company_ID  ,Expenses_Name  ,Expenses_Description  ,Claimable_Type  ,Allowed_Probation  ,Allowed_Over_Amount_Per_Year    ,Is_MileAge  ,UOM_ID  ,Amount_Per_UOM  ,Expenses_Category_ID
+) VALUES (
+  null   -- Department_ID
+  ,(select Company_ID from Company_Details where [Name] like '%Bluecube%')   -- Company_ID
+  ,'Meal Claim'  -- Expenses_Name
+  ,''  -- Expenses_Description
+  ,'Per Employeee'  -- Claimable_Type
+  ,1  -- Allowed_Probation
+  ,0  -- Allowed_Over_Amount_Per_Year
+  ,0  -- Is_MileAge
+  ,null   -- UOM_ID
+  ,null   -- Amount_Per_UOM
+  ,null   -- Expenses_Category_ID
+)
+
+insert into Expenses_Config_Detail (Expenses_Config_ID,Designation_ID,Amount_Per_Year,Select_Pecentage,Select_Amount
+  ,Amount,Pecentage,Year_Service,Group_ID  ,Amount_Per_Month,Select_Per_Month
+) VALUES (
+  (select Expenses_Config_ID from Expenses_Config where Expenses_Name = 'Meal Claim')   -- Expenses_Config_ID
+  ,null   -- Designation_ID
+  ,0   -- Amount_Per_Year
+  ,0  -- Select_Pecentage
+  ,1  -- Select_Amount
+  ,0   -- Amount
+  ,0   -- Pecentage
+  ,0   -- Year_Service
+  ,1   -- Group_ID
+  ,0   -- Amount_Per_Month
+  ,0  -- Select_Per_Month
+)
+
+
+-- Taxi Claim (Total $100 per month, No Cap) - Mileage No, Claim Type Per Employee, Allow over amount per year No, Allowed Probation No
+
+insert into Expenses_Config (   Department_ID   ,Company_ID  ,Expenses_Name  ,Expenses_Description  ,Claimable_Type  ,Allowed_Probation  ,Allowed_Over_Amount_Per_Year    ,Is_MileAge  ,UOM_ID  ,Amount_Per_UOM  ,Expenses_Category_ID
+) VALUES (
+  null   -- Department_ID
+  ,(select Company_ID from Company_Details where [Name] like '%Bluecube%')   -- Company_ID
+  ,'Taxi Claim'  -- Expenses_Name
+  ,''  -- Expenses_Description
+  ,'Per Employeee'  -- Claimable_Type
+  ,0  -- Allowed_Probation
+  ,0  -- Allowed_Over_Amount_Per_Year
+  ,0  -- Is_MileAge
+  ,null   -- UOM_ID
+  ,null   -- Amount_Per_UOM
+  ,null   -- Expenses_Category_ID
+)
+
+insert into Expenses_Config_Detail (Expenses_Config_ID,Designation_ID,Amount_Per_Year,Select_Pecentage,Select_Amount
+  ,Amount,Pecentage,Year_Service,Group_ID  ,Amount_Per_Month,Select_Per_Month
+) VALUES (
+  (select Expenses_Config_ID from Expenses_Config where Expenses_Name = 'Taxi Claim')   -- Expenses_Config_ID
+  ,null   -- Designation_ID
+  ,0   -- Amount_Per_Year
+  ,0  -- Select_Pecentage
+  ,1  -- Select_Amount
+  ,100   -- Amount
+  ,0   -- Pecentage
+  ,0   -- Year_Service
+  ,1   -- Group_ID
+  ,100   -- Amount_Per_Month
+  ,1  -- Select_Per_Month
+)
+

@@ -1,0 +1,262 @@
+﻿@model  HR.Models.LeaveDashBoardViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Models;
+@using SBSWorkFlowAPI.ModelsAndService;
+@using SBSResourceAPI;
+@using SBSWorkFlowAPI.Constants;
+@{
+   ViewBag.Title = @Resource.DashBoard;
+}
+@{
+   var userlogin = UserSession.getUser(Request.RequestContext.HttpContext);
+   var requests = new List<Request>();
+   var requestIDs = new List<int>();
+   var hist = new EmploymentHistoryService().GetCurrentEmploymentHistoryByProfile(userlogin.Profile_ID);
+   if (hist != null)
+   {
+      var aService = new SBSWorkFlowAPI.Service();
+      var r = aService.GetMyRequests(userlogin.Company_ID.Value, hist.Department_ID.Value, userlogin.Profile_ID, ModuleCode.HR, ApprovalType.Leave);
+      if (r.Item2.IsSuccess && r.Item1 != null)
+      {
+         requests = r.Item1.ToList();
+         requestIDs = r.Item1.Select(s => s.Request_ID).ToList();
+      }
+   }
+}
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+        <!-- page header -->
+   <div class="pageheader">
+      <h2> @Resource.DashBoard <span></span></h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li class="active">@Resource.DashBoard</li>
+         </ol>
+      </div>
+   </div>
+   <div class="main">
+      <div class="row">
+         <!-- col 6 -->
+         <div class="col-md-4">
+            <section class="tile color transparent-black">
+               <div class="tile-header transparent">
+                  <h1><strong>@Resource.Leave_Balances</strong></h1>
+                  <div class="controls">
+                     <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body ">
+                  <div class="row" style="max-height: 450px; min-height: 450px; overflow-y: auto">
+                     <table class="table">
+                        <thead>
+                           <tr>
+                              <th style="padding-left: 15px;">@Resource.Leave_Type</th>
+                              <th style="padding-right: 15px;" class="text-right"></th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           @foreach (var row in Model.LeaveBalanceList)
+                           {
+                              var lconfig = row.Leave_Config;
+                              var lleft = row.Leave_Left;
+                              if (lconfig == null)
+                              {
+                                 continue;
+                              }
+
+                              string str = "";
+                              var entitleAll = 0M; var left = 0M; var weeksleft = 0M;
+                              if (lleft != null)
+                              {
+                                 entitleAll = lleft.EntitleAll;
+                                 left = lleft.Left;
+                                 weeksleft = lleft.Weeks_Left;
+                              }
+
+                              if (lconfig.Type == LeaveConfigType.Normal)
+                              {
+                                 str = NumUtil.FormatCurrency(left) + " " + Resource.Out_Of_Tolower + " " + NumUtil.FormatCurrency(entitleAll) + " " + Resource.Days;
+                              }
+                              else
+                              {
+                                 str = NumUtil.FormatCurrency(weeksleft) + " " + Resource.Out_Of_Tolower + " " + NumUtil.FormatCurrency(entitleAll) + " " + Resource.Weeks;
+                              }
+                              <tr>
+                                 <td style="padding-left:15px;">@lconfig.Leave_Name</td>
+                                 <td style="padding-right:15px;" class="text-right">@str</td>
+                              </tr>
+                           }
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+            </section>
+         </div>
+         <div class="col-md-4">
+            <section class="tile color transparent-black">
+               <div class="tile-header transparent">
+                  <h1><strong>@Resource.Pending_Applications</strong></h1>
+                  <div class="controls">
+                     <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body ">
+                  <div class="row" style="max-height: 400px; min-height: 400px; overflow-y: auto">
+                     <table class="table">
+                        <tbody>
+                           @foreach (var row in Model.LeaveList)
+                           {
+                              var status = "";
+
+                              if (string.IsNullOrEmpty(row.Cancel_Status))
+                              {
+                                 status = StatusUtil.Get_Overall_Status(row.Overall_Status);
+                                 if (row.Overall_Status != WorkflowStatus.Pending)
+                                 {
+                                    continue;
+                                 }
+                              }
+                              else
+                              {
+                                 status = StatusUtil.Get_Overall_Status(row.Cancel_Status);
+                                 if (row.Overall_Status != WorkflowStatus.Canceling)
+                                 {
+                                    continue;
+                                 }
+                              }
+
+                              if (true)
+                              {
+                                 var date = DateUtil.ToDisplayDate(row.Start_Date);
+                                 if (!string.IsNullOrEmpty(row.Start_Date_Period))
+                                 {
+                                    date = date + " " + row.Start_Date_Period;
+                                 }
+                                 if (row.End_Date.HasValue)
+                                 {
+                                    date = date + " - " + DateUtil.ToDisplayDate(row.End_Date);
+                                 }
+                                 if (!string.IsNullOrEmpty(row.End_Date_Period))
+                                 {
+                                    date = date + " " + row.End_Date_Period;
+                                 }
+                                 <tr>
+                                    <td style="padding-left:15px">
+                                       <div class="row">
+                                          <div class="col-sm-12" style="padding-left:0px;padding-right:0px;">
+                                             <div class="form-group">
+                                                <div class="col-sm-12"><i class="fa fa-clock-o"> @date</i></div>
+                                             </div>
+                                             <div class="form-group">
+                                                <div class="col-sm-12"><span class="color-red">@NumUtil.FormatCurrency(row.Days_Taken) @Resource.Days</span> @row.Leave_Config.Leave_Name @Resource.Is @status.</div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </td>
+                                    <td class="actions text-right" style="padding-right:15px">
+                                       <a style="padding-right:px;margin-right:0px;" href="@Url.Action("Application", "Leave", new { pDocID = EncryptUtil.Encrypt(row.Leave_Application_Document_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })"><i class="fa fa-file-o fa-2x"></i></a>
+                                    </td>
+                                 </tr>
+                              }
+                           }
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="row" style="margin-top:15px;">
+                     <div class="col-sm-12">
+                        <a class="btn btn-default" href="@Url.Action("Record", "Leave")">@Resource.View_All_Applications</a>
+                     </div>
+                  </div>
+               </div>
+            </section>
+         </div>
+         <div class="col-md-4">
+            <section class="tile color transparent-black">
+               <div class="tile-header transparent">
+                  <h1><strong>@Resource.Rejected / @Resource.Approved / @Resource.Cancelled</strong></h1>
+                  <div class="controls">
+                     <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body ">
+                  <div class="row" style="max-height: 400px; min-height: 400px; overflow-y: auto; ">
+                     <table class="table">
+                        <tbody>
+                           @foreach (var row in Model.LeaveList)
+                           {
+                              var status = "";
+                              if (string.IsNullOrEmpty(row.Cancel_Status))
+                              {
+                                 status = StatusUtil.Get_Overall_Status(row.Overall_Status);
+                                 if (row.Overall_Status == WorkflowStatus.Closed || row.Overall_Status == WorkflowStatus.Rejected)
+                                 {
+
+                                 }
+                                 else
+                                 {
+                                    continue;
+                                 }
+                              }
+                              else
+                              {
+                                 status = StatusUtil.Get_Overall_Status(row.Cancel_Status);
+                                 if (row.Cancel_Status == WorkflowStatus.Cancelled || row.Cancel_Status == WorkflowStatus.Cancellation_Rejected)
+                                 {
+
+                                 }
+                                 else
+                                 {
+                                    continue;
+                                 }
+                              }
+                           
+                              if (true)
+                              {
+                                 var date = DateUtil.ToDisplayDate(row.Start_Date);
+                                 if (!string.IsNullOrEmpty(row.Start_Date_Period))
+                                 {
+                                    date = date + " " + row.Start_Date_Period;
+                                 }
+                                 if (row.End_Date.HasValue)
+                                 {
+                                    date = date + " - " + DateUtil.ToDisplayDate(row.End_Date);
+                                 }
+                                 if (!string.IsNullOrEmpty(row.End_Date_Period))
+                                 {
+                                    date = date + " " + row.End_Date_Period;
+                                 }
+                                 <tr>
+                                    <td style="padding-left:15px">
+                                       <div class="row">
+                                          <div class="col-sm-12" style="padding-left:0px;padding-right:0px;">
+                                             <div class="form-group">
+                                                <div class="col-sm-12"><i class="fa fa-clock-o"> @date</i></div>
+                                             </div>
+                                             <div class="form-group">
+                                                <div class="col-sm-12"><span class="color-red">@NumUtil.FormatCurrency(row.Days_Taken) @Resource.Days</span> @row.Leave_Config.Leave_Name @Resource.Is @status</div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </td>
+                                    <td class="actions text-right" style="padding-right:15px">
+                                       <a style="padding-right:15px;margin-right:0px;" href="@Url.Action("Application", "Leave", new { pDocID = EncryptUtil.Encrypt(row.Leave_Application_Document_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })"><i class="fa fa-file-o fa-2x"></i></a>
+                                    </td>
+                                 </tr>
+                              }
+                           }
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="row" style="margin-top:15px;">
+                     <div class="col-sm-12">
+                        <a class="btn btn-default" href="@Url.Action("Record", "Leave")">@Resource.View_All_Applications</a>
+                     </div>
+                  </div>
+               </div>
+            </section>
+         </div>
+      </div>
+   </div>
+}

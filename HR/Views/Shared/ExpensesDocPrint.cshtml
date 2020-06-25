@@ -1,0 +1,450 @@
+﻿@model HR.Models.ExpensesDocPrintViewModel
+@using HR.Models
+@using SBSModel.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@using System.Text;
+@using SBSWorkFlowAPI.Constants;
+@{
+   ViewBag.Title = @Resource.Employee_Expenses_Claim;
+   Layout = null;
+   decimal totalAmount = 0.0M;
+   var uitem = UserUtil.GetUserItem(Request.RequestContext.HttpContext);
+}
+
+<meta http-equiv="Content-Language" content="th">
+<meta http-equiv="content-Type" content="text/html; charset=window-874">
+<meta http-equiv="content-Type" content="text/html; charset=tis-620">
+@{
+   var status = "-";
+   if (!string.IsNullOrEmpty(Model.Cancel_Status) && Model.Cancel_Status == WorkflowStatus.Cancelled)
+   {
+      if (Model.Overall_Status == WorkflowStatus.Closed && Model.Cancel_Status == WorkflowStatus.Cancelled)
+      {
+         status = "<span style='color:green'>" + Resource.Cancellation_Approved + "</span>";
+      }
+   }
+   else
+   {
+      if (Model.Overall_Status == WorkflowStatus.Closed)
+      {
+         status = "<span style='color:green'>" + Resource.Approved + "</span>";
+      }
+      else if (Model.Overall_Status == WorkflowStatus.Rejected)
+      {
+         //status = "<span style='color:red'>" + Resource.Rejected + "</span>";
+      }
+   }
+}
+<div class="main-content">
+   <div id="divReport" >
+      <table border="0">
+         <tr style="text-align:right;">
+            <td>
+               <span style="font-weight:700;">@Model.Company_Name </span>
+               <br />
+               @Model.Address_Row_1 <br />
+               @Model.Address_Row_2 <br />
+               @Model.Address_Row_3 <br />
+            </td>
+         </tr>
+      </table>
+      <table style="width: 100%;" border="1" cellpadding="2" cellspacing="2" useascender="true">
+         <tr>
+            <td style="font-weight:700;" width="100%" colspan="7">
+               <h2>
+                  <span style="text-align: center">@Resource.Employee_Expenses_Claim</span>
+                  @if (!string.IsNullOrEmpty(Model.Cancel_Status) && Model.Cancel_Status == WorkflowStatus.Cancelled)
+                  {
+                     <span style="color:red">
+                        (@Resource.Cancelled)
+                     </span>
+                  }
+                  else if (Model.Overall_Status == WorkflowStatus.Closed && string.IsNullOrEmpty(Model.Cancel_Status))
+                  {
+                     <span style="color:green">
+                        (@Resource.Closed)
+                     </span>
+                  }
+                  else if (Model.Overall_Status == WorkflowStatus.Closed && Model.Cancel_Status != WorkflowStatus.Cancelled)
+                  {
+                     <span style="color:green">
+                        (@Resource.Closed)
+                     </span>
+                  }
+                  else if (Model.Overall_Status == WorkflowStatus.Rejected)
+                  {
+                     @*<span style="color:red">
+                        (@Resource.Rejected)
+                     </span>*@
+                  }
+               </h2>
+            </td>
+         </tr>
+         <tr bgcolor="#C0C0C0">
+            <td colspan="2" width="30%" style="text-align:center;width:5px">@Resource.Employee_No_SymbolDot</td>
+            <td colspan="2" style="text-align:center">@Resource.Dept_Or_Div</td>
+            <td colspan="2" style="text-align:center">@Resource.Name</td>
+            <td style="text-align:center">@Resource.Date</td>
+         </tr>
+         <tr>
+            <td colspan="2" style="text-align:center">@Model.Employee_No</td>
+            <td colspan="2" style="text-align:center">@Model.Department_Name</td>
+            <td colspan="2" style="text-align:center">@Model.Employee_Name</td>
+            <td style="text-align:center">@Model.Date</td>
+         </tr>
+         <tr>
+            <td colspan="2">@Resource.Expenses </td>
+            <td colspan="6"><span style="font-weight:700;"> @Resource.Expenses_Title </span> : @Model.Expenses_Title </td>
+         </tr>
+         <tr bgcolor="#C0C0C0">
+            <td colspan="2" style="text-align:center">@Resource.Item_Description</td>
+            <td style="text-align:center">@Resource.Amount <br /> (excl.VAT)</td>
+            <td style="text-align:center">@Resource.Tax <br /></td>
+            <td style="text-align:center">@Resource.W_Or_H_Tax <br /></td>
+            <td style="text-align:center">@Resource.Amount <br />(incl.VAT)</td>
+            @if (uitem.Is_Indent)
+            {
+               <td style="text-align:center">@Resource.Job_Cost</td>
+            }
+            else
+            {
+               <td></td>
+            }
+         </tr>
+         @if (Model.ExpensesDetailList != null)
+         {
+            var i = 1;
+
+            int fixrow = 0;
+            int currentJobCostID = 0;
+            int rowhigh = 1;
+            bool show = true;
+
+
+
+            foreach (var row in Model.ExpensesDetailList)
+            {
+               decimal amtExVat = (row.Amount_Claiming.HasValue ? row.Amount_Claiming.Value : 0);
+               decimal amtInVat = (row.Amount_Claiming.HasValue ? row.Amount_Claiming.Value : 0);
+
+               decimal taxAmount = (row.Tax_Amount.HasValue ? row.Tax_Amount.Value : 0);
+               decimal withholdingTaxAmount = (row.Withholding_Tax_Amount.HasValue ? row.Withholding_Tax_Amount.Value : 0);
+
+               amtExVat = (amtExVat + withholdingTaxAmount) - taxAmount;
+
+               if (currentJobCostID != (row.Job_Cost_ID.HasValue ? row.Job_Cost_ID.Value : 0))
+               {
+
+                  fixrow = Model.ExpensesDetailList.Where(w => w.Job_Cost_ID == row.Job_Cost_ID).Count();
+                  if (fixrow > 0)
+                  {
+                     rowhigh = fixrow;
+                     currentJobCostID = (row.Job_Cost_ID.HasValue ? row.Job_Cost_ID.Value : 0);
+                     show = true;
+                  }
+                  else
+                  {
+                     fixrow = 0;
+                     rowhigh = 1;
+                     show = true;
+                  }
+               }
+
+               if (!row.Job_Cost_ID.HasValue)
+               {
+                  show = true;
+               }
+               <tr valign="top">
+                  <td colspan="2">
+                     @i) @row.Expenses_Config.Expenses_Name
+                     @if (!string.IsNullOrEmpty(row.Reasons))
+                     {
+                        @: -
+                        @:&ensp;
+                        @row.Reasons
+                     }
+                  </td>
+                  <td style="text-align:right">@NumUtil.FormatCurrency(amtExVat, 2)</td>
+                  <td style="text-align:right">@NumUtil.FormatCurrency(taxAmount, 2)</td>
+                  <td style="text-align:right">@NumUtil.FormatCurrency(withholdingTaxAmount, 2)</td>
+                  <td style="text-align:right">@NumUtil.FormatCurrency(amtInVat, 2)</td>
+                  @if (show)
+                  {
+                     <td rowspan="@rowhigh" style="text-align:center">
+                        @if (uitem.Is_Indent)
+                        {
+                           if (Model.JobCostlst != null && row.Job_Cost_ID.HasValue)
+                           {
+                              var jobCost = Model.JobCostlst.Where(w => w.Value == row.Job_Cost_ID.ToString()).FirstOrDefault();
+                              if (jobCost != null)
+                              {
+                                 @jobCost.Text
+                              }
+                              else
+                              {
+                                 @Resource.Other
+                              }
+                           }
+                        }
+                     </td>
+                        show = false;
+                  }
+               </tr>
+                  totalAmount += amtInVat;
+                  currentJobCostID = (row.Job_Cost_ID.HasValue ? row.Job_Cost_ID.Value : 0);
+                  i++;
+            }
+         }
+         <tr>
+            <td colspan="2" bgcolor="#C0C0C0">@Resource.Total @Resource.Expenses </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td style="text-align:right">@NumUtil.FormatCurrency(totalAmount, 2)</td>
+            <td></td>
+         </tr>
+         <tr>
+            <td colspan="2" rowspan="3" valign="top" bgcolor="#C0C0C0">
+               <img src="@Server.MapPath("~/Images/checked.png")" width="12" height="12" />&emsp;&emsp;&emsp; @Resource.Claim <br />
+               <img src="@Server.MapPath("~/Images/unchecked.png")" width="12" height="12" />&emsp;&emsp;&emsp; @Resource.Refund <br />
+               <img src="@Server.MapPath("~/Images/unchecked.png")" width="12" height="12" />&emsp;&emsp;&emsp; @Resource.No_claim <br />
+            </td>
+            <td colspan="5" rowspan="3" valign="top">
+               <table style="width: 100%;" border=0 cellpadding="2" cellspacing="2" >
+                  <tr valign="top">
+                     <td width="30%">@Resource.Amount :</td>
+                     <td style="text-decoration:underline">@NumUtil.FormatCurrency(totalAmount, 2)</td>
+                  </tr>
+                  <tr valign="top">
+                     <td width="30%">Amount in word :</td>
+                     <td style="text-decoration:underline">@NumberToCurrencyTextMordifi(totalAmount, 0)</td>
+                  </tr>
+               </table>
+            </td>
+         </tr>
+
+      </table>
+
+      <table style="width: 100%;" border="1" cellpadding="2" cellspacing="2" useascender="true">
+         @if (Model.Expenses_Request != null)
+         {
+            foreach (var rrow in Model.Expenses_Request)
+            {
+               if (rrow.Request_Type != "Cancel")
+               {
+                  if (rrow.Task_Assignment.Where(w => w.Status == WorkflowStatus.Rejected).FirstOrDefault() != null)
+                  {
+                     continue;
+                  }
+
+                  if (rrow.Task_Assignment != null && rrow.Task_Assignment.Count() > 0)
+                  {
+                     var i = 1;
+                     var j = 1;
+                     var k = 1;
+                     <tr>
+                        @foreach (var row2 in rrow.Task_Assignment.OrderBy(o => o.Approval_Level).ThenByDescending(o => o.Record_Status).ToList())
+                        {
+                           if (i == 1)
+                           {
+                              <td width="10%" style="text-align:center" bgcolor="#C0C0C0">@Resource.Status</td>
+                           }
+                           var rowstatus = "-";
+                           if (row2.Status == WorkflowStatus.Closed | row2.Status == WorkflowStatus.Approved)
+                           {
+                              rowstatus = "<span style='color:green'>" + Resource.Approved + "</span>";
+                           }
+                           <td style="text-align:center;"><h3><strong>@Html.Raw(rowstatus)</strong></h3></td>
+                           i++;
+                        }
+                     </tr>
+                     <tr>
+                        @foreach (var row2 in rrow.Task_Assignment.OrderBy(o => o.Approval_Level).ThenByDescending(o => o.Record_Status).ToList())
+                        {
+                           if (j == 1)
+                           {
+                              <td width="10%" style="text-align:center" bgcolor="#C0C0C0">@Resource.Name</td>
+                           }
+                           <td style="text-align:center">@row2.Name</td>
+                           j++;
+                        }
+                     </tr>
+                     <tr>
+                        @foreach (var row2 in rrow.Task_Assignment)
+                        {
+                           if (k == 1)
+                           {
+                              <td width="10%" style="text-align:center" bgcolor="#C0C0C0">@Resource.Position</td>
+                           }
+                           <td style="text-align:center">@GetDesignation(row2.Profile_ID)</td>
+                           k++;
+                        }
+                     </tr>
+                  }
+               }
+            }
+         }
+         else if (Model.Supervisor.HasValue)
+         {
+            <tr>
+               <td width="10%" style="text-align:center" bgcolor="#C0C0C0">@Resource.Status</td>
+               <td style="text-align:center"><h3><strong>@Html.Raw(status)</strong></h3> </td>
+            </tr>
+            <tr style="text-align:center" bgcolor="#C0C0C0">
+               <td width="10%" style="text-align:center" bgcolor="#C0C0C0">@Resource.Name</td>
+               <td>@Model.Supervisor_Name </td>
+            </tr>
+            <tr style="text-align:center" bgcolor="#C0C0C0">
+               <td width="10%" style="text-align:center" bgcolor="#C0C0C0">@Resource.Position</td>
+               <td>@Model.Supervisor_Designation</td>
+            </tr>
+         }
+         else
+         {
+            <tr>
+               <td width="10%" style="text-align:center" bgcolor="#C0C0C0">@Resource.Status</td>
+               <td style="text-align:center"><h3><strong>@Html.Raw(status)</strong></h3> </td>
+            </tr>
+            <tr style="text-align:center" bgcolor="#C0C0C0">
+               <td width="10%" style="text-align:center" bgcolor="#C0C0C0">@Resource.Name</td>
+               <td>@Model.Employee_Name </td>
+            </tr>
+            <tr style="text-align:center" bgcolor="#C0C0C0">
+               <td width="10%" style="text-align:center" bgcolor="#C0C0C0">@Resource.Position</td>
+               <td>@Model.Designation_Name</td>
+            </tr>
+         }
+         <tr>
+            <td colspan="8" valign="top"> @Resource.Contact_Person : <br /><br /><br /></td>
+         </tr>
+      </table>
+
+
+
+</div>
+
+</div>
+
+@functions{
+
+   public static string GetDesignation(int profileID)
+   {
+      var empService = new EmployeeService();
+      var histServ = new EmploymentHistoryService();
+      var emp = empService.GetEmployeeProfileByProfileID(profileID);
+      if (emp != null)
+      {
+         var hist = histServ.GetCurrentEmploymentHistory(emp.Employee_Profile_ID);
+         if (hist != null)
+         {
+            if (hist.Designation != null)
+               return hist.Designation.Name;
+         }
+      }
+      return "";
+   }
+
+   public static string NumberToCurrencyTextMordifi(decimal number, MidpointRounding midpointRounding)
+   {
+      // Round the value just in case the decimal value is longer than two digits
+      number = decimal.Round(number, 2, midpointRounding);
+
+      string wordNumber = string.Empty;
+
+      // Divide the number into the whole and fractional part strings
+      string[] arrNumber = number.ToString().Split('.');
+
+      // Get the whole number text
+      long wholePart = long.Parse(arrNumber[0]);
+      string strWholePart = NumberToText(wholePart);
+
+      // For amounts of zero dollars show 'No Dollars...' instead of 'Zero Dollars...'
+      wordNumber = (wholePart == 0 ? "- " : strWholePart + " ");
+
+      // If the array has more than one element then there is a fractional part otherwise there isn't
+      // just add 'No Cents' to the end
+      if (arrNumber.Length > 1)
+      {
+         // If the length of the fractional element is only 1, add a 0 so that the text returned isn't,
+         // 'One', 'Two', etc but 'Ten', 'Twenty', etc.
+         long a = arrNumber[1].Length;
+         long fractionPart = long.Parse((arrNumber[1].Length == 1 ? arrNumber[1] + "0" : arrNumber[1]));
+         string strFarctionPart = NumberToText(fractionPart);
+         if (arrNumber[1].Length > 1)
+         {
+            var substr = arrNumber[1].Substring(0, 1);
+            if (substr.Contains("0"))
+            {
+               wordNumber += (fractionPart == 0 ? " " : "Point Zero " + strFarctionPart);
+            }
+            else
+            {
+               wordNumber += (fractionPart == 0 ? " " : "Point " + strFarctionPart);
+            }
+         }
+         else
+         {
+            wordNumber += (fractionPart == 0 ? " " : "Point " + strFarctionPart);
+         }
+      }
+      return wordNumber.ToLower();
+   }
+
+
+   public static string NumberToText(long number)
+   {
+      StringBuilder wordNumber = new StringBuilder();
+
+      string[] powers = new string[] { "Thousand ", "Million ", "Billion " };
+      string[] tens = new string[] { "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety" };
+      string[] ones = new string[] { "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
+                                       "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen" };
+
+      if (number == 0) { return "Zero"; }
+      if (number < 0)
+      {
+         wordNumber.Append("Negative ");
+         number = -number;
+      }
+
+      long[] groupedNumber = new long[] { 0, 0, 0, 0 };
+      int groupIndex = 0;
+
+      while (number > 0)
+      {
+         groupedNumber[groupIndex++] = number % 1000;
+         number /= 1000;
+      }
+
+      for (int i = 3; i >= 0; i--)
+      {
+         long group = groupedNumber[i];
+
+         if (group >= 100)
+         {
+            wordNumber.Append(ones[group / 100 - 1] + " Hundred ");
+            group %= 100;
+
+            if (group == 0 && i > 0)
+               wordNumber.Append(powers[i - 1]);
+         }
+
+         if (group >= 20)
+         {
+            if ((group % 10) != 0)
+               wordNumber.Append(tens[group / 10 - 2] + " " + ones[group % 10 - 1] + " ");
+            else
+               wordNumber.Append(tens[group / 10 - 2] + " ");
+         }
+         else if (group > 0)
+            wordNumber.Append(ones[group - 1] + " ");
+
+         if (group != 0 && i > 0)
+            wordNumber.Append(powers[i - 1]);
+      }
+
+      return wordNumber.ToString().Trim();
+   }
+}
+

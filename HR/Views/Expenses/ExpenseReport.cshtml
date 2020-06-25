@@ -1,0 +1,190 @@
+﻿@model  HR.Models.ExpensesListViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@{
+   ViewBag.Title = Resource.Expenses_Report;
+}
+
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+   <div class="pageheader">
+      <h2>@Resource.Expenses_Report<span></span></h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("index", "Home" )">@Resource.Dash_Board</a></li>
+            <li class="active">@Resource.Expenses_Report</li>
+         </ol>
+      </div>
+   </div>
+
+   <script type="text/javascript">
+      $(function () {
+         InitDatatable('moduleDataTable', null, null, 0, 'asc');
+      });
+   </script>
+
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+            <!-- /tile header -->
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @UserSession.GetMsg(Model.result.Code, Model.result.Msg, Model.result.Field)
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @UserSession.GetMsg(Model.result.Code, Model.result.Msg, Model.result.Field)
+                  </div>
+               }
+            }
+            @using (Html.BeginForm("ExpenseReport", "Expenses", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+            {
+               @Html.AntiForgeryToken()
+               <section class="tile color transparent-black filter" id="secfilter">
+                  <div class="tile-header transparent">
+                     <h1 onclick="CollapseHeader(null)" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize filter" id="btncollapse"><i class="fa fa-search  color-white"></i></a>
+                     </div>
+                  </div>
+                  <div class="tile-body">
+                     <div class="row">
+                        <div class="col-md-2">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Year" class="control-label">@Resource.Year</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Year" name="Year">
+                                    @if (Model.Yearlst != null)
+                                    {
+                                       foreach (var row in Model.Yearlst)
+                                       {
+                                          if (Model.Year == row)
+                                          {
+                                             <option value="@row" selected>@row</option>
+                                          }
+                                          else
+                                          {
+                                             <option value="@row">@row</option>
+                                          }
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Year)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Leave_Type" class="control-label">@Resource.Department</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Department_ID" name="Department_ID">
+                                    @if (Model.departmentlst != null)
+                                    {
+                                       foreach (var row in Model.departmentlst)
+                                       {
+                                          if (Model.Department_ID == NumUtil.ParseInteger(row.Value))
+                                          {
+                                    <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                          }
+                                          else
+                                          {
+                                    <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                          }
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Department_ID)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <div style="height:30px;"></div>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <button type="submit" class="btn btn-default">@Resource.Filter</button>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </section>
+            }
+            <section class="tile color transparent-black">
+               <!-- tile header -->
+               <div class="tile-header transparent">
+                  <h1><strong>@Resource.Expenses_Report</strong></h1>
+                  <div class="controls">
+                     <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                  </div>
+               </div>
+               <!-- /tile header -->
+               <!-- tile body -->
+               <div class="tile-body ">
+                  <div class="table-responsive">
+                     <table class="table table-datatable table-custom" id="moduleDataTable">
+                        <thead>
+                           <tr>
+                              <th class="sort-alpha">@Resource.Expenses_Type</th>
+                              <th class="sort-amount" style="width:150px;">@Resource.Claimable_Amount_SymbolDollar</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           @{  decimal sumtotal = 0;}
+                           @if (Model.ExpensesList != null)
+                           {
+                              foreach (var row in Model.ExpensesList)
+                              {
+                                 <tr>
+                                    @if (row.Expenses_ID != null && Model.Year != null)
+                                    {
+                                       <td class="actions text-left">
+                                          <a target="_blank" href="@Url.Action("ExpenseReports", "Expenses", new { Expid = EncryptUtil.Encrypt(row.Expenses_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U), lYear = Model.Year })" title="Open">@row.Expenses_Type</a>
+                                       </td>
+                                       <td class="text-right" style="padding-right:0.2cm">@row.Claimable_Amount.ToString("n2")</td>
+                                       sumtotal += row.Claimable_Amount;
+                                    }
+                                 </tr>
+                              }
+                           }
+                        </tbody>
+                        <tfoot>
+                           <tr class="table-footer-summary" style="font-size:12px">
+                              <td>@Resource.Total_Amount_SymbolDollar</td>
+                              <td style="text-align: right;">@sumtotal.ToString("n2")</td>
+                           </tr>
+                        </tfoot>
+
+                     </table>
+                  </div>
+               </div>
+               <!-- /tile body -->
+            </section>
+
+         </div>
+      </div>
+   </div>
+}

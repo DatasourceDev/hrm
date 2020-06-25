@@ -1,0 +1,160 @@
+﻿@model  Time.Models.TimeConfViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using Time.Models;
+@using SBSResourceAPI;
+
+@using (Html.BeginForm("Configuration", "Time", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+   @Html.AntiForgeryToken()
+   @Html.HiddenFor(m => m.Device_ID)
+
+   <input type="hidden" name="operation" id="operation" />
+   <div class="modal fade" id="modal-device" tabindex="-1" role="dialog" aria-labelledby="modalConfirmLabel" aria-hidden="true">
+      <div class="modal-dialog">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h3 class="modal-title" id="modalConfirmLabel"><strong>@Resource.Device</strong></h3>
+            </div>
+            <div class="modal-body">
+               <div class="row">
+                  <div class="col-sm-6">
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <label for="Device_Branch_ID" class="control-label">@Resource.Branch</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <select class="chosen-select  form-control" id="Device_Branch_ID" name="Device_Branch_ID">
+                              @if (Model.cBranchlist != null)
+                              {
+                                 foreach (var row in Model.cBranchlist)
+                                 {
+                                    <option value="@row.Value" @(Model.Device_Branch_ID == NumUtil.ParseInteger(row.Value) ? "selected" : "")>@row.Text</option>
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Device_Branch_ID)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-sm-6">
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <label for="Device_User_Name" class="control-label">@Resource.User_Name</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <input type="text" class="form-control" name="Device_User_Name" id="Device_User_Name" value="@Model.Device_User_Name">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Device_User_Name)
+                           </div>
+                        </div>
+                     </div>
+
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-sm-6">
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <label for="Device_No" class="control-label">@Resource.Device_No</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <input type="text" class="form-control" name="Device_No" id="Device_No" value="@Model.Device_No">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Device_No)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-sm-6">
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <label for="Device_Password" class="control-label">@Resource.Password</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <input type="text" class="form-control" name="Device_Password" id="Device_Password" value="@Model.Device_User_Name" autocomplete="off">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Device_Password)
+                           </div>
+                        </div>
+                     </div>
+
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-sm-6">
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <label for="Device_IP" class="control-label">@Resource.IP_Address</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <input type="text" class="form-control" name="Device_IP" id="Device_IP" value="@Model.Device_IP" onchange="IP_Onchange()">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Device_IP)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-sm-6">
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <label for="Device_Brand" class="control-label">@Resource.Device_Brand</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <select class="chosen-select  form-control" id="Brand_Name" name="Brand_Name">
+                              @if (Model.cBrandlist != null)
+                              {
+                                 foreach (var row in Model.cBrandlist)
+                                 {
+                                    <option value="@row.Value" @(Model.Brand_Name == row.Value ? "selected" : "")>@row.Text</option>
+                                 }
+                              }
+                           </select>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-sm-6">
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <label for="Device_Port" class="control-label">@Resource.Device_Port</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <input type="text" class="form-control" name="Device_Port" id="Device_Port" value="@Model.Device_Port">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Device_Port)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+               </div>
+            </div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+               @if (Model.rights != null && Model.rights.Contains(Operation.U) | Model.rights.Contains(Operation.C))
+               {
+                  <button type="submit" class="btn btn-primary" name="tabAction" value="device" onclick="return Confirm_Alert($('#Device_ID').val());">@Resource.Save_Change</button>
+               }
+            </div>
+         </div>
+      </div>
+   </div>
+}

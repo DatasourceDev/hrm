@@ -1,0 +1,128 @@
+﻿@using POS.Common;
+@using POS.Models;
+@using SBSModel.Common;
+@using SBSModel.Models;
+@model  POS.Models.POSCustomerPurchasesViewModel
+@{
+    ViewBag.Title = "Customer Purchases";
+}
+<div class="main-content">
+
+
+    <script type="text/javascript">
+
+        $(function () {
+            $("#btnExport").click(function () {
+                theForm.action = '@Url.Action("ExportBirthdays", "POS")';
+                theForm.method = 'get';
+                theForm.submit();
+
+
+                theForm.action = '@Url.Action("CustomerPurchases", "POS")';
+                CloseProgress();
+            });
+
+            $("#btnSearch").click(function () {
+
+                var pCategoryId = $('#Category_Id :selected').val();
+
+                var url = '@Url.Action("CustomerPurchases", "POS")';
+                $(location).attr('href', url + '?pCategoryId=' + pCategoryId);
+            });
+
+            function getTransactionsByPart(pPartNo, pBatchNo) {
+
+            };
+
+        });
+
+        function cleanString(message) {
+            var msg = message.split('&gt;').join('>').split('&lt;').join('<').split('&quot;').join('"').split('nline;').join('\x0a');
+            return msg;
+        };
+
+    </script>
+
+    <div class="container-fluid padded">
+        <div class="row-fluid">
+            <div class="span12">
+                <div class="box" style='margin-bottom:0;'>
+                    <div class="box-header">
+                        <span class="title">Member Birthdays</span>
+                    </div>
+                    <div class="box-content">
+                        <div class="padded">
+                            @using (Html.BeginForm("MemberBirthdays", "POS", FormMethod.Get, new { @class = "form-horizontal validatable", role = "form", id = "theForm" })) {
+                                @Html.AntiForgeryToken()
+                                <div class="control-group ">
+                                    <div class="span4">
+                                        <div class="control-group ">
+                                            @Html.Label("Category", new { @class = "control-label" })
+                                            <div class="controls">
+                                                @Html.DropDownListFor(m => m.Category_Id, new SelectList(Model.Category_List, "Product_Category_ID", "Category_Name"))
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="span5">
+                                        <div class="control-group ">
+                                            @Html.LabelFor(m => m.Text_Search, new { @class = "control-label" })
+                                            <div class="controls">
+                                                @Html.TextBoxFor(model => model.Text_Search, new { style = "width: 55%" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="span3" style="text-align:right;">
+                                        <div class="control-group ">
+                                            <button type="button" id="btnSearch" class="btn btn-white">@Resources.ResourceMain.Search</button>
+                                            <a class="btn btn-white" href="#" target="_blank" id="btnExport" data-toggle="modal">@Resources.ResourceMain.ExporttoExcel</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            <div id="dataTables">
+                                <table cellpadding="0" cellspacing="0" border="0" class="table table-normal responsive ">
+                                    <thead>
+                                        <tr>
+                                            <th style="display:none;"></th>
+                                            <th>@Resources.ResourcePOS.Name</th>
+                                            <th>@Resources.ResourcePOS.ContactNo</th>
+                                            <th>@Resources.ResourcePOS.Email</th>
+                                            <th>Receipt Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model != null && Model.Customers != null && Model.Customers.Count > 0) {
+
+                                            foreach (var row in Model.Customers) {
+                                                <tr class="status-info">
+
+                                                    @if (row.Member_Id.HasValue) {
+                                                        <td>
+                                                            <a href="@Url.Action("MemberPurchases", "POS", new { pMemberID = @row.Member_Id })" target="_blank">@row.Name</a>
+                                                        </td>
+                                                    } else {
+                                                        <td>@row.Name</td>
+                                                    }
+                                                    <td>@row.Email</td>
+                                                    <td>@row.Contact_No</td>
+                                                    <td>@DateUtil.ToDisplayDate(row.Purchase_Date)</td>
+                                                </tr>
+                                            }
+
+                                        }
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+

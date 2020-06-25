@@ -1,0 +1,179 @@
+﻿<error errorId="3272b14c-905e-443c-bc05-fc3b7e46a025" application="/LM/W3SVC/4/ROOT" host="LAPTOP-64514UIV" type="System.Web.HttpException" message="The controller for path '/__browserLink/requestData/403455fa18504d7288a368b7b7f60a8d' was not found or does not implement IController." source="System.Web.Mvc" detail="System.Web.HttpException (0x80004005): The controller for path '/__browserLink/requestData/403455fa18504d7288a368b7b7f60a8d' was not found or does not implement IController.&#xD;&#xA;   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)&#xD;&#xA;   at System.Web.Mvc.DefaultControllerFactory.CreateController(RequestContext requestContext, String controllerName)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController&amp; controller, IControllerFactory&amp; factory)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContext httpContext, AsyncCallback callback, Object state)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.System.Web.IHttpAsyncHandler.BeginProcessRequest(HttpContext context, AsyncCallback cb, Object extraData)&#xD;&#xA;   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()&#xD;&#xA;   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean&amp; completedSynchronously)" user="enquiries@bssgroup.com.sg" time="2016-05-24T11:08:22.7722933Z" statusCode="404">
+  <serverVariables>
+    <item name="ALL_HTTP">
+      <value string="HTTP_CONNECTION:keep-alive&#xD;&#xA;HTTP_ACCEPT:application/json, text/javascript, */*; q=0.01&#xD;&#xA;HTTP_ACCEPT_ENCODING:gzip, deflate, lzma, sdch&#xD;&#xA;HTTP_ACCEPT_LANGUAGE:en-US,en;q=0.8&#xD;&#xA;HTTP_COOKIE:__RequestVerificationToken=3FCyjQDFvldyVH1dZVBXtciCuowiQ0nHjjD7iFTTcNakKMb85LUUh7Z55_SCPsawt6lD0sn9qAh89Bm3guRU1PXGd9I1; ASP.NET_SessionId=x4a23qr4x0jalzthpt4upkhm; .AspNet.ApplicationCookie=TgdCZK2lyGaMomoCpcwpHvC1EX0nWkfhPJLzN6U3kTaTA8p6uWDEZR3mpexvGNbJOxEsYzcAC4J_joDBmol_R91b7G41Lu3ClUVjSc4n0roYlxiiPhmuli_pZQroBaP4mrl0TVfNe4O74TCDg2PRhcJy6tM8BGVdOUtuYUBKgn2dET0zBfnAAwGheembYBPW6x9YD_OL-VfYuPZz1gT5i8-39rdWYN9qTHmG1uXePP_rwCGAh3mY55BH_UD2tJsypFhnvQqfdgpisaiVNcF_0p7_-r3abmWvMpwLNpjiSm3ipiADtjgKtIOWc9ZIEfzvEHdRwxZ6M-o0iroaYNnOgLXwztLKfU0I6tnGFFMOuDEg_0OrfzZ2Bf_kV1RFldoMhavc3j4rWJ9D_mlDZ_5uoT5umsVnZ_P97hv4JZTCTWiUT9Vf; culture=en&#xD;&#xA;HTTP_HOST:localhost:49485&#xD;&#xA;HTTP_REFERER:http://localhost:49485/Expenses/ExpensesManagement?Code=1&amp;Msg=has%20been%20approved%20successfully.&amp;Field=Expense&#xD;&#xA;HTTP_USER_AGENT:Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.94 Safari/537.36 OPR/37.0.2178.43&#xD;&#xA;HTTP_X_REQUESTED_WITH:XMLHttpRequest&#xD;&#xA;" />
+    </item>
+    <item name="ALL_RAW">
+      <value string="Connection: keep-alive&#xD;&#xA;Accept: application/json, text/javascript, */*; q=0.01&#xD;&#xA;Accept-Encoding: gzip, deflate, lzma, sdch&#xD;&#xA;Accept-Language: en-US,en;q=0.8&#xD;&#xA;Cookie: __RequestVerificationToken=3FCyjQDFvldyVH1dZVBXtciCuowiQ0nHjjD7iFTTcNakKMb85LUUh7Z55_SCPsawt6lD0sn9qAh89Bm3guRU1PXGd9I1; ASP.NET_SessionId=x4a23qr4x0jalzthpt4upkhm; .AspNet.ApplicationCookie=TgdCZK2lyGaMomoCpcwpHvC1EX0nWkfhPJLzN6U3kTaTA8p6uWDEZR3mpexvGNbJOxEsYzcAC4J_joDBmol_R91b7G41Lu3ClUVjSc4n0roYlxiiPhmuli_pZQroBaP4mrl0TVfNe4O74TCDg2PRhcJy6tM8BGVdOUtuYUBKgn2dET0zBfnAAwGheembYBPW6x9YD_OL-VfYuPZz1gT5i8-39rdWYN9qTHmG1uXePP_rwCGAh3mY55BH_UD2tJsypFhnvQqfdgpisaiVNcF_0p7_-r3abmWvMpwLNpjiSm3ipiADtjgKtIOWc9ZIEfzvEHdRwxZ6M-o0iroaYNnOgLXwztLKfU0I6tnGFFMOuDEg_0OrfzZ2Bf_kV1RFldoMhavc3j4rWJ9D_mlDZ_5uoT5umsVnZ_P97hv4JZTCTWiUT9Vf; culture=en&#xD;&#xA;Host: localhost:49485&#xD;&#xA;Referer: http://localhost:49485/Expenses/ExpensesManagement?Code=1&amp;Msg=has%20been%20approved%20successfully.&amp;Field=Expense&#xD;&#xA;User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.94 Safari/537.36 OPR/37.0.2178.43&#xD;&#xA;X-Requested-With: XMLHttpRequest&#xD;&#xA;" />
+    </item>
+    <item name="APPL_MD_PATH">
+      <value string="/LM/W3SVC/4/ROOT" />
+    </item>
+    <item name="APPL_PHYSICAL_PATH">
+      <value string="E:\Work\SBS\HRSBS2 (Dev)\HR\" />
+    </item>
+    <item name="AUTH_TYPE">
+      <value string="ApplicationCookie" />
+    </item>
+    <item name="AUTH_USER">
+      <value string="enquiries@bssgroup.com.sg" />
+    </item>
+    <item name="AUTH_PASSWORD">
+      <value string="*****" />
+    </item>
+    <item name="LOGON_USER">
+      <value string="" />
+    </item>
+    <item name="REMOTE_USER">
+      <value string="enquiries@bssgroup.com.sg" />
+    </item>
+    <item name="CERT_COOKIE">
+      <value string="" />
+    </item>
+    <item name="CERT_FLAGS">
+      <value string="" />
+    </item>
+    <item name="CERT_ISSUER">
+      <value string="" />
+    </item>
+    <item name="CERT_KEYSIZE">
+      <value string="" />
+    </item>
+    <item name="CERT_SECRETKEYSIZE">
+      <value string="" />
+    </item>
+    <item name="CERT_SERIALNUMBER">
+      <value string="" />
+    </item>
+    <item name="CERT_SERVER_ISSUER">
+      <value string="" />
+    </item>
+    <item name="CERT_SERVER_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="CERT_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="CONTENT_LENGTH">
+      <value string="0" />
+    </item>
+    <item name="CONTENT_TYPE">
+      <value string="" />
+    </item>
+    <item name="GATEWAY_INTERFACE">
+      <value string="CGI/1.1" />
+    </item>
+    <item name="HTTPS">
+      <value string="off" />
+    </item>
+    <item name="HTTPS_KEYSIZE">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SECRETKEYSIZE">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SERVER_ISSUER">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SERVER_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="INSTANCE_ID">
+      <value string="4" />
+    </item>
+    <item name="INSTANCE_META_PATH">
+      <value string="/LM/W3SVC/4" />
+    </item>
+    <item name="LOCAL_ADDR">
+      <value string="::1" />
+    </item>
+    <item name="PATH_INFO">
+      <value string="/__browserLink/requestData/403455fa18504d7288a368b7b7f60a8d" />
+    </item>
+    <item name="PATH_TRANSLATED">
+      <value string="E:\Work\SBS\HRSBS2 (Dev)\HR\__browserLink\requestData\403455fa18504d7288a368b7b7f60a8d" />
+    </item>
+    <item name="QUERY_STRING">
+      <value string="version=2" />
+    </item>
+    <item name="REMOTE_ADDR">
+      <value string="::1" />
+    </item>
+    <item name="REMOTE_HOST">
+      <value string="::1" />
+    </item>
+    <item name="REMOTE_PORT">
+      <value string="56587" />
+    </item>
+    <item name="REQUEST_METHOD">
+      <value string="GET" />
+    </item>
+    <item name="SCRIPT_NAME">
+      <value string="/__browserLink/requestData/403455fa18504d7288a368b7b7f60a8d" />
+    </item>
+    <item name="SERVER_NAME">
+      <value string="localhost" />
+    </item>
+    <item name="SERVER_PORT">
+      <value string="49485" />
+    </item>
+    <item name="SERVER_PORT_SECURE">
+      <value string="0" />
+    </item>
+    <item name="SERVER_PROTOCOL">
+      <value string="HTTP/1.1" />
+    </item>
+    <item name="SERVER_SOFTWARE">
+      <value string="Microsoft-IIS/8.0" />
+    </item>
+    <item name="URL">
+      <value string="/__browserLink/requestData/403455fa18504d7288a368b7b7f60a8d" />
+    </item>
+    <item name="HTTP_CONNECTION">
+      <value string="keep-alive" />
+    </item>
+    <item name="HTTP_ACCEPT">
+      <value string="application/json, text/javascript, */*; q=0.01" />
+    </item>
+    <item name="HTTP_ACCEPT_ENCODING">
+      <value string="gzip, deflate, lzma, sdch" />
+    </item>
+    <item name="HTTP_ACCEPT_LANGUAGE">
+      <value string="en-US,en;q=0.8" />
+    </item>
+    <item name="HTTP_COOKIE">
+      <value string="__RequestVerificationToken=3FCyjQDFvldyVH1dZVBXtciCuowiQ0nHjjD7iFTTcNakKMb85LUUh7Z55_SCPsawt6lD0sn9qAh89Bm3guRU1PXGd9I1; ASP.NET_SessionId=x4a23qr4x0jalzthpt4upkhm; .AspNet.ApplicationCookie=TgdCZK2lyGaMomoCpcwpHvC1EX0nWkfhPJLzN6U3kTaTA8p6uWDEZR3mpexvGNbJOxEsYzcAC4J_joDBmol_R91b7G41Lu3ClUVjSc4n0roYlxiiPhmuli_pZQroBaP4mrl0TVfNe4O74TCDg2PRhcJy6tM8BGVdOUtuYUBKgn2dET0zBfnAAwGheembYBPW6x9YD_OL-VfYuPZz1gT5i8-39rdWYN9qTHmG1uXePP_rwCGAh3mY55BH_UD2tJsypFhnvQqfdgpisaiVNcF_0p7_-r3abmWvMpwLNpjiSm3ipiADtjgKtIOWc9ZIEfzvEHdRwxZ6M-o0iroaYNnOgLXwztLKfU0I6tnGFFMOuDEg_0OrfzZ2Bf_kV1RFldoMhavc3j4rWJ9D_mlDZ_5uoT5umsVnZ_P97hv4JZTCTWiUT9Vf; culture=en" />
+    </item>
+    <item name="HTTP_HOST">
+      <value string="localhost:49485" />
+    </item>
+    <item name="HTTP_REFERER">
+      <value string="http://localhost:49485/Expenses/ExpensesManagement?Code=1&amp;Msg=has%20been%20approved%20successfully.&amp;Field=Expense" />
+    </item>
+    <item name="HTTP_USER_AGENT">
+      <value string="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.94 Safari/537.36 OPR/37.0.2178.43" />
+    </item>
+    <item name="HTTP_X_REQUESTED_WITH">
+      <value string="XMLHttpRequest" />
+    </item>
+  </serverVariables>
+  <queryString>
+    <item name="version">
+      <value string="2" />
+    </item>
+  </queryString>
+  <cookies>
+    <item name="__RequestVerificationToken">
+      <value string="3FCyjQDFvldyVH1dZVBXtciCuowiQ0nHjjD7iFTTcNakKMb85LUUh7Z55_SCPsawt6lD0sn9qAh89Bm3guRU1PXGd9I1" />
+    </item>
+    <item name="ASP.NET_SessionId">
+      <value string="x4a23qr4x0jalzthpt4upkhm" />
+    </item>
+    <item name=".AspNet.ApplicationCookie">
+      <value string="TgdCZK2lyGaMomoCpcwpHvC1EX0nWkfhPJLzN6U3kTaTA8p6uWDEZR3mpexvGNbJOxEsYzcAC4J_joDBmol_R91b7G41Lu3ClUVjSc4n0roYlxiiPhmuli_pZQroBaP4mrl0TVfNe4O74TCDg2PRhcJy6tM8BGVdOUtuYUBKgn2dET0zBfnAAwGheembYBPW6x9YD_OL-VfYuPZz1gT5i8-39rdWYN9qTHmG1uXePP_rwCGAh3mY55BH_UD2tJsypFhnvQqfdgpisaiVNcF_0p7_-r3abmWvMpwLNpjiSm3ipiADtjgKtIOWc9ZIEfzvEHdRwxZ6M-o0iroaYNnOgLXwztLKfU0I6tnGFFMOuDEg_0OrfzZ2Bf_kV1RFldoMhavc3j4rWJ9D_mlDZ_5uoT5umsVnZ_P97hv4JZTCTWiUT9Vf" />
+    </item>
+    <item name="culture">
+      <value string="en" />
+    </item>
+  </cookies>
+</error>

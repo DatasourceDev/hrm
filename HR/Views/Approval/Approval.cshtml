@@ -1,0 +1,827 @@
+﻿@model  HR.Models.ApprovalFlowViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Constants;
+@{
+   ViewBag.Title = @Resource.Approval;
+   var uitem = UserUtil.GetUserItem(Request.RequestContext.HttpContext);
+}
+
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+   <script type="text/javascript">
+      $(function () {
+         //check all checkboxes
+         $('table thead input[type="checkbox"]').change(function () {
+            $(this).parents('table').find('tbody input[type="checkbox"]').prop('checked', $(this).prop('checked'));
+            DepartmentALL_Onchange();
+         });
+
+         //initialize chosen
+         $('.dataTables_length select').chosen({ disable_search_threshold: 10 });
+
+         // Add custom class
+         $('div.dataTables_filter input').addClass('form-control');
+         $('div.dataTables_length select').addClass('form-control');
+
+         $("#btnMoveRightAll").click(function (event) {
+            var selectFrom = "#ListOfEmployees";
+            var moveTo = "#ApplicableFor";
+
+            var selectedItems = $(selectFrom + " option").toArray();
+            $(moveTo).append(selectedItems);
+            $(selectFrom + " option").remove;
+            $(moveTo + " option").remove;
+            if ($(selectFrom + " option").length > 0) {
+               $(selectFrom + " option").get(0).setAttribute("selected", '');
+            }
+         });
+
+         $("#btnMoveRight").click(function (event) {
+            var selectFrom = "#ListOfEmployees";
+            var moveTo = "#ApplicableFor";
+
+            var selectedItems = $(selectFrom + " :selected").toArray();
+            $(moveTo).append(selectedItems);
+            $(selectFrom + " :selected").remove;
+            $(moveTo + " :selected").remove;
+            if ($(selectFrom + " option").length > 0) {
+               $(selectFrom + " option").get(0).setAttribute("selected", '');
+            }
+         });
+
+         $("#btnMoveLeft").click(function (event) {
+            var selectFrom = "#ApplicableFor";
+            var moveTo = "#ListOfEmployees";
+
+            var selectedItems = $(selectFrom + " :selected").toArray();
+            $(moveTo).append(selectedItems);
+            $(selectFrom + " :selected").remove;
+            $(moveTo + " :selected").remove;
+            if ($(selectFrom + " option").length > 0) {
+               $(selectFrom + " option").get(0).setAttribute("selected", '');
+            }
+         });
+
+         $("#btnMoveLeftAll").click(function (event) {
+            var selectFrom = "#ApplicableFor";
+            var moveTo = "#ListOfEmployees";
+
+            var selectedItems = $(selectFrom + " option").toArray();
+            $(moveTo).append(selectedItems);
+            $(selectFrom + " option").remove;
+            $(moveTo + " option").remove;
+            if ($(selectFrom + " option").length > 0) {
+               $(selectFrom + " option").get(0).setAttribute("selected", '');
+            }
+         });
+
+         $("#btnSave").click(function (event) {
+
+            if ('@Model.Approval_Flow_ID' > 0) {
+               if (!Confirm_Alert('@Model.Approval_Flow_ID')) {
+                  return;
+               }
+            }
+
+            ShowMask();
+            var appfor = $("#ApplicableFor option");
+            var listEmps = $("#ListOfEmployees option");
+
+            if (appfor != null && appfor.length > 0) {
+               for (var i = 0; i < appfor.length; i++) {
+                  $('#theForm').append('<input type="hidden" name="Application_For" value="' + appfor.get(i).value + '" />');
+               }
+            }
+            if (listEmps != null && listEmps.length > 0) {
+               for (var i = 0; i < listEmps.length; i++) {
+                  $('#theForm').append('<input type="hidden" name="Not_Application_For" value="' + listEmps.get(i).value + '" />');
+               }
+            }
+            theForm.action = '@Url.Action("Approval", "Approval")';
+            theForm.method = 'post';
+            theForm.submit();
+         });
+      })
+
+
+      function DepartmentALL_Onchange(index, Department_ID) {
+
+         @for (var i = 0; i < (Model.departmentList != null ? Model.departmentList.Count() : 0); i++)
+           {
+                @:Department_Onchange('@i', '@Model.departmentList[i].Value');
+                                                                                                                                                                                                                             }
+      }
+
+      function Department_Onchange(index, Department_ID) {
+         var chk = $("#Departments-" + index);
+         if (chk != null) {
+            var checked = chk.is(':checked');
+            if (checked) {
+               var option = ""
+
+               @for(var i= 0; i< (Model.EmpList != null ? Model.EmpList.Count(): 0);i++ )
+                    {
+                        @:if (parseInt('@Model.EmpList[i].Department_ID') == Department_ID) { var dup = false; if ($("#ListOfEmployees option").length > 0) { for (var j = 0; j < $("#ListOfEmployees option").length ; j++) { if ($("#ListOfEmployees option").get(j).value == '@Model.EmpList[i].Profile_ID') { dup = true; break; } } } if ($("#ApplicableFor option").length > 0) { for (var j = 0; j < $("#ApplicableFor option").length ; j++) { if ($("#ApplicableFor option").get(j).value == '@Model.EmpList[i].Profile_ID') { dup = true; break; } } } if (!dup) { if ('@i' == '0') { option += '<option value="' + '@Model.EmpList[i].Profile_ID' + '" selected>' + '@(Model.EmpList[i].Name + " (" + Model.EmpList[i].Email + ")")' + '</option>'; } else { option += '<option value="' + '@Model.EmpList[i].Profile_ID' + '">' + '@(Model.EmpList[i].Name + " (" + Model.EmpList[i].Email + ")")' + '</option>'; } } }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      }
+               $("#ListOfEmployees").append(option);
+            }
+            else {
+               var selectedItems = $("#ApplicableFor option");
+               if (selectedItems != null) {
+                  for (var j = 0; j < selectedItems.length; j++) {
+                     @for(var i= 0; i< (Model.EmpList != null ? Model.EmpList.Count(): 0);i++ )
+                          {
+                               @:if ('@Model.EmpList[i].Profile_ID' == selectedItems.get(j).value & parseInt('@Model.EmpList[i].Department_ID') == Department_ID) selectedItems.get(j).remove();
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            }
+                  }
+               }
+
+               var selectedItems = $("#ListOfEmployees option");
+               if (selectedItems != null) {
+                  for (var j = 0; j < selectedItems.length; j++) {
+                     @for(var i= 0; i< (Model.EmpList != null ? Model.EmpList.Count(): 0);i++ )
+                        {
+                            @:if ('@Model.EmpList[i].Profile_ID' == selectedItems.get(j).value & parseInt('@Model.EmpList[i].Department_ID') == Department_ID) selectedItems.get(j).remove();
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          }
+                  }
+               }
+            }
+         }
+      }
+
+      function AddNewApprover() {
+         var rowcount = $('#aDataTable > tbody >tr').length;
+         var data = { pIndex: rowcount, pApprovalType: '@Model.Approval_Type' };
+         ShowMask();
+         $.ajax({
+            url: '@Url.Action("AddNewApprover", "Approval")',
+            //Passes the content of an input up
+            data: data,
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+               var str = '<tr id="arow-' + rowcount + '">';
+               str = str + data + '</tr>';
+               $('#aDataTable > tbody').append(str);
+
+               rowcount = $('#aDataTable > tbody >tr').length;
+               var lastIndex = 0;
+               var haveIndent = false;
+               var order = 1;
+               for (var i = 0 ; i < rowcount; i++) {
+                  var rowType = $('#Approver_Rows_' + i + '__Row_Type').val();
+                  if (rowType != '@RowType.DELETE') {
+                     $('#Approver_Rows_' + i + '__Approval_Level').val(order);
+                     order++;
+
+                     var fType = $('#Approver_Rows_' + i + '__Approver_Flow_Type').val();
+                     if (fType == '@ApproverFlowType.Job_Cost') {
+                        haveIndent = true;
+                     }
+
+                  }
+                  lastIndex = i;
+                  SetIndent(i, '@ApproverFlowType.Employee');
+               }
+               if (haveIndent) {
+                  SetIndent(lastIndex, '@ApproverFlowType.Job_Cost');
+               }
+               CloseMask();
+            }
+         });
+      }
+
+
+      function DeleteApprover(rowid, index) {
+         if (confirm('@Resource.Confirm_Delete_Msg')) {
+            $('#Approver_Rows_' + index + '__Row_Type').val('@RowType.DELETE');
+            $('#' + rowid).hide();
+
+            var rowcount = $('#aDataTable > tbody >tr').length;
+            var lastIndex = 0;
+            var haveIndent = false;
+            var order = 1;
+            for (var i = 0 ; i < rowcount; i++) {
+               var rowType = $('#Approver_Rows_' + i + '__Row_Type').val();
+               if (rowType != '@RowType.DELETE') {
+                  $('#Approver_Rows_' + i + '__Approval_Level').val(order);
+                  order++;
+                  var fType = $('#Approver_Rows_' + i + '__Approver_Flow_Type').val();
+                  if (fType == '@ApproverFlowType.Job_Cost') {
+                     haveIndent = true;
+                  }
+                  lastIndex = i;
+               }
+               SetIndent(i, '@ApproverFlowType.Employee');
+            }
+
+            if (haveIndent) {
+               SetIndent(lastIndex, '@ApproverFlowType.Job_Cost');
+            }
+         }
+      }
+
+      function Approver_Onchange(index) {
+         var profileID = $('#Approver_Rows_' + index + '__Profile_ID').val();
+         @for(var i= 0; i < (Model.EmpList != null ? Model.EmpList.Count(): 0); i++ )
+         {
+            @:if ('@Model.EmpList[i].Profile_ID' == profileID) $('#Approver_Rows_' + index + '__Email').val('@Model.EmpList[i].Email');
+                                                                                                                                                   }
+      }
+
+      function Reviewer_Onchange(index) {
+         var profileID = $('#Approver_Rows_' + index + '__Profile_ID').val();
+         @for(var i= 0; i < (Model.EmpList != null ? Model.EmpList.Count(): 0); i++ )
+          {
+                @:if ('@Model.EmpList[i].Profile_ID' == profileID) $('#Reviewer_Rows_' + index + '__Email').val('@Model.EmpList[i].Email');
+                                                                                                                                                    }
+      }
+
+      function AddNewReviewer() {
+         var rowcount = $('#rDataTable > tbody >tr').length;
+         var data = { pIndex: rowcount };
+         ShowMask();
+         $.ajax({
+            url: '@Url.Action("AddNewReviewer", "Approval")',
+            //Passes the content of an input up
+            data: data,
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+               var str = '<tr id="rrow-' + rowcount + '">';
+               str = str + data + '</tr>';
+               $('#rDataTable > tbody').append(str);
+               CloseMask();
+            }
+         });
+      }
+
+
+      function DeleteReviewer(rowid, index) {
+         if (confirm('@Resource.Confirm_Delete_Msg')) {
+            $('#Reviewer_Rows_' + index + '__Row_Type').val('@RowType.DELETE');
+            $('#' + rowid).hide();
+         }
+      }
+
+      function Reviewer_Onchange(index) {
+         var profileID = $('#Reviewer_Rows_' + index + '__Profile_ID').val();
+         @for(var i= 0; i < (Model.EmpList != null ? Model.EmpList.Count(): 0); i++ )
+            {
+                @:if ('@Model.EmpList[i].Profile_ID' == profileID) $('#Reviewer_Rows_' + index + '__Email').val('@Model.EmpList[i].Email');
+                                                                                                                              }
+      }
+
+      function ApproverFlowType_Onchange(index) {
+         var rowcount = $('#aDataTable > tbody >tr').length;
+         var lastIndex = 0;
+         var haveIndent = false;
+         for (var i = 0 ; i < rowcount; i++) {
+            var fType = $('#Approver_Rows_' + i + '__Approver_Flow_Type').val();
+            if (fType == '@ApproverFlowType.Job_Cost') {
+               haveIndent = true;
+            }
+            SetIndent(i, '@ApproverFlowType.Employee');
+            var rowType = $('#Approver_Rows_' + i + '__Row_Type').val();
+            if (rowType != '@RowType.DELETE') {
+               lastIndex = i;
+            }
+         }
+
+         if (haveIndent) {
+            SetIndent(lastIndex, '@ApproverFlowType.Job_Cost');
+         }
+      }
+
+      function SetIndent(index, pType) {
+         $('#Approver_Rows_' + index + '__Approver_Flow_Type').val(pType);
+         $('#Approver_Rows_' + index + '__Approver_Flow_Type').trigger("chosen:updated");
+         if (pType == '@ApproverFlowType.Job_Cost') {
+            $('#divProfile_ID_' + index).hide();
+            $('#divEmail_' + index).hide();
+         } else {
+            $('#divProfile_ID_' + index).show();
+            $('#divEmail_' + index).show();
+            Approver_Onchange(index);
+         }
+      }
+
+      function Manage_Tour() {
+         var strtitle = "Approval workflow Set up";
+         var appTour = new Tour({
+            autoscroll: true,
+            storage: false,
+            steps: [
+            {
+               element: "#hDept",
+               title: strtitle,
+               content: "Choose the department to apply this work flow.",
+               onNext: function () {
+
+               }
+            },
+            {
+               element: "#hListofEmp",
+               title: strtitle,
+               content: "The employee list will appear which is not assigned in any other work flow.",
+               onNext: function () {
+
+               }
+            },
+            {
+               element: "#hAppFor",
+               title: strtitle,
+               content: "Select the employee from Employee List and move to here",
+               onNext: function () {
+
+               }
+            },
+            {
+               element: "#hApprover",
+               title: strtitle,
+               content: "Set up the approver for this work flow.",
+               onNext: function () {
+
+               }
+            },
+            {
+               element: "#hReviewer",
+               title: strtitle,
+               content: "Set up the reviewer for this work flow.",
+               onNext: function () {
+               }
+            }
+            ],
+            onEnd: function () {
+
+            }
+
+         });
+         appTour.init();
+         appTour.start();
+      }
+   </script>
+        <!-- page header -->
+   <div class="pageheader">
+      @if (Model.Approval_Type == ApprovalType.Leave)
+      {
+         if (!Model.Approval_Flow_ID.HasValue || Model.Approval_Flow_ID.Value == 0)
+         {
+            <h2>@Resource.Add_New_Leave_Approval</h2>
+         }
+         else
+         {
+            <h2>@Resource.Leave_Approval_Details</h2>
+         }
+
+      }
+      else if (Model.Approval_Type == ApprovalType.Expense)
+      {
+         if (!Model.Approval_Flow_ID.HasValue || Model.Approval_Flow_ID.Value == 0)
+         {
+            <h2>@Resource.Add_New_Expenses_Approval</h2>
+         }
+         else
+         {
+            <h2>@Resource.Expenses_Approval_Details</h2>
+         }
+      }
+      else if (Model.Approval_Type == ApprovalType.PurchaseOrder)
+      {
+         if (!Model.Approval_Flow_ID.HasValue || Model.Approval_Flow_ID.Value == 0)
+         {
+            <h2>@Resource.Add_New_Puchase_Approval</h2>
+         }
+         else
+         {
+            <h2>@Resource.Purchase_Approval_Details</h2>
+         }
+      }
+      else if (Model.Approval_Type == ApprovalType.Quotation)
+      {
+         if (!Model.Approval_Flow_ID.HasValue || Model.Approval_Flow_ID.Value == 0)
+         {
+            <h2>@Resource.Add_New_Quotation_Approval</h2>
+         }
+         else
+         {
+            <h2>@Resource.Quotation_Approval_Details</h2>
+         }
+      }
+      else if (Model.Approval_Type == ApprovalType.TimeSheet)
+      {
+         if (!Model.Approval_Flow_ID.HasValue || Model.Approval_Flow_ID.Value == 0)
+         {
+            <h2>@Resource.Add_New_Time_Sheet_Approval</h2>
+         }
+         else
+         {
+            <h2>@Resource.Time_Sheet_Approval_Details</h2>
+         }
+      }
+
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            @if (Model.Approval_Type == ApprovalType.Leave)
+            {
+               <li><a href="@UrlUtil.Action(Url,"Configuration", "Leave")">@Resource.Configuration</a></li>
+               <li class="active">@Resource.Leave_Approval</li>
+            }
+            else if (Model.Approval_Type == ApprovalType.Expense)
+            {
+               <li><a href="@UrlUtil.Action(Url, "Configuration", "Expenses")">@Resource.Configuration</a></li>
+               <li class="active">@Resource.Expenses_Approval</li>
+            }
+            else if (Model.Approval_Type == ApprovalType.PurchaseOrder)
+            {
+               <li><a href="@UrlUtil.Action(Url, "Configuration", "Purchase")">@Resource.Configuration</a></li>
+               <li class="active">@Resource.Puchase_Approval</li>
+            }
+            else if (Model.Approval_Type == ApprovalType.Quotation)
+            {
+               <li><a href="@UrlUtil.Action(Url, "Configuration", "Quotation")">@Resource.Configuration</a></li>
+               <li class="active">@Resource.Quotation_Approval</li>
+            }
+            else if (Model.Approval_Type == ApprovalType.TimeSheet)
+            {
+               <li><a href="@UrlUtil.Action(Url, "Configuration", "TimeSheet")">@Resource.Configuration</a></li>
+               <li class="active">@Resource.Time_Sheet_Approval</li>
+            }
+         </ol>
+      </div>
+   </div>
+
+   using (Html.BeginForm("Approval", "Approval", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "theForm" }))
+   {
+      <input type="hidden" name="operation" value="@Model.operation" />
+      <input type="hidden" name="md" value="@Model.md" />
+      <input type="hidden" name="Approval_Flow_ID" value="@Model.Approval_Flow_ID" />
+      <input type="hidden" name="Approval_Type" value="@Model.Approval_Type" />
+      <input type="hidden" name="Module" value="@Model.Module" />
+      <input type="hidden" name="Record_Status" value="@Model.Record_Status" />
+      <div class="main">
+         <div class="row">
+            <div class="col-md-12">
+               <!-- tile  -->
+               @if (Model.result != null && Model.result.Code != 0)
+               {
+
+                  if (Model.result.Code < 0)
+                  {
+                     <div class="alert alert-red">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                     </div>
+                  }
+                  else if (Model.result.Code > 0)
+                  {
+                     <div class="alert alert-success">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                     </div>
+                  }
+               }
+               <section class="tile color transparent-black">
+                  <div class="tile-header transparent">
+                     @if (Model.Approval_Type == ApprovalType.Leave)
+                     {
+                        <h1><strong>@Resource.Leave_Approval</strong></h1>
+                     }
+                     else if (Model.Approval_Type == ApprovalType.Expense)
+                     {
+                        <h1><strong>@Resource.Expenses_Approval</strong></h1>
+                     }
+                     else if (Model.Approval_Type == ApprovalType.PurchaseOrder)
+                     {
+                        <h1><strong>@Resource.Purchase_Approval</strong></h1>
+                     }
+                     else if (Model.Approval_Type == ApprovalType.Quotation)
+                     {
+                        <h1><strong>@Resource.Quotation_Approval</strong></h1>
+                     }
+                     else if (Model.Approval_Type == ApprovalType.TimeSheet)
+                     {
+                        <h1><strong>@Resource.Time_Sheet_Approval</strong></h1>
+                     }
+                     <div class="controls">
+                        <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                     </div>
+                     <span class="label label-success tour-guide pull-right" onclick="Manage_Tour();" style="cursor:pointer">@Resource.Guide</span>
+                  </div>
+                  <div class="tile-body ">
+                     <div class="row">
+                        <div class="col-md-3">
+                           <div class="tile-header transparent">
+                              <h1 id="hDept"><strong>@Resource.Department</strong></h1>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="tile-header transparent">
+                              <h1 id="hListofEmp"><strong>@Resource.List_Of_Employees</strong></h1>
+                           </div>
+                        </div>
+                        <div class="col-md-1">
+                        </div>
+                        <div class="col-md-4">
+                           <div class="tile-header transparent">
+                              <h1 id="hAppFor"><strong>@Resource.Applicable_For</strong></h1>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-3">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Departments)
+                           </div>
+                           <div class="table-responsive">
+                              <table class="table table-datatable table-custom" id="empDataTable" style="height:300px;overflow-y:auto">
+                                 <thead>
+                                    <tr>
+                                       <th class="no-sort" style="width: 40px;">
+                                          <div class="checkbox check-transparent">
+                                             <input type="checkbox" value="1" id="chkall">
+                                             <label for="chkall"></label>
+                                          </div>
+                                       </th>
+                                       <th>@Resource.ALL</th>
+                                    </tr>
+                                 </thead>
+                                 <tbody>
+                                    @if (Model != null && Model.departmentList != null && Model.departmentList.Count > 0)
+                                    {
+                                       var i = 0;
+                                       foreach (var row in Model.departmentList)
+                                       {
+                                          <tr>
+
+                                             <td>
+                                                <div class="checkbox check-transparent">
+                                                   @if (Model.Departments != null && Model.Departments.Contains(NumUtil.ParseInteger(row.Value)))
+                                                   {
+                                                      <input type="checkbox" value="@row.Value" id="Departments-@i" name="Departments" onchange="Department_Onchange(@i, '@row.Value')" checked>
+                                                   }
+                                                   else
+                                                   {
+                                                      <input type="checkbox" value="@row.Value" id="Departments-@i" name="Departments" onchange="Department_Onchange(@i, '@row.Value')">
+                                                   }
+
+                                                   <label for="Departments-@i"></label>
+                                                </div>
+                                             </td>
+                                             <td>@row.Text</td>
+                                          </tr>
+                                                   i++;
+                                       }
+                                    }
+
+                                 </tbody>
+                              </table>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group" style="padding-left:15px;padding-right:15px;">
+                              <select class="chosen-transparent form-control" id="ListOfEmployees" multiple="multiple" style="height:300px;overflow-y:scroll">
+                                 @foreach (var emp in Model.EmpList)
+                                 {
+                                    if (Model.Not_Application_For != null && Model.Not_Application_For.Contains(emp.Profile_ID.Value))
+                                    {
+                                       <option value="@emp.Profile_ID">@(emp.Name + " (" + emp.Email + ")")</option>
+                                    }
+                                 }
+                              </select>
+                           </div>
+                        </div>
+                        <div class="col-md-1 text-center">
+                           <div class="form-group">
+                              <button type="button" id="btnMoveLeftAll" class="btn btn-default"><i class="fa  fa-angle-double-left "></i></button>
+                           </div>
+                           <div class="form-group">
+                              <button type="button" id="btnMoveLeft" class="btn btn-default"><i class="fa fa-angle-left"></i></button>
+                           </div>
+                           <div class="form-group">
+                              <button type="button" id="btnMoveRight" class="btn btn-default"><i class="fa fa-angle-right"></i></button>
+                           </div>
+                           <div class="form-group">
+                              <button type="button" id="btnMoveRightAll" class="btn btn-default"><i class="fa  fa-angle-double-right "></i></button>
+                           </div>
+                        </div>
+
+                        <div class="col-md-4">
+                           <div class="form-group" style="padding-left:15px;padding-right:15px;">
+                              <select class="chosen-transparent form-control" id="ApplicableFor" multiple="multiple" style="height:300px;overflow-y:scroll">
+                                 @foreach (var emp in Model.EmpList)
+                                 {
+                                    if (Model.Application_For != null && Model.Application_For.Contains(emp.Profile_ID.Value))
+                                    {
+                                       <option value="@emp.Profile_ID" selected>@(emp.Name + " (" + emp.Email + ")")</option>
+                                    }
+                                 }
+                              </select>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-12">
+                           <section class="tile transparent">
+
+                              <div class="tile-header transparent">
+                                 <h1 id="hApprover"><strong>@Resource.Approver</strong></h1>
+                                 <div class="controls">
+                                    <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                 </div>
+                              </div>
+                              <div class="tile-body">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Approver_Rows)
+                                 </div>
+                                 <div class="row">
+                                    <div class="col-md-12 text-center">
+                                       <a class="btn btn-greensea  btn-sm add-row" onclick="AddNewApprover()">@Resource.Add_An_Item</a>
+                                    </div>
+                                 </div>
+                                 <div class="table-responsive">
+                                    <table class="table table-datatable table-custom" id="aDataTable">
+                                       <thead>
+                                          <tr>
+                                             <th class="sort-numeric" width="100px">@Resource.No_SymbolDot</th>
+                                             @if (Model.Approval_Type == ApprovalType.Expense || Model.Approval_Type == ApprovalType.TimeSheet)
+                                             {
+                                                if (uitem.Is_Indent)
+                                                {
+                                                   <th width="150px">@Resource.Flow_By</th>
+                                                }
+                                             }
+                                             <th width="300px" class="sort-alpha">@Resource.Employee_Name</th>
+                                             <th class="sort-alpha">@Resource.Email</th>
+                                             <th class="no-sort" width="60px">@Resource.Action</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody>
+                                          @if (Model.Approver_Rows != null)
+                                          {
+                                             for (var i = 0; i < Model.Approver_Rows.Count(); i++)
+                                             {
+                                                var row = Model.Approver_Rows[i];
+                                                <tr class="status-info" id="arow-@i">
+                                                   @{ Html.RenderPartial("ApproverRow", new HR.Models.ApproverViewModel()
+                                                   {
+                                                      Index = i,
+                                                      I = row.I,
+                                                      Row_Type = row.Row_Type,
+                                                      Approval_Flow_ID = row.Approval_Flow_ID,
+                                                      Approver_ID = row.Approver_ID,
+                                                      Approval_Level = row.Approval_Level,
+                                                      Profile_ID = row.Profile_ID,
+                                                      Email = row.Email,
+                                                      Approver_Flow_Type = row.Approver_Flow_Type,
+                                                      Approval_Type = Model.Approval_Type,
+                                                      EmpList = Model.EmpList,
+                                                      ApproverFlowTypeList = Model.ApproverFlowTypeList
+                                                   }
+                                                   );
+                                                   }
+                                                </tr>
+                                             }
+                                          }
+                                       </tbody>
+                                    </table>
+                                 </div>
+                              </div>
+
+                           </section>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-12">
+                           <section class="tile transparent">
+                              <div class="tile-header transparent">
+                                 <h1 id="hReviewer"><strong>@Resource.Reviewer</strong></h1>
+                                 <div class="controls">
+                                    <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                 </div>
+                              </div>
+                              <div class="tile-body">
+                                 <div class="row">
+                                    <div class="col-md-12 text-center">
+                                       <a class="btn btn-greensea  btn-sm add-row" onclick="AddNewReviewer()">@Resource.Add_An_Item</a>
+                                    </div>
+                                 </div>
+                                 <div class="table-responsive">
+                                    <table class="table table-datatable table-custom" id="rDataTable">
+                                       <thead>
+                                          <tr>
+                                             <th width="300px" class="sort-alpha">@Resource.Employee_Name</th>
+                                             <th class="sort-alpha">@Resource.Email</th>
+                                             <th class="no-sort" width="60px">@Resource.Action</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody>
+                                          @if (Model.Reviewer_Rows != null)
+                                          {
+                                             var i = 0;
+                                             foreach (var row in Model.Reviewer_Rows)
+                                             {
+                                                <tr id="rrow-@i">
+                                                   <td>
+                                                      @if (Model.Reviewer_Rows[i].Row_Type == RowType.DELETE)
+                                                      {
+                                                         <script type="text/javascript">
+                                                            $(function () {
+                                                               $('#' + 'rrow-@i').hide();
+                                                            });
+                                                         </script>
+                                                      }
+                                                      @Html.Hidden("Reviewer_Rows[" + i + "].I", i)
+                                                      <input type="hidden" class="form-control" id="Reviewer_Rows_@(i)__I" name="Reviewer_Rows[@i].I" value="@i">
+                                                      @Html.Hidden("Reviewer_Rows[" + i + "].Row_Type", Model.Reviewer_Rows[i].Row_Type)
+                                                      @Html.Hidden("Reviewer_Rows[" + i + "].Approval_Flow_ID", Model.Reviewer_Rows[i].Approval_Flow_ID)
+                                                      @Html.Hidden("Reviewer_Rows[" + i + "].Reviewer_ID", Model.Reviewer_Rows[i].Reviewer_ID)
+                                                      <select class="chosen-select chosen-transparent form-control" id="Reviewer_Rows_@(i)__Profile_ID" name="Reviewer_Rows[@i].Profile_ID" onchange="Reviewer_Onchange(@i);">
+                                                         @foreach (var drow in Model.EmpList)
+                                                         {
+                                                            if (Model.Reviewer_Rows[i].Profile_ID == drow.Profile_ID)
+                                                            {
+                                                               <option value="@drow.Profile_ID" selected>@drow.Name</option>
+                                                            }
+                                                            else
+                                                            {
+                                                               <option value="@drow.Profile_ID">@drow.Name</option>
+                                                            }
+                                                         }
+                                                      </select>
+                                                      <div class="validation-error">
+                                                         @Html.ValidationMessage("Reviewer_Rows[" + i + "].Profile_ID")
+                                                      </div>
+                                                   </td>
+                                                   <td>
+                                                      <input type="text" class="form-control" id="Reviewer_Rows_@(i)__Email" name="Reviewer_Rows[@i].Email" value="@Model.Reviewer_Rows[i].Email" readonly>
+                                                      <div class="validation-error">
+                                                         @Html.ValidationMessage("Reviewer_Rows[" + i + "].Email")
+                                                      </div>
+                                                   </td>
+                                                   <td class="actions text-left" style="cursor:pointer">
+                                                      <a data-toggle="modal" onclick="return DeleteReviewer('rrow-@i', @i);" title="@Resource.Delete">
+                                                         <i class="fa fa-times-circle-o fa-2x"></i>
+                                                      </a>
+                                                   </td>
+                                                </tr>
+                                                         i++;
+                                             }
+                                          }
+                                       </tbody>
+                                    </table>
+                                 </div>
+                              </div>
+                           </section>
+                        </div>
+                     </div>
+                  </div>
+               </section>
+            </div>
+         </div>
+
+
+         <div class="row">
+            <div class="col-md-12">
+               <section class="tile color transparent-white">
+                  <div class="tile-body">
+                     <div class="row">
+                        <div class="col-md-12">
+                           @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U) | Model.rights.Contains(UserSession.RIGHT_C))
+                           {
+                              if (Model.departmentList.Count() > 0)
+                              {
+                                 <button id="btnSave" type="button" class="btn btn-primary">@Resource.Save</button>
+                              }
+                           }
+
+                           @if (Model.Approval_Type == ApprovalType.Leave)
+                           {
+                              <a href="@Url.Action("Configuration", "Leave", new { tabAction = "approval" })" class="btn btn-default">@Resource.Back</a>
+                           }
+                           else if (Model.Approval_Type == ApprovalType.Expense)
+                           {
+                              <a href="@Url.Action("Configuration", "Expenses", new { tabAction = "approval" })" class="btn btn-default">@Resource.Back</a>
+                           }
+                           else if (Model.Approval_Type == ApprovalType.PurchaseOrder)
+                           {
+                              <a href="@UrlUtil.Action(Url, "Configuration", "Purchase", new { tabAction = "approval" })" class="btn btn-default">@Resource.Back</a>
+                           }
+                           else if (Model.Approval_Type == ApprovalType.Quotation)
+                           {
+                              <a href="@UrlUtil.Action(Url, "Configuration", "Quotation", new { tabAction = "approval" })" class="btn btn-default">@Resource.Back</a>
+                           }
+                           else if (Model.Approval_Type == ApprovalType.TimeSheet)
+                           {
+                              <a href="@UrlUtil.Action(Url, "Configuration", "TimeSheet", new { tabAction = "approval" })" class="btn btn-default">@Resource.Back</a>
+                           }
+                        </div>
+                     </div>
+                  </div>
+               </section>
+            </div>
+         </div>
+      </div>
+   }
+}

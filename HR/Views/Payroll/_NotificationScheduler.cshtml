@@ -1,0 +1,385 @@
+﻿@model  HR.Models.PayrollConfigurationViewModel
+@using SBSModel.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+
+<script type="text/javascript">
+    var ckoperation = '@Model.operation';
+    var cknotification = '@Model.Notification_Scheduler_ID';
+    var ckTP = '@Model.Trigger_Period';
+    $(document).ready(function () {
+
+        if (ckoperation == '@UserSession.RIGHT_C' || cknotification == null) {
+            $("#Div_RecurEveryWeeks").hide();
+            $("#Div_Week").hide();
+            $("#Div_DateWeek").show();
+            $("#Div_Month").hide();
+            $("#Div_RecurEveryDays").show();
+        }
+
+        if (ckTP == '@Term.Daily') {
+            $("#Div_RecurEveryWeeks").hide();
+            $("#Div_Week").hide();
+            $("#Div_Month").hide();
+            $("#Div_DateWeek").show();
+            $("#Div_RecurEveryDays").show();
+        }
+        else if (ckTP == '@Term.Weekly') {
+            $("#Div_RecurEveryDays").hide();
+            $("#Div_Month").hide();
+            $("#Div_DateWeek").show();
+            $("#Div_RecurEveryWeeks").show();
+            $("#Div_Week").show();
+        }
+        else if (ckTP == '@Term.Monthly') {
+            $("#Div_DateWeek").hide();
+            $("#Div_Week").hide();
+            $("#Div_Month").show();
+        }
+
+        $('input[type=radio][name=Trigger_Period]').change(function () {
+            if (this.value == '@Term.Daily') {
+                $("#Div_RecurEveryWeeks").hide();
+                $("#Div_Week").hide();
+                $("#Div_Month").hide();
+                $("#Div_DateWeek").show();
+                $("#Div_RecurEveryDays").show();
+            }
+            else if (this.value == '@Term.Weekly') {
+                $("#Div_RecurEveryDays").hide();
+                $("#Div_Month").hide();
+                $("#Div_DateWeek").show();
+                $("#Div_RecurEveryWeeks").show();
+                $("#Div_Week").show();
+            }
+            else if (this.value == '@Term.Monthly') {
+                $("#Div_DateWeek").hide();
+                $("#Div_Week").hide();
+                $("#Div_Month").show();
+            }
+        });
+    });
+
+</script>
+<input type="hidden" name="Company_ID" value="@Model.Company_ID" />
+<input type="hidden" name="operation" value="@Model.operation" />
+<input type="hidden" name="Notification_Scheduler_ID" value="@Model.Notification_Scheduler_ID" />
+<div class="row">
+    <div class="col-md-12">
+        <section class="tile color transparent filter" id="secfilter2">
+            <div class="tile-header transparent">
+                <h1><strong>@Resource.Notification_Scheduler</strong></h1>
+                <div class="controls">
+                    <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                </div>
+            </div>
+            <div class="tile-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <div class="col-sm-12">
+                                <label for="search_Race" class="control-label">@Resource.Trigger_Set_Up</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <div class="radio radio-transparent">
+                                    @if (Model.Trigger_Set_Up)
+                                    {
+                                        <input type="radio" name="Trigger_Set_Up" id="Trigger_Set_UpY" value="true" checked>
+                                    }
+                                    else
+                                    {
+                                        <input type="radio" name="Trigger_Set_Up" id="Trigger_Set_UpY" value="true">
+                                    }
+
+                                    <label for="Trigger_Set_UpY">@Resource.On</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="radio radio-transparent">
+                                    @if (Model.Trigger_Set_Up)
+                                    {
+                                        <input type="radio" name="Trigger_Set_Up" id="Trigger_Set_UpN" value="false">
+                                    }
+                                    else
+                                    {
+                                        <input type="radio" name="Trigger_Set_Up" id="Trigger_Set_UpN" value="false" checked>
+                                    }
+
+                                    <label for="Trigger_Set_UpN">@Resource.Off</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div class="col-sm-12">
+                                <label for="search_Race" class="control-label">@Resource.Trigger</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-2">
+                                <div class="radio radio-transparent">
+                                    @if (Model.Trigger_Period == Term.Daily)
+                                    {
+                                        <input type="radio" name="Trigger_Period" id="@Term.Daily" value="@Term.Daily" checked>
+                                    }
+                                    else
+                                    {
+                                        <input type="radio" name="Trigger_Period" id="@Term.Daily" value="@Term.Daily">
+                                    }
+                                    <label for="@Term.Daily">@Resource.Daily</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="radio radio-transparent">
+                                    @if (Model.Trigger_Period == Term.Weekly)
+                                    {
+                                        <input type="radio" name="Trigger_Period" id="@Term.Weekly" value="@Term.Weekly" checked>
+                                    }
+                                    else
+                                    {
+                                        <input type="radio" name="Trigger_Period" id="@Term.Weekly" value="@Term.Weekly">
+                                    }
+                                    <label for="@Term.Weekly">@Resource.Weekly</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="radio radio-transparent">
+                                    @if (Model.Trigger_Period == Term.Monthly)
+                                    {
+                                        <input type="radio" name="Trigger_Period" id="@Term.Monthly" value="@Term.Monthly" checked>
+                                    }
+                                    else
+                                    {
+                                        <input type="radio" name="Trigger_Period" id="@Term.Monthly" value="@Term.Monthly">
+                                    }
+                                    <label for="@Term.Monthly">@Resource.Monthly</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div class="col-sm-12">
+                                <label for="Start_Date" class="control-label">@Resource.Start</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control input-datepicker" id="Start_Date" name="Start_Date" value="@Model.Start_Date">
+                                <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Start_Date)
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <input type="text" class="form-control input-timepicker" id="Start_Time" name="Start_Time" value="@Model.Start_Time">
+                                <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Start_Time)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" id="Div_DateWeek">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div class="col-sm-12">
+                                <label for="Recur_Every_Weeks" class="control-label">@Resource.Recur_Every</label>
+                            </div>
+                        </div>
+                        <div class="form-group" id="Div_RecurEveryDays">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="Recur_Every_Days" id="Recur_Every_Days" value="@Model.Recur_Every_Days">
+                                <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Recur_Every_Days)
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <div class="form-group">
+                                    <div class="col-md-1">
+                                        <label class="control-label transparent">@Resource.Days</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="Div_RecurEveryWeeks">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="Recur_Every_Weeks" id="Recur_Every_Weeks" value="@Model.Recur_Every_Weeks">
+                                <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Recur_Every_Weeks)
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <div class="form-group">
+                                    <div class="col-md-1">
+                                        <label class="control-label transparent">@Resource.Weeks</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" id="Div_Week">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <div class="checkbox check-transparent">
+                                    @if (Model.Selected_Sunday)
+                                    {
+                                        <input type="checkbox" name="Selected_Sunday" id="Selected_Sunday" value="true" checked />
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" name="Selected_Sunday" id="Selected_Sunday" value="true" />
+                                    }
+                                    <label for="Selected_Sunday">@Resource.Sunday</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="checkbox check-transparent">
+                                    @if (Model.Selected_Monday)
+                                    {
+                                        <input type="checkbox" name="Selected_Monday" id="Selected_Monday" value="true" checked />
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" name="Selected_Monday" id="Selected_Monday" value="true" />
+                                    }
+                                    <label for="Selected_Monday">@Resource.Monday</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="checkbox check-transparent">
+                                    @if (Model.Selected_Tuesday)
+                                    {
+                                        <input type="checkbox" name="Selected_Tuesday" id="Selected_Tuesday" value="true" checked />
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" name="Selected_Tuesday" id="Selected_Tuesday" value="true" />
+                                    }
+                                    <label for="Selected_Tuesday">@Resource.Tuesday</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="checkbox check-transparent">
+                                    @if (Model.Selected_Wednesday)
+                                    {
+                                        <input type="checkbox" name="Selected_Wednesday" id="Selected_Wednesday" value="true" checked />
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" name="Selected_Wednesday" id="Selected_Wednesday" value="true" />
+                                    }
+                                    <label for="Selected_Wednesday">@Resource.Wednesday</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="checkbox check-transparent">
+                                    @if (Model.Selected_Thursday)
+                                    {
+                                        <input type="checkbox" name="Selected_Thursday" id="Selected_Thursday" value="true" checked />
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" name="Selected_Thursday" id="Selected_Thursday" value="true" />
+                                    }
+                                    <label for="Selected_Thursday">@Resource.Thursday</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="checkbox check-transparent">
+                                    @if (Model.Selected_Friday)
+                                    {
+                                        <input type="checkbox" name="Selected_Friday" id="Selected_Friday" value="true" checked />
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" name="Selected_Friday" id="Selected_Friday" value="true" />
+                                    }
+                                    <label for="Selected_Friday">@Resource.Friday</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="checkbox check-transparent">
+                                    @if (Model.Selected_Saturday)
+                                    {
+                                        <input type="checkbox" name="Selected_Saturday" id="Selected_Saturday" value="true" checked />
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" name="Selected_Saturday" id="Selected_Saturday" value="true" />
+                                    }
+                                    <label for="Selected_Saturday">@Resource.Saturday</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" id="Div_Month">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div class="col-sm-12">
+                                <label for="Selected_Months" class="control-label">@Resource.Month</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-4">
+                                <select class="chosen-select chosen-transparent form-control" id="Selected_Months" name="Selected_Months">
+                                    @if (Model.NotificationMonthList != null)
+                                    {
+                                        foreach (var row in Model.NotificationMonthList)
+                                        {
+                                            if (Model.Selected_Months == NumUtil.ParseInteger(row.Value))
+                                            {
+                                                <option value="@(row.Value != null ? row.Value : " ")" selected>@row.Text</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                                <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Selected_Months)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <section class="tile color transparent-white" style="padding-left:15px;">
+            <div class="tile-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U) && Model.rights.Contains(UserSession.RIGHT_C))
+                        {
+                            <button type="submit" class="btn btn-primary" onclick="return Confirm_Alert('@Model.Notification_Scheduler_ID');">@Resource.Save</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+
+

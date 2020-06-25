@@ -1,0 +1,268 @@
+﻿@model  HR.Models.EmployeeViewModels
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+
+@{
+   var admin = Model.adminRights != null ? Model.adminRights.Contains(Model.operation) : false;
+   var self = Model.Profile_ID == Model.User_Login_Profile_ID ? true : false;
+   var hr = Model.hrRights != null ? Model.hrRights.Contains(Model.operation) : false;
+}
+
+<script type="text/javascript">
+   function AddEmerContact_Onclick() {
+      var rowcount = $('#emerDataTable > tbody >tr').length;
+      var data = { pIndex: rowcount };
+      ShowMask();
+      $.ajax({
+         url: '@Url.Action("AddNewEmployeeEmergencyContact", "Employee")',
+         //Passes the content of an input up
+         data: data,
+         contentType: "application/json; charset=utf-8",
+         success: function (data) {
+            var str = '<tr  id="erow-' + rowcount + '">';
+            str = str + data + '</tr>';
+            $('#emerDataTable > tbody').append(str);
+            CloseMask();
+         }
+      });
+   };
+
+   function DeleteEmerContact_Onclick(rowid, index) {
+      if (confirm('@Resource.Confirm_Delete_Msg')) {
+         $('#Emer_Contact_Rows_' + index + '__Row_Type').val('@RowType.DELETE');
+         $('#' + rowid).hide();
+      }
+   }
+</script>
+
+<div id="address-tab" class="tab-pane fade in">
+   <div class="row">
+      <div class="col-md-12">
+         <section class="tile transparent">
+            <div class="tile-header transparent">
+               <h1><strong>@Resource.Address</strong></h1>
+               <div class="controls">
+                  <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+               </div>
+            </div>
+            <div class="tile-body">
+               <div class="row">
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Residential_Address_1" class="control-label">@Resource.Address_1</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input class="form-control" name="Residential_Address_1" id="Residential_Address_1" value="@Model.Residential_Address_1">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Residential_Address_1)
+                           </div>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Residential_Address_2" class="control-label">@Resource.Address_2</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input class="form-control" name="Residential_Address_2" id="Residential_Address_2" value="@Model.Residential_Address_2">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Residential_Address_2)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Postal_Code_1" class="control-label">@Resource.Zip_Or_Postal_Code</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control" name="Postal_Code_1" id="Postal_Code_1" value="@Model.Postal_Code_1">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Postal_Code_1)
+                           </div>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Postal_Code_2" class="control-label">@Resource.Zip_Or_Postal_Code</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control" name="Postal_Code_2" id="Postal_Code_2" value="@Model.Postal_Code_2">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Postal_Code_2)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Residential_Country_1" class="control-label">@Resource.Country</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <select class="chosen-select chosen-transparent form-control" id="Residential_Country_1" name="Residential_Country_1">
+                              @if (Model.countryList != null)
+                              {
+                                 foreach (var row in Model.countryList)
+                                 {
+                                    if (Model.Residential_Country_1 == NumUtil.ParseInteger(row.Value))
+                                    {
+                              <option value="@row.Value" selected>@row.Desc</option>
+                                    }
+                                    else
+                                    {
+                              <option value="@(row.Value != null ? row.Value : " ")">@row.Desc</option>
+                                    }
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Residential_Country_1)
+                           </div>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Residential_Country_2" class="control-label">@Resource.Country</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <select class="chosen-select chosen-transparent form-control" id="Residential_Country_2" name="Residential_Country_2">
+                              @if (Model.countryList != null)
+                              {
+                                 foreach (var row in Model.countryList)
+                                 {
+                                    if (Model.Residential_Country_2 == NumUtil.ParseInteger(row.Value))
+                                    {
+                              <option value="@row.Value" selected>@row.Desc</option>
+                                    }
+                                    else
+                                    {
+                              <option value="@(row.Value != null ? row.Value : " ")">@row.Desc</option>
+                                    }
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Residential_Country_2)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </section>
+      </div>
+   </div>
+
+   <div class="row">
+      <div class="col-md-12">
+         <section class="tile transparent">
+            <div class="tile-header transparent">
+               <h1><strong>@Resource.Emergency</strong></h1>
+               <div class="controls">
+                  <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+               </div>
+            </div>
+            <div class="tile-body">
+               <div class="row">
+                  <div class="col-md-12 text-center">
+                     <a class="btn btn-greensea  btn-sm add-row" onclick="AddEmerContact_Onclick()">@Resource.Add_An_Item</a>
+                  </div>
+               </div>
+               <div class="table-responsive">
+                  <table class="table table-datatable table-custom" id="emerDataTable">
+                     <thead>
+                        <tr>
+                           <th class="sort-alpha">@Resource.Name</th>
+                           <th class="sort-alpha">@Resource.Contact_No</th>
+                           <th class="sort-alpha">@Resource.Relationship</th>
+                           <th class="sort-alpha" style="width:80px">@Resource.Action</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        @if (Model.Emer_Contact_Rows != null)
+                        {
+                           var i = 0;
+                           foreach (var row in Model.Emer_Contact_Rows)
+                           {
+                        <tr id="erow-@i">
+                           <td>
+                              @if (Model.Emer_Contact_Rows[i].Row_Type == RowType.DELETE)
+                                    {
+                                    <script type="text/javascript">
+                                          $(function () {
+                                             $('#' + 'erow-@i').hide();
+                                          });
+                                    </script>
+                                    }
+                              @if (Model.Emer_Contact_Rows[i].Row_Type == null)
+                                    {
+                                    @Html.Hidden("Emer_Contact_Rows[" + i + "].Row_Type", RowType.EDIT)
+                                    }
+                                    else
+                                    {
+                                    @Html.Hidden("Emer_Contact_Rows[" + i + "].Row_Type", Model.Emer_Contact_Rows[i].Row_Type)
+                                    }
+                              @Html.Hidden("Emer_Contact_Rows[" + i + "].Employee_Emergency_Contact_ID", Model.Emer_Contact_Rows[i].Employee_Emergency_Contact_ID)
+                              <input type="text" class="form-control" id="Emer_Contact_Rows_@(i)__Name" name="Emer_Contact_Rows[@i].Name" value="@Model.Emer_Contact_Rows[i].Name">
+                              <div class="validation-error">
+                                 @Html.ValidationMessage("Emer_Contact_Rows[" + i + "].Name")
+                              </div>
+                           </td>
+                           <td>
+                              <input type="text" class="form-control" id="Emer_Contact_Rows_@(i)__Contact_No" name="Emer_Contact_Rows[@i].Contact_No" value="@Model.Emer_Contact_Rows[i].Contact_No">
+                              <div class="validation-error">
+                                 @Html.ValidationMessage("Emer_Contact_Rows[" + i + "].Contact_No")
+                              </div>
+                           </td>
+                           <td>
+                              <select class="chosen-select chosen-transparent form-control" id="Emer_Contact_Rows_@(i)__Relationship" name="Emer_Contact_Rows[@i].Relationship">
+                                 @if (Model.relationshipList != null)
+                                       {
+                                          foreach (var rrow in Model.relationshipList)
+                                          {
+                                             if (Model.Emer_Contact_Rows[i].Relationship == NumUtil.ParseInteger(rrow.Value))
+                                             {
+                                       <option value="@rrow.Value" selected>@rrow.Text</option>
+                                             }
+                                             else
+                                             {
+                                       <option value="@(rrow.Value != null ? rrow.Value : "0")">@rrow.Text</option>
+                                             }
+                                          }
+                                       }
+                              </select>
+                           </td>
+                           <td class="actions text-center" style="cursor:pointer">
+                              <a data-toggle="modal" onclick="return DeleteEmerContact_Onclick('erow-@i', @i);">
+                                 <i class="fa fa-times-circle-o fa-2x"></i>
+                              </a>
+                           </td>
+                        </tr>
+                                       i++;
+                           }
+                        }
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+         </section>
+      </div>
+   </div>
+</div>

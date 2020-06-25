@@ -1,0 +1,262 @@
+﻿@model  HR.Models.ImportExpensesViewModels
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+
+@{
+    ViewBag.Title = @Resource.Import_Expenses;
+}
+
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+    <script type="text/javascript">
+        //initialize file upload button function
+        $(document)
+          .on('change', '.btn-file :file', function () {
+              var input = $(this),
+              numFiles = input.get(0).files ? input.get(0).files.length : 1,
+              label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+              input.trigger('fileselect', [numFiles, label]);
+          });
+
+        $(function () {
+            InitDatatable('expensesdocDataTable', null, null, 1, 'asc');
+            //initialize file upload button
+            $('.btn-file :file').on('fileselect', function (event, numFiles, label) {
+
+                var sizeIsnull = $('#uploadfile')[0].files[0];
+                if (sizeIsnull != undefined) {
+                    var fsize = $('#uploadfile')[0].files[0].size;
+                    if (fsize > 6097150) {
+                        alert('@Resource.Message_Please_Upload_File_Size_Is_Less_Than_5_MB');
+                        $('#uploadfile').after($('#uploadfile').clone(true)).remove();
+                        $('#uploadfile').parents('.input-group').find(':text').val('');
+                        return false;
+                    }
+
+                    var input = $(this).parents('.input-group').find(':text'),
+                        log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+                    console.log(log);
+
+                    if (input.length) {
+                        input.val(log);
+                    } else {
+                        if (log) alert(log);
+                    }
+                }
+            });
+
+
+            $("#btnUpload").click(function () {
+                var filename = $('#uploadfile').val();
+                var ext = '';
+                if (filename != null) {
+                    var k = filename.lastIndexOf('.');
+                    if (k >= 0) {
+                        ext = filename.substring(k + 1).toLowerCase();
+                    }
+                }
+                if (ext != 'xls' && ext != 'xlsx') {
+                    alert('@Resource.Message_Please_Please_Upload_File_xls');
+                    return;
+                }
+                theForm.action = '@Url.Action("ExpensesImport", "Expenses")';
+                theForm.method = 'post';
+                theForm.submit();
+            });
+        })
+</script>
+
+    <div class="pageheader">
+        <h2>@Resource.Import_Expenses</h2>
+        <div class="breadcrumbs">
+            <ol class="breadcrumb">
+                <li>@Resource.You_Are_Here</li>
+                <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+                <li><a href="@Url.Action("Record", "Expenses")">@Resource.Expenses_Record</a></li>
+                <li class="active">@Resource.Import_Expenses</li>
+            </ol>
+        </div>
+    </div>
+    using (Html.BeginForm("ExpensesImport", "Expenses", FormMethod.Post, new { @class = "form-horizontal validatable", role = "form", id = "theForm", enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="main">
+            <div class="row">
+
+                <div class="col-md-12">
+                    @if (Model.result != null && Model.result.Code != 0)
+                    {
+                        if (Model.result.Code < 0)
+                        {
+                            <div class="alert alert-red">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                        else if (Model.result.Code > 0)
+                        {
+                            <div class="alert alert-success">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                    }
+
+                    <section class="tile color transparent-black filter" id="secfilter">
+                        <div class="tile-header transparent">
+                            <h1 onclick="CollapseHeader(null)" style="cursor:pointer"><strong>@Resource.Import_Expenses</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="uploadfile" class="control-label">@Resource.Upload_File</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <div class="input-group">
+                                                <span class="input-group-btn">
+                                                    <span class="btn btn-primary btn-file">
+                                                        <i class="fa fa-upload"></i><input id="uploadfile" type="file" name="file">
+                                                    </span>
+                                                </span>
+                                                <input type="text" class="form-control" ="" readonly>
+                                            </div>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessage("Import_Expenses")
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12" style="height :28px;">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <button type="button" class="btn btn-default" id="btnUpload">@Resource.Validate_File</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="tile color transparent-black">
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.Expenses_Info</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+                            <div class="validation-error">
+                                @Html.ValidationMessageFor(m => m.ExpensesAppDoc)
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-datatable table-custom" id="expensesdocDataTable">
+                                    <thead>
+                                        <tr>
+                                            <th class="no-sort" style="width: 20px;"></th>
+                                            <th class="sort-numeric">@Resource.SN</th>
+                                            <th class="sort-alpha">@Resource.Employee_No</th>
+                                            <th class="sort-alpha">@Resource.Expenses_Title</th>
+                                            <th class="sort-alpha">@Resource.Date_Applied</th>
+                                            <th class="sort-alpha">@Resource.Expenses_Type</th>
+                                            <th class="sort-alpha">@Resource.Expenses_Date</th>
+                                            <th class="sort-alpha">@Resource.Total_Amount</th>
+                                            <th class="sort-alpha">@Resource.Currency</th>
+                                            <th class="sort-alpha">@Resource.Tax</th>
+                                            <th class="sort-alpha">@Resource.Amount_Claiming</th>
+                                            <th class="sort-alpha">@Resource.Notes</th>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.ExpensesAppDoc != null)
+                                        {
+                                            for (int i = 0; i < Model.ExpensesAppDoc.Length; i++)
+                                            {
+                                                var row = Model.ExpensesAppDoc[i];
+                                                var colour = "color:#FFFFFF;";
+                                                if (!row.Validate)
+                                                {
+                                                    colour = "color:red;";
+                                                }
+                                                <tr title="@row.ErrMsg" style="@colour">
+                                                    <td>
+                                                        @if (!row.Validate)
+                                                        {
+                                                            <a><i class="fa fa-ban fa-2x color-white"></i></a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <a><i class="fa fa-check fa-2x color-green"></i></a>
+                                                        }
+                                                        <input type="hidden" name="ExpensesAppDoc[@i].Company_ID" value="@row.Company_ID">
+                                                        <input type="hidden" name="ExpensesAppDoc[@i].Validate" value="@row.Validate.ToString()">
+                                                        <input type="hidden" name="ExpensesAppDoc[@i].ErrMsg" value="@row.ErrMsg">
+                                                        <input type="hidden" name="ExpensesAppDoc[@i].Employee_Profile_ID" value="@row.Employee_Profile_ID">
+                                                        <input type="hidden" name="ExpensesAppDoc[@i].Employee_No" value="@row.Employee_No">
+                                                        <input type="hidden" name="ExpensesAppDoc[@i].Expenses_Title" value="@row.Expenses_Title">
+                                                        <input type="hidden" name="ExpensesAppDoc[@i].Date_Applied" value="@row.Date_Applied">
+                                                        <input type="hidden" name="ExpensesAppDoc[@i].Expenses_Config_ID" value="@row.Expenses_Config_ID">
+                                                        <input type="hidden" name="ExpensesAppDoc[@i].Expenses_Config_Type" value="@row.Expenses_Config_Type">
+                                                        <input type="hidden" name="ExpensesAppDoc[@i].Expenses_Date" value="@row.Expenses_Date">
+                                                        <input type="hidden" name="ExpensesAppDoc[@i].Total_Amount" value="@row.Total_Amount">
+                                                        <input type="hidden" name="ExpensesAppDoc[@i].Selected_Currency" value="@row.Selected_Currency">
+                                                        <input type="hidden" name="ExpensesAppDoc[@i].Selected_Currency_" value="@row.Selected_Currency_">
+                                                        <input type="hidden" name="ExpensesAppDoc[@i].Tax" value="@row.Tax">
+                                                        <input type="hidden" name="ExpensesAppDoc[@i].Amount_Claiming" value="@row.Amount_Claiming">
+                                                        <input type="hidden" name="ExpensesAppDoc[@i].Remarks" value="@row.Remarks">
+                                                        <input type="hidden" name="ExpensesAppDoc[@i].Department_ID" value="@row.Department_ID">
+                                                    </td>
+                                                    <td style="width:20px">@(i + 1)</td>
+                                                    <td>@row.Employee_No</td>
+                                                    <td>@row.Expenses_Title</td>
+                                                    <td>@row.Date_Applied</td>
+                                                    <td>@row.Expenses_Config_Type</td>
+                                                    <td>@row.Expenses_Date</td>
+                                                    <td style=" text-align: right;">@row.Total_Amount.ToString("n2")</td>
+                                                    <td>@row.Selected_Currency_</td>
+                                                    <td style=" text-align: right;">@row.Tax.ToString("n2")</td>
+                                                    <td style=" text-align: right;">@row.Amount_Claiming.ToString("n2")</td>
+                                                    <td>@row.Remarks</td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- tile widget -->
+                            <!-- /tile widget -->
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <section class="tile color transparent-white">
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <input type="hidden" name="Validated_Main" value="@Model.Validated_Main.ToString()">
+                                    @if (Model.Validated_Main && Model.ExpensesAppDoc != null && Model.ExpensesAppDoc.Length > 0)
+                                    {
+                                        <button class="btn btn-primary" type="submit" name="pageAction" value="import">@Resource.Import</button>
+                                    }
+                                    <a href="@Url.Action("Record", "Expenses")" class="btn btn-default">@Resource.Back</a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    }
+
+}

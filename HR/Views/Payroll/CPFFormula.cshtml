@@ -1,0 +1,252 @@
+﻿@model HR.Models.FormulaViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+
+@{
+    ViewBag.Title = Resource.CPF_Formula;
+}
+
+<script language="javascript" type="text/javascript">
+    $(function () {
+        $("#Variables li").draggable({
+            appendTo: "body",
+            helper: "clone",
+            cursor: "select",
+            revert: "invalid"
+        });
+
+        $("#Symbols li").draggable({
+            appendTo: "body",
+            helper: "clone",
+            cursor: "select",
+            revert: "invalid"
+        });
+
+        initDroppable($("#Formula"));
+        function initDroppable($elements) {
+            $elements.droppable({
+                hoverClass: "textarea",
+                accept: ":not(.ui-sortable-helper)",
+                drop: function (event, ui) {
+                    var $this = $(this);
+
+                    var tempid = ui.draggable.text();
+                    var dropText;
+                    dropText = " " + tempid + " ";
+                    var droparea = document.getElementById('Formula');
+                    var range1 = droparea.selectionStart;
+                    var range2 = droparea.selectionEnd;
+                    var val = droparea.value;
+                    var str1 = val.substring(0, range1);
+                    var str3 = val.substring(range1, val.length);
+                    droparea.value = str1 + dropText + str3;
+                }
+            });
+        }
+    });
+</script>
+
+@if ((Model.operation == UserSession.RIGHT_C && Model.rights != null && Model.rights.Contains(UserSession.RIGHT_C)) | (Model.operation == UserSession.RIGHT_U && Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U)))
+{
+    <div class="pageheader">
+        @if (Model.Formula_ID.HasValue && Model.Formula_ID.Value > 0)
+        {
+            <h2>@Resource.CPF_Formula_Details<span></span></h2>
+        }
+        else
+        {
+            <h2>@Resource.Add_New_CPF_Formula<span></span></h2>
+        }
+
+        <div class="breadcrumbs">
+            <ol class="breadcrumb">
+                <li>@Resource.You_Are_Here</li>
+                <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+                <li><a href="@Url.Action("ConfigurationMaster", "Payroll")">@Resource.Payroll_Configuration</a></li>
+                <li class="active">@Resource.CPF_Formula</li>
+            </ol>
+        </div>
+    </div>
+    using (Html.BeginForm("CPFFormula", "Payroll", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        <div class="main">
+            <div class="row">
+                <div class="col-md-12">
+                    @if (Model.result != null && Model.result.Code != 0)
+                    {
+
+                        if (Model.result.Code < 0)
+                        {
+                            <div class="alert alert-red">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                        else if (Model.result.Code > 0)
+                        {
+                            <div class="alert alert-success">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                    }
+                    <section class="tile color transparent-black">
+
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.CPF_Formula</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+
+                        <div class="tile-body">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="operation" value="@Model.operation" />
+                            <input type="hidden" name="Formula_ID" value="@Model.Formula_ID" />
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Formula_Name" class="control-label">@Resource.Formula_Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control" name="Formula_Name" id="Formula_Name" value="@Model.Formula_Name">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Formula_Name)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Year" class="control-label">@Resource.Year</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control" name="Year" id="Year" value="@Model.Year">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Year)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Formula_Desc" class="control-label">@Resource.Formula_Desc</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <textarea class="form-control" id="Formula_Desc" name="Formula_Desc" rows="5">@Model.Formula_Desc</textarea>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Formula_Desc)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tile-header transparent">
+                                <h1><strong>@Resource.Variables</strong></h1>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <ul id="Variables" class="nav nav-pills">
+                                        <li style="width:230px"><a href="#" class="color-blue">@FormulaVariable.Employee_Contribution</a></li>
+                                        <li style="width:230px"><a href="#" class="color-blue">@FormulaVariable.Total_CPF_Contribution</a></li>
+                                        <li style="width:230px"><a href="#">@FormulaVariable.Basic_Salary</a></li>
+                                        <li style="width:230px"><a href="#">@FormulaVariable.Bonus</a></li>
+                                        <li style="width:230px"><a href="#">@FormulaVariable.Deduction_Ad_Hoc</a></li>
+                                        <li style="width:230px"><a href="#">@FormulaVariable.Leave_Amount</a></li>
+                                        <li style="width:230px"><a href="#">@FormulaVariable.Allowance</a></li>
+                                        <li style="width:230px"><a href="#">@FormulaVariable.Adjustment_Allowance</a></li>
+                                        <li style="width:230px"><a href="#">@FormulaVariable.Deduction</a></li>
+                                        <li style="width:230px"><a href="#">@FormulaVariable.Adjustment_Deductions</a></li>
+                                        <li style="width:230px"><a href="#">@FormulaVariable.Commission</a></li>
+                                        <li style="width:230px"><a href="#">@FormulaVariable.Overtime</a></li>
+                                        <li style="width:230px"><a href="#">@FormulaVariable.Employee_Age</a></li>
+                                        <li style="width:230px"><a href="#">@FormulaVariable.PR_Years</a></li>
+                                        <li style="width:230px"><a href="#">@FormulaVariable.Current_Date</a></li>
+                                        <li style="width:230px"><a href="#">@FormulaVariable.Local</a></li>
+                                        <li style="width:230px"><a href="#">@FormulaVariable.PR</a></li>
+                                        <li style="width:230px"><a href="#">@FormulaVariable.Employee_Status</a></li>
+                                        <li style="width:230px"><a href="#">@FormulaVariable.Internship</a></li>
+                                        <li style="width:230px"><a href="#">@FormulaVariable.Employee_Residential_Status</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="tile-header transparent">
+                                <h1><strong>@Resource.Symbols</strong></h1>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <ul id="Symbols" class="nav nav-pills">
+                                        <li><a href="#">If</a></li>
+                                        <li><a href="#">Else</a></li>
+                                        <li><a href="#">Else if</a></li>
+                                        <li><a href="#">End if</a></li>
+                                        <li><a href="#">Then</a></li>
+                                        <li><a href="#">></a></li>
+                                        <li><a href="#"><</a></li>
+                                        <li><a href="#">>=</a></li>
+                                        <li><a href="#"><=</a></li>
+                                        <li><a href="#">==</a></li>
+                                        <li><a href="#">&</a></li>
+                                        <li><a href="#">|</a></li>
+                                        <li><a href="#">=</a></li>
+                                        <li><a href="#">+</a></li>
+                                        <li><a href="#">-</a></li>
+                                        <li><a href="#">*</a></li>
+                                        <li><a href="#">/</a></li>
+                                        <li><a href="#">(</a></li>
+                                        <li><a href="#">)</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="tile-header transparent">
+                                <h1><strong>@Resource.Formula</strong></h1>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Formula)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <textarea class="form-control" id="Formula" name="Formula" rows="40">@Model.Formula</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <section class="tile color transparent-white">
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-primary" onclick="return Confirm_Alert('@Model.Formula_ID');">@Resource.Save</button>
+                                    <a href="@Url.Action("ConfigurationMaster", "Payroll", new { tabAction = "cpf" })" class="btn btn-default">@Resource.Back</a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+
+
+
+

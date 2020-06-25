@@ -1,0 +1,88 @@
+﻿@model  Authentication.Models.PageRoleDetailViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@{
+    var i = Model.Index;
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("#Page_Role_Rows_" + @i + "__User_Role_ID").chosen({ disable_search_threshold: 10 });
+        $("#Page_Role_Rows_" + @i + "__Page_ID").chosen({ disable_search_threshold: 10 });
+        InitDatepicker();
+    });
+</script>
+
+<td>
+    @Html.Hidden("Page_Role_Rows[" + i + "].Row_Type", RowType.ADD)
+    <select class="chosen-select chosen-transparent form-control" id="Page_Role_Rows_@(i)__User_Role_ID" name="Page_Role_Rows[@i].User_Role_ID">
+        @foreach (var prow in Model.UserRoleLst)
+        {
+            if (Model.User_Role_ID == NumUtil.ParseInteger(prow.Value))
+            {
+                <option value="@prow.Value" selected>@prow.Text</option>
+            }
+            else
+            {
+                <option value="@(prow.Value != null ? prow.Value : "0")">@prow.Text</option>
+            }
+        }
+    </select>
+</td>
+<td>
+    <select class="chosen-select chosen-transparent form-control" id="Page_Role_Rows_@(i)__Page_ID" name="Page_Role_Rows[@i].Page_ID">
+        @foreach (var prow in Model.PageUrlLst)
+        {
+            if (Model.Page_ID == NumUtil.ParseInteger(prow.Value))
+            {
+                <option value="@prow.Value" selected>@prow.Text</option>
+            }
+            else
+            {
+                <option value="@(prow.Value != null ? prow.Value : "0")">@prow.Text</option>
+            }
+        }
+    </select>
+</td>
+<td class="actions text-center" style="cursor:pointer">
+    <a href="#" id="btnEditDetail-@i" onclick="EditDetail_Onclick('@i')"><i class="fa fa-edit fa-2x"></i></a>
+    <a id="btnOpenDlgDetail-@i" href="#modal-AccessRight-@i" role="button" data-toggle="modal" style="display:none;"></a>
+    <div class="modal fade" id="modal-AccessRight-@i" tabindex="-1" role="dialog" aria-labelledby="modalConfirmAccessRight-@i" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="modalConfirmAccessRight-@i"><strong>@Resource.Access_Right</strong></h3>
+                </div>
+                <div class="modal-body">
+                    @for (var j = 0; j < Model.AccessRightLst.Count; j++)
+                    {
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <div class="col-sm-2">
+                                        <div class="checkbox">                                          
+                                            <input type="checkbox" value="@Model.AccessRightLst[j].Value" id="Access_ID_@i@j" name="Page_Role_Rows[@i].Access_Page_Rows" checked>
+                                            <label for="Access_ID_@i@j"></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-9 text-left">@Model.AccessRightLst[j].Text</div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button id="btnAccessRightSave-@i" type="button" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">@Resource.Save</button>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+        </div>
+    </div>
+</td>
+<td class="actions text-center" style="cursor:pointer">
+    <a data-toggle="modal" onclick="return DeleteRoleInfo_Onclick('brow-@i', @i);" title="@Resource.Delete">
+        <i class="fa fa-times-circle-o fa-2x"></i>
+    </a>
+</td>

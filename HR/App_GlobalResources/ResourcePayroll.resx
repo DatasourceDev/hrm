@@ -1,0 +1,791 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AdditionalInformation" xml:space="preserve">
+    <value>Additional Information</value>
+  </data>
+  <data name="AdditionalPayment" xml:space="preserve">
+    <value>Additional Payment</value>
+  </data>
+  <data name="AGM" xml:space="preserve">
+    <value>AGM</value>
+  </data>
+  <data name="Allowance" xml:space="preserve">
+    <value>Allowance/Deduction</value>
+  </data>
+  <data name="AllowanceType" xml:space="preserve">
+    <value>Allowance Type</value>
+  </data>
+  <data name="AllowanceTypeName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Allowance_" xml:space="preserve">
+    <value>Allowance</value>
+  </data>
+  <data name="Amount" xml:space="preserve">
+    <value>Amount ($)</value>
+  </data>
+  <data name="AmountDeductable" xml:space="preserve">
+    <value>Amount Deductable ($)</value>
+  </data>
+  <data name="AmountPayable" xml:space="preserve">
+    <value>Amount Payable ($)</value>
+  </data>
+  <data name="Amount_" xml:space="preserve">
+    <value>Amount</value>
+  </data>
+  <data name="AssignEmployee" xml:space="preserve">
+    <value>Assign Employee</value>
+  </data>
+  <data name="AssignHR" xml:space="preserve">
+    <value>Assign HR</value>
+  </data>
+  <data name="Authorization" xml:space="preserve">
+    <value>Authorization</value>
+  </data>
+  <data name="BasicSalary" xml:space="preserve">
+    <value>Basic Salary</value>
+  </data>
+  <data name="BasicSalaryDetails" xml:space="preserve">
+    <value>Basic salary details</value>
+  </data>
+  <data name="Bonus" xml:space="preserve">
+    <value>Bonus</value>
+  </data>
+  <data name="BonusAmount" xml:space="preserve">
+    <value>Bonus Amount</value>
+  </data>
+  <data name="BonusIssue" xml:space="preserve">
+    <value>Issue Bonus this month</value>
+  </data>
+  <data name="BreakdownOfAdditionalPayment" xml:space="preserve">
+    <value>Breakdown of Additional Payment</value>
+  </data>
+  <data name="BreakdownOfAllowance" xml:space="preserve">
+    <value>Breakdown of Allowance</value>
+  </data>
+  <data name="BreakdownOfDeductions" xml:space="preserve">
+    <value>Breakdown of Deductions</value>
+  </data>
+  <data name="Calculation" xml:space="preserve">
+    <value>Calculation</value>
+  </data>
+  <data name="Cash" xml:space="preserve">
+    <value>Cash</value>
+  </data>
+  <data name="Cheque" xml:space="preserve">
+    <value>Cheque</value>
+  </data>
+  <data name="ChequeNo" xml:space="preserve">
+    <value>Cheque No</value>
+  </data>
+  <data name="ClaimableAmount" xml:space="preserve">
+    <value>Claimable Amount ($)</value>
+  </data>
+  <data name="Commission" xml:space="preserve">
+    <value>Commission</value>
+  </data>
+  <data name="CommissionDesciption" xml:space="preserve">
+    <value>Commission Desciption</value>
+  </data>
+  <data name="Confirmation" xml:space="preserve">
+    <value>Confirmation</value>
+  </data>
+  <data name="ConfirmationText" xml:space="preserve">
+    <value>Do you confirm to process payroll in selected employee(s)?
+Once comfirmed, the payroll will be auto-generated with default information.</value>
+  </data>
+  <data name="CPFFormula" xml:space="preserve">
+    <value>CPF Formula</value>
+  </data>
+  <data name="Currency" xml:space="preserve">
+    <value>Currency</value>
+  </data>
+  <data name="DAT" xml:space="preserve">
+    <value>.DAT</value>
+  </data>
+  <data name="DateApplied" xml:space="preserve">
+    <value>Date Applied</value>
+  </data>
+  <data name="DateOfPayment" xml:space="preserve">
+    <value>Payroll Run Date</value>
+  </data>
+  <data name="DeductInPayroll" xml:space="preserve">
+    <value>Deduct in Payroll ?</value>
+  </data>
+  <data name="Deductions" xml:space="preserve">
+    <value>Deductions</value>
+  </data>
+  <data name="Department" xml:space="preserve">
+    <value>Department</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Designation" xml:space="preserve">
+    <value>Designation</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="DirectorFee" xml:space="preserve">
+    <value>Director Fee</value>
+  </data>
+  <data name="DonationType" xml:space="preserve">
+    <value>Donation Type</value>
+  </data>
+  <data name="DTL" xml:space="preserve">
+    <value>.DTL</value>
+  </data>
+  <data name="EffectiveDate" xml:space="preserve">
+    <value>Effective Date</value>
+  </data>
+  <data name="EmployeeContribution" xml:space="preserve">
+    <value>Employee's Contribution</value>
+  </data>
+  <data name="EmployeeCPFContribution" xml:space="preserve">
+    <value>Employee's CPF Contribution</value>
+  </data>
+  <data name="EmployeeInformation" xml:space="preserve">
+    <value>Employee Information</value>
+  </data>
+  <data name="EmployeeName" xml:space="preserve">
+    <value>Employee's Name</value>
+  </data>
+  <data name="EmployeeNo" xml:space="preserve">
+    <value>Employee No</value>
+  </data>
+  <data name="EmployerContribution" xml:space="preserve">
+    <value>Employer's Contribution</value>
+  </data>
+  <data name="EmployerCPFContribution" xml:space="preserve">
+    <value>Employer's CPF Contribution</value>
+  </data>
+  <data name="EmployerName" xml:space="preserve">
+    <value>Employer's Name</value>
+  </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>End Date</value>
+  </data>
+  <data name="Expenses" xml:space="preserve">
+    <value>Expenses</value>
+  </data>
+  <data name="ExpensesAmount" xml:space="preserve">
+    <value>Expenses Claimable Amount</value>
+  </data>
+  <data name="ExpensesDate" xml:space="preserve">
+    <value>Expenses Date</value>
+  </data>
+  <data name="ExpensesPeriod" xml:space="preserve">
+    <value>Expenses Period</value>
+  </data>
+  <data name="ExpensesPeriodFrom" xml:space="preserve">
+    <value>Expenses Record Period</value>
+  </data>
+  <data name="ExpensesPeriodTo" xml:space="preserve">
+    <value>To</value>
+  </data>
+  <data name="ExpensesRecord" xml:space="preserve">
+    <value>Expenses Record</value>
+  </data>
+  <data name="ExpensesType" xml:space="preserve">
+    <value>Expenses Type</value>
+  </data>
+  <data name="ExportESubmission" xml:space="preserve">
+    <value>Export E-Submission</value>
+  </data>
+  <data name="ExtraDonations" xml:space="preserve">
+    <value>Extra Donations</value>
+  </data>
+  <data name="FeeAmount" xml:space="preserve">
+    <value>Fee Amount</value>
+  </data>
+  <data name="FileType" xml:space="preserve">
+    <value>File Type</value>
+  </data>
+  <data name="Formula" xml:space="preserve">
+    <value>Formula</value>
+  </data>
+  <data name="Formula_Name" xml:space="preserve">
+    <value>Formula Name</value>
+  </data>
+  <data name="GrossSalary" xml:space="preserve">
+    <value>Gross Salary</value>
+  </data>
+  <data name="GroupName" xml:space="preserve">
+    <value>GroupName</value>
+  </data>
+  <data name="IR8A" xml:space="preserve">
+    <value>IR8A</value>
+  </data>
+  <data name="IssueDirectorFee" xml:space="preserve">
+    <value>Issue Director Fee this month?</value>
+  </data>
+  <data name="Item" xml:space="preserve">
+    <value>Item</value>
+  </data>
+  <data name="LeaveAmount" xml:space="preserve">
+    <value>Leave Amount Deductable</value>
+  </data>
+  <data name="LeavePeriod" xml:space="preserve">
+    <value>Leave Period</value>
+  </data>
+  <data name="LeavePeriodFrom" xml:space="preserve">
+    <value>Leave Record Period</value>
+  </data>
+  <data name="LeavePeriodTo" xml:space="preserve">
+    <value>To</value>
+  </data>
+  <data name="LeaveRecord" xml:space="preserve">
+    <value>Leave Record</value>
+  </data>
+  <data name="LeaveType" xml:space="preserve">
+    <value>Leave Type</value>
+  </data>
+  <data name="ModeOfPayment" xml:space="preserve">
+    <value>Mode of payment</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="NetSalary" xml:space="preserve">
+    <value>Net Salary</value>
+  </data>
+  <data name="NoOfDays" xml:space="preserve">
+    <value>No Of Days</value>
+  </data>
+  <data name="NumberOfHoursWorked" xml:space="preserve">
+    <value>Number of Hours worked</value>
+  </data>
+  <data name="OTFormula" xml:space="preserve">
+    <value>Overtime Formula</value>
+  </data>
+  <data name="OtherAllowancesDeductions" xml:space="preserve">
+    <value>Other Allowances / Deductions</value>
+  </data>
+  <data name="Overtime" xml:space="preserve">
+    <value>Overtime</value>
+  </data>
+  <data name="OvertimeDetails" xml:space="preserve">
+    <value>Overtime details</value>
+  </data>
+  <data name="OvertimeHourWorked" xml:space="preserve">
+    <value>Overtime hour worked</value>
+  </data>
+  <data name="OvertimePay" xml:space="preserve">
+    <value>Overtime Amount Payable</value>
+  </data>
+  <data name="OvertimePaymentRate" xml:space="preserve">
+    <value>Overtime Payment Rate</value>
+  </data>
+  <data name="OvertimePeriod" xml:space="preserve">
+    <value>Overtime period</value>
+  </data>
+  <data name="Payroll" xml:space="preserve">
+    <value>Payroll</value>
+  </data>
+  <data name="PayrollConfiguration" xml:space="preserve">
+    <value>Payroll Configuration</value>
+  </data>
+  <data name="PayrollReport" xml:space="preserve">
+    <value>Payroll Report</value>
+  </data>
+  <data name="Payslip" xml:space="preserve">
+    <value>Payslip</value>
+  </data>
+  <data name="PreviewPayslip" xml:space="preserve">
+    <value>Preview Payslip</value>
+  </data>
+  <data name="Process" xml:space="preserve">
+    <value>Process</value>
+  </data>
+  <data name="ProcessDate" xml:space="preserve">
+    <value>Process Date</value>
+  </data>
+  <data name="ProcessMonth" xml:space="preserve">
+    <value>Process Month</value>
+  </data>
+  <data name="ProcessYear" xml:space="preserve">
+    <value>Process Year</value>
+  </data>
+  <data name="Race" xml:space="preserve">
+    <value>Race</value>
+  </data>
+  <data name="RunDate" xml:space="preserve">
+    <value>Run Date</value>
+  </data>
+  <data name="SelectedCPFFormula" xml:space="preserve">
+    <value>Selected CPF Formula</value>
+  </data>
+  <data name="SelectedOTFormula" xml:space="preserve">
+    <value>Selected OT Formula</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>Start Date</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Summary" xml:space="preserve">
+    <value>Summary</value>
+  </data>
+  <data name="Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="TotalAdditionalPayment" xml:space="preserve">
+    <value>Total additional payment</value>
+  </data>
+  <data name="TotalAllowance" xml:space="preserve">
+    <value>Total Allowance</value>
+  </data>
+  <data name="TotalAmount" xml:space="preserve">
+    <value>Total Amount</value>
+  </data>
+  <data name="TotalBonus" xml:space="preserve">
+    <value>Total Bonus</value>
+  </data>
+  <data name="TotalDeduction" xml:space="preserve">
+    <value>Total Deduction</value>
+  </data>
+  <data name="TotalDirectorFee" xml:space="preserve">
+    <value>Total Director Fee</value>
+  </data>
+  <data name="TotalWorkDays" xml:space="preserve">
+    <value>Days Worked</value>
+  </data>
+  <data name="TXT" xml:space="preserve">
+    <value>.TXT</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="DonationFormula" xml:space="preserve">
+    <value>Donation Formula</value>
+  </data>
+  <data name="SelectedDonationFormula" xml:space="preserve">
+    <value>Selected Donation Formula</value>
+  </data>
+  <data name="AddDonation" xml:space="preserve">
+    <value>Add Donation</value>
+  </data>
+  <data name="DonationDesc" xml:space="preserve">
+    <value>Donation Description</value>
+  </data>
+  <data name="DonationName" xml:space="preserve">
+    <value>Donation Name</value>
+  </data>
+  <data name="MasterDonationType" xml:space="preserve">
+    <value>Master Donation Type</value>
+  </data>
+  <data name="AddExtraDonation" xml:space="preserve">
+    <value>Add Extra Donation</value>
+  </data>
+  <data name="Donation" xml:space="preserve">
+    <value>Donation</value>
+  </data>
+  <data name="ExtraDonation" xml:space="preserve">
+    <value>Extra Donation</value>
+  </data>
+  <data name="MasterExtraDonations" xml:space="preserve">
+    <value>Master Extra donations</value>
+  </data>
+  <data name="ToDate" xml:space="preserve">
+    <value>To Date</value>
+  </data>
+  <data name="PayrollConfiguration1" xml:space="preserve">
+    <value>Payroll Configuration</value>
+  </data>
+  <data name="CPFDeductable" xml:space="preserve">
+    <value>CPF Deductable</value>
+  </data>
+  <data name="CPF" xml:space="preserve">
+    <value>CPF</value>
+  </data>
+  <data name="Formula_Desc" xml:space="preserve">
+    <value>Formula Description</value>
+  </data>
+  <data name="Year" xml:space="preserve">
+    <value>Year</value>
+  </data>
+  <data name="Symbols" xml:space="preserve">
+    <value>Symbols</value>
+  </data>
+  <data name="Variables" xml:space="preserve">
+    <value>Variables</value>
+  </data>
+  <data name="AllowanceAmount" xml:space="preserve">
+    <value>Allowance Amount</value>
+  </data>
+  <data name="DeductionsAmount" xml:space="preserve">
+    <value>Deductions Amount</value>
+  </data>
+  <data name="PayslipSummary" xml:space="preserve">
+    <value>Payslip Summary</value>
+  </data>
+  <data name="Leave" xml:space="preserve">
+    <value>Leave</value>
+  </data>
+  <data name="IR8AInfo" xml:space="preserve">
+    <value>IR8A Information</value>
+  </data>
+  <data name="ApplicableFor" xml:space="preserve">
+    <value>Applicable for</value>
+  </data>
+  <data name="Employee" xml:space="preserve">
+    <value>Employee</value>
+  </data>
+  <data name="HR" xml:space="preserve">
+    <value>HR</value>
+  </data>
+  <data name="NotApplicableFor" xml:space="preserve">
+    <value>Not Applicable for</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Full_Name" xml:space="preserve">
+    <value>Full Name</value>
+  </data>
+  <data name="CPF_File" xml:space="preserve">
+    <value>CPF File</value>
+  </data>
+  <data name="ExportCPF" xml:space="preserve">
+    <value>Export CPF File</value>
+  </data>
+  <data name="Generate" xml:space="preserve">
+    <value>Generate CPF</value>
+  </data>
+  <data name="CPFEmpeList" xml:space="preserve">
+    <value>Employee List</value>
+  </data>
+  <data name="FileGeneratedDate" xml:space="preserve">
+    <value>Generated Date</value>
+  </data>
+  <data name="CPFFileLocalPath" xml:space="preserve">
+    <value>File Local Path</value>
+  </data>
+  <data name="FileName" xml:space="preserve">
+    <value>File Name</value>
+  </data>
+  <data name="CPFGenerateFile" xml:space="preserve">
+    <value>PAT - Submit CPF File</value>
+  </data>
+  <data name="FileTypeCPF" xml:space="preserve">
+    <value>CPF</value>
+  </data>
+  <data name="CPFAddWages" xml:space="preserve">
+    <value>Additional Wages</value>
+  </data>
+  <data name="CPFCont" xml:space="preserve">
+    <value>CPF Contribution</value>
+  </data>
+  <data name="CPFEmpe" xml:space="preserve">
+    <value>CPF Employee</value>
+  </data>
+  <data name="CPFGenerateFileDetail" xml:space="preserve">
+    <value>PAT - CPF Employees List</value>
+  </data>
+  <data name="CPFOrdWages" xml:space="preserve">
+    <value>Ordinary Wages</value>
+  </data>
+  <data name="CPFRace" xml:space="preserve">
+    <value>Race</value>
+  </data>
+  <data name="CPFResStatus" xml:space="preserve">
+    <value>Residential Status</value>
+  </data>
+  <data name="CPFFileConfig" xml:space="preserve">
+    <value>PAT - CPF Configuration</value>
+  </data>
+  <data name="IR8AFileConfig" xml:space="preserve">
+    <value>PAT - IR8A Configuration</value>
+  </data>
+  <data name="ProcessMonthYear" xml:space="preserve">
+    <value>Process Month / Year</value>
+  </data>
+  <data name="SubmissionHistory" xml:space="preserve">
+    <value>Submission History</value>
+  </data>
+  <data name="Submit" xml:space="preserve">
+    <value>Submit CPF File</value>
+  </data>
+  <data name="FileTypeIR8A" xml:space="preserve">
+    <value>IR8A</value>
+  </data>
+  <data name="IR8AGenerateFile" xml:space="preserve">
+    <value>PAT - Submit IR8A File</value>
+  </data>
+  <data name="GeneratedNo" xml:space="preserve">
+    <value>Generated No</value>
+  </data>
+  <data name="IR8A_File" xml:space="preserve">
+    <value>IR8A File</value>
+  </data>
+  <data name="ListOfEmployees" xml:space="preserve">
+    <value>List of employees</value>
+  </data>
+  <data name="CDAC" xml:space="preserve">
+    <value>CDAC</value>
+  </data>
+  <data name="ECF" xml:space="preserve">
+    <value>ECF</value>
+  </data>
+  <data name="MBMF" xml:space="preserve">
+    <value>MBMF</value>
+  </data>
+  <data name="SDL" xml:space="preserve">
+    <value>SDL</value>
+  </data>
+  <data name="SIDA" xml:space="preserve">
+    <value>SIDA</value>
+  </data>
+  <data name="IR8ABonus" xml:space="preserve">
+    <value>Bonus</value>
+  </data>
+  <data name="IR8ACPFDsgnPF" xml:space="preserve">
+    <value>CPF/ Designated pension/ fund</value>
+  </data>
+  <data name="IR8ADirectorsFee" xml:space="preserve">
+    <value>Director's fee</value>
+  </data>
+  <data name="IR8ADonation" xml:space="preserve">
+    <value>Donation</value>
+  </data>
+  <data name="IR8AGenerate" xml:space="preserve">
+    <value>Generate IR8A File</value>
+  </data>
+  <data name="IR8AGenerateFileDetail" xml:space="preserve">
+    <value>PAT - IR8A Employees List</value>
+  </data>
+  <data name="IR8AGrossCommission" xml:space="preserve">
+    <value>Gross Commission</value>
+  </data>
+  <data name="IR8AInsurance" xml:space="preserve">
+    <value>Insurance</value>
+  </data>
+  <data name="IR8AOthers" xml:space="preserve">
+    <value>Others</value>
+  </data>
+  <data name="IR8APension" xml:space="preserve">
+    <value>Pension</value>
+  </data>
+  <data name="IR8ASalary" xml:space="preserve">
+    <value>Salary</value>
+  </data>
+  <data name="IR8ASubmit" xml:space="preserve">
+    <value>Submit IR8A File</value>
+  </data>
+  <data name="IR8ATotalAmount" xml:space="preserve">
+    <value>Total Amount</value>
+  </data>
+  <data name="Adjustment_Addition" xml:space="preserve">
+    <value>Adjustment (Addition)</value>
+  </data>
+  <data name="Adjustment_Deduction" xml:space="preserve">
+    <value>Adjustment (Deduction)</value>
+  </data>
+  <data name="Deduction_Donation" xml:space="preserve">
+    <value>Deduction (Donation)</value>
+  </data>
+  <data name="_PATGenerateUrl" xml:space="preserve">
+    <value>http://app.sbsolutions.com.sg/PAT/</value>
+    <comment>http://demo.bluecube.com.sg/PAT/ | http://app.sbsolutions.com.sg/PAT/</comment>
+  </data>
+  <data name="_sFTPDomainName" xml:space="preserve">
+    <value>pftpsn01.asianconnect.com</value>
+    <comment>pftpsn01.asianconnect.com | tftpsn01.asianconnect.com</comment>
+  </data>
+  <data name="_sFTPKeyFileName" xml:space="preserve">
+    <value>PTR003_openssh.key</value>
+    <comment>PTR003_openssh.key | OpenSSHFile.key</comment>
+  </data>
+  <data name="_sFTPKeyFilePath" xml:space="preserve">
+    <value>D:\BlueCube\PAT\KeyFiles</value>
+  </data>
+  <data name="_sFTPPort" xml:space="preserve">
+    <value>22</value>
+  </data>
+  <data name="_sFTPUploadFilePath" xml:space="preserve">
+    <value>/download/receive/</value>
+  </data>
+  <data name="_sFTPUploadFilePathIR8A" xml:space="preserve">
+    <value>/download/IRASreceive/</value>
+  </data>
+  <data name="_sFTPUserName" xml:space="preserve">
+    <value>ptr003</value>
+    <comment>ptr003 | pat1ftp</comment>
+  </data>
+  <data name="Total_Donation" xml:space="preserve">
+    <value>Donation</value>
+  </data>
+  <data name="Export_All_PDF" xml:space="preserve">
+    <value>Export All to PDF.</value>
+  </data>
+  <data name="NoOfHours" xml:space="preserve">
+    <value>No. Of Hours</value>
+  </data>
+  <data name="HourlyRate" xml:space="preserve">
+    <value>Hourly Rate</value>
+  </data>
+  <data name="HoursWorked" xml:space="preserve">
+    <value>Hours Worked</value>
+  </data>
+  <data name="Allowance_Type" xml:space="preserve">
+    <value>Allowance Type</value>
+  </data>
+  <data name="Amount_Payable" xml:space="preserve">
+    <value>Amount Payable</value>
+  </data>
+  <data name="Days_Worked" xml:space="preserve">
+    <value>Days Worked</value>
+  </data>
+  <data name="Donation_Type" xml:space="preserve">
+    <value>Donation Type</value>
+  </data>
+  <data name="Import_Payroll" xml:space="preserve">
+    <value>Import Payroll</value>
+  </data>
+  <data name="Mode_of_Payment" xml:space="preserve">
+    <value>Mode of Payment</value>
+  </data>
+  <data name="OT_Hours" xml:space="preserve">
+    <value>OT Hours</value>
+  </data>
+  <data name="OT_Rate" xml:space="preserve">
+    <value>OT Rate</value>
+  </data>
+  <data name="NotificationScheduler" xml:space="preserve">
+    <value>Notification Scheduler</value>
+  </data>
+  <data name="Recur_Every" xml:space="preserve">
+    <value>Recur every</value>
+  </data>
+  <data name="Trigger" xml:space="preserve">
+    <value>Trigger</value>
+  </data>
+  <data name="Trigger_Set_Up" xml:space="preserve">
+    <value>Trigger Set Up</value>
+  </data>
+  <data name="Start" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="Time" xml:space="preserve">
+    <value>Time</value>
+  </data>
+</root>

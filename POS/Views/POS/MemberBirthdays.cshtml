@@ -1,0 +1,174 @@
+﻿@using POS.Common;
+@using POS.Models;
+@using SBSModel.Common;
+@using SBSModel.Models;
+@model  POS.Models.POSMemberBirthdayViewModel
+@{
+    ViewBag.Title = "Birthdays";
+    var total = 0M;
+}
+
+<div class="main-content">
+
+
+    <script type="text/javascript">
+
+        function Print_Onclick(receipt_id) {
+
+            var data = { pReceiptID: receipt_id, pUrl: "/POS/Report" };
+            $.ajax({
+                url: '@Url.Action("PrintReport", "POS")',
+                //Passes the content of an input up
+                data: data,
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    if (data != null) {
+                        if (data.Msg !== undefined) {
+                            alert(data.Msg);
+                        } else if (data.ipAddress !== undefined) {
+                            var request = cleanString(data.Message);
+                            sendMessage(request, data.ipAddress);
+                        }
+                    }
+                    CloseProgress();
+                }
+            });
+
+        }
+
+        $(function () {
+            $("#btnExport").click(function () {
+                theForm.action = '@Url.Action("ExportBirthdays", "POS")';
+                theForm.method = 'get';
+                theForm.submit();
+
+
+                theForm.action = '@Url.Action("MemberBirthdays", "POS")';
+                CloseProgress();
+            });
+
+            $("#btnSearch").click(function () {
+
+                var pBirthdate = $('#Search_Birthday_Month').val();
+
+                var url = '@Url.Action("MemberBirthdays", "POS")';
+                $(location).attr('href', url + '?pBirthdate=' + pBirthdate);
+
+                @*theForm.action = '@Url.Action("MemberBirthdays", "POS")';
+                theForm.method = 'get';
+                theForm.submit();*@
+            });
+
+            function getTransactionsByPart(pPartNo, pBatchNo) {
+                
+            };
+
+        });
+
+        function cleanString(message) {
+            var msg = message.split('&gt;').join('>').split('&lt;').join('<').split('&quot;').join('"').split('nline;').join('\x0a');
+            return msg;
+        };
+
+    </script>
+
+
+    <div class="container-fluid padded">
+        <div class="row-fluid">
+            <div class="span12">
+                <div class="box" style='margin-bottom:0;'>
+                    <div class="box-header">
+                        <span class="title">Member Birthdays</span>
+                    </div>
+                    <div class="box-content">
+                        <div class="padded">
+                            @using (Html.BeginForm("MemberBirthdays", "POS", FormMethod.Get, new { @class = "form-horizontal validatable", role = "form", id = "theForm" })) {
+                                @Html.AntiForgeryToken()
+                                <div class="control-group ">
+                                    <div class="span3">
+                                        <div class="control-group ">
+                                            @Html.LabelFor(m => m.Search_Birthday_Month, new { @class = "control-label" })
+                                            <div class="controls">
+                                                <div class="input-append date" id="startdate" data-date="" data-date-format="dd/mm/yyyy">
+                                                    @Html.TextBoxFor(model => model.Search_Birthday_Month, "{0:dd/mm/yyyy}", new { @class = "" })
+                                                    <span class="add-on"><i class="icon-th"></i></span>
+                                                </div>
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(model => model.Search_Birthday_Month)
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="span3">
+                                        <div class="control-group ">
+                                            @Html.LabelFor(m => m.Text_Search, new { @class = "control-label" })
+                                            <div class="controls">
+                                                @Html.TextBoxFor(model => model.Text_Search, new { style = "width:100%" })
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(model => model.Text_Search)
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="span3">
+                                        <div class="control-group ">
+                                            <button type="button" id="btnSearch" class="btn btn-white">@Resources.ResourceMain.Search</button>
+                                        </div>
+                                    </div>
+                                    <div class="span3" style="text-align:right;">
+                                        <div class="control-group ">
+                                            <a class="btn btn-white" href="#" target="_blank" id="btnExport" data-toggle="modal">@Resources.ResourceMain.ExporttoExcel</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            <div id="dataTables">
+                                <table cellpadding="0" cellspacing="0" border="0" class="table table-normal responsive ">
+                                    <thead>
+                                        <tr>
+                                            <th style="display:none;"></th>
+                                            <th>@Resources.ResourcePOS.MemberName</th>
+                                            <th>@Resources.ResourcePOS.MemberCardNo</th>
+                                            <th>@Resources.ResourcePOS.NRICNo</th>
+                                            <th>@Resources.ResourcePOS.PhoneNo</th>
+                                            <th>@Resources.ResourcePOS.Email</th>
+                                            <th>@Resources.ResourcePOS.DOB</th>
+                                            <th>@Resources.ResourcePOS.Credits</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model != null && Model.Members != null && Model.Members.Count > 0) {
+
+                                            foreach (var row in Model.Members) {
+                                                <tr class="status-info">
+                                                    <td>
+                                                        <a href="@Url.Action("MemberPurchases", "POS", new { pMemberID = @row.Member_ID })" target="_blank">@row.Member_Name</a>
+                                                    </td>
+                                                    <td>@row.Member_Card_No</td>
+                                                    <td>@row.NRIC_No</td>
+                                                    <td>@row.Phone_No</td>
+                                                    <td>@row.Email</td>
+                                                    <td>@DateUtil.ToDisplayDate(row.DOB)</td>
+                                                    <td class="text-right">@((row.Credit.HasValue ? row.Credit.Value : 0).ToString("n2"))</td>
+                                                </tr>
+                                            }
+
+                                        }
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+
+

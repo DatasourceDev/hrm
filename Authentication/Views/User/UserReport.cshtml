@@ -1,0 +1,166 @@
+﻿@model Authentication.Models.UserViewModel
+@using Authentication.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using Authentication.Models;
+@using SBSResourceAPI;
+
+@{
+    ViewBag.Title = Resource.User_Report;
+}
+<script type="text/javascript">
+    $(function () {
+        InitDatatable('moduleDataTable', null, null, 0, 'asc');
+    })
+</script>
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+    <div class="pageheader">
+        <h2>@Resource.User_Report<span></span></h2>
+        <div class="breadcrumbs">
+            <ol class="breadcrumb">
+                <li>@Resource.You_Are_Here</li>
+                <li><a href="@Url.Action("Index", "Home")">@Resource.User_Report</a></li>
+                <li class="active">@Resource.User_Report</li>
+            </ol>
+        </div>
+    </div>
+    <div class="main">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- /tile header -->
+                @if (Model.result != null && Model.result.Code != 0)
+                {
+
+                    if (Model.result.Code < 0)
+                    {
+                        <div class="alert alert-red">
+                            @UserSession.GetMsg(Model.result.Code, Model.result.Msg, Model.result.Field)
+                        </div>
+                    }
+                    else if (Model.result.Code > 0)
+                    {
+                        <div class="alert alert-success">
+                            @UserSession.GetMsg(Model.result.Code, Model.result.Msg, Model.result.Field)
+                        </div>
+                    }
+                }
+
+                @using (Html.BeginForm("UserReport", "User", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <section class="tile color transparent-black filter" id="secfilter">
+                        <div class="tile-header transparent">
+                            <h1 onclick="CollapseHeader(null)" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize filter" id="btncollapse"><i class="fa fa-search  color-white"></i></a>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="search_Name" class="control-label">@Resource.Search</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <input type="text" class="form-control" id="search_val" name="search_val" value="@Model.search_val">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.search_val)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <button type="submit" class="btn btn-default">@Resource.Filter</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="tile color transparent-black">
+                        <!-- tile header -->
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.User_Report</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+                        <!-- /tile header -->
+                        <!-- tile body -->
+                        <div class="tile-body ">
+                            <div class="table-responsive">
+                                <table class="table table-datatable table-custom" id="moduleDataTable">
+                                    <thead>
+                                        <tr>
+                                            <th class="sort-alpha">@Resource.Company_Name</th>
+                                            <th class="sort-alpha">@Resource.Full_Name</th>
+                                            <th class="sort-alpha">@Resource.Email</th>
+                                            <th class="sort-alpha">@Resource.Status</th>
+                                            <th class="sort-alpha">@Resource.Date_Of_Registeration</th>
+                                            <th class="sort-alpha">@Resource.Login_Attempt</th>
+                                            <th class="sort-alpha">@Resource.Last_Connection</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.UserList != null)
+                                        {
+                                            foreach (var row in Model.UserList)
+                                            {
+                                                var nameTemp = Model.CompanyList.Where(w => w.Company_ID == row.Company_ID).Select(w => w.Name).FirstOrDefault();
+
+                                                if (!string.IsNullOrEmpty(Model.search_val) && nameTemp != null)
+                                                {
+                                                    if (!nameTemp.Contains(Model.search_val))
+                                                    {
+                                                        continue;
+                                                    }
+                                                }
+
+                                                <tr>
+                                                    <td>
+                                                        @if (row.Company_ID != null && nameTemp != null)
+                                                        {
+                                                            @nameTemp;
+                                                        }
+                                                    </td>
+                                                    <td>@UserSession.getUserName(row)</td>
+                                                    <td>
+                                                        @if (row.User_Authentication != null)
+                                                        {
+                                                            @row.User_Authentication.Email_Address
+                                                        }
+                                                    </td>
+                                                    <td>@row.User_Status</td>
+                                                    <td>@DateUtil.ToDisplayDateTime(row.Registration_Date)</td>
+                                                    <td>
+                                                        @if (row.User_Authentication != null)
+                                                        {
+                                                            @row.User_Authentication.Login_Attempt
+                                                        }
+                                                    </td>
+                                                    <td>@DateUtil.ToDisplayDateTime(row.Latest_Connection)</td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- /tile body -->
+                    </section>
+                }
+            </div>
+        </div>
+    </div>
+}

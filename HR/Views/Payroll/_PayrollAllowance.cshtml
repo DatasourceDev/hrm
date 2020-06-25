@@ -1,0 +1,302 @@
+﻿@model  HR.Models.PayrollViewModels
+@using SBSModel.Models;
+@using HR.Models;
+@using HR.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+    var cbService = new ComboService();
+    var userlogin = UserSession.getUser(Request.RequestContext.HttpContext);
+}
+<script type="text/javascript">
+    function SumAllowance(donotsum) {
+        var total = 0;
+        var allowance = 0;
+        var deductions = 0;
+        var deductionadhoc = 0;
+        var deductiondonation = 0;
+        var allowanceadhoc = 0;
+        var adjustaddition = 0;
+        var adjustdeduction = 0;
+        var bonus = 0;
+        var allowanceaddontobasicsalary = 0;
+
+        var cpf_allowance = 0;
+        var cpf_deductions = 0;
+        var cpf_deductionadhoc = 0;
+        var cpf_deductiondonation = 0;
+        var cpf_allowanceadhoc = 0;
+        var cpf_adjustaddition = 0;
+        var cpf_adjustdeduction = 0;
+        var cpf_bonus = 0;
+        var cpf_allowanceaddontobasicsalary = 0;
+        //Added by sun 09-02-2017
+      
+
+        var rowcount = $('#allowanceDataTable > tbody >tr').length;
+        for (var i = 0; i < rowcount; i++) {
+            var amount = parseFloat($('input[name="Allowance_Rows[' + i + '].Amount"]').val());
+            var opt = $('#Allowance_Rows_' + i + '__PRT_ID').get(0);
+            var type = "";
+            if (opt.options != null) 
+                type = opt.options[opt.selectedIndex].text;
+            else 
+                type = $('#Allowance_Rows_' + i + '__Type').val();
+            
+            var cpfdeducable = $('input[name="Allowance_Rows[' + i + '].CPF_Deduction"]').val().toLowerCase();
+            if (!isNaN(amount)) {
+                if (type == 'Allowance') {
+                   if (cpfdeducable != "false" ) cpf_allowance = cpf_allowance + amount;
+                   allowance = allowance + amount;
+
+                    var prc_id = $('#Allowance_Rows_' + i + '__PRC_ID').val();
+                    if (prc_id == 0) {
+                        if (cpfdeducable != "false" ) cpf_allowanceadhoc = cpf_allowanceadhoc + amount;
+                       allowanceadhoc = allowanceadhoc + amount;
+                    }
+                    total = total + amount;
+                }
+                else if (type == 'Deduction') {
+                    if (cpfdeducable != "false" ) cpf_deductions = cpf_deductions + amount;
+                   deductions = deductions + amount;
+                    var prc_id = $('#Allowance_Rows_' + i + '__PRC_ID').val();
+                    if (prc_id == 0) {
+                        if (cpfdeducable != "false" ) cpf_deductionadhoc = cpf_deductionadhoc + amount;
+                       deductionadhoc = deductionadhoc + amount;
+                    }
+                    total = total - amount;
+                }
+                else if (type == 'Adjustment (Addition)') {
+                    if (cpfdeducable != "false" ) cpf_adjustaddition = cpf_adjustaddition + amount;
+
+                   adjustaddition = adjustaddition + amount;
+                    total = total + amount;
+                }
+                else if (type == 'Adjustment (Deduction)') {
+                    if (cpfdeducable != "false" ) cpf_adjustdeduction = cpf_adjustdeduction + amount;
+
+                   adjustdeduction = adjustdeduction + amount;
+                    total = total - amount;
+                }
+                else if (type == 'Deduction (Donation)') {
+                    if (cpfdeducable != "false" ) cpf_deductiondonation = cpf_deductiondonation + amount;
+
+                   deductiondonation = deductiondonation + amount;
+                    total = total - amount;
+                }
+                else if (type == '@PayrollAllowanceType.Allowance_Add_On_To_Basic_Salary') {
+                    if (cpfdeducable != "false" ) cpf_allowanceaddontobasicsalary = cpf_allowanceaddontobasicsalary + amount;
+                    allowanceaddontobasicsalary = allowanceaddontobasicsalary + amount;
+                }
+                else if (type == '@PayrollAllowanceType.Bonus') {
+                    if (cpfdeducable != "false" ) cpf_bonus = cpf_bonus + amount;
+                    bonus = bonus + amount;
+                    total = total + amount;
+                }
+            }
+        }
+
+        $('#Allowance_Total_Amount').val(formatCurrency(total));
+        $('#Allowance').val(formatCurrency(allowance));
+        $('#Deductions').val(formatCurrency(deductions));
+        $('#Deduction_Adhoc').val(formatCurrency(deductionadhoc));
+        $('#Deduction_Donation').val(formatCurrency(deductiondonation));
+        $('#Allowance_Adhoc').val(formatCurrency(allowanceadhoc));
+        $('#Adjustment_Addition').val(formatCurrency(adjustaddition));
+        $('#Adjustment_Deduction').val(formatCurrency(adjustdeduction));
+
+        $('#Allowance_Add_On_To_Basic_Salary').val(formatCurrency(allowanceaddontobasicsalary));
+
+        //Added by sun 03-01-2018
+        $('#Bonus').val(formatCurrency(bonus));
+
+
+       //Added by Jane for CPF deductable
+        $('#CPF_Allowance').val(formatCurrency(cpf_allowance));
+        $('#CPF_Deductions').val(formatCurrency(cpf_deductions));
+        $('#CPF_Deduction_Adhoc').val(formatCurrency(cpf_deductionadhoc));
+        $('#CPF_Deduction_Donation').val(formatCurrency(cpf_deductiondonation));
+        $('#CPF_Allowance_Adhoc').val(formatCurrency(cpf_allowanceadhoc));
+        $('#CPF_Adjustment_Addition').val(formatCurrency(cpf_adjustaddition));
+        $('#CPF_Adjustment_Deduction').val(formatCurrency(cpf_adjustdeduction));
+        $('#CPF_Bonus').val(formatCurrency(cpf_bonus));
+        SumAll(donotsum);
+    }
+
+    function addNewAllowance() {
+        var rowcount = $('#allowanceDataTable > tbody >tr').length;
+        var data = { pIndex: rowcount, pAllowType: '@PayrollAllowanceType.Allowance_Deduction' };
+        ShowMask();
+        $.ajax({
+            url: '@Url.Action("PayrollNewPRD", "Payroll")',
+            //Passes the content of an input up
+            data: data,
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                var str = '<tr  id="allowanceRow-' + rowcount + '">';
+                str = str + data + '</tr>';
+                $('#allowanceDataTable > tbody').append(str);
+                CloseMask();
+            }
+        });
+    }
+
+    function DeleteAllowance(rowid, index) {
+        if (confirm('@Resource.Confirm_Delete_Msg')) {
+            $('#Allowance_Rows_' + index + '__Row_Type').val('@RowType.DELETE');
+            $('#' + rowid).hide();
+            $('input[name="Allowance_Rows[' + index + '].Amount"]').val(0);
+            SumAllowance();
+        }
+    }
+
+    function PRT_OnChange(opt, control_id, index) {
+        var id = opt.options[opt.selectedIndex].value;
+        var comboenum = '@ComboTypeEnum.PRC';
+        var company_id = '@userlogin.Company_ID';
+        ShowMask();
+        $.ajax({
+            type: 'POST',
+            url: '../Combo/Reload',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ type: comboenum, param: company_id, param2: id }),
+            dataType: 'json',
+            success: function (data) {
+                var result = '';
+                for (var i = 0, iL = data.length; i < iL; i++) {
+                    result += '<option value="' + data[i].Value + '">' + data[i].Text + '</option>';
+                }
+                $('#' + control_id).html(result);
+                $('#' + control_id).trigger("chosen:updated");
+
+                if (data.length > 0)
+                    $('#Allowance_Rows_' + index + '__Description').val(data[0].Desc);
+
+               
+                var opt2 = $('#Allowance_Rows_' + index + '__PRC_ID').get(0);
+                var id2 = opt2.options[opt2.selectedIndex].value;
+                if (id2 > 0)
+                   PRC_OnChange($('#Allowance_Rows_' + index + '__PRC_ID').get(0), index);
+                else {
+                   $('#Allowance_Rows_' + index + '__CPF_Deduction').val(true);
+                   SumAllowance()
+                }
+                
+                CloseMask();
+            }
+        });
+    }
+
+    function PRC_OnChange(opt, index) {
+        var id = opt.options[opt.selectedIndex].value;
+        ShowMask();
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("PayrollLoadPRC", "Payroll")',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ pPrcID: id }),
+            dataType: 'json',
+            success: function (data) {
+               if (data != null) {
+                  $('#Allowance_Rows_' + index + '__Description').val(data.desc);
+                  $('#Allowance_Rows_' + index + '__CPF_Deduction').val(data.deductable);
+               }
+
+                SumAllowance()
+                CloseMask();
+            }
+        });
+    }
+</script>
+<div id="allowance-tab" class="tab-pane fade in">
+    <div class="tile-header">
+        <h1><strong>@Resource.Other_Allowances_Or_Deductions</strong></h1>
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <a id="addAllowanceRow" class="btn btn-greensea  btn-sm add-row" onclick="addNewAllowance()">@Resource.Add_An_Item</a>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-custom" id="allowanceDataTable">
+            <thead>
+                <tr>
+                   <th id="thAllowType" width="25%">@Resource.Allowance_Type</th>
+                   <th id="thAllowName" width="25%">@Resource.Name</th>
+                   <th width="20%">@Resource.Description</th>
+                   <th id="thAllowAmt" width="20%">@Resource.Amount_SymbolDollar</th>
+                   <th width="10%">@Resource.Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Allowance_Rows != null)
+                {
+                    for (var i = 0; i < Model.Allowance_Rows.Length; i++)
+                    {
+                        var row = Model.Allowance_Rows[i];
+                        <tr id="allowanceRow-@i">
+                            @{Html.RenderPartial("_PayrollAllowanceRow", new PayrollDetailViewModel()
+                                  {
+                                      Amount = row.Amount,
+                                      Description = row.Description,
+                                      Index = i,
+                                      Payroll_Detail_ID = row.Payroll_Detail_ID,
+                                      History_Allowance_ID = row.History_Allowance_ID,
+                                      PRC_ID = row.PRC_ID,
+                                      PRM_ID = row.PRM_ID,
+                                      PRT_ID = row.PRT_ID,
+                                      Row_Type = row.Row_Type,
+                                      CPF_Deduction = row.CPF_Deduction,
+                                      prtList = Model.prtallowanceList
+                                  });}
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="row " style="padding-top:30px;">
+        <div class="col-md-8">
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <div class="col-md-12">
+                    <label for="Allowance_Total_Amount" class="control-label">@Resource.Total_Amount</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-8">
+                    <input type="text" class="form-control text-right" id="Allowance_Total_Amount" value="0.00" readonly>
+                </div>
+                <div class="col-md-2">
+                    <label class="control-label">@Model.Company_Currency_Code</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    @*Allowance add-on to basic salary*@
+    <div class="row " style="padding-top:30px;display:none;">
+        <div class="col-md-8">
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <div class="col-md-12">
+                    <label for="Total_Allowance_Basic_Salary" class="control-label">Allowance add-on to basic salary</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-8">
+                    <input type="text" class="form-control text-right" id="Allowance_Add_On_To_Basic_Salary" value="0.00" readonly>
+                </div>
+                <div class="col-md-2">
+                    <label class="control-label"></label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*Added by sun 03-01-2018*@
+    <input type="hidden" id="Bonus" name="Bonus" value="0.00">
+</div>

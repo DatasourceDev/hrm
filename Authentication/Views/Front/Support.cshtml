@@ -1,0 +1,2147 @@
+﻿@using System.Web.Configuration
+@using Authentication.Models;
+@using Authentication.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Models;
+@using SBSResourceAPI;
+@{
+    ViewBag.Title = Resource.Front_Page;
+    ViewBag.ReturnUrl = Url.Action("Index", "Home");
+    Layout = null;
+}
+
+
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+<!--<![endif]-->
+<head>
+
+    <!-- BASICS -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title>@Resource.SBS</title>
+
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/ico" href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/images/favicon.ico" />
+
+    <link href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/css/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/css/vendor/animate/animate.css">
+    <link rel="stylesheet" href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/css/vendor/bootstrap-checkbox.css">
+    <link rel="stylesheet" href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/js/vendor/text-rotator/css/simpletextrotator.css">
+
+    <!-- Important Owl stylesheet -->
+    <link rel="stylesheet" href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/js/vendor/owl-carousel/css/owl.carousel.css">
+    <link rel="stylesheet" href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/js/vendor/owl-carousel/css/owl.theme.css">
+    <link rel="stylesheet" href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/js/vendor/owl-carousel/css/owl.transitions.css">
+
+    <link rel="stylesheet" href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/js/vendor/nivo-lightbox/css/nivo-lightbox.css">
+    <link rel="stylesheet" href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/js/vendor/nivo-lightbox/css/themes/default/default.css" type="text/css" />
+
+    <link rel="stylesheet" href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/js/vendor/datatables/css/dataTables.bootstrap.css">
+    <link rel="stylesheet" href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/js/vendor/datatables/css/ColVis.css">
+    <link rel="stylesheet" href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/js/vendor/datatables/css/TableTools.css">
+
+    <link rel="stylesheet" href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/js/vendor/chosen/css/chosen.min.css">
+    <link rel="stylesheet" href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/js/vendor/chosen/css/chosen-bootstrap.css">
+
+    <!-- CUSTOM STYLE -->
+    <link rel="stylesheet" href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/css/minimal.css">
+
+
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/Scripts/jquery-2.1.4.min.js"></script>
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/Scripts/jquery-ui-1.11.4.min.js"></script>
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/Scripts/app-validate.js"></script>
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/Scripts/app-control.js"></script>
+
+
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery.js"></script>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/js/vendor/bootstrap/bootstrap.min.js"></script>
+
+    @*<script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/js/vendor/skrollr/skrollr.min.js"></script>*@
+
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/js/vendor/text-rotator/jquery.simple-text-rotator.js"></script>
+
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/js/vendor/owl-carousel/owl.carousel.min.js"></script>
+
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/js/vendor/nivo-lightbox/nivo-lightbox.min.js"></script>
+
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/js/vendor/tweet-js/jquery.tweet.min.js"></script>
+
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/js/vendor/vticker/jquery.vticker.min.js"></script>
+
+    @*<script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/js/vendor/jflickrfeed/jflickrfeed.min.js"></script>*@
+
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/js/vendor/appear/jquery.appear.js"></script>
+
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/js/vendor/parallax/jquery.parallax-1.1.3.js"></script>
+
+
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/frontpage/assets/js/minimal.min.js"></script>
+
+
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/js/vendor/chosen/chosen.jquery.min.js"></script>
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/js/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/js/vendor/datatables/ColReorderWithResize.js"></script>
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/js/vendor/datatables/colvis/dataTables.colVis.min.js"></script>
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/js/vendor/datatables/tabletools/ZeroClipboard.js"></script>
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/js/vendor/datatables/tabletools/dataTables.tableTools.min.js"></script>
+    <script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/js/vendor/datatables/dataTables.bootstrap.js"></script>
+
+    <link rel="stylesheet" href="~/css/lightbox.min.css">
+    <style>
+        .thumbnail {
+            width: 400px;
+        }
+
+            .thumbnail img {
+                max-height: 100%;
+                max-width: 100%;
+            }
+    </style>
+</head>
+
+<body>
+
+    <script type="text/javascript">
+        function Solution_Onclick() {
+            $("#secSolution").show();
+        }
+    </script>
+
+    <!-- Preloader -->
+    <div class="mask"><div id="loader"></div></div>
+
+    <!-- BEGIN NAVBAR -->
+    <div class="navbar navbar-fixed-top" role="navigation" data-0="line-height:80px; height:80px;-webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);" data-300="line-height:40px; height:40px;-webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">
+
+        <div class="container">
+            <!-- Branding -->
+            <div class="navbar-header">
+                <a class="navbar-brand" href="@Url.Action("Front", "Front")">
+                </a>
+                <div class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <a href="#">
+                        <i class="fa fa-bars"></i>
+                    </a>
+                </div>
+            </div>
+            <!-- Branding end -->
+
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="@Url.Action("Front", "Front")" data-0="padding: 30px 25px 22px;border-bottom-width:4px;" data-100="padding: 24px 25px 16px;border-bottom-width:3px;" data-200="padding: 15px 25px 12px;border-bottom-width:2px;" data-300="padding: 15px 25px 10px;border-bottom-width:1px;">@Resource.FrontEnd_Home</a>
+
+                    </li>
+                    <li>
+                        <a href="@Url.Action("Feature", "Front")" data-0="padding: 30px 25px 22px;border-bottom-width:4px;" data-100="padding: 24px 25px 16px;border-bottom-width:3px;" data-200="padding: 15px 25px 12px;border-bottom-width:2px;" data-300="padding: 15px 25px 10px;border-bottom-width:1px;">@Resource.FrontEnd_Feature</a>
+
+                    </li>
+                    <li>
+                        <a href="@Url.Action("Pricing", "Front")" data-0="padding: 30px 25px 22px;border-bottom-width:4px;" data-100="padding: 24px 25px 16px;border-bottom-width:3px;" data-200="padding: 15px 25px 12px;border-bottom-width:2px;" data-300="padding: 15px 25px 10px;border-bottom-width:1px;">@Resource.FrontEnd_Pricing</a>
+
+                    </li>
+                    <li>
+                        <a href="@Url.Action("FreeTrial", "Front")" data-0="padding: 30px 25px 22px;border-bottom-width:4px;" data-100="padding: 24px 25px 16px;border-bottom-width:3px;" data-200="padding: 15px 25px 12px;border-bottom-width:2px;" data-300="padding: 15px 25px 10px;border-bottom-width:1px;">@Resource.FrontEnd_FreeTrial</a>
+
+                    </li>
+                    <li>
+                        <a href="@Url.Action("Support", "Front")" data-0="padding: 30px 25px 22px;border-bottom-width:4px;" data-100="padding: 24px 25px 16px;border-bottom-width:3px;" data-200="padding: 15px 25px 12px;border-bottom-width:2px;" data-300="padding: 15px 25px 10px;border-bottom-width:1px;">@Resource.FrontEnd_Support</a>
+
+                    </li>
+                    <li>
+                        <a href="@Url.Action("Front", "Front")" data-0="padding: 30px 25px 22px;border-bottom-width:4px;" data-100="padding: 24px 25px 16px;border-bottom-width:3px;" data-200="padding: 15px 25px 12px;border-bottom-width:2px;" data-300="padding: 15px 25px 10px;border-bottom-width:1px;">@Resource.FrontEnd_Login</a>
+
+                    </li>
+                    @*<li class="search"><input type="text" placeholder="&#61442;" data-0="margin-top:23px" data-300="margin-top:10px"></li>*@
+                </ul>
+            </div><!--/.navbar-collapse -->
+        </div>
+    </div>
+    <!-- END NAVBAR -->
+    <!-- BEGIN BREADCRUMBS -->
+    <div id="breadcrumbs" class="breadcrumbs  bg-breadcrumb">
+        <div class="container">
+
+            @*<ol class="breadcrumb">
+                <li><a href="@Url.Action("Front", "Front")">@Resource.Home</a></li>
+                <li class="active">@Resource.FrontEnd_Support</li>
+            </ol>*@
+            <div class="row">
+                <div class="col-sm-6">
+                    <h2><strong>@Resource.FrontEnd_Support</strong></h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="section">
+        <div class="container">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-3 col-sm-3">
+                        <ul class="tabs-menu">
+                            <li class="active">
+                                <a href="#tab_1" data-toggle="tab">1. Setup employee account</a>
+                            </li>
+                            <li>
+                                <a href="#tab_2" data-toggle="tab">2. Leave configuration</a>
+                            </li>
+                            <li>
+                                <a href="#tab_3" data-toggle="tab">3. Expense configuration</a>
+                            </li>
+                            <li>
+                                <a href="#tab_4" data-toggle="tab">4. Payroll configuration</a>
+                            </li>
+                            <li>
+                                <a href="#tab_5" data-toggle="tab">5. Payroll processing</a>
+                            </li>
+                            <li>
+                                <a href="#tab_6" data-toggle="tab">6. Setup PAT (Singapore only)</a>
+                            </li>
+                        </ul>
+
+                    </div>
+                    <div class="col-md-9 col-sm-9">
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="tab_1">
+                                <div class="row">
+                                    <b>Setup your employee account with their personal profile and employment details</b>
+                                    Create the specified number of employee accounts based on your company’s manpower size. Then create individual employee profile, employment records, and upload the relevant documents for future reference.
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/1.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/1.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>1.	Set Up Company Details</b>
+                                            <ul>
+                                                <li>
+                                                    To get started, the company administrator needs to configure company first before creating employee accounts.
+                                                </li>
+                                                <li>
+                                                    Go to the Configuration icon at top right hand of the page, next to your profile picture, and click on “General Configuration” tab.
+                                                </li>
+                                                <li>
+                                                    Check that the company details are correct under “Company” tab.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <b>2.	Configure Company Branches (where applicable)</b>
+                                            <ul>
+                                                <li>
+                                                    Under “Branch” tab, click on “Add New Item” button to create new branches.
+                                                </li>
+                                                <li>
+                                                    Key in branch code, branch name, branch description and select “Active” for branch status.
+                                                </li>
+                                                <li>
+                                                    Click on “Save Change” button to apply changes.
+                                                </li>
+                                                <li>
+                                                    The new branches will appear in the list. You can click on the pencil icon to make changes; or click on the close icon to remove existing records.  
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/2.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/2.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>3.	Configure Employee No. Pattern</b>
+                                            <ul>
+                                                <li>
+                                                    Under “Employee No. Pattern” tab, select a specific Employee’s Pattern (also known as Employee’s number) based on the available formats provided*.
+                                                </li>
+                                                <li>
+                                                    Click on “Save” button to apply changes.
+                                                </li>
+                                                <li>
+                                                    Note: Employee No. Pattern can only be configured once. Once the selected Pattern has been saved and created, company is not able to change the Pattern. So, please choose and decide carefully!
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <b>4.	Configure Company Other Information</b>
+                                            <ul>
+                                                <li>
+                                                    Under “Department” tab, click on “Add New Item” button to add new departments, click on “Save” button to apply changes
+                                                </li>
+                                                <li>
+                                                    Under “Designation” tab, click on “Add New Item” button to add new designation, click on “Save Change” button to apply changes
+                                                </li>
+                                                <li>
+                                                    Under “Fiscal Year” tab, select or customise fiscal year, click on “Save” button to apply changes
+                                                </li>
+                                                <li>Under “Working Days” tab, select for working days and working hours, and set up for lunch time period</li>
+                                                <li>Under “Exchange Rate” tab, key in year and click on “Add New Item” button to add new exchange rate, click on “Save” button to apply change</li>
+                                                <li>Company Administrator is also able to configure the Department, Designation, Company’s Fiscal Year and Working Days </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/4.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/4.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/5.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/5.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>5.	Create Employee Account</b>
+                                            <ul>
+                                                <li>
+                                                    Click on “Employee” at the left menu bar and select “Employee” sub menu.
+                                                </li>
+                                                <li>
+                                                    Click on “Add New Employee” button to create employees.
+                                                </li>
+                                                <li>
+                                                    Key in the name and email address of the employee (phone number is optional) under “User Account” tab.
+                                                </li>
+                                            </ul>
+                                            <span>
+                                                <b>How to import employee list</b>
+                                                Tired of keying your employee records one-by-one? You can create multiple employee accounts by importing all employee data from excel file directly in the system.
+                                            </span>
+                                            <ul>
+                                                <li>First of all, download the “Employee List” excel template, and insert all the details in the document according to the field names.  </li>
+                                                <li>After the excel sheet is prepared, login into the system and click on the “Employee” link at the left menu bar.  </li>
+                                                <li>Click on the “Import” button beside “Add New Employee” button </li>
+                                                <li>Thereafter, click on the “Upload” button to upload the excel sheet from your local disk. Subsequently click on the “Validate File” button to validate the excel format. </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <b>6.	Assign Module to Employee</b>
+                                            <ul>
+                                                <li>
+                                                    Move to the “Access Right” tab, select the relevant ‘module’ to asign to the Employee.
+                                                </li>
+
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/6.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/6.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/7.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/7.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>7.	Assign User Role to Employee</b>
+                                            <ul>
+                                                <li>
+                                                    Move to the “User Role” tab, select the relevant ‘User Role’ that should be tagged to the employee with reference to the role descriptions.
+                                                </li>
+
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <b>8.	Input Employee Particulars</b>
+                                            Scroll down the page, HR staff can update all employees’ personal details under “Personal Information” tab.
+                                            <ul>
+                                                <li>
+                                                    “Donation Opt Out” will affect the payroll and should only be selected when the employee wish to opt out from the monthly Fund Contribution scheme  (eg. CDAC)
+                                                </li>
+                                                <li>
+                                                    Select the CPF contribution rate accordingly for Singapore Permanent Residents (SPR)
+                                                </li>
+                                                <li>To select “Foreigner” for the “Residential Status” when employee is not Singaporean or SPR, and the options for Work Pass Type will be made available to user.  </li>
+                                                <li>HR staff can also upload employees’ photos by clicking on the photo image.</li>
+
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/8.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/8.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/9.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/9.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>9.	Input Employment History</b>
+                                            <ul>
+                                                <li>
+                                                    Move to “Employment History” tab and click on “Add New Item” button to create new employment records.
+                                                </li>
+                                                <li>
+                                                    Key in employee’s designation / department / effective date / salary etc, scroll down the page to “Allowance” where you can add regular allowance or deduction for the particular employee, to “Woking Days” and “Working Hours” where you can update individual employee’s working time.
+                                                </li>
+                                                <li>
+                                                    Click on “Save” button to apply changes. The records will appear in the employment history list. You can click on the pencil icon to make changes; or click on the close icon to remove existing records.  
+                                                </li>
+                                                <li>
+                                                    Note: When there is change in the employment information such as change in Employment Type, Designation or Salary, you can just add a new employment record with the new information and effective date. The system will tap on the latest salary record for payroll computation based on the effective date.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <b>10.	Input Other details</b>
+                                            <ul>
+                                                <li>
+                                                    Move to  “Other Contacts” tab where HR staff can enter employee’s address and emergency contact.
+                                                </li>
+                                                <li>
+                                                    Under “Bank Information” tab, HR staff can enter employee’s bank details for easy reference
+                                                </li>
+                                                <li>
+                                                    Under “Attachment” tab, HR staff can upload documents like the employee’s resume. Click on “Upload File” button to capture file(s) uploaded.
+                                                </li>
+                                                <li>o	Under the “Family Member” tab, HR staff can enter particulars of the employee’s family members. Click on “Save Change” button to create new family members.</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/10.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/10.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/11.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/11.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>11.	Finish Setup</b>
+                                            <ul>
+                                                <li>
+                                                    Under “Employee No. Pattern” tab, select a specific Employee’s Pattern (also known as Employee’s number) based on the available formats provided*.
+                                                    As this is the last group of information to be updated, user has to click on “Save” button to save all information. The new records will appear in the employee list. You can click on the pencil icon to make changes.
+                                                </li>
+
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <b>12.	Activate Employee Account</b>
+                                            <ul>
+                                                <li>
+                                                    The email used for registeration will receive account activation email, click the url inside the email to activate the account.
+                                                </li>
+
+                                            </ul>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/12.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/12.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="tab_2">
+                                <div class="row"><b>Configure leave setting with holiday & event</b>
+                                    Create or import public holidays and/or company events, which will appear in calendar on Dashboard.</div>
+                                <div class="row">
+                                    <b>1.	Setup Holiday & Event</b>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-1.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-1.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>1.1.	Go To Leave Configuration</b>
+                                            <ul>
+                                                <li>
+                                                    Go to the Configuration icon at the top right hand of the page, next to your profile picture, and click on “Leave Configuration” tab.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>1.2.	Create New Holiday&Event</b>
+                                            <ul>
+                                                <li>
+                                                    Under “Holiday & Event” tab, click on “Add New Item” button to create a new holiday or event.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-1.2.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-1.2.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-1.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-1.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>1.3.	Finish Setup</b>
+                                            <ul>
+                                                <li>
+                                                    Click on “Save Change” button to apply changes.
+                                                </li>
+                                                <li>The records will appear in the holiday&event list and the respective dates will be reflected in dashboard calendar. </li>
+                                                <li>
+                                                    You can click on the pencil icon to make changes; or click on the close icon to remove existing records.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <b>2.	Update Default Leave Type </b>
+                                        System provides a list of common used leave types as default leave types; users can update the list accordingly.
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>2.1.	Go To Leave Configuration </b>
+                                            <ul>
+                                                <li>
+                                                    Go to the Configuration icon at the top right hand of the page, next to your profile picture, and click on “Leave Configuration” tab.
+                                                </li>
+                                                <li>The records will appear in the holiday&event list and the respective dates will be reflected in dashboard calendar. </li>
+
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-1.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-1.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-2.2.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-2.2.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>2.2.	Edit Default Leave Type </b>
+                                            <ul>
+                                                <li>
+                                                    Under “Leave Type” tab, you can edit existing default leave type at “Default Leave Type”section by clicking on the pencil icon.
+                                                </li>
+                                                <li>The records will appear in the holiday&event list and the respective dates will be reflected in dashboard calendar. </li>
+                                                <li>To activate Maternity / Paternity leave for applicable employees, please go to the employee detail page “Personal Information” tab, set “Marital Status” as “Married”. And go to “Family Member” tab to add in baby’s name, relationship (”Daughter” or “Son”), child type (must be “Own Child”) and date of birth.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>2.3.	Finish Setup </b>
+                                            <ul>
+                                                <li>
+                                                    Update the setting and click on “Save” button to apply changes.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-2.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-2.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <b>3.	Setup Customized Leave Type  </b>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-1.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-1.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>3.1. go to leave configuration</b>
+                                            <ul>
+                                                <li>
+                                                    Go to the Configuration icon at the top right hand of the page, next to your profile picture, and click on “Leave Configuration” tab.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>3.2.	Create New Leave Type</b>
+                                            <ul>
+                                                <li>
+                                                    Under “Leave Type” tab, scroll down the page to “Customized Leave Type” section, you can add new leave types to employee’s entitlement by clicking on “Add New Item” button.
+                                                </li>
+                                                <li>Key in the name of the new leave type and leave description, configure the leave type accordingly.  </li>
+                                                <li>You can set the requirement for employees to upload relevant documents, such as medical certificate when they apply leave via the system  </li>
+                                                <li>You are also able to tag the leave type to employee based on the following formats: By Designation and/or By Employee  </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-1.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-1.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-3.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-3.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>3.3.	Assign Leave Type By Designation</b>
+                                            <ul>
+                                                <li>
+                                                    Under “By Designation” tab, click on “Add New Item” button to set no. of leave days based on employee’s designation. Click “Save Change” button to apply changes.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>3.4.	Assign Leave By Employee</b>
+                                            <ul>
+                                                <li>
+                                                    Under “By Employee” tab, click on “Add New Item” button to set no. of leave days based on individual employee. You can add or deduct specific number of days from the leave entitlement of a particular employee. Subsequently, you can just click on the close icon to delete the record.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-3.4.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-3.4.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-3.5.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-3.5.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>3.5.	Finish Setup</b>
+                                            <ul>
+                                                <li>
+                                                    Click on “Save” button to apply changes. The new records will appear in the customized leave type list. You can click on the pencil icon to make changes; or click on the close icon to remove existing records.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <b>4.	Add Leave Adjustment   </b>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>4.1.	Go To Leave Configuration</b>
+                                            <ul>
+                                                <li>
+                                                    Go to the Configuration icon at the top right hand of the page, next to your profile picture, and click on “Leave Configuration” tab.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-1.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-1.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.2.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.2.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>4.2.	Create New Leave Adjustment</b>
+                                            <ul>
+                                                <li>
+                                                    Under “Leave Adjustment” tab, click on “Add New Item” button to add additional leave adjustment for employee.
+                                                </li>
+                                                <li>Select the department / employee / leave type, and key in the adjustment amount (no. of days) / year of entitlement and the reason for that adjustment.  </li>
+                                                <li>Click “Save” button to apply changes. The new records will appear in the leave adjustment list. You can click on the pencil icon to make changes; or click on the close icon to remove existing records. </li>
+
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>4.3.	Click “Save” button to apply changes</b>
+                                            <ul>
+                                                <li>
+                                                    The new records will appear in the leave adjustment list. You can click on the pencil icon to make changes; or click on the close icon to remove existing records.  
+                                                </li>
+
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <b>5.	Setup Leave Approval  </b>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>5.1.	Go To Leave Configuration</b>
+                                            <ul>
+                                                <li>
+                                                    Go to the Configuration icon at the top right hand of the page, next to your profile picture, and click on “Leave Configuration” tab.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>5.2.	Create New Leave Approval</b>
+                                            <ul>
+                                                <li>
+                                                    Under “Leave Approval” tab, click on “Add New Item” button to create new approval workflow.
+                                                </li>
+                                                <li>
+                                                    Select the department(s), the list of employees for the selected department(s) will be displayed.
+                                                </li>
+                                                <li>
+                                                    Select the employee(s) and click on the right-arrow button to confirm that this leave approval workflow is applicable for the selected employee(s).  
+                                                </li>
+                                                <li>
+                                                    At “Approver” section, click on “Add New Item” to select multiple approval approver(s)*.
+                                                    Note: The approval levels will be based on the order the approvers are selected.
+                                                    At “Reviewer” section, you can create reviewer(s) by clicking “Add New Item” to select the reviewer of the leave approval process*.
+                                                    Note: The reviewer will not be able to approve or reject any leave application.
+
+                                                </li>
+                                                <li>
+                                                    Click on “Save” button to apply changes. The new records will appear in the leave approval workflow list. You can click on the pencil icon to make changes; or click on the close icon to remove existing records.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>5.2.	Create New Leave Approval</b>
+                                            <ul>
+                                                <li>
+                                                    Under “Leave Approval” tab, click on “Add New Item” button to create new approval workflow.
+                                                </li>
+                                                <li>
+                                                    Select the department(s), the list of employees for the selected department(s) will be displayed.
+                                                </li>
+                                                <li>
+                                                    Select the employee(s) and click on the right-arrow button to confirm that this leave approval workflow is applicable for the selected employee(s).  
+                                                </li>
+                                                <li>
+                                                    At “Approver” section, click on “Add New Item” to select multiple approval approver(s)*.
+                                                    Note: The approval levels will be based on the order the approvers are selected.
+                                                    At “Reviewer” section, you can create reviewer(s) by clicking “Add New Item” to select the reviewer of the leave approval process*.
+                                                    Note: The reviewer will not be able to approve or reject any leave application.
+
+                                                </li>
+                                                <li>
+                                                    Click on “Save” button to apply changes. The new records will appear in the leave approval workflow list. You can click on the pencil icon to make changes; or click on the close icon to remove existing records.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" id="tab_3">
+                                <div class="row">
+                                    <b>1.	Configure Expenses Category </b>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>1.1.	Go To Expense Configuration</b>
+                                            <ul>
+                                                <li>
+                                                    Go to the Configuration icon at the top right hand of the page, next to your profile picture, and click on “Expenses Configuration”.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>1.2.	Create New Expense Category</b>
+                                            <ul>
+                                                <li>
+                                                    Under “Expenses Category” tab, click on “Add New Item” to create new expenses categories. Key in the category name and description.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>1.3.	Finish Setup</b>
+                                            <ul>
+                                                <li>
+                                                    Click on “Save” button to apply changes. The new records workflow will appear in the leave approval list. You can click on the pencil icon to make changes; or click on the close icon to remove existing records.  
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row"><b>2.	Configure Expenses Type   </b></div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>2.1.	Go To Expense Configuration</b>
+                                            <ul>
+                                                <li>
+                                                    Go to the Configuration icon at the top right hand of the page, next to your profile picture, and click on “Expenses Configuration”.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>2.2.	Create New Expense Type</b>
+                                            <ul>
+                                                <li>
+                                                    Under “Expenses Type” tab, click on “Add New Item” button to create new expense type.
+                                                </li>
+                                                <li>Key in name and detail of the new expense type, you are able to set the amount that per employee or per department is entitled for that particular expense type.  </li>
+
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>2.3.	Assign Expense Type Per Department</b>
+                                            <ul>
+                                                <li>
+                                                    Select “Per Department” from “Claim Type” dropdown list, “Department” field is enabled to select the specific department.
+                                                </li>
+                                                <li>
+                                                    Click on “Add New Item” button to set total claimable amount and maximum amount to be claimed each time.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>2.4.	Assign Expense Type Per Employee</b>
+                                            <ul>
+                                                <li>
+                                                    Select “Per Employee” from “Claim Type” dropdown list
+                                                </li>
+                                                <li>
+                                                    Click on “Add New Item” button to set total claimable amount and maximum amount to be claimed each time.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>2.5.	Finish Setup</b>
+                                            <ul>
+                                                <li>
+                                                    Click on “Save” button to apply changes. The new records will appear in the expense type list. You can click on the pencil icon to make changes; or click on the close icon to remove existing records.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <b>3.	Configure Expenses Approval   </b>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>3.1.	Go To Expense Configuration</b>
+                                            <ul>
+                                                <li>
+                                                    Go to the Configuration icon at the top right hand of the page, next to your profile picture, and click on “Expenses Configuration”.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>3.2.	Create New Expense Approval</b>
+                                            <ul>
+                                                <li>
+                                                    Under “Expenses Approval” tab, click on “Add New Item” button to configure the expense approval workflow.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>3.3.	Select Applicable Departments</b>
+                                            <ul>
+                                                <li>
+                                                    Select the department(s), the list of employees for the selected department(s) will be displayed.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>3.4.	Select Applicable Employees</b>
+                                            <ul>
+                                                <li>
+                                                    Select the employee(s) and click on the right-arrow button to confirm that this leave approval workflow is applicable for the selected employee(s).
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>3.5.	Select Applicable Employees</b>
+                                            <ul>
+                                                <li>
+                                                    At “Approver” section, click on “Add New Item” to select multiple approval approver(s)*.
+                                                </li>
+                                                <li>At “Reviewer” section, you can create reviewer(s) by clicking “Add New Item” to select the reviewer of the leave approval process*. </li>
+                                                <li>Note: The approval levels will be based on the order the approvers are selected</li>
+                                                <li>Note: The reviewer will not be able to approve or reject any leave application. </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>3.6.	Finish Setup</b>
+                                            <ul>
+                                                <li>
+                                                    Click on “Save” button to apply changes
+                                                </li>
+                                                <li>The new records will appear in the expense approval workflow list. You can click on the pencil icon to make changes; or click on the close icon to remove existing records. </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="tab_4">
+                                <div class="row">
+                                    <b>1.	Allowance/Deduction</b>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>1.	Allowance/Deduction</b>
+                                            <ul>
+                                                <li>
+                                                    Go to the Configuration icon at the top right hand of the page, next to your profile picture, and click on “Payroll Configuration”.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>1.1.	Go To Payroll Configuration</b>
+                                            <ul>
+                                                <li>
+                                                    Go to the Configuration icon at the top right hand of the page, next to your profile picture, and click on “Payroll Configuration”.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>1.2.	Create New Allowance / Deduction</b>
+                                            <ul>
+                                                <li>
+                                                    Under “Allowance/Deduction” tab, click on “Add New Item”create a new allowance/deduction for employees.
+                                                </li>
+                                                <li>
+                                                    Key in a name for the allowance/deduction type in the “Name” field.
+                                                </li>
+                                                <li>
+                                                    Select the allowance/deduction type by clicking on the dropdown list of the “Type” field.  
+                                                </li>
+                                                <li>
+                                                    Key in a general description for that particular allowance /deduction type in the “Description” field.
+                                                </li>
+                                                <li>
+                                                    Select the department(s) for that particular allowance/deduction type.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>1.3.	Click on “Save Change” </b>
+                                            <ul>
+                                                <li>
+                                                    The new records will appear in the allowance/deduction type list. You can click on the pencil icon to make changes; or click on the close icon to remove existing records.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row"><b>2.	Donation    </b></div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>2.1.	Go To Payroll Configuration</b>
+                                            <ul>
+                                                <li>
+                                                    Go to the Configuration icon at the top right hand of the page, next to your profile picture, and click on “Payroll Configuration” tab.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>2.2.	Activate Donation</b>
+                                            <ul>
+                                                <li>
+                                                    Under “Donation” tab, click on the pencil icon to activate the respective monthly Fund Contribution scheme(s) for employees.
+                                                </li>
+                                                <li>Key in the effective date i.e. 1st January of the year of subscription or the effective date of change. </li>
+
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>2.3.	Confirm Save</b>
+                                            <ul>
+                                                <li>
+                                                    Click on “Save” button at the bottom of the page.
+                                                    You will be asked “Do you want to proceed with the change?” to confirm the selection.
+                                                </li>
+
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>2.4.	Finish Setup</b>
+                                            <ul>
+                                                <li>
+                                                    will Click on “Ok” button to confirm. Upon confirmation, a “√” will appear alongside the selected Fund Contribution scheme.
+                                                    Note: If an employee wish to contribute to any other Fund Contribution scheme, HR staff can add a separate donation for that particular employee under Payroll Management.
+                                                </li>
+
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <b>3.	CPF Formula   </b><br />
+                                    During the initial set-up or when there are changes to the CPF contribution and allocation rates, HR staff can activate the CPF formula accordingly.
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>3.1.	Go To Payroll Configuration</b>
+                                            <ul>
+                                                <li>
+                                                    Go to the Configuration icon at the top right hand of the page, next to your profile picture, and click on “Payroll Configuration” tab.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>3.2.	Activate CPF formula</b>
+                                            <ul>
+                                                <li>
+                                                    Under “CPF Formula” tab, click on the pencil icon to activate the selected CPF formula.
+                                                </li>
+                                                <li>
+                                                    Enter the effective date i.e. 1st January of the year of subscription or the effective date of CPF changes.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>3.3.	Click “Save” at the bottom of the page. </b>
+                                            <ul>
+                                                <li>
+                                                    User will be asked “Do you want to proceed with the change?” to confirm the selection.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>3.4.	Click on “Ok” button to confirm.</b>
+                                            <ul>
+                                                <li>
+                                                    Upon confirmation, a “√” will appear alongside the selected CPF
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row"><b>4.	Authorization   </b></div><hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>4.1.	Go to the Configuration </b>
+                                            <ul>
+                                                <li>
+                                                    Go to the Configuration icon at the top right hand of the page, next to your profile picture, and click on “Payroll Configuration” tab.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div><hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>4.2.	Create New Authorization</b>
+                                            <ul>
+                                                <li>
+                                                    Under “Authorization”, click on “Add New Item” button to create an authorization workflow.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div><hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>4.3.	Select Applicable Departments </b>
+                                            <ul>
+                                                <li>
+                                                    Select the department(s), the list of employees for the selected department(s) will be displayed.  
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>4.4.	Select Applicable Employees</b>
+                                            <ul>
+                                                <li>
+                                                    Select the employee(s) and click on the right-arrow button to confirm that this authorization workflow is applicable for the selected employee(s).
+                                                </li>
+
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>4.5.	Configure HR </b>
+                                            <ul>
+                                                <li>
+                                                    Select the relevant HR person-in-charge, i.e. the HR officer to process the payroll for the employees selected above.
+                                                </li>
+
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>4.6.	Finish Setup </b>
+                                            <ul>
+                                                <li>
+                                                    Click on “Save” button to apply changes. The new records will appear in the authorization list. You can click on the pencil icon to make changes; or click on the close icon to remove existing records.  
+                                                </li>
+
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="tab_5">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>1.	Go To Payroll </b>
+                                            <ul>
+                                                <li>
+                                                    Click on “Payroll” at the left menu bar and select the “Payroll” sub menu. In Payroll page, all employees’ payroll will appear in the list.
+                                                </li>
+
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+
+                                            <b>2.	Amend Payroll Before Processing</b>
+                                            <ul>
+                                                <li>
+                                                    To amend some employees’ payroll before processing it, click on the pencil icon alongside each employee.
+                                                    •	You can generate all relevant leave records under “Leave Record” tab by selecting start date / to date and clicking on “Retrieve” button*.
+                                                    •	You can generate all relevant expense records under “Expenses Record” tab by selecting start date / to date and clicking on “Retrieve” button*.
+                                                    •	You can record in overtime allowance/other allowances or deductions/ donation under “Overtime” tab/ “Other Allowances / Deductions” tab / “Donation” tab by clicking on “Add New Item” button to key in amount.
+                                                    Note: Leave record and expenses record retrieve function is only applicable when company subscribes to the Leave module and Expense module.
+                                                    The overtime payment rate option, allowance / deduction type and donation type can be configured in “Payroll Configuration” under “Allowance / Deduction” tab.
+                                                    The donation set up under “Donation” tab is extra donation.
+
+                                                </li>
+
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>3.	Save Amendment And Preview</b>
+                                            <ul>
+                                                <li>
+                                                    Click on “Payroll” at the left menu bar and select the “Payroll” sub menu. In Payroll page, all employees’ payroll will appear in the list.
+                                                </li>
+
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>4.	Process Multiple Payrolls</b>
+                                            <ul>
+                                                <li>
+                                                    To automatically validate multiple employees’ payroll at one go, select multiple employees by clicking on the box besides the employee’s name, select “Process Payroll” from dropdown list and click on “Apply” button.
+                                                    Note: This is only recommended when there is no amendment to the selected employee’s payroll for that month.
+
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>5.	Offically Confirm Payroll One By One</b>
+                                            <ul>
+                                                <li>
+                                                    To officially process the employee’s payroll one by one, click on the box beside the pencil icon, the pop-up window will appear to ask you confirm the payroll, click on “Yes” button to proceed.
+                                                    Note: Once a payroll is “confirmed”, you are not able to make any further changes to the employee’s payroll for that month.
+
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>6.	Officially Confirm Multiple Payrolls </b>
+                                            <ul>
+                                                <li>
+                                                    To officially process the multiple employees’ payroll at one go, select multiple employees by clicking on the box besides the employee’s name, select “Confirm Payroll” from dropdown list and click on “Apply” button.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>7.	Print Or Export</b>
+                                            <ul>
+                                                <li>
+                                                    The confirmed payroll will appear in the list, you can click on “Print” button beside “Export” dropdown list to print a list of employees’ payroll.
+                                                </li>
+                                                <li>
+                                                    Or click on printer icon beside each employee’s record to print individual employee’s payroll.
+                                                </li>
+                                                <li>
+                                                    Or select wanted format from “Export” dropdown list to export the list of employee payrolls.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="tab_6">
+                                <div class="row">
+                                    <b>1.	PAT – CPF Configuration </b>
+                                    Provident and Tax (PAT) System is a web-based system developed and managed by CrimsonLogic Pte Ltd, that supports e-Submission of Employment Income.
+                                    Our system is integrated with PAT system. Companies will be able to submit CPF monthly contributions directly to PAT system via our system, without the need to access two different platforms (IRAS and CPF).
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>1.	Register An Account From CrimsonLogic</b>
+                                            <ul>
+                                                <li>
+                                                    In order to use this feature in our system, you are required to register an account in PAT and configure in our system.
+                                                </li>
+                                                <li>
+                                                    <!--To change URL-->
+                                                    Click here http://www.crimsonlogic.com/Application-Form-For-CrimsonLogic-Services.htm
+                                                    For more information, please contact CrimsoLogic:
+                                                    •	Call PAT helpline at 6887-7888
+                                                    •	Email to pat@crimsonlogic.com
+                                                    •	Visit PAT website at http://pat.com.sg
+
+                                                </li>
+
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>2.	Go To PAT – CPF Configuration</b>
+                                            <ul>
+                                                <li>
+                                                    Login into SBSolution, go to the Configuration icon at the top right hand of the page, next to your profile picture, and click on “PAT - CPF Configuration”.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>3.	Enter PAT ID into System </b>
+                                            <ul>
+                                                <li>
+                                                    You will be asked to enter your company’s CPF Submission No., PAT User ID and PAT Password.
+                                                    Click on “Save” button to activate the integration to PAT.
+
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>3.	Enter PAT ID into System </b>
+                                            <ul>
+                                                <li>
+                                                    You will be asked to enter your company’s CPF Submission No., PAT User ID and PAT Password.
+                                                    Click on “Save” button to activate the integration to PAT.
+
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <b>2.	PAT – IR8A Configuration     </b>
+                                    <div class="row">
+                                        Provident and Tax (PAT) System is a web-based system developed and managed by CrimsonLogic Pte Ltd, that supports e-Submission of Employment Income.
+                                        Our system is integrated with PAT system. Companies will be able to submit CPF monthly contributions directly to PAT system via our system, without the need to access two different platforms (IRAS and CPF).
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>2.1.	Go To Payroll Configuration</b>
+                                            <ul>
+                                                <li>
+                                                    In order to use this feature in our system, you are required to register an account in PAT and configure in our system.
+                                                </li>
+                                                <li>
+                                                    <!--To change URL-->
+                                                    Click here http://www.crimsonlogic.com/Application-Form-For-CrimsonLogic-Services.htm
+                                                    For more information, please contact CrimsoLogic:
+                                                    •	Call PAT helpline at 6887-7888
+                                                    •	Email to pat@crimsonlogic.com
+                                                    •	Visit PAT website at http://pat.com.sg
+
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-md-6">
+                                            <b>2.2.	Go To PAT – CPF Configuration</b>
+                                            <ul>
+                                                <li>
+                                                    In order to use this feature in our system, you are required to register an account in PAT and configure in our system.
+                                                </li>
+                                                <li>
+                                                    <!--To change URL-->
+                                                    Click here http://www.crimsonlogic.com/Application-Form-For-CrimsonLogic-Services.htm
+                                                    For more information, please contact CrimsoLogic:
+                                                    •	Call PAT helpline at 6887-7888
+                                                    •	Email to pat@crimsonlogic.com
+                                                    •	Visit PAT website at http://pat.com.sg
+
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="thumbnail">
+                                                <a class="example-image-link" href="~/Images/Support/Leave-config-4.3.jpg" data-lightbox="example-set" data-title="">
+                                                    <img src="~/Images/Support/Leave-config-4.3.jpg" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <b>2.3.	Enter PAT ID into System </b>
+                                            <ul>
+                                                <li>
+                                                    You will be asked to enter your company’s PAT User ID Type and PAT User ID.
+                                                    Click on “Save” button to activate the integration to PAT.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="before-footer">
+        <section class="section">
+            <div class="container">
+                <div class="row">
+
+                    <div class="col-sm-6 appear-el animated fadeInLeft" data-animation="fadeInLeft">
+                        <img src="~/Images/Home/Design-for-SME.png" alt="" class="img-responsive">
+                    </div>
+                    <div class="col-sm-6 appear-el animated fadeInRight" data-animation="fadeInRight">
+                        <div class="col-md-12">
+                            <h4 class="headline" style="font-size:18px;"><strong style="color:#fdd933;">@Resource.FrontEnd_Designed</strong> @Resource.FrontEnd_ForSME</h4>
+                            <br />
+                            <p style="color:white;">
+                                Try out the software with 30 days free trail without credit card details. <br />If you like it, simply continue with only USD 0.05 per day.
+                                <br /> Well if you don't... you didn't lose much too!
+                            </p>
+
+                            <br />
+                            <br />
+                        </div>
+                        <div class="col-sm-6">
+                            <a class="btn btn-border-white" style="height:40px; width:150px; line-height:30px ">Try now!</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>     <!-- FOOTER -->
+    <footer id="footer">
+
+        <div class="footer-main">
+            <div class="container">
+                <div class="row">
+
+                    <div class="col-md-4">
+                        <div class="widget widget-about">
+                            <div class="">
+                                <h4><strong>@Resource.FrontEnd_Solutions</strong> HRM</h4>
+                                <p>
+                                    An online Human Resource Management System specially designed and built for start-ups, sole-proprietorships, and small to medium sized organizations. Made affordable to all types of business with its easy-to-use functionalities.
+                                    Companies could be freed from expensive HRM software, tedious HR processes and gaining higher focus on key business and sales strategy.
+                                </p>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="widget widget-about">
+                            <div class="">
+                                <h4 class=""><strong>@Resource.FrontEnd_ContactUS</strong> Us</h4>
+                                <p><strong>Phone:</strong> +65 66965457</p>
+                                <p><strong>Email:</strong> support@sbsolutions.com.sg</p>
+                                <p><strong>Partnership:</strong> partners@sbsolutions.com.sg</p>
+                                <p><strong>Address:</strong> 520 Sims Avenue #02-04 Singapore 387580</p>                                
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="widget widget-about">
+                            <div class="">
+                                <h4><strong>@Resource.FrontEnd_Join</strong> @Resource.FrontEnd_OurCom</h4>
+                                <p>Subscribe to our newsletter and stay up to date with the latest news and promotions!</p>
+                                
+                                                                @using (Html.BeginForm("Newletters", "Front", FormMethod.Post, new { role = "form" }))
+                                                                {
+                                                                    <input type="text" class="footer-form-control" name="Email" id="Email" value="" style="width:220px;" placeholder="Enter your email address"><button type="submit" class="footer-btn btn-primary" style="height:34px;">Subscribe</button>
+                                                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="footer-bottom">
+            <div class="container">
+                <div class="row">
+
+                    <div class="col-md-4 copyright">
+                        &copy; Copyright 2013 by <a href="@Url.Action("Front","Front" , new { step="" })">BlueCube Media Pte Ltd.</a> All Rights Reserved.
+                    </div>
+                    <div class="col-md-8">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- END FOOTER -->
+    <!-- SCROLL TOP -->
+    <div class="scroll-top">
+        <a href="#">
+            <i class="fa fa-angle-up"></i>
+        </a>
+    </div>
+    <!-- END SCROLL TOP -->
+
+
+    <script src="~/Scripts/lightbox.js"></script>
+
+
+</body>
+
+</html>

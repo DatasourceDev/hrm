@@ -1,0 +1,270 @@
+﻿@model HR.Models.ConfigurationViewModel
+@using HR.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+@{
+    ViewBag.Title = Resource.System_Configuration;
+
+}
+<script type="text/javascript">
+    $(function () {
+        InitDatepicker();
+        var addRowLink = '<a href="@Url.Action("UserRoleInfo", "System", new { pComID = EncryptUtil.Encrypt(Model.Company_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_C) })" class="btn btn-greensea  btn-sm add-row">@Resource.Add_New_User_Row</a>'
+        InitDatatable('moduleDataTable', addRowLink, null, 0, 'asc');
+        InitDatatable('pageDataTable', null, null, 0, 'asc');
+
+        var module = '@Model.tabAction';
+        if ('@string.IsNullOrEmpty(Model.tabAction)' == "True") {
+            module = "userrole";
+        }
+        var liID = "li-" + module;
+        var tabID = module + "-tab";
+        $("#" + liID).addClass("active");
+        $("#" + tabID).addClass("active");
+    });
+</script>
+
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+    <div class="pageheader">
+        <h2>@Resource.System_Configuration<span></span></h2>
+        <div class="breadcrumbs">
+            <ol class="breadcrumb">
+                <li>@Resource.You_Are_Here</li>
+                <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+                <li class="active">@Resource.System_Configuration</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="row">
+            <div class="col-md-12">
+                
+                @if (Model.result != null && Model.result.Code != 0)
+                {
+
+                    if (Model.result.Code < 0)
+                    {
+                        <div class="alert alert-red">
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        </div>
+                    }
+                    else if (Model.result.Code > 0)
+                    {
+                        <div class="alert alert-success">
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        </div>
+                    }
+                }
+                <!-- tile widget -->
+                @using (Html.BeginForm("SystemConfiguration", "System", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <section class="tile color transparent-black">
+                        <div class="tile-widget nopadding color transparent-white rounded-top-corners">
+                            <!-- Nav tabs -->
+                            <ul class="nav nav-tabs tabdrop">
+                                <li id="li-userrole"><a href="#userrole-tab" data-toggle="tab">@Resource.User_Role</a></li>
+                                <li id="li-pagerole"><a href="#pagerole-tab" data-toggle="tab">@Resource.Page_Role</a></li>
+                                <li id="li-page"><a href="#page-tab" data-toggle="tab">@Resource.Page</a></li>
+                            </ul>
+                            <!-- / Nav tabs -->
+                        </div>
+                        <!-- /tile widget -->
+                        
+                        <div class="tile-body tab-content ">
+                            <div id="userrole-tab" class="tab-pane fade in ">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <section class="tile transparent">
+                                            
+                                            <div class="tile-header transparent">
+                                                <h1><strong>@Resource.User_Role</strong></h1>
+                                                <div class="controls">
+                                                    <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <div class="tile-body">
+                                                <div class="table-responsive">
+                                                    <table class="table table-datatable table-custom" id="moduleDataTable">
+                                                        <thead>
+                                                            <tr>
+                                                                <th class="sort-alpha">@Resource.Role_Name</th>
+                                                                <th class="sort-alpha">@Resource.Role_Desc</th>
+                                                                <th class="no-sort" width="110px">@Resource.Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @if (Model.UserRoleList != null)
+                                                            {
+                                                                var i = 0;
+                                                                foreach (var row in Model.UserRoleList)
+                                                                {
+                                                                    <tr>
+                                                                        <td>@row.Role_Name</td>
+                                                                        <td>@Html.Raw(row.Role_Description)</td>
+                                                                        <td class="actions text-left">
+                                                                            @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                                            {
+                                                                                <a href="@Url.Action("UserRoleInfo", "System", new { pRolID = EncryptUtil.Encrypt(row.User_Role_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                                                            }
+
+                                                                            @if (row.User_Role_ID > 5 && Model.rights != null && Model.rights.Contains(UserSession.RIGHT_D))
+                                                                            {
+                                                                                <a href="@Url.Action("UserRoleInfo", "System", new { pRolID = EncryptUtil.Encrypt(row.User_Role_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_D) }) " onclick="return confirm('@Resource.Confirm_Delete_Msg');" title="@Resource.Delete">
+                                                                                    <i class="fa fa-times-circle-o fa-2x"></i>
+                                                                                </a>
+                                                                            }
+                                                                        </td>
+                                                                    </tr>
+                                                                            i++;
+                                                                }
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            <div id="pagerole-tab" class="tab-pane fade in">
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <section class="tile transparent">
+                                            
+                                            <div class="tile-header transparent">
+                                                <h1><strong>@Resource.Page_Role</strong></h1>
+                                                <div class="controls">
+                                                    <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <div class="tile-body">
+                                                <div class="table-responsive">
+                                                    <table class="table table-datatable table-custom" id="moduleDataTable">
+                                                        <thead>
+                                                            <tr>
+                                                                <th class="sort-alpha">@Resource.Module</th>
+                                                                <th class="sort-alpha">@Resource.Module_Detail</th>
+                                                                <th class="no-sort" width="110px">@Resource.Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @if (Model.ModuleDetailLst != null)
+                                                            {
+                                                                <tr>
+                                                                    <td>@Resource.Authentication</td>
+                                                                    <td>Authentication</td>
+                                                                    <td class="actions text-left">
+                                                                        @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                                        {
+                                                                            <a href="@Url.Action("PageRoleInfo", "System", new { pModDeltID = EncryptUtil.Encrypt(""), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                                                        }
+                                                                    </td>
+                                                                </tr>
+                                                                        var i = 0;
+                                                                        foreach (var row in Model.ModuleDetailLst)
+                                                                        {
+                                                                            <tr>
+                                                                                <td>@Page_Name.Get_Manu_Name(row.Module_Detail_Name)</td>
+                                                                                <td>@row.Module_Detail_Description</td>
+                                                                                <td class="actions text-left">
+                                                                                    @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                                                    {
+                                                                                        <a href="@Url.Action("PageRoleInfo", "System", new { pModDeltID = EncryptUtil.Encrypt(row.Module_Detail_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                                                                    }
+                                                                                </td>
+                                                                            </tr>
+                                                                                    i++;
+                                                                        }
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                
+                                            </div>
+                                        </section>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div id="page-tab" class="tab-pane fade in">
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <section class="tile transparent">
+                                            
+                                            <div class="tile-header transparent">
+                                                <h1><strong>@Resource.Page</strong></h1>
+                                                <div class="controls">
+                                                    <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <div class="tile-body">
+                                                <div class="table-responsive">
+                                                    <table class="table table-datatable table-custom" id="pageDataTable">
+                                                        <thead>
+                                                            <tr>
+                                                                <th class="sort-alpha">@Resource.Module_Name</th>
+                                                                <th class="sort-alpha">@Resource.Page_Name</th>
+                                                                <th class="sort-alpha">@Resource.Page_URL</th>
+                                                                <th class="sort-numeric">@Resource.Page_Attempt</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @if (Model.PageLst != null)
+                                                            {
+                                                                foreach (var row in Model.PageLst)
+                                                                {
+                                                                    <tr>
+                                                                        <td>
+                                                                            @if (row.Module_Detail_ID != null)
+                                                                            {
+                                                                                @Page_Name.Get_Manu_Name(row.SBS_Module_Detail.Module_Detail_Name)
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                               @Resource.Authentication
+                                                                            }
+                                                                        </td>
+                                                                        <td>@Page_Name.Get_Page_Name(row.Page_Name)</td>
+                                                                        <td>@row.Page_Url</td>
+                                                                        <td class="text-right">@(row.Page_Attempt.HasValue ? row.Page_Attempt.Value : 0)</td>
+                                                                    </tr>
+
+                                                                }
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                
+                                            </div>
+                                        </section>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <!-- / Tab panes -->
+                        </div>
+                    </section>
+                }
+            </div>
+        </div>
+    </div>
+}

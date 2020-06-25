@@ -1,0 +1,107 @@
+﻿@model  HR.Models.ApproverViewModel
+@using HR.Models
+@using SBSModel.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Constants;
+@{
+   var i = Model.Index;
+   var emp = new _Applicable_Employee();
+   if (Model.EmpList != null && Model.EmpList.Count() > 0)
+   {
+      emp = Model.EmpList[0];
+      if (!Model.Profile_ID.HasValue)
+      {
+         Model.Profile_ID = emp.Profile_ID;
+         Model.Email = emp.Email;
+      }
+   }
+   var uitem = UserUtil.GetUserItem(Request.RequestContext.HttpContext);
+}
+<script type="text/javascript">
+   $(function () {
+      $(".chosen-select").chosen({ disable_search_threshold: 10 });
+   });
+</script>
+
+<td>
+   @if (Model.Row_Type == RowType.DELETE)
+   {
+      <script type="text/javascript">
+         $(function () {
+            $('#' + 'arow-@i').hide();
+         });
+      </script>
+   }
+   @if (Model.Approval_Type == ApprovalType.Expense || Model.Approval_Type == ApprovalType.TimeSheet)
+   {
+      if (!uitem.Is_Indent)
+      {
+         @Html.Hidden("Approver_Rows[" + i + "].Approver_Flow_Type", ApproverFlowType.Employee)
+      }
+   }
+   @Html.Hidden("Approver_Rows[" + i + "].I", i)
+   @Html.Hidden("Approver_Rows[" + i + "].Row_Type", RowType.ADD)
+
+   <input type="text" class="form-control" id="Approver_Rows_@(i)__Approval_Level" name="Approver_Rows[@i].Approval_Level" value="@Model.Approval_Level" readonly>
+   <div class="validation-error">
+      @Html.ValidationMessage("Approver_Rows[" + i + "].Approval_Level")
+   </div>
+</td>
+@if (Model.Approval_Type == ApprovalType.Expense || Model.Approval_Type == ApprovalType.TimeSheet)
+{
+   if (uitem.Is_Indent)
+   {
+      <td>
+         <select class="chosen-select chosen-transparent form-control" id="Approver_Rows_@(i)__Approver_Flow_Type" name="Approver_Rows[@i].Approver_Flow_Type" onchange="ApproverFlowType_Onchange(@i)">
+            @foreach (var drow in Model.ApproverFlowTypeList)
+            {
+               if (Model.Approver_Flow_Type == drow.Value)
+               {
+                  <option value="@drow.Value" selected>@drow.Text</option>
+               }
+               else
+               {
+                  <option value="@drow.Value">@drow.Text</option>
+               }
+            }
+         </select>
+         <div class="validation-error">
+            @Html.ValidationMessage("Approver_Rows[" + i + "].Approver_Flow_Type")
+         </div>
+      </td>
+   }
+}
+<td>
+   <div id="divProfile_ID_@(i)" @(Model.Approver_Flow_Type == ApproverFlowType.Job_Cost ? "hidden" : "")>
+      <select class="chosen-select chosen-transparent form-control" id="Approver_Rows_@(i)__Profile_ID" name="Approver_Rows[@i].Profile_ID" onchange="Approver_Onchange(@i);">
+         @foreach (var drow in Model.EmpList)
+         {
+            if (Model.Profile_ID == drow.Profile_ID)
+            {
+               <option value="@drow.Profile_ID" selected>@drow.Name</option>
+            }
+            else
+            {
+               <option value="@drow.Profile_ID">@drow.Name</option>
+            }
+         }
+      </select>
+      <div class="validation-error">
+         @Html.ValidationMessage("Approver_Rows[" + i + "].Profile_ID")
+      </div>
+   </div>
+</td>
+<td>
+   <div id="divEmail_@(i)" @(Model.Approver_Flow_Type == ApproverFlowType.Job_Cost ? "hidden" : "")>
+      <input type="text" class="form-control" id="Approver_Rows_@(i)__Email" name="Approver_Rows[@i].Email" value="@Model.Email" readonly>
+   </div>
+   <div class="validation-error">
+      @Html.ValidationMessage("Approver_Rows[" + i + "].Email")
+   </div>
+</td>
+<td class="actions text-left" style="cursor:pointer">
+   <a data-toggle="modal" onclick="return DeleteApprover('arow-@i', @i);" title="@Resource.Delete">
+      <i class="fa fa-times-circle-o fa-2x"></i>
+   </a>
+</td>

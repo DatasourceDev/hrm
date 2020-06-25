@@ -1,0 +1,104 @@
+﻿body {
+}
+
+.input-validation-error {
+   border:1px solid #FF0000 !important;
+}
+
+.mandatory-validation {
+   border:1px solid #FFFF00 !important;
+   border-radius:4px;
+}
+
+.validation-error {
+    float: left;
+    width: 100%;
+    padding-left: 0px;
+    color: #ff4a43;
+    font-weight: 600;
+    font-style: italic;
+    /*text-shadow: 2px 2px #000;*/
+     border-radius:4px;
+}
+.bg-white .tile.color.transparent-black .validation-error
+{
+    text-shadow: 2px 2px #ccc;
+}
+.tile.color.transparent-black .validation-error
+{
+    /*text-shadow: 2px 2px #000;*/
+}
+.tile .validation-error
+{
+    /*text-shadow: 2px 2px #ccc;*/
+}
+
+.login-block .validation-error {
+    text-shadow: 2px 2px #ccc;
+}
+
+.modal .validation-error {
+    text-shadow: 2px 2px #ccc;
+}
+
+.fc-state-highlight-holiday {
+    background-color: #7ABEF3;
+    cursor: default;
+}
+
+.holiday-text {
+    color: #fff;
+}
+
+.modal-loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
+    opacity: 0.7;
+    filter: alpha(opacity=80);
+    -moz-opacity: 0.8;
+    min-height: 100%;
+    width: 100%;
+}
+
+.loading {
+    display: none;
+    background-color: transparent;
+    z-index: 2001;
+    height: 15px;
+    width: 15px;
+    left: 50%;
+    top: 50%;
+    position: absolute;
+    margin: -90px 0 0 -15px;
+}
+
+.modal-warning-timeout-dlg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
+    opacity: 0.7;
+    filter: alpha(opacity=80);
+    -moz-opacity: 0.8;
+    min-height: 100%;
+    width: 100%;
+}
+
+.warning-timeout-dlg {
+    display: none;
+    background-color: transparent;
+    z-index: 2001;
+    left: 0%;
+    top: 40%;
+    position: absolute;
+    margin: -90px 0 0 -15px;
+    width:100%
+}
+
+.tour-guide {
+   margin-right:15px !important;
+}

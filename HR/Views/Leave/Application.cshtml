@@ -1,0 +1,1023 @@
+﻿@model  HR.Models.LeaveViewModel
+@using SBSModel.Models;
+@using System.Text;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Constants;
+@{
+   ViewBag.Title = @Resource.Leave;
+
+   var userlogin = UserSession.getUser(Request.RequestContext.HttpContext);
+
+   var isReadonly = false;
+   if (Model.Leave_Application_Document_ID > 0)
+      isReadonly = true;
+   if (Model.operation == UserSession.RIGHT_U && !Model.rights.Contains(UserSession.RIGHT_U))
+      isReadonly = true;
+   else if (!Model.rights.Contains(UserSession.RIGHT_C))
+      isReadonly = true;
+
+   var infoColsapan = "col-md-12";
+}
+@functions{
+   public string GenTimelineItem(string status, string approval = null)
+   {
+      var li = new StringBuilder();
+      li.AppendLine("<li class='color transparent-black'>");
+      if (status == WorkflowStatus.Approved | status == WorkflowStatus.Closed | status == WorkflowStatus.Cancellation_Approved | status == WorkflowStatus.Cancelled)
+         li.AppendLine("<div class='pointer green'>");
+      else if (status == WorkflowStatus.Rejected | status == WorkflowStatus.Cancellation_Rejected)
+         li.AppendLine("<div class='pointer red'>");
+      else
+         li.AppendLine("<div class='pointer slategray'>");
+
+      if (string.IsNullOrEmpty(status) | status == WorkflowStatus.Canceling | status == WorkflowStatus.Pending)
+      {
+         li.AppendLine("<i class='fa fa-spinner'></i>");
+      }
+      else if (status == WorkflowStatus.Rejected | status == WorkflowStatus.Cancellation_Rejected)
+      {
+         li.AppendLine("<i class='fa fa-times'></i>");
+      }
+      else if (status == WorkflowStatus.Approved | status == WorkflowStatus.Cancellation_Approved)
+      {
+         li.AppendLine("<i class='fa fa-check'></i>");
+      }
+      else if (status == WorkflowStatus.Cancelled | status == WorkflowStatus.Closed)
+      {
+         li.AppendLine("<i class='fa fa-power-off'></i>");
+      }
+      li.AppendLine("</div>");
+
+      li.AppendLine("<div class='el-container'>");
+      li.AppendLine("<div class='content'>");
+      li.AppendLine(" <h1>");
+      li.AppendLine("<strong>");
+
+      if (string.IsNullOrEmpty(status) | status == WorkflowStatus.Pending)
+      {
+         li.AppendLine(Resource.Leave + " " + Resource.Message_Is_Pending);
+      }
+      else if (status == WorkflowStatus.Canceling)
+      {
+         li.AppendLine(Resource.Leave + " " + Resource.Message_Is_Canceling);
+      }
+      else if (status == WorkflowStatus.Rejected)
+      {
+         li.AppendLine(Resource.Leave + " " + Resource.Message_Is_Rejected);
+      }
+      else if (status == WorkflowStatus.Approved)
+      {
+         li.AppendLine(Resource.Leave + " " + Resource.Message_Is_Approved);
+      }
+      else if (status == WorkflowStatus.Closed)
+      {
+         li.AppendLine(Resource.Leave + " " + Resource.Message_Is_Closed);
+      }
+      else if (status == WorkflowStatus.Cancelled)
+      {
+         li.AppendLine(Resource.Leave + " " + Resource.Message_Is_Cancelled);
+      }
+      else if (status == WorkflowStatus.Cancellation_Approved)
+      {
+         li.AppendLine(Resource.Leave + " " + Resource.Message_Is_Cancellation_Approved);
+      }
+      else if (status == WorkflowStatus.Cancellation_Rejected)
+      {
+         li.AppendLine(Resource.Leave + " " + Resource.Message_Is_Cancellation_Rejected);
+      }
+      li.AppendLine(" </strong>");
+      li.AppendLine(" </h1>");
+      if (!string.IsNullOrEmpty(approval))
+      {
+         li.AppendLine(" <p>" + Resource.Approver + " " + approval + "</p>");
+      }
+      li.AppendLine(" </div>");
+      li.AppendLine(" </div>");
+      li.AppendLine(" </li>");
+      return li.ToString();
+   }
+}
+
+
+@if (Model.operation == UserSession.RIGHT_U)
+{
+   infoColsapan = "col-md-8";
+}
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+   <script type="text/javascript">
+      //initialize file upload button function
+      $(document)
+        .on('change', '.btn-file :file', function () {
+           var input = $(this),
+           numFiles = input.get(0).files ? input.get(0).files.length : 1,
+           label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+           input.trigger('fileselect', [numFiles, label]);
+        });
+
+      $(function () {
+         InitDatepicker();
+
+         if ('@Model.isRejectPopUp' == 'true' || '@Model.isRejectPopUp' == 'True' || '@Model.isRejectPopUp' == true) {
+            $('#btnReject').get(0).click();
+         }
+
+         if ('@isReadonly.ToString().ToLower()' == 'true') {
+            Disable('divApplication');
+            $('#showfile').removeAttr('disabled');
+         }
+
+         ReloadLeaveLeft($('#Leave_Config_ID').get(0).value);
+
+         //initialize file upload button
+         $('.btn-file :file').on('fileselect', function (event, numFiles, label) {
+
+            var sizeIsnull = $('#uploadfile')[0].files[0];
+            if (sizeIsnull != null) {
+               var fsize = $('#uploadfile')[0].files[0].size;
+               if (fsize > 2097150) {
+                  alert('@Resource.Message_Please_Upload_File_Size_Is_Less_Than_2_MB');
+                  $('#uploadfile').after($('#uploadfile').clone(true)).remove();
+                  $('#uploadfile').parents('.input-group').find(':text').val('');
+                  return false;
+               }
+
+               var input = $(this).parents('.input-group').find(':text'),
+                   log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+               console.log(log);
+
+               if (input.length) {
+                  input.val(log);
+               } else {
+                  if (log) alert(log);
+               }
+            }
+         });
+
+      });
+
+       function Employee_OnChange(opt) {           
+           var proifleID = opt.options[opt.selectedIndex].value;
+           //var opt1 = $('#Leave_Config_ID');
+           var leaveconfigid = $('#Leave_Config_ID').get(0).value;
+           ReloadLeaveLeft(leaveconfigid, proifleID);
+       }
+
+      function Leave_Config_OnChange(opt) {
+         var leaveconfigid = opt.options[opt.selectedIndex].value;
+         ReloadLeaveLeft(leaveconfigid);
+      }
+
+      /* Added by Jane 28/01/2016*/
+      function Date_Onchange() {
+         if ('@Model.operation' == '@UserSession.RIGHT_C') {
+            /*For calculate Maternity end date and days taken*/
+            var weektaken = parseInt($('#Maternity_Weeks_Taken').val());
+            var weekleft = parseInt($('#Maternity_Weeks_Left').val());
+            var isfirstPeriod = $('#Maternity_Is_First_Period').val();
+            var workdays = '@Model.Working_Days.Count()'
+            var flexibly = $('#Flexibly').val();
+            var continuously = $('#Continuously').val();
+            var entitle = $('#Entitle').val();
+            var wdays = 7;
+            if ($('#Leave_Name').val() == '@LeaveType.MaternityLeave') {
+               if (flexibly.toLowerCase() == "true" && continuously.toLowerCase() == "true") {
+                  if (isfirstPeriod.toLowerCase() == 'true') {
+                     if (entitle == weektaken)
+                        wdays = workdays;
+                     else
+                        wdays = 7;
+                  }
+                  else
+                     wdays = workdays;
+               }
+               else if (flexibly.toLowerCase() == "true") {
+                  if (isfirstPeriod.toLowerCase() == 'true')
+                     wdays = 7;
+                  else
+                     wdays = workdays;
+               }
+               else if (continuously.toLowerCase() == "true") {
+                  wdays = workdays;
+               }
+            }
+            else if ($('#Leave_Name').val() == '@LeaveType.PaternityLeave') {
+               wdays = 7;
+            }
+
+            var daystaken = weektaken * wdays;
+            $.ajax({
+               type: 'POST',
+               url: 'GetEndDate',
+               contentType: 'application/json; charset=utf-8',
+               data: JSON.stringify({ pStartDate: $('#Start_Date').val(), pDaysTaken: daystaken, pWorkingDays: wdays }),
+               dataType: 'json',
+               success: function (data) {
+                  $('#End_Date').val(data.enddate);
+                  $('#End_Date_Text').val(data.enddate);
+               }
+            });
+         }
+      }
+
+      /* Edited by Jane 28/01/2016*/
+      function ReloadLeaveLeft(leavetypeid, profileID) {
+         $('#Maternity_Weeks_Left').val(0);
+         $('#Leave_Left').val(0);
+         $('#Leave_Config_ID').val(0);
+         var paramProfileID;
+         if (profileID > 0)
+             paramProfileID = profileID;
+         else
+             paramProfileID = $('#Profile_ID').val();
+
+         if ('@isReadonly.ToString().ToLower()' != 'true') {
+            $('#End_Date').prop('disabled', false);
+            $('#Start_Date_Period').prop('disabled', false); $('#Start_Date_Period').trigger("chosen:updated");
+            $('#End_Date_Period').prop('disabled', false); $('#End_Date_Period').trigger("chosen:updated");
+         }
+
+         $('#Flexibly').val(false); $('#Continuously').val(false);
+         $('#End_Date_Text').hide(); $('#End_Date').show();
+
+         ShowMask();
+         $.ajax({
+            type: 'POST',
+            url: 'ReloadLeaveLeft',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ pLeaveConfigID: leavetypeid, pProfileID: paramProfileID, pStartDate: $('#Start_Date').val(), pRelationshipID: $('#Relationship_ID').val() }),
+            dataType: 'json',
+            success: function (data) {
+
+               $('#Leave_Name').val(data.leaveName);
+               $('#Leave_Config_ID').val(data.leaveConfig);
+               $('#OnBehalf_Profile_ID').val(paramProfileID);
+               $('#Leave_Type_Desc').val(data.leavedesc);
+               $('#Type').val(data.Type);
+               $('#Entitle').val(data.Entitle);
+
+               if (data.IsUploadDoc == false)
+                  $('#uniform-uploadfile').hide();
+               else
+                  $('#uniform-uploadfile').show();
+
+               if (data.Type == '@LeaveConfigType.Child') {
+                  $('#divBalanceLeftType').html('<label class="control-label">@Resource.Weeks</label>')
+                  $('#divStartDatePeriod').hide(); $('#divEndDatePeriod').hide();
+                  $('#Leave_Left').val(data.weeksLeft);
+                  $('#Maternity_Weeks_Left').val(data.weeksLeft);
+                  var weeksLeft = parseInt(data.weeksLeft);
+                  $('#divSelectWeeks').show();
+                  $('#divSelectWeeksLabel').show();
+                  if ('@Model.operation' == '@UserSession.RIGHT_C') {
+                     var sel = document.createElement("select");
+                     sel.id = "Maternity_Weeks_Taken";
+                     sel.name = "Maternity_Weeks_Taken";
+                     sel.setAttribute("class", "chosen-select chosen-transparent form-control");
+                     sel.setAttribute("onchange", "Date_Onchange();");
+                     $('#Maternity_Is_First_Period').val(data.isfirstPeriod);
+
+                     if (data.leaveName == '@LeaveType.MaternityLeave') {
+                        $('#Flexibly').val(data.Flexibly);
+                        $('#Continuously').val(data.Continuously);
+
+                        var flexibly = $('#Flexibly').val();
+                        var continuously = $('#Continuously').val();
+
+                        for (var i = 1; i <= weeksLeft; i++) {
+                           var option = document.createElement("option");
+                           option.value = i;
+                           option.text = i;
+
+                           if (flexibly.toLowerCase() == "true" && continuously.toLowerCase() == "true") {
+                              if (data.isfirstPeriod == false) {
+                                 if (i == weeksLeft) {
+                                    option.setAttribute('selected', true);
+                                    sel.setAttribute('disabled', false);
+                                 }
+                              }
+                           }
+                           else if (flexibly.toLowerCase() == "true") {
+                              if (data.isfirstPeriod == true) {
+                                 if (i == weeksLeft) {
+                                    option.setAttribute('disabled', false);
+                                 }
+                              }
+                              else {
+
+                                 if (i == weeksLeft) {
+                                    option.setAttribute('selected', true);
+                                    sel.setAttribute('disabled', false);
+                                 }
+                              }
+                           }
+                           else if (continuously.toLowerCase() == "true") {
+                              if (i == weeksLeft) {
+                                 option.setAttribute('selected', true);
+                                 sel.setAttribute('disabled', false);
+                              }
+                           }
+
+                           /*first taking leave user can be select weeks taken*/
+                           if ('@Model.Maternity_Weeks_Taken.HasValue'.toLowerCase() == 'true') {
+                              if (parseInt('@(Model.Maternity_Weeks_Taken.HasValue ? Model.Maternity_Weeks_Taken.Value : 0)') == i)
+                                 option.setAttribute('selected', true);
+                           }
+
+                           sel.appendChild(option);
+                        }
+                     }
+                     else if (data.leaveName == '@LeaveType.PaternityLeave') {
+                        for (var i = 1; i <= weeksLeft; i++) {
+                           var option = document.createElement("option");
+                           option.value = i;
+                           option.text = i;
+                           option.setAttribute('selected', true);
+
+                           sel.appendChild(option);
+                        }
+                        sel.setAttribute('disabled', false);
+                     }
+
+                     $('#divSelectWeeks').html(sel);
+
+                     /*second taking leave or continuously leave, user cannot be select weeks taken*/
+                     if (sel.attributes["disabled"] != null) {
+                        var hid = document.createElement("input");
+                        hid.id = "Maternity_Weeks_Taken";
+                        hid.name = "Maternity_Weeks_Taken";
+                        hid.value = sel.selectedIndex + 1;
+                        hid.setAttribute('type', "hidden");
+                        $('#divSelectWeeks').append(hid);
+                     }
+
+                     $("#Maternity_Weeks_Taken").chosen({ disable_search_threshold: 10 });
+                     $('#End_Date_Text').val('');
+                     $('#End_Date').val('');
+                     $('#Start_Date_Period').val('');
+                     $('#End_Date_Period').val('');
+                  }
+                  else if ('@Model.operation' == '@UserSession.RIGHT_U') {
+                     $('#divSelectWeeks').hide();
+                     $('#divSelectWeeksLabel').hide();
+                  }
+                  $('#End_Date_Text').show();
+                  $('#End_Date').hide();
+                  Date_Onchange();
+               }
+               else {
+                  $('#Leave_Left').val(data.leaveleft);
+                  $('#divBalanceLeftType').html('<label class="control-label">@Resource.Days</label>')
+
+                  $('#divSelectWeeks').hide(); $('#divSelectWeeksLabel').hide();
+                  $('#divStartDatePeriod').show(); $('#divEndDatePeriod').show();
+               }
+            }
+         }).done(function () {
+            CloseMask();
+         });
+      }
+
+      function OpenReject_Onclick() {
+         $('#btnReject').get(0).click();
+      }
+
+   </script>
+
+   <div class="pageheader">
+      @if (Model.Leave_Application_Document_ID.HasValue && Model.Leave_Application_Document_ID.Value > 0)
+      {
+         <h2>@Resource.Leave_Details<span></span></h2>
+      }
+      else
+      {
+         <h2>@Resource.Add_New_Leave <span></span></h2>
+      }
+
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            @if (Model.ApprStatus == "Manage")
+            {
+               <li><a href="@Url.Action("LeaveManagement", "Leave")">@Resource.Leave_Management</a></li>
+               <li class="active">@Resource.Leave</li>
+            }
+            else
+            {
+               <li><a href="@Url.Action("Record", "Leave")">@Resource.Leave_Record</a></li>
+               <li class="active">@Resource.Leave</li>
+            }
+         </ol>
+      </div>
+   </div>
+
+   using (Html.BeginForm("Application", "Leave", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data" }))
+   {
+      @Html.AntiForgeryToken()
+      @Html.HiddenFor(m => m.Leave_Application_Document_ID)
+      @Html.HiddenFor(m => m.Upload_Document_ID)
+      @Html.HiddenFor(m => m.Employee_Profile_ID)
+      @Html.HiddenFor(m => m.OnBehalf_Employee_Profile_ID)
+      @Html.HiddenFor(m => m.OnBehalf_Profile_ID)
+      @Html.HiddenFor(m => m.Overall_Status)
+      @Html.HiddenFor(m => m.Approval_Status_1st)
+      @Html.HiddenFor(m => m.Approval_Status_2st)
+      @Html.HiddenFor(m => m.Approval_Cancel_Status)
+      @Html.HiddenFor(m => m.file)
+      @Html.HiddenFor(m => m.IsUploadDoc)
+      @Html.HiddenFor(m => m.ApprStatus)
+      @Html.HiddenFor(m => m.Approval_Level)
+      @Html.HiddenFor(m => m.Request_ID)
+      @Html.HiddenFor(m => m.Profile_ID)
+      @Html.HiddenFor(m => m.Name)
+      @Html.HiddenFor(m => m.Email)
+      @Html.HiddenFor(m => m.Flexibly)
+      @Html.HiddenFor(m => m.Continuously)
+      @Html.HiddenFor(m => m.Type)
+      @Html.HiddenFor(m => m.Entitle)
+      @Html.HiddenFor(m => m.Maternity_Weeks_Left)
+      @Html.HiddenFor(m => m.Maternity_Is_First_Period)
+      @Html.HiddenFor(m => m.Relationship_ID)
+      @Html.HiddenFor(m => m.Relationship_Name)
+      @Html.HiddenFor(m => m.Leave_Name)
+      @Html.HiddenFor(m => m.Supervisor_Name)
+      @Html.HiddenFor(m => m.Supervisor)
+      @Html.HiddenFor(m => m.Request_Cancel_ID)
+      @Html.HiddenFor(m => m.tabAction)
+      @Html.HiddenFor(m => m.Cancel_Status)
+
+      <input type="hidden" id="operation" name="operation" value="@Model.operation" />
+      <div class="main">
+         <div class="row">
+            <div class="col-md-12">
+               @if (Model.result != null && Model.result.Code != 0)
+               {
+                  if (Model.result.Code < 0)
+                  {
+                     <div class="alert alert-red">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                     </div>
+                  }
+                  else if (Model.result.Code > 0)
+                  {
+                     <div class="alert alert-success">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                     </div>
+                  }
+               }
+            </div>
+         </div>
+
+         <div class="row">
+            @if (Model.operation == UserSession.RIGHT_U)
+            {
+               <div class="col-md-4">
+                  <section class="tile color transparent-black">
+                     <div class="tile-header transparent">
+                        <h1><strong>@Resource.Leave_Approval</strong></h1>
+                        <div class="controls">
+                           <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                        </div>
+                     </div>
+                     <div class="tile-body">
+                        <div class="row">
+                           <div class="col-md-12 sm-left">
+                              <h1 class="timeline-heading"><strong>@Resource.Start</strong></h1>
+                              <ol class="timeline">
+                                 @if (Model.Leave_Request != null && Model.Leave_Request.Count > 0)
+                                 {
+                                    foreach (var rrow in Model.Leave_Request)
+                                    {
+                                       foreach (var row in rrow.Task_Assignment)
+                                       {
+                                          if (Model.Request_Cancel_ID == rrow.Request_ID)
+                                          {
+                                             if (row.Status == WorkflowStatus.Closed)
+                                             {
+                                                @Html.Raw(GenTimelineItem(WorkflowStatus.Cancelled, row.Name))
+                                             }
+                                             else if (row.Status == WorkflowStatus.Approved)
+                                             {
+                                                @Html.Raw(GenTimelineItem(WorkflowStatus.Cancellation_Approved, row.Name))
+                                             }
+                                             else if (row.Status == WorkflowStatus.Rejected)
+                                             {
+                                                @Html.Raw(GenTimelineItem(WorkflowStatus.Cancellation_Rejected, row.Name))
+                                             }
+                                             else
+                                             {
+                                                @Html.Raw(GenTimelineItem(WorkflowStatus.Canceling, row.Name))
+                                             }
+                                          }
+                                          else
+                                          {
+                                             @Html.Raw(GenTimelineItem(row.Status, row.Name))
+                                          }
+                                       }
+                                    }
+                                 }
+                                 else
+                                 {
+                                    string appname = null;
+                                    if (Model.Supervisor.HasValue)
+                                    {
+                                       appname = Model.Supervisor_Name;
+                                    }
+                                    @Html.Raw(GenTimelineItem(Model.Overall_Status, appname))
+                                 }
+
+                                 @if (!string.IsNullOrEmpty(Model.Cancel_Status))
+                                 {
+                                    string appname = null;
+                                    if (Model.Supervisor.HasValue && Model.Overall_Status == WorkflowStatus.Closed)
+                                    {
+                                       appname = Model.Supervisor_Name;
+                                    }
+                                    if (!Model.Request_Cancel_ID.HasValue)
+                                    {
+                                       @Html.Raw(GenTimelineItem(Model.Cancel_Status, appname))
+                                    }
+                                 }
+                              </ol>
+                              <h1 class="timeline-heading"><strong>@Resource.End</strong></h1>
+                           </div>
+
+                        </div>
+                     </div>
+                  </section>
+               </div>
+            }
+            <div class="@infoColsapan">
+               <section class="tile color transparent-black">
+                  <div class="tile-header transparent">
+                     <h1><strong>@Resource.Leave_Info</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                     </div>
+                  </div>
+                  <div class="tile-body">
+                     <div id="divApplication">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <label for="Reasons" class="control-label">@Resource.On_Behalf_Emplyoee</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        @if (Model.operation == UserSession.RIGHT_C)
+                                        {   
+                                            <select class="chosen-select chosen-transparent form-control" id="Employee_Under_Me" name="Employee_Under_Me" onchange="Employee_OnChange(this)">
+                                                <option value=""> -- </option>
+                                                @foreach (var row in Model.EmployeeUnderMeList)
+                                                {
+                                                    if (Model.OnBehalf_Profile_ID == NumUtil.ParseInteger(row.Value))
+                                                    {
+                                                        <option value="@(row.Value != null ? row.Value : "0")" selected>@row.Text</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@(row.Value != null ? row.Value : "0")">@row.Text</option>
+                                                    }
+                                                }
+                                            </select>
+                                      }
+                                    else if (Model.operation == UserSession.RIGHT_U)
+                                    {
+                                        <input type="text" class="form-control" value="@Model.Name" readonly />
+                                        <input type="hidden" id="Employee_Under_Me" name="Employee_Under_Me" value="@Model.OnBehalf_Profile_ID" />
+                                    }
+                                    </div>
+                                </div>
+                            </div>
+                            @if (Model.operation == UserSession.RIGHT_C)
+                            {
+                                <div class="col-md-8">
+                                   <div class="form-group">
+                                      <div class="col-md-12" style="height:30px">
+                                      </div>
+                                   </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Expenses_Title" class="control-label">@Resource.Leave_Note</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            }                            
+                        </div>
+
+                        <div class="row">
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <label for="Leave_Config_ID" class="control-label">@Resource.Leave_Type</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    @if (Model.operation == UserSession.RIGHT_C)
+                                    {
+                                       <select class="chosen-select chosen-transparent form-control" id="Leave_Config_ID" name="Leave_Config_ID" onchange="Leave_Config_OnChange(this)">
+                                          @foreach (var row in Model.LeaveTypeComboList)
+                                          {
+                                             var lname = row.Text;
+                                             if (row.Text == LeaveType.AdoptionLeave | row.Text == LeaveType.MaternityLeave | row.Text == LeaveType.PaternityLeave | row.Text == LeaveType.ChildCareLeave)
+                                             {
+                                                lname += " (" + Model.Relationship_Name + ")";
+                                             }
+                                             if (Model.Leave_Config_ID == NumUtil.ParseInteger(row.Value))
+                                             {
+                                                <option value="@(row.Value != null ? row.Value : "")" selected>@lname</option>
+                                             }
+                                             else
+                                             {
+                                                <option value="@(row.Value != null ? row.Value : "")">@lname</option>
+                                             }
+                                          }
+                                       </select>
+                                       <div class="validation-error">
+                                          @Html.ValidationMessageFor(m => m.Leave_Config_ID)
+                                       </div>
+                                    }
+                                    else if (Model.operation == UserSession.RIGHT_U)
+                                    {
+                                       <input type="text" class="form-control" value="@Model.Leave_Name" readonly />
+                                       <input type="hidden" id="Leave_Config_ID" name="Leave_Config_ID" value="@Model.Leave_Config_ID" />
+                                    }
+
+                                 </div>
+
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    @if (Model.operation == UserSession.RIGHT_C)
+                                    {
+                                       <label for="Leave_Left" class="control-label">@Resource.Leave_Left</label>
+                                    }
+                                    else if (Model.Maternity_Weeks_Taken.HasValue && Model.Maternity_Weeks_Taken.Value > 0)
+                                    {
+                                       <label for="Maternity_Weeks_Taken" class="control-label">@Resource.Weeks_Taken</label>
+                                    }
+                                    else if (Model.operation == UserSession.RIGHT_U)
+                                    {
+                                       <label for="Days_Taken" class="control-label">@Resource.Days_Taken</label>
+                                    }
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-md-8">
+                                    @if (Model.operation == UserSession.RIGHT_C)
+                                    {
+                                       <input type="text" class="form-control text-right" name="Leave_Left" id="Leave_Left" value="@Model.Leave_Left" readonly>
+                                       <div class="validation-error">
+                                          @Html.ValidationMessageFor(m => m.Leave_Left)
+                                       </div>
+                                    }
+                                    else if (Model.operation == UserSession.RIGHT_U)
+                                    {
+                                       @Html.HiddenFor(m => m.Leave_Left)
+                                       if (Model.Maternity_Weeks_Taken.HasValue && Model.Maternity_Weeks_Taken.Value > 0)
+                                       {
+                                          <input type="text" class="form-control text-right" id="Maternity_Weeks_Taken" name="Maternity_Weeks_Taken" value="@Model.Maternity_Weeks_Taken" readonly>
+                                       }
+                                       else
+                                       {
+                                          <input type="text" class="form-control text-right" id="Days_Taken" name="Days_Taken" value="@Model.Days_Taken" readonly>
+                                       }
+                                    }
+
+                                 </div>
+                                 <div class="col-md-4" id="divBalanceLeftType">
+                                    <label class="control-label">@Resource.Days</label>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-md-7">
+                                    <label for="Start_Date" class="control-label">@Resource.Start_Date</label>
+                                 </div>
+                                 <div class="col-sm-5" id="divSelectWeeksLabel">
+                                    <label for="Maternity_Weeks_Taken" class="control-label">@Resource.Weeks</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-7">
+                                    <input type="text" class="form-control input-datepicker" id="Start_Date" name="Start_Date" value="@Model.Start_Date" onchange="Date_Onchange()">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Start_Date, "", new { id = "Start_Date_Err" })
+                                    </div>
+                                 </div>
+                                 <div class="col-sm-5" id="divStartDatePeriod">
+                                    <select class="chosen-select chosen-transparent form-control" id="Start_Date_Period" name="Start_Date_Period" onchange="Date_Onchange()">
+                                       @foreach (var row in Model.periodList)
+                                       {
+                                          <option value="@row.Value" @(Model.Start_Date_Period == row.Value ? "selected" : "")>@row.Text</option>
+                                       }
+                                    </select>
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Start_Date_Period)
+                                    </div>
+                                 </div>
+                                 <div class="col-sm-5" id="divSelectWeeks">
+
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <label for="End_Date" class="control-label">@Resource.End_Date</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-7">
+                                    <input type="text" class="form-control input-datepicker" id="End_Date_Text" value="@Model.End_Date" disabled>
+                                    <input type="text" class="form-control input-datepicker" id="End_Date" name="End_Date" value="@Model.End_Date">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.End_Date, "", new { id = "End_Date_Err" })
+                                    </div>
+                                 </div>
+                                 <div class="col-sm-5" id="divEndDatePeriod">
+                                    <select class="chosen-select chosen-transparent form-control" id="End_Date_Period" name="End_Date_Period">
+                                       @foreach (var row in Model.periodList)
+                                       {
+                                          if (Model.End_Date_Period == row.Value)
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                          }
+                                          else
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                          }
+                                       }
+                                    </select>
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.End_Date_Period)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <label for="Leave_Type_Desc" class="control-label">@Resource.Leave_Description</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <textarea class="form-control" name="Leave_Type_Desc" id="Leave_Type_Desc" rows="5" readonly>@Model.Leave_Type_Desc</textarea>
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Leave_Type_Desc)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-md-6">
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <label for="Reasons" class="control-label">@Resource.Note</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <textarea class="form-control" name="Reasons" id="Reasons" rows="5">@Model.Reasons</textarea>
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Reasons)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-6" id="uniform-uploadfile">
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <label for="Upload_Document_ID" class="control-label">@Resource.Upload_Document</label>
+                                 </div>
+                              </div>
+                              @if (!isReadonly)
+                              {
+                                 <div class="form-group">
+                                    <div class="col-md-12">
+                                       <div class="input-group">
+                                          <span class="input-group-btn">
+                                             <span class="btn btn-primary btn-file">
+                                                <i class="fa fa-upload"></i><input id="uploadfile" type="file" name="file">
+                                             </span>
+                                          </span>
+                                          <input type="text" class="form-control" readonly />
+                                       </div>
+                                    </div>
+                                 </div>
+                              }
+                              else
+                              {
+                                 <div class="form-group">
+                                    <div class="col-md-12">
+                                       <a id="showfile" class="link-allow-click" style="padding-top:5px;float:left;" target="_blank" href="@Url.Action("ApplicationPdf", "Leave", new { pDocID = Model.Leave_Application_Document_ID })">@Model.filename</a>
+                                    </div>
+                                 </div>
+                              }
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-md-12">
+                              <div class="tile-header transparent">
+                                 <h1><strong>@Resource.While_Overseas</strong></h1>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <label for="Contact_While_Overseas" class="control-label">@Resource.Primary_Contact_No</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <input type="text" class="form-control" name="Contact_While_Overseas" id="Contact_While_Overseas" value="@Model.Contact_While_Overseas">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Contact_While_Overseas)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+
+
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <label for="Second_Contact_While_Overseas" class="control-label">@Resource.Secondary_Contact_No</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <input type="text" class="form-control" name="Second_Contact_While_Overseas" id="Second_Contact_While_Overseas" value="@Model.Second_Contact_While_Overseas">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Second_Contact_While_Overseas)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <label for="Address_While_On_Leave" class="control-label">@Resource.Address</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <input type="text" class="form-control" name="Address_While_On_Leave" id="Address_While_On_Leave" value="@Model.Address_While_On_Leave">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Address_While_On_Leave)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </section>
+            </div>
+         </div>
+
+         @if (Model.rights.Contains(UserSession.RIGHT_C) && Model.operation == UserSession.RIGHT_C)
+         {
+            <div class="row">
+               <div class="col-md-12">
+                  <section class="tile color transparent-white">
+                     <div class="tile-body">
+                        <div class="row">
+                           <div class="col-md-12">
+                              <button type="submit" class="btn btn-primary" name="pStatus" value="Save">@Resource.Submit</button>
+                              <a href="@Url.Action("Record", "Leave", new { })" cl class="btn btn-default">@Resource.Cancel</a>
+                           </div>
+                        </div>
+                     </div>
+                  </section>
+               </div>
+            </div>
+         }
+
+         @if (Model.ApprStatus == "Manage")
+         {
+            if (Model.rights.Contains(UserSession.RIGHT_U))
+            {
+               var showApprovalBar = false;
+               int? emploginID = null;
+               if (userlogin.Employee_Profile != null)
+               {
+                  emploginID = userlogin.Employee_Profile.FirstOrDefault().Employee_Profile_ID;
+               }
+               <div class="row">
+                  <div class="col-md-12">
+                     <section class="tile color transparent-white">
+                        <div class="tile-body">
+                           <div class="row">
+                              <div class="col-md-12">
+                                 @if (Model.Leave_Request != null && Model.Leave_Request.Count > 0)
+                                 {
+                                    int? rid = null;
+                                    if (!string.IsNullOrEmpty(Model.Cancel_Status)) { rid = Model.Request_Cancel_ID; }
+                                    else { rid = Model.Request_ID; }
+                                    var request = Model.Leave_Request.Where(w => w.Request_ID == rid).FirstOrDefault();
+                                    if (request != null && request.Task_Assignment != null)
+                                    {
+                                       var task = request.Task_Assignment.Where(w => w.Record_Status == WfRecordStatus.Active).OrderBy(o => o.Approval_Level).FirstOrDefault();
+                                       if (task != null && task.Profile_ID == userlogin.Profile_ID) { showApprovalBar = true; }
+                                    }
+                                 }
+                                 else
+                                 {
+
+                                    if (Model.Supervisor.HasValue && Model.Supervisor == emploginID)
+                                    {
+                                       if (!string.IsNullOrEmpty(Model.Cancel_Status))
+                                       {
+                                          if (Model.Cancel_Status == WorkflowStatus.Canceling) { showApprovalBar = true; }
+                                       }
+                                       else
+                                       {
+                                          if (Model.Overall_Status == WorkflowStatus.Pending | Model.Overall_Status == WorkflowStatus.Approved) { showApprovalBar = true; }
+                                       }
+                                    }
+                                 }
+
+                                 @if (showApprovalBar)
+                                 {
+                                    <button type="submit" class="btn btn-primary" name="pStatus" value="@WorkflowStatus.Approved">@Resource.Approve</button>
+                                    <a id="btnReject" href="#modal-reject" role="button" data-toggle="modal" class="btn btn-primary">@Resource.Reject</a>
+                                 }
+                                 <a href="@Url.Action("LeaveManagement", "Leave", new { tabAction = Model.tabAction })" class="btn btn-default">@Resource.Cancel</a>
+                              </div>
+                           </div>
+                        </div>
+                     </section>
+                  </div>
+               </div>
+
+               <div class="modal fade" id="modal-reject" tabindex="-1" role="dialog" aria-labelledby="modalConfirmLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                     <div class="modal-content">
+                        <div class="modal-header">
+                           <h3 class="modal-title" id="modalConfirmLabel"><strong>@Resource.Reject</strong></h3>
+                        </div>
+                        <div class="modal-body">
+                           <div class="row">
+                              <div class="col-sm-12">
+                                 <div class="form-group">
+                                    <div class="col-sm-12">
+                                       <label for="Remarks" class="control-label">@Resource.Remark</label>
+                                    </div>
+                                 </div>
+                                 <div class="form-group">
+                                    <div class="col-sm-12">
+                                       <textarea class="form-control" name="Remark_Rej" id="Remark_Rej" rows="5">@Model.Remark_Rej</textarea>
+                                       <div class="validation-error">
+                                          @Html.ValidationMessageFor(m => m.Remark_Rej)
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="modal-footer">
+                           <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+                           <button type="submit" class="btn btn-primary" name="pStatus" value="@WorkflowStatus.Rejected">@Resource.Reject</button>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="md-overlay"></div>
+            }
+         }
+         else
+         {
+            if (Model.operation == UserSession.RIGHT_U & Model.rights.Contains(UserSession.RIGHT_U))
+            {
+               <div class="row">
+                  <div class="col-md-12">
+                     <section class="tile color transparent-white">
+                        <div class="tile-body">
+                           <div class="row">
+                              <div class="col-md-12">
+                                 @if (string.IsNullOrEmpty(Model.Cancel_Status))
+                                 {
+                                    <button type="submit" class="btn btn-primary" name="pStatus" value="@WorkflowStatus.Cancelled">@Resource.Leave_Request_Cancel</button>
+                                 }
+                                 <a href="@Url.Action("Record", "Leave", new { })" cl class="btn btn-default">@Resource.Cancel</a>
+                              </div>
+                           </div>
+                        </div>
+                     </section>
+                  </div>
+               </div>
+            }
+         }
+      </div>
+   }
+}

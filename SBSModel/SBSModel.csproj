@@ -1,0 +1,514 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{4546A10E-59B8-46D1-A323-9908F24BD86B}</ProjectGuid>
+    <ProjectTypeGuids>{32f31d43-81cc-4c15-9de6-3fc5453562b6};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SBSModel</RootNamespace>
+    <AssemblyName>SBSModel</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="antlr.runtime">
+      <HintPath>..\packages\Ical.Net.2.2.3\lib\net45\antlr.runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="CivinTecAccessManager, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\Time\CivinTecAccessManager.dll</HintPath>
+    </Reference>
+    <Reference Include="DDay.Collections">
+      <HintPath>..\packages\DDay\DDay.Collections.dll</HintPath>
+    </Reference>
+    <Reference Include="DDay.iCal">
+      <HintPath>..\packages\DDay\DDay.iCal.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="Ical.Net, Version=2.1.0.19501, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ical.Net.2.2.3\lib\net45\Ical.Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Ical.Net.Collections, Version=2.1.0.19501, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ical.Net.2.2.3\lib\net45\Ical.Net.Collections.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="itextsharp, Version=5.5.0.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\HR\bin\itextsharp.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp.pdfa, Version=5.5.0.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\HR\bin\itextsharp.pdfa.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\Microsoft.AspNet.Identity.Core.1.0.0\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.EntityFramework, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\Microsoft.AspNet.Identity.EntityFramework.1.0.0\lib\net45\Microsoft.AspNet.Identity.EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.QualityTools.Testing.Fakes, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Microsoft.Web.Administration, Version=7.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.Web.Administration.7.0.0.0\lib\net20\Microsoft.Web.Administration.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NodaTime, Version=1.3.0.0, Culture=neutral, PublicKeyToken=4226afe0d9b296d1, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ical.Net.2.2.3\lib\net45\NodaTime.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Renci.SshNet, Version=2016.0.0.0, Culture=neutral, PublicKeyToken=1cee9f8bde3db106, processorArchitecture=MSIL">
+      <HintPath>..\packages\SSH.NET.2016.0.0\lib\net40\Renci.SshNet.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Renci.SshNet.Async, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Renci.SshNet.Async.1.0.0\lib\net40\Renci.SshNet.Async.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Activities" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Activities" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Mvc, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\Microsoft.AspNet.Mvc.5.0.0\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Common\AppSetting.cs" />
+    <Compile Include="Common\CSIUtil.cs" />
+    <Compile Include="Common\DateCal.cs" />
+    <Compile Include="Common\DateUtil.cs" />
+    <Compile Include="Common\EncryptUtil.cs" />
+    <Compile Include="Common\IISUtil.cs" />
+    <Compile Include="Common\IniUtil.cs" />
+    <Compile Include="Common\InterfaceUtil.cs" />
+    <Compile Include="Common\InternetUtil.cs" />
+    <Compile Include="Common\ITextEvents.cs" />
+    <Compile Include="Common\LocalizedAttribute.cs" />
+    <Compile Include="Common\LogUtil.cs" />
+    <Compile Include="Common\NumUtil.cs" />
+    <Compile Include="Common\ObjectUtil.cs" />
+    <Compile Include="Common\SqlUtil.cs" />
+    <Compile Include="Common\StatusUtil.cs" />
+    <Compile Include="Common\StrUtil.cs" />
+    <Compile Include="Common\UrlUtil.cs" />
+    <Compile Include="Common\UserUtil.cs" />
+    <Compile Include="Models\Access_Page.cs" />
+    <Compile Include="Models\Access_Right.cs" />
+    <Compile Include="Models\Activation_Link.cs" />
+    <Compile Include="Models\AspNetRole.cs" />
+    <Compile Include="Models\AspNetUser.cs" />
+    <Compile Include="Models\AspNetUserClaim.cs" />
+    <Compile Include="Models\AspNetUserLogin.cs" />
+    <Compile Include="Models\Banking_Info.cs" />
+    <Compile Include="Models\Bank_Details.cs" />
+    <Compile Include="Models\Branch.cs" />
+    <Compile Include="Models\Company.cs" />
+    <Compile Include="Models\Company_Details.cs" />
+    <Compile Include="Models\Company_Logo.cs" />
+    <Compile Include="Models\Company_Mail_Config.cs" />
+    <Compile Include="Models\Country.cs" />
+    <Compile Include="Models\CPF_Formula.cs" />
+    <Compile Include="Models\Ctl_Table_Syn.cs" />
+    <Compile Include="Models\Currency.cs" />
+    <Compile Include="Models\Customer.cs" />
+    <Compile Include="Models\Default_Expense_Type.cs" />
+    <Compile Include="Models\Department.cs" />
+    <Compile Include="Models\Designation.cs" />
+    <Compile Include="Models\Donation_Formula.cs" />
+    <Compile Include="Models\Donation_Type.cs" />
+    <Compile Include="Models\Email_Attachment.cs" />
+    <Compile Include="Models\Email_Notification.cs" />
+    <Compile Include="Models\Employee_Attachment.cs" />
+    <Compile Include="Models\Employee_Emergency_Contact.cs" />
+    <Compile Include="Models\Employee_No_Pattern.cs" />
+    <Compile Include="Models\Employee_Profile.cs" />
+    <Compile Include="Models\Employment_History.cs" />
+    <Compile Include="Models\Employment_History_Allowance.cs" />
+    <Compile Include="Models\ETIRA8.cs" />
+    <Compile Include="Models\Exchange.cs" />
+    <Compile Include="Models\Exchange_Currency.cs" />
+    <Compile Include="Models\Exchange_Rate.cs" />
+    <Compile Include="Models\Expenses_Application.cs" />
+    <Compile Include="Models\Expenses_Application_Document.cs" />
+    <Compile Include="Models\Expenses_Calculation.cs" />
+    <Compile Include="Models\Expenses_Category.cs" />
+    <Compile Include="Models\Expenses_Config.cs" />
+    <Compile Include="Models\Expenses_Config_Budget.cs" />
+    <Compile Include="Models\Expenses_Config_Detail.cs" />
+    <Compile Include="Models\Expenses_No_Pattern.cs" />
+    <Compile Include="Models\Extra_Product_Info.cs" />
+    <Compile Include="Models\Global_Lookup_Data.cs" />
+    <Compile Include="Models\Global_Lookup_Def.cs" />
+    <Compile Include="Models\Holiday_Config.cs" />
+    <Compile Include="Models\HRSBS2Context.cs" />
+    <Compile Include="Models\HR_FileExport_History.cs" />
+    <Compile Include="Models\HR_FileExport_History_Detail.cs" />
+    <Compile Include="Models\HR_FileExport_IR8A_Detail.cs" />
+    <Compile Include="Models\HR_FileExport_IR8B_Detail.cs" />
+    <Compile Include="Models\HR_FileExport_IR8S_Detail.cs" />
+    <Compile Include="Models\HR_FileExport_IRA8A_Detail.cs" />
+    <Compile Include="Models\Invoice_Details.cs" />
+    <Compile Include="Models\Invoice_Header.cs" />
+    <Compile Include="Models\IR8A_Bank.cs" />
+    <Compile Include="Models\IR8A_Country.cs" />
+    <Compile Include="Models\IR8A_Nationality.cs" />
+    <Compile Include="Models\Job_Cost.cs" />
+    <Compile Include="Models\Job_Cost_Payment_Term.cs" />
+    <Compile Include="Models\Leave_Adjustment.cs" />
+    <Compile Include="Models\Leave_Application_Document.cs" />
+    <Compile Include="Models\Leave_Calculation.cs" />
+    <Compile Include="Models\Leave_Config.cs" />
+    <Compile Include="Models\Leave_Config_Child_Detail.cs" />
+    <Compile Include="Models\Leave_Config_Condition.cs" />
+    <Compile Include="Models\Leave_Config_Detail.cs" />
+    <Compile Include="Models\Leave_Config_Extra.cs" />
+    <Compile Include="Models\Leave_Default.cs" />
+    <Compile Include="Models\Leave_Default_Child_Detail.cs" />
+    <Compile Include="Models\Leave_Default_Condition.cs" />
+    <Compile Include="Models\Leave_Default_Detail.cs" />
+    <Compile Include="Models\Mapping\Access_PageMap.cs" />
+    <Compile Include="Models\Mapping\Access_RightMap.cs" />
+    <Compile Include="Models\Mapping\Activation_LinkMap.cs" />
+    <Compile Include="Models\Mapping\AspNetRoleMap.cs" />
+    <Compile Include="Models\Mapping\AspNetUserClaimMap.cs" />
+    <Compile Include="Models\Mapping\AspNetUserLoginMap.cs" />
+    <Compile Include="Models\Mapping\AspNetUserMap.cs" />
+    <Compile Include="Models\Mapping\Banking_InfoMap.cs" />
+    <Compile Include="Models\Mapping\Bank_DetailsMap.cs" />
+    <Compile Include="Models\Mapping\BranchMap.cs" />
+    <Compile Include="Models\Mapping\CompanyMap.cs" />
+    <Compile Include="Models\Mapping\Company_DetailsMap.cs" />
+    <Compile Include="Models\Mapping\Company_LogoMap.cs" />
+    <Compile Include="Models\Mapping\Company_Mail_ConfigMap.cs" />
+    <Compile Include="Models\Mapping\CountryMap.cs" />
+    <Compile Include="Models\Mapping\CPF_FormulaMap.cs" />
+    <Compile Include="Models\Mapping\Ctl_Table_SynMap.cs" />
+    <Compile Include="Models\Mapping\CurrencyMap.cs" />
+    <Compile Include="Models\Mapping\CustomerMap.cs" />
+    <Compile Include="Models\Mapping\Default_Expense_TypeMap.cs" />
+    <Compile Include="Models\Mapping\DepartmentMap.cs" />
+    <Compile Include="Models\Mapping\DesignationMap.cs" />
+    <Compile Include="Models\Mapping\Donation_FormulaMap.cs" />
+    <Compile Include="Models\Mapping\Donation_TypeMap.cs" />
+    <Compile Include="Models\Mapping\Email_AttachmentMap.cs" />
+    <Compile Include="Models\Mapping\Email_NotificationMap.cs" />
+    <Compile Include="Models\Mapping\Employee_AttachmentMap.cs" />
+    <Compile Include="Models\Mapping\Employee_Emergency_ContactMap.cs" />
+    <Compile Include="Models\Mapping\Employee_No_PatternMap.cs" />
+    <Compile Include="Models\Mapping\Employee_ProfileMap.cs" />
+    <Compile Include="Models\Mapping\Employment_HistoryMap.cs" />
+    <Compile Include="Models\Mapping\Employment_History_AllowanceMap.cs" />
+    <Compile Include="Models\Mapping\ETIRA8Map.cs" />
+    <Compile Include="Models\Mapping\ExchangeMap.cs" />
+    <Compile Include="Models\Mapping\Exchange_CurrencyMap.cs" />
+    <Compile Include="Models\Mapping\Exchange_RateMap.cs" />
+    <Compile Include="Models\Mapping\Expenses_ApplicationMap.cs" />
+    <Compile Include="Models\Mapping\Expenses_Application_DocumentMap.cs" />
+    <Compile Include="Models\Mapping\Expenses_CalculationMap.cs" />
+    <Compile Include="Models\Mapping\Expenses_CategoryMap.cs" />
+    <Compile Include="Models\Mapping\Expenses_ConfigMap.cs" />
+    <Compile Include="Models\Mapping\Expenses_Config_BudgetMap.cs" />
+    <Compile Include="Models\Mapping\Expenses_Config_DetailMap.cs" />
+    <Compile Include="Models\Mapping\Expenses_No_PatternMap.cs" />
+    <Compile Include="Models\Mapping\Global_Lookup_DataMap.cs" />
+    <Compile Include="Models\Mapping\Global_Lookup_DefMap.cs" />
+    <Compile Include="Models\Mapping\Holiday_ConfigMap.cs" />
+    <Compile Include="Models\Mapping\HR_FileExport_HistoryMap.cs" />
+    <Compile Include="Models\Mapping\HR_FileExport_History_DetailMap.cs" />
+    <Compile Include="Models\Mapping\HR_FileExport_IR8A_DetailMap.cs" />
+    <Compile Include="Models\Mapping\HR_FileExport_IR8B_DetailMap.cs" />
+    <Compile Include="Models\Mapping\HR_FileExport_IR8S_DetailMap.cs" />
+    <Compile Include="Models\Mapping\HR_FileExport_IRA8A_DetailMap.cs" />
+    <Compile Include="Models\Mapping\Invoice_DetailsMap.cs" />
+    <Compile Include="Models\Mapping\Invoice_HeaderMap.cs" />
+    <Compile Include="Models\Mapping\IR8A_BankMap.cs" />
+    <Compile Include="Models\Mapping\IR8A_CountryMap.cs" />
+    <Compile Include="Models\Mapping\IR8A_NationalityMap.cs" />
+    <Compile Include="Models\Mapping\Job_CostMap.cs" />
+    <Compile Include="Models\Mapping\Job_Cost_Payment_TermMap.cs" />
+    <Compile Include="Models\Mapping\Leave_AdjustmentMap.cs" />
+    <Compile Include="Models\Mapping\Leave_Application_DocumentMap.cs" />
+    <Compile Include="Models\Mapping\Leave_CalculationMap.cs" />
+    <Compile Include="Models\Mapping\Leave_ConfigMap.cs" />
+    <Compile Include="Models\Mapping\Leave_Config_Child_DetailMap.cs" />
+    <Compile Include="Models\Mapping\Leave_Config_ConditionMap.cs" />
+    <Compile Include="Models\Mapping\Leave_Config_DetailMap.cs" />
+    <Compile Include="Models\Mapping\Leave_Config_ExtraMap.cs" />
+    <Compile Include="Models\Mapping\Leave_DefaultMap.cs" />
+    <Compile Include="Models\Mapping\Leave_Default_Child_DetailMap.cs" />
+    <Compile Include="Models\Mapping\Leave_Default_ConditionMap.cs" />
+    <Compile Include="Models\Mapping\Leave_Default_DetailMap.cs" />
+    <Compile Include="Models\Mapping\MenuMap.cs" />
+    <Compile Include="Models\Mapping\Menu_PageMap.cs" />
+    <Compile Include="Models\Mapping\ModuleMap.cs" />
+    <Compile Include="Models\Mapping\Module_MappingMap.cs" />
+    <Compile Include="Models\Mapping\NationalityMap.cs" />
+    <Compile Include="Models\Mapping\Notification_SchedulerMap.cs" />
+    <Compile Include="Models\Mapping\OT_FormulaMap.cs" />
+    <Compile Include="Models\Mapping\PageMap.cs" />
+    <Compile Include="Models\Mapping\Page_RoleMap.cs" />
+    <Compile Include="Models\Mapping\PRALMap.cs" />
+    <Compile Include="Models\Mapping\PRCMap.cs" />
+    <Compile Include="Models\Mapping\PRC_DepartmentMap.cs" />
+    <Compile Include="Models\Mapping\PRDEMap.cs" />
+    <Compile Include="Models\Mapping\PRDLMap.cs" />
+    <Compile Include="Models\Mapping\PRDMap.cs" />
+    <Compile Include="Models\Mapping\PREDLMap.cs" />
+    <Compile Include="Models\Mapping\PRELMap.cs" />
+    <Compile Include="Models\Mapping\PRGMap.cs" />
+    <Compile Include="Models\Mapping\PRMMap.cs" />
+    <Compile Include="Models\Mapping\PRTMap.cs" />
+    <Compile Include="Models\Mapping\RelationshipMap.cs" />
+    <Compile Include="Models\Mapping\SBS_ModuleMap.cs" />
+    <Compile Include="Models\Mapping\SBS_Module_DetailMap.cs" />
+    <Compile Include="Models\Mapping\Screen_Capture_ImageMap.cs" />
+    <Compile Include="Models\Mapping\Screen_Capture_LogMap.cs" />
+    <Compile Include="Models\Mapping\Selected_CPF_FormulaMap.cs" />
+    <Compile Include="Models\Mapping\Selected_Donation_FormulaMap.cs" />
+    <Compile Include="Models\Mapping\Selected_OT_FormulaMap.cs" />
+    <Compile Include="Models\Mapping\StateMap.cs" />
+    <Compile Include="Models\Mapping\Storage_UpgradeMap.cs" />
+    <Compile Include="Models\Mapping\SubscriberMap.cs" />
+    <Compile Include="Models\Mapping\SubscriptionMap.cs" />
+    <Compile Include="Models\Mapping\sysdiagramMap.cs" />
+    <Compile Include="Models\Mapping\Time_Mobile_MapMap.cs" />
+    <Compile Include="Models\Mapping\Time_Mobile_TransMap.cs" />
+    <Compile Include="Models\Mapping\Time_SheetMap.cs" />
+    <Compile Include="Models\Mapping\Time_Sheet_DtlMap.cs" />
+    <Compile Include="Models\Mapping\TsEXMap.cs" />
+    <Compile Include="Models\Mapping\Upload_DocumentMap.cs" />
+    <Compile Include="Models\Mapping\Upload_ReceiptMap.cs" />
+    <Compile Include="Models\Mapping\User_Assign_ModuleMap.cs" />
+    <Compile Include="Models\Mapping\User_Assign_RoleMap.cs" />
+    <Compile Include="Models\Mapping\User_AuthenticationMap.cs" />
+    <Compile Include="Models\Mapping\User_ProfileMap.cs" />
+    <Compile Include="Models\Mapping\User_Profile_PhotoMap.cs" />
+    <Compile Include="Models\Mapping\User_RoleMap.cs" />
+    <Compile Include="Models\Mapping\User_Session_DataMap.cs" />
+    <Compile Include="Models\Mapping\User_TransactionsMap.cs" />
+    <Compile Include="Models\Mapping\vwQuantityOnHandMap.cs" />
+    <Compile Include="Models\Mapping\Working_DaysMap.cs" />
+    <Compile Include="Models\Menu.cs" />
+    <Compile Include="Models\Menu_Page.cs" />
+    <Compile Include="Models\Module.cs" />
+    <Compile Include="Models\Module_Mapping.cs" />
+    <Compile Include="Models\Nationality.cs" />
+    <Compile Include="Models\Notification_Scheduler.cs" />
+    <Compile Include="Models\OT_Formula.cs" />
+    <Compile Include="Models\Page.cs" />
+    <Compile Include="Models\Page_Role.cs" />
+    <Compile Include="Models\PRAL.cs" />
+    <Compile Include="Models\PRC.cs" />
+    <Compile Include="Models\PRC_Department.cs" />
+    <Compile Include="Models\PRD.cs" />
+    <Compile Include="Models\PRDE.cs" />
+    <Compile Include="Models\PRDL.cs" />
+    <Compile Include="Models\PREDL.cs" />
+    <Compile Include="Models\PREL.cs" />
+    <Compile Include="Models\PRG.cs" />
+    <Compile Include="Models\PRM.cs" />
+    <Compile Include="Models\PRT.cs" />
+    <Compile Include="Models\Relationship.cs" />
+    <Compile Include="Models\SBS2DBContext.cs" />
+    <Compile Include="Models\SBSDBContext-temp.cs" />
+    <Compile Include="Models\SBS_Module.cs" />
+    <Compile Include="Models\SBS_Module_Detail.cs" />
+    <Compile Include="Models\Screen_Capture_Image.cs" />
+    <Compile Include="Models\Screen_Capture_Log.cs" />
+    <Compile Include="Models\Selected_CPF_Formula.cs" />
+    <Compile Include="Models\Selected_Donation_Formula.cs" />
+    <Compile Include="Models\Selected_OT_Formula.cs" />
+    <Compile Include="Models\State.cs" />
+    <Compile Include="Models\Storage_Upgrade.cs" />
+    <Compile Include="Models\Subscriber.cs" />
+    <Compile Include="Models\Subscription.cs" />
+    <Compile Include="Models\sysdiagram.cs" />
+    <Compile Include="Models\Time_Mobile_Map.cs" />
+    <Compile Include="Models\Time_Mobile_Trans.cs" />
+    <Compile Include="Models\Time_Sheet.cs" />
+    <Compile Include="Models\Time_Sheet_Dtl.cs" />
+    <Compile Include="Models\TsEX.cs" />
+    <Compile Include="Models\Upload_Document.cs" />
+    <Compile Include="Models\Upload_Receipt.cs" />
+    <Compile Include="Models\User_Assign_Module.cs" />
+    <Compile Include="Models\User_Assign_Role.cs" />
+    <Compile Include="Models\User_Authentication.cs" />
+    <Compile Include="Models\User_Profile.cs" />
+    <Compile Include="Models\User_Profile_Photo.cs" />
+    <Compile Include="Models\User_Role.cs" />
+    <Compile Include="Models\User_Session_Data.cs" />
+    <Compile Include="Models\User_Transactions.cs" />
+    <Compile Include="Models\vwQuantityOnHand.cs" />
+    <Compile Include="Models\Working_Days.cs" />
+    <Compile Include="Offline\DbResult.cs" />
+    <Compile Include="Offline\LocalService.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Offline\MigrateTable.cs" />
+    <Compile Include="Common\AppConst.cs" />
+    <Compile Include="Common\EmailTemplete.cs" />
+    <Compile Include="Common\RandomColor .cs" />
+    <Compile Include="CriteriaBase.cs" />
+    <Compile Include="Models_\_Models.cs" />
+    <Compile Include="Offline\LocalContext.cs" />
+    <Compile Include="Offline\ManageOffline.cs" />
+    <Compile Include="Offline\ServerContext.cs" />
+    <Compile Include="Offline\ServerService.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\ApproveService.cs" />
+    <Compile Include="Service\Customer2Service.cs" />
+    <Compile Include="Service\FrontService.cs" />
+    <Compile Include="Service\JobCostService.cs" />
+    <Compile Include="Service\EmailScheduleService.cs" />
+    <Compile Include="Service\ScheduleService.cs" />
+    <Compile Include="Service\BranchService.cs" />
+    <Compile Include="Service\ComboService.cs" />
+    <Compile Include="Service\ConfigService.cs" />
+    <Compile Include="Service\EmployeeService.cs" />
+    <Compile Include="Service\ExpensesService.cs" />
+    <Compile Include="Service\GlobalLookupService.cs" />
+    <Compile Include="Service\LeaveService.cs" />
+    <Compile Include="Service\ModelBase.cs" />
+    <Compile Include="Service\ModuleService.cs" />
+    <Compile Include="Service\PayrollService.cs" />
+    <Compile Include="Service\RoleService.cs" />
+    <Compile Include="Service\ServiceBase.cs" />
+    <Compile Include="Service\SubscriptionService.cs" />
+    <Compile Include="Service\SupportService.cs" />
+    <Compile Include="Service\TimeMoblieService.cs" />
+    <Compile Include="Service\TimeSheetService.cs" />
+    <Compile Include="Service\TsExService.cs" />
+    <Compile Include="Service\UserService.cs" />
+    <Compile Include="Service\CompanyService.cs" />
+    <Compile Include="Service\IdentityModels.cs" />
+    <Compile Include="Service\StoredProcedure.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="AppSetting.ini" />
+    <None Include="lib\Microsoft.AspNet.Identity.Core.1.0.0\Microsoft.AspNet.Identity.Core.1.0.0.nupkg" />
+    <None Include="lib\Microsoft.AspNet.Identity.Core.1.0.0\Microsoft.AspNet.Identity.Core.1.0.0.nuspec" />
+    <None Include="lib\Microsoft.AspNet.Identity.EntityFramework.1.0.0\Microsoft.AspNet.Identity.EntityFramework.1.0.0.nupkg" />
+    <None Include="lib\Microsoft.AspNet.Identity.EntityFramework.1.0.0\Microsoft.AspNet.Identity.EntityFramework.1.0.0.nuspec" />
+    <None Include="lib\Microsoft.AspNet.Identity.Owin.1.0.0\Microsoft.AspNet.Identity.Owin.1.0.0.nupkg" />
+    <None Include="lib\Microsoft.AspNet.Identity.Owin.1.0.0\Microsoft.AspNet.Identity.Owin.1.0.0.nuspec" />
+    <None Include="lib\Microsoft.AspNet.Mvc.5.0.0\Microsoft.AspNet.Mvc.5.0.0.nupkg" />
+    <None Include="lib\Microsoft.AspNet.Mvc.5.0.0\Microsoft.AspNet.Mvc.5.0.0.nuspec" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="lib\DDay.Collections.dll" />
+    <Content Include="lib\DDay.iCal.dll" />
+    <Content Include="lib\EntityFramework.dll" />
+    <Content Include="lib\EPPlus\EPPlus.dll" />
+    <Content Include="lib\EPPlus\EPPlus.XML" />
+    <Content Include="lib\EPPlus\readme.txt" />
+    <Content Include="lib\Excel.dll" />
+    <Content Include="lib\itextsharp.dll" />
+    <Content Include="lib\itextsharp.pdfa.dll" />
+    <Content Include="lib\iTextSharp.xml" />
+    <Content Include="lib\Microsoft.AspNet.Identity.Core.1.0.0\lib\net45\Microsoft.AspNet.Identity.Core.dll" />
+    <Content Include="lib\Microsoft.AspNet.Identity.Core.1.0.0\lib\net45\Microsoft.AspNet.Identity.Core.xml" />
+    <Content Include="lib\Microsoft.AspNet.Identity.EntityFramework.1.0.0\lib\net45\Microsoft.AspNet.Identity.EntityFramework.dll" />
+    <Content Include="lib\Microsoft.AspNet.Identity.EntityFramework.1.0.0\lib\net45\Microsoft.AspNet.Identity.EntityFramework.xml" />
+    <Content Include="lib\Microsoft.AspNet.Identity.Owin.1.0.0\lib\net45\Microsoft.AspNet.Identity.Owin.dll" />
+    <Content Include="lib\Microsoft.AspNet.Identity.Owin.1.0.0\lib\net45\Microsoft.AspNet.Identity.Owin.xml" />
+    <Content Include="lib\StarIO.dll" />
+    <Content Include="lib\StarIO.xml" />
+    <Content Include="lib\StarIOPort.dll" />
+    <Content Include="lib\Microsoft.AspNet.Mvc.5.0.0\lib\net45\System.Web.Mvc.dll" />
+    <Content Include="lib\Microsoft.AspNet.Mvc.5.0.0\lib\net45\System.Web.Mvc.xml" />
+    <Content Include="lib\Time\CivinTecAccessManager.dll" />
+    <Content Include="lib\Time\CivinTecAccessManager.pdb" />
+    <Content Include="lib\Time\CN8TcpComm.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SBSResourceAPI\SBSResourceAPI.csproj">
+      <Project>{79e9badf-1319-422f-bec7-df01e9a25754}</Project>
+      <Name>SBSResourceAPI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SBSWorkFlowAPI\SBSWorkFlowAPI.csproj">
+      <Project>{bd0baa27-d16b-47ec-b0f3-8b2e9644bfde}</Project>
+      <Name>SBSWorkFlowAPI</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

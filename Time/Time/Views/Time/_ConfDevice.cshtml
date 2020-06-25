@@ -1,0 +1,146 @@
+﻿@model  Time.Models.TimeConfViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using Time.Models;
+@using SBSResourceAPI;
+
+<div id="device-tab" class="tab-pane fade in">
+    <script type="text/javascript">
+        $(function () {
+            var passElem = $("input#Device_Password");
+            passElem.focus(function () {
+                passElem.prop("type", "password");
+            });
+        });
+
+
+        function AddDevice_Onclick() {
+            $('#btnAddDevice').get(0).click();
+            $('#operation').val('@Operation.C');
+
+            $('#Device_ID').val('');
+            $('#Device_Branch_ID').val('');
+            $('#Device_No').val('');
+            $('#Device_IP').val('');
+            $('#Device_Brand').val('');
+            $('#Device_Password').val('');
+            $('#Device_User_Name').val('');
+            $('#Device_Port').val('');
+            $('#Device_Branch_ID').trigger("chosen:updated");
+        }
+        function EditDevice_Onclick(id, bid, dNo, ip, port, uname, pwd, brandname) {
+            //alert(brandname);
+            $('#btnAddDevice').get(0).click();
+            $('#operation').val('@Operation.U');
+
+            $('#Device_ID').val(id);
+            $('#Device_Branch_ID').val(bid);
+            $('#Device_No').val(dNo);
+            $('#Device_IP').val(ip);
+            $('#Brand_Name').val(brandname);
+            $('#Device_Password').val(pwd);
+            $('#Device_User_Name').val(uname);
+            $('#Device_Port').val(port);
+            $('#Device_Branch_ID').trigger("chosen:updated");
+            $('#Brand_Name').trigger("chosen:updated");
+            var passElem = $("#Device_Password");
+            passElem.prop("type", "password");
+        }
+
+        function ResetDevice_Onclick() {
+            var msg = '-  @Resource.Message_All_The_Transactions_Will_Be_Reset_To_Oiginal_Stage_In_The_System  \r\n';
+            msg += '-  @Resource.Message_You_Need_To_Remap_The_Employees_Between_New_Device_And_The_System \r\n';
+            msg += '-   @Resource.Message_Need_To_Refresh_The_Data_To_Get_The_Report \r\n';
+            msg += ' @Resource.Message_Are_You_Sure_You_Want_To_Reset \r\n';
+            if (confirm(msg)) {
+                $('#operation').val('@Operation.R');
+                return true;
+            }
+            return false;
+        }
+        function DeleteDevice_Onclick() {
+            var msg = '-  @Resource.Message_All_The_Transactions_Will_Be_Delele \r\n';
+            msg += '-  @Resource.Message_All_The_Employees_Mapping_Will_Be_Delele \r\n';
+            msg += '@Resource.Message_Are_You_Sure_You_Want_To_Delete \r\n';
+            if (confirm(msg)) {
+                $('#operation').val('@Operation.D');
+                return true;
+            }
+            return false;
+        }
+
+        function IP_Onchange() {
+            if ($('#operation').val() == '@Operation.U') {
+                if ($('#Device_IP').val() != null && $('#Device_IP').val() != '') {
+                    var msg = '-  @Resource.Message_All_The_Transactions_Will_Be_Delele \r\n';
+                    msg += '-  @Resource.Message_All_The_Employees_Mapping_Will_Be_Delele \r\n';
+                    msg += '@Resource.Message_Are_You_Sure_You_Want_To_Change_The_IP_Address\r\n';
+                    if (confirm(msg)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+    </script>
+    <a id="btnAddDevice" href="#modal-device" role="button" data-toggle="modal" style="display:none;"></a>
+
+    <div class="row">
+        <div class="col-md-12">
+            <section class="tile transparent">
+                <div class="tile-header transparent">
+                    <h1><strong>@Resource.Device</strong></h1>
+                    <div class="controls">
+                        <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                    </div>
+                </div>
+                <div class="tile-body">
+                    <div class="table-responsive">
+                        <table class="table table-datatable table-custom" id="dDataTable">
+                            <thead>
+                                <tr>
+                                    <th class="sort-alpha">@Resource.Branch</th>
+                                    <th class="sort-alpha">@Resource.Device_No</th>
+                                    <th class="sort-alpha">@Resource.IP_Address</th>
+                                    <th class="sort-alpha">@Resource.Device_Port</th>
+                                    <th class="sort-alpha">@Resource.Device_Brand</th>
+                                    <th class="no-sort" width="160px">@Resource.Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @foreach (var row in Model.deviceList)
+                                {
+                                    <tr>
+                                        <td>
+                                            @row.Branch_Name
+                                        </td>
+                                        <td>@row.Device_No</td>
+                                        <td>@row.IP_Address</td>
+                                        <td>@row.Port</td>
+                                        <td>@row.Brand_Name</td>
+                                        <td class="actions">
+                                            @if (Model.rights != null && Model.rights.Contains(Operation.U))
+                                            {
+                                                <a href="#" onclick="EditDevice_Onclick('@row.Device_ID','@row.Branch_ID','@row.Device_No','@row.IP_Address','@row.Port','@row.User_Name','@row.Password','@row.Brand_Name')" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                                <a style="text-decoration:none;" href="@Url.Action("Configuration", "Time", new { Device_ID = row.Device_ID, operation = Operation.R, tabAction = "device" })" onclick="return ResetDevice_Onclick();" title="@Resource.Reset">
+                                                    <i class="fa fa-refresh fa-2x"></i>
+                                                </a>
+                                            }
+                                            @if (Model.rights != null && Model.rights.Contains(Operation.D))
+                                            {
+                                                <a href="@Url.Action("Configuration", "Time", new { Device_ID = row.Device_ID, operation = Operation.D, tabAction = "device" })" onclick="return DeleteDevice_Onclick();" title="@Resource.Delete">
+                                                    <i class="fa fa-times-circle-o fa-2x"></i>
+                                                </a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>

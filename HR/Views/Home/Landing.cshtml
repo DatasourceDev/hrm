@@ -1,0 +1,234 @@
+﻿@model  HR.Models.LandingViewModel
+@using SBSModel.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+    ViewBag.Title = Resource.Landing;
+    Layout = "~/Views/Shared/_Layout_Landing.cshtml";
+}
+
+@using (Html.BeginForm("Landing", "Home", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "theForm" }))
+{
+    <div class="main">
+        <br />
+        <div class="row">
+            <div class="col-md-12">     
+                <section class="tile color transparent-white">
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h2>@Resource.Landing<span></span></h2>
+                            </div>
+                        </div>
+                    </div>
+                </section>                                          
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <!-- tile widget -->
+                <section class="tile color transparent-black">
+
+                    <div class="tile-body tab-content rounded-bottom-corners">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="Company_ID" value="@Model.Company_ID" />
+                        <input type="hidden" name="Employee_No_Pattern_ID" value="@Model.Employee_No_Pattern_ID" />
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.Branch</strong></h1>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <label for="Branch_Code" class="control-label">@Resource.Branch_Code</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <input type="text" class="form-control" name="Branch_Code" id="Branch_Code" value="@Model.Branch_Code">
+                                        <div class="validation-error">
+                                            @Html.ValidationMessageFor(m => m.Branch_Code)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <label for="Branch_Name" class="control-label">@Resource.Branch_Name</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <input type="text" class="form-control" name="Branch_Name" id="Branch_Name" value="@Model.Branch_Name">
+                                        <div class="validation-error">
+                                            @Html.ValidationMessageFor(m => m.Branch_Name)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.Department</strong></h1>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <label for="Department_Name" class="control-label">@Resource.Department_Name</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <input type="text" class="form-control" name="Department_Name" id="Department_Name" value="@Model.Department_Name">
+                                        <div class="validation-error">
+                                            @Html.ValidationMessageFor(m => m.Department_Name)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.Pattern</strong></h1>
+                        </div>
+
+                        <div class="table-responsive" style="padding-left:0px;padding-right:0px;">
+                            <table class="table table-datatable table-custom" id="patternDataTable">
+                                <thead>
+                                    <tr>
+                                        <th class="sort-alpha" width="30px">@Resource.Select</th>
+                                        <th class="sort-alpha" width="200px">@Resource.Items</th>
+                                        <th class="sort-alpha">@Resource.Format</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="checkbox">
+                                                <input type="hidden" value="true" name="Select_Year">
+                                                <input type="checkbox" value="true" id="Select_Year" checked disabled>
+                                                <label for="Select_Year"></label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Resource.Years
+                                        </td>
+                                        <td>
+                                            <div class="radio radio-transparent">
+                                                <input type="radio" name="Year_2_Digit" id="Year_2_Digit" value="true">
+                                                <label for="Year_2_Digit">@Resource.Year_2_Digit</label>
+                                            </div>
+
+                                            <div class="radio radio-transparent">
+                                                <input type="radio" name="Year_2_Digit" id="Year_4_Digit" value="false">
+                                                <label for="Year_4_Digit">@Resource.Year_4_Digit</label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="checkbox">
+                                                <input type="checkbox" value="true" id="Select_Nationality" name="Select_Nationality">
+                                                <label for="Select_Nationality"></label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Resource.Nationality
+                                        </td>
+                                        <td>
+                                            @Resource.Select_Nationality
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="checkbox">
+                                                <input type="checkbox" value="true" id="Select_Branch_Code" name="Select_Branch_Code">
+                                                <label for="Select_Branch_Code"></label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Resource.Branch
+                                        </td>
+                                        <td>
+                                            @Resource.Select_Branch_Code
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="checkbox ">
+                                                <input type="checkbox" id="Select_Running_No" name="Select_Running_No" checked disabled>
+                                                <label for="Select_Running_No"></label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <label for="Select_Running_No">@Resource.Running_No_SymbolDot</label>
+                                        </td>
+                                        <td>
+                                            <div id="divRunNumber">
+                                                <div class="form-group">
+                                                    <div class="col-sm-4">
+                                                        <div class="radio radio-transparent">
+                                                            @if (Model.Is_Default_Emp_No_Next_Start)
+                                                        {
+                                                                <input type="radio" name="Is_Default_Emp_No_Next_Start" id="Is_Default_Emp_No_Next_Start" value="true" checked>
+                                                        }
+                                                        else
+                                                        {
+                                                                <input type="radio" name="Is_Default_Emp_No_Next_Start" id="Is_Default_Emp_No_Next_Start" value="true">
+                                                        }
+                                                            <label for="Is_Default_Emp_No_Next_Start">@Resource.Select_Default_Emp_No_Next_Start</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <input type="text" class="form-control" name="Default_Emp_No_Next_Start" id="Default_Emp_No_Next_Start" value="@Model.Default_Emp_No_Next_Start">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-sm-4">
+                                                        <div class="radio radio-transparent">
+                                                            @if (!Model.Is_Default_Emp_No_Next_Start)
+                                                        {
+                                                                <input type="radio" name="Is_Default_Emp_No_Next_Start" id="Is_Emp_No_Next_Start" value="false" checked>
+                                                        }
+                                                        else
+                                                        {
+                                                                <input type="radio" name="Is_Default_Emp_No_Next_Start" id="Is_Emp_No_Next_Start" value="false">
+                                                        }
+                                                            <label for="Is_Emp_No_Next_Start">@Resource.Select_Emp_No_Next_Start</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <input type="text" class="form-control" name="Current_Running_Number" id="Current_Running_Number" value="@Model.Current_Running_Number">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </section>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <section class="tile color transparent-white">
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button id="btnSave" type="submit" class="btn btn-primary">@Resource.Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+}

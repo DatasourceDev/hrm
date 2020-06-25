@@ -1,0 +1,324 @@
+﻿@model  HR.Models.ExpenseReportViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@using SBSWorkFlowAPI.Constants;
+@{
+   ViewBag.Title = Resource.Expenses_Report;
+   var totalhash = new System.Collections.Hashtable();
+   var currentdate = StoredProcedure.GetCurrentDate();
+}
+
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+   <div class="pageheader">
+      <h2>@Resource.Expenses_Report<span></span></h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("index", "Home" )">@Resource.Dash_Board</a></li>
+            <li class="active">@Resource.Expenses_Report</li>
+         </ol>
+      </div>
+   </div>
+   <script type="text/javascript">
+      $(function () {
+         InitDatepicker();
+         InitDatatable('moduleDataTable', null, null, 0, 'asc');
+
+         $("#Expenses_Type_Sel").val(@Model.Expenses_Sel);
+         $("#Expenses_Type_Sel").trigger("chosen:updated");
+
+         $(function () {
+            $("#btnExport").click(function () {
+               $('#tabAction').val('export');
+               var form = $("#theform");
+               form.attr("action", "@Url.Action("ExpenseReports", "Expenses")");
+               form.method = 'get';
+               form.submit();
+               CloseMask();
+            });
+
+            $("#btnSearch").click(function () {
+               $('#tabAction').val('');
+               var form = $("#theform");
+               form.attr("action", "@Url.Action("ExpenseReports", "Expenses")");
+               form.method = 'get';
+               form.submit();
+            });
+         });
+      });
+   </script>
+
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+
+            @using (Html.BeginForm("ExpenseReports", "Expenses", FormMethod.Get, new { @class = "form-horizontal", role = "form", id = "theform" }))
+            {
+               <section class="tile color transparent-black filter" id="secfilter">
+                  <div class="tile-header transparent">
+                     <h1 onclick="CollapseHeader(null)" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize filter" id="btncollapse"><i class="fa fa-search  color-white"></i></a>
+                     </div>
+                  </div>
+                  <div class="tile-body">
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Expenses_Type" class="control-label">@Resource.Expenses_Type</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select multiple class="chosen-select chosen-transparent form-control" id="Expenses_Type_Sel" name="Expenses_Type_Sel">
+                                    @if (Model.expensesTypeList != null)
+                                    {
+                                       foreach (var row in Model.expensesTypeList)
+                                       {
+                                          if (row.Value != null && !string.IsNullOrEmpty(row.Value))
+                                          {
+                                             <option value="@row.Value">@row.Text</option>
+                                          }
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Expenses_Sel)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="sFrom" class="control-label">@Resource.From</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <input type="text" class="form-control input-datepicker" id="sFrom" name="sFrom" value="@Model.sFrom">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.sFrom, "", new { id = "sFrom_Err" })
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="sTo" class="control-label">@Resource.To</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <input type="text" class="form-control input-datepicker" id="sTo" name="sTo" value="@Model.sTo">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.sTo, "", new { id = "sToErr" })
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Department_ID" class="control-label">@Resource.Department</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Department_ID" name="Department_ID">
+                                    @if (Model.departmentlst != null)
+                                    {
+                                       foreach (var row in Model.departmentlst)
+                                       {
+                                          if (Model.Department_ID == NumUtil.ParseInteger(row.Value))
+                                          {
+                                    <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                          }
+                                          else
+                                          {
+                                    <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                          }
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Department_ID)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <div style="height:30px;"></div>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="hidden" name="tabAction" id="tabAction" />
+                                 <input type="hidden" id="Year" name="Year" value="@Model.Year" />
+                                 <button type="button" id="btnSearch" class="btn btn-default">@Resource.Filter</button>
+                                 <a class="btn btn-default" href="#" target="_blank" id="btnExport" data-toggle="modal">@Resource.Export_To_Excel</a>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </section>
+
+               <section class="tile color transparent-black">
+                  <div class="tile-header transparent">
+                     <h1><strong>@Resource.Expenses_Report</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                     </div>
+                  </div>
+                  <div class="tile-body ">
+                     <div class="table-responsive" style="overflow-x:auto">
+                        <table class="table table-datatable table-custom" id="moduleDataTable">
+                           <thead>
+                              <tr>
+                                 <th class="sort-alpha" style="width:120px;">@Resource.Employee_No_SymbolDot</th>
+                                 <th class="sort-alpha" style="width:150px;">@Resource.Employee_Name</th>
+                                 @if (Model.expensesTypeList != null && Model.expensesTypeList.Count > 0)
+                                 {
+                                    foreach (ComboViewModel c in Model.expensesTypeList)
+                                    {
+                                       if (Model.Expenses_Type_Sel.Contains(NumUtil.ParseInteger(c.Value)))
+                                       {
+                                          <th class="sort-amount" style="width:auto">@c.Text</th>
+                                       }
+                                    }
+                                 }
+                                 <th class="sort-amount">@Resource.Total_SymbolDollar</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              @if (Model.employeeList != null && Model.employeeList.Count > 0)
+                              {
+                                 decimal total = 0;
+                                 int employee = 0;
+                                 foreach (var emp in Model.employeeList)
+                                 {
+                                    employee = 0;
+                                    total = 0;
+                                    Global_Lookup_Data emptype = null;
+                                    Employment_History emphist = emp.Employment_History.Where(w => w.Effective_Date <= currentdate).OrderByDescending(o => o.Effective_Date).FirstOrDefault();
+                                    if (emphist != null)
+                                    {
+                                       emptype = new ComboService().GetLookup(emphist.Employee_Type);
+                                       if (Model.Department_ID.HasValue && emphist.Department_ID != Model.Department_ID)
+                                       {
+                                          continue;
+                                       }
+                                    }
+                                    employee = emp.Employee_Profile_ID;
+                                    string emp_no = emp.Employee_No;
+                                    List<Expenses_Application_Document> expenses = Model.expenseList.Where(w => w.Employee_Profile_ID == employee && w.Expenses_Application.Overall_Status == WorkflowStatus.Closed).ToList();
+                                    <tr>
+                                       <td>@emp_no</td>
+                                       <td>@UserSession.GetUserName(emp.User_Profile)</td>
+                                       @if (Model.expensesTypeList != null && Model.expensesTypeList.Count > 0)
+                                       {
+                                          total = 0;
+                                          foreach (ComboViewModel c in Model.expensesTypeList)
+                                          {
+                                             if (Model.Expenses_Type_Sel.Contains(NumUtil.ParseInteger(c.Value)))
+                                             {
+                                                decimal expV = 0;
+                                                if (expenses != null && expenses.Count > 0)
+                                                {
+                                                   foreach (Expenses_Application_Document exp in expenses.Where(w => w.Expenses_Config.Expenses_Name.ToLower() == c.Text.ToLower()).ToList())
+                                                   {
+                                                      expV += exp.Amount_Claiming.Value;
+                                                      total += exp.Amount_Claiming.Value;
+                                                   }
+                                                   if (!totalhash.Contains(c.Value))
+                                                   {
+                                                      totalhash.Add(c.Value, expV);
+                                                   }
+                                                   else
+                                                   {
+                                                      totalhash[c.Value] = (decimal)totalhash[c.Value] + expV;
+                                                   }
+                                                }
+                                                <td class="text-right">@expV.ToString("n2")</td>
+                                             }
+                                          }
+                                       }
+                                       <td class="text-right" style="padding-right:0.2cm">
+                                          @if (!totalhash.Contains("total"))
+                                          {
+                                             totalhash.Add("total", total);
+                                          }
+                                          else
+                                          {
+                                             totalhash["total"] = (decimal)totalhash["total"] + total;
+                                          }
+                                          @total.ToString("n2")
+                                       </td>
+                                    </tr>
+                                 }
+                              }
+                           </tbody>
+                           <tfoot>
+                              <tr class="table-footer-summary" style="font-size:15px">
+                                 <td colspan="2"></td>
+                                 @if (Model.expensesTypeList != null && Model.expensesTypeList.Count > 0)
+                                 {
+                                    foreach (ComboViewModel c in Model.expensesTypeList)
+                                    {
+                                       if (Model.Expenses_Type_Sel.Contains(NumUtil.ParseInteger(c.Value)))
+                                       {
+                                          decimal expV = 0;
+                                          if (totalhash.Contains(c.Value))
+                                          {
+                                             expV = (decimal)totalhash[c.Value];
+                                          }
+                                          <td class="text-right"><strong>@NumUtil.FormatCurrency(expV, 2)</strong></td>
+                                       }
+                                    }
+                                 }
+                                 <td class="text-right">
+                                    @{
+                                 decimal totalall = 0;
+                                 if (totalhash.Contains("total"))
+                                 {
+                                    totalall = (decimal)totalhash["total"];
+                                 }
+                                    }
+                                    <strong>@NumUtil.FormatCurrency(totalall, 2)</strong>
+                                 </td>
+                              </tr>
+                           </tfoot>
+                        </table>
+                     </div>
+                  </div>
+               </section>
+            }
+         </div>
+      </div>
+   </div>
+}

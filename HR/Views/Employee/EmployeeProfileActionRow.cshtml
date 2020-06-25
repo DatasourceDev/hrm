@@ -1,0 +1,40 @@
+﻿@model  HR.Models.EmployeeActionViewModels
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+    var i = Model.Index;
+}
+<script type="text/javascript">
+    $(function () {
+        $('.input-append').datepicker({});
+    });
+</script>
+
+<td style="text-align:center">
+    <input type="hidden" name="Rows_Type[@i]" id="Rows_Type[@i]" value="@RowType.ADD" />
+    <div class="input-append date" data-date="" data-date-format="dd/mm/yyyy">
+        @Html.TextBox("empActionlist[" + i + "].Hired_Date", null, "{0:dd/mm/yyyy}", new { @class = "" })
+        <span class="add-on"><i class="icon-th"></i></span>
+    </div>
+    <div class="validation-error">
+        @Html.ValidationMessage("empActionlist[" + i + "].Hired_Date")
+    </div>
+</td>
+<td style="text-align:center">
+    <div class="input-append date" data-date="" data-date-format="dd/mm/yyyy">
+        @Html.TextBox("empActionlist[" + i + "].Terminated_Date", "", "{0:dd/mm/yyyy}", new { @class = "" })
+        <span class="add-on"><i class="icon-th"></i></span>
+    </div>
+    <div class="validation-error">
+        @Html.ValidationMessage("empActionlist[" + i + "].Terminated_Date")
+    </div>
+</td>
+
+<td style="text-align:center">
+    <a data-toggle="modal" onclick="return DeleteItem('itemRow-@i', @i);">
+        <i class="fa fa-times-circle-o fa-2x" ></i>
+    </a>
+</td>

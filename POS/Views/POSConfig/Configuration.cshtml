@@ -1,0 +1,374 @@
+﻿@using POS.Common;
+@using POS.Models;
+@using SBSModel.Common;
+@using SBSModel.Models;
+@using System.Net.NetworkInformation;
+@using System.Runtime.InteropServices;
+@using System.Net;
+@using System.Net.NetworkInformation;
+@using System.ComponentModel;
+@using System.Text;
+@using System.Management;
+
+@model  POS.Models.ConfigurationViewModel
+@{
+    ViewBag.Title = @Resources.ResourcePOS.Configuration;
+    var currentdate = StoredProcedure.GetCurrentDate();
+}
+
+
+@Html.AntiForgeryToken()
+
+@using (Html.BeginForm("Configuration", "POSConfig", FormMethod.Post, new { @class = "form-horizontal validatable", role = "form" }))
+{
+    @Html.HiddenFor(m => m.Terminal_ID)
+    @Html.HiddenFor(m => m.Cashier_ID)
+    @Html.HiddenFor(m => m.operation)
+    @Html.HiddenFor(m => m.Receipt_Conf_ID)
+    @Html.HiddenFor(m => m.isCashier)
+    @Html.HiddenFor(m => m.isSupervisor)
+    @Html.HiddenFor(m => m.Tax_ID)
+    @Html.HiddenFor(m => m.Is_Uploaded)
+    @Html.HiddenFor(m => m.Is_Latest)
+    @Html.HiddenFor(m => m.Ref_Count)
+    <div class="main-content">
+
+        @if (Model.result != null && Model.result.Code != 0)
+        {
+            <div class="container-fluid padded">
+                <div class="row-fluid">
+                    <div class="span12">
+                        @if (Model.result.Code < 0)
+                        {
+                            <div class="alert alert-error">
+                                @UserSession.GetMsg(Model.result.Code, Model.result.Msg, Model.result.Field)
+                                <br />
+                            </div>
+                        }
+                        else if (Model.result.Code > 0)
+                        {
+                            <div class="alert alert-success">
+                                @UserSession.GetMsg(Model.result.Code, Model.result.Msg, Model.result.Field)
+                                <br />
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+
+        <div class="container-fluid padded">
+            <div class="row-fluid">
+                <div class="span10 offset1">
+                    <div class="box" style='margin-bottom:0;'>
+                        <div class="box-header">
+                            <span class="title">@Resources.ResourcePOS.Configuration</span>
+                        </div>
+                        <div class="box-content">
+                            <div class="padded">
+                                @if ((Model.operation == UserSession.RIGHT_C && Model.rights != null && Model.rights.Contains(UserSession.RIGHT_C)) || (Model.operation == UserSession.RIGHT_U && Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U)))
+                                {
+
+                                    <div class="control-group">
+                                        <h5 style="text-decoration:underline;">@Resources.ResourcePOS.BranchTerminal </h5>
+                                    </div>
+                                    <div class="control-group">
+                                        <div class="span4">
+                                            @Html.LabelFor(m => m.Branch_ID, new { @class = "control-label" })
+                                            <div class="controls">
+                                                @Html.DropDownListFor(m => m.Branch_ID, new SelectList(Model.branchlist, "Branch_ID", "Branch_Name"), new { style = "width:90%" })
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(m => m.Branch_ID)
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="span4">
+                                            @Html.LabelFor(m => m.Terminal_Name, new { @class = "control-label" })
+                                            <div class="controls">
+                                                @Html.TextBoxFor(m => m.Terminal_Name, new { style = "width:90%" })
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(m => m.Terminal_Name)
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="span4">
+                                            @Html.LabelFor(m => m.Mac_Address, new { @class = "control-label" })
+                                            <div class="controls">
+                                                @Html.TextBoxFor(m => m.Mac_Address, new { Readonly = true, style = "width:90%" })
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(m => m.Mac_Address)
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <div class="span4">
+                                            @Html.LabelFor(m => m.Cashier_Name, new { @class = "control-label" })
+                                            <div class="controls">
+                                                @Html.HiddenFor(m => m.Cashier_ID)
+                                                @Html.TextBoxFor(m => m.Cashier_Name, new { Readonly = true, style = "width:90%" })
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(m => m.Cashier_Name)
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="span4">
+                                            @Html.LabelFor(m => m.Printer_IP_Address, new { @class = "control-label" })
+                                            <div class="controls">
+                                                @Html.TextBoxFor(m => m.Printer_IP_Address, new { style = "width:90%" })
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(m => m.Printer_IP_Address)
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="span4">
+                                            <label class="control-label"></label>
+                                            <div class="controls">
+                                                @Html.CheckBoxFor(m => m.Is_WebPRNT, new { })
+                                                @Html.LabelFor(m => m.Is_WebPRNT, new { @class = "control-label", style = "width:auto" })
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                }
+
+
+                                @if ((Model.rightsSup != null && Model.rightsSup.Contains(UserSession.RIGHT_C)) || (Model.rightsSup != null && Model.rightsSup.Contains(UserSession.RIGHT_U)))
+                                {
+                                    var refconf = (Model.Receipt_Conf_ID.HasValue ? Model.Receipt_Conf_ID.Value : 0);
+                                    <script type="text/javascript">
+                                        $(function () {
+
+                                            Prefix_Onchage();
+                                            //if have any receipt will disable (wait for cashier page)
+
+                                            @* Receipt Configuration should not be change or amend. *@
+                                            if (parseInt('@refconf') > 0)
+                                                Disable('divReceipt');
+
+                                            if (('@AppSetting.POS_OFFLINE_CLIENT').toLowerCase() == 'true')
+                                                Disable('divConfig');
+                                        });
+
+                                        function Prefix_Onchage() {
+                                            var prefix = $('#Prefix').val();
+                                            var dateformat = $('#Date_Format').val();
+                                            var suffix = $('#Suffix').val();
+                                            var numlenght = $('#Num_Lenght').val();
+                                            var refcnt = $('#Ref_Count').val();
+
+                                            dateformat = dateformat.replace("yyyy", '@currentdate.Year');
+                                            dateformat = dateformat.replace("MM", '@currentdate.Month.ToString("00")');
+                                            dateformat = dateformat.replace("dd", '@currentdate.Day.ToString("00")');
+
+                                            var numtext = "1";
+                                            if (refcnt != null && parseInt(refcnt) > 1) {
+                                                numtext = refcnt;
+                                            }
+                                            while (numtext.length < numlenght) {
+                                                numtext = "0" + numtext;
+                                            }
+
+                                            var sample = prefix + dateformat + numtext + suffix;
+                                            $('#Sample').val(sample);
+                                        }
+                                    </script>
+                                    <div class="control-group">
+                                        <h5 style="text-decoration: underline;">@Resources.ResourcePOS.ReceiptConfig</h5>
+                                    </div>
+                                    <div id="divConfig">
+                                        <div id="divReceipt">
+                                            <div class="control-group">
+                                                <div class="span4">
+                                                    @Html.LabelFor(m => m.Prefix, new { @class = "control-label" })
+                                                    <div class="controls">
+                                                        @Html.TextBoxFor(m => m.Prefix, new { @onchange = "Prefix_Onchage()", style = "width:90%" })
+                                                        <div class="validation-error">
+                                                            @Html.ValidationMessageFor(m => m.Prefix)
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="span4">
+                                                    @Html.LabelFor(m => m.Date_Format, new { @class = "control-label" })
+                                                    <div class="controls">
+                                                        @Html.DropDownListFor(m => m.Date_Format, new SelectList(Model.dateformatlist, "Value", "Text"), new { @onchange = "Prefix_Onchage()", style = "width:90%" })
+                                                        <div class="validation-error">
+                                                            @Html.ValidationMessageFor(m => m.Date_Format)
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="span4">
+                                                    @Html.LabelFor(m => m.Suffix, new { @class = "control-label" })
+                                                    <div class="controls">
+                                                        @Html.TextBoxFor(m => m.Suffix, new { @onchange = "Prefix_Onchage()", style = "width:90%" })
+                                                        <div class="validation-error">
+                                                            @Html.ValidationMessageFor(m => m.Suffix)
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div class="control-group">
+                                                <div class="span4">
+                                                    @Html.LabelFor(m => m.Num_Lenght, new { @class = "control-label" })
+                                                    <div class="controls">
+                                                        @Html.TextBoxFor(m => m.Num_Lenght, new { @onchange = "Prefix_Onchage()", style = "width:90%" })
+                                                        <div class="validation-error">
+                                                            @Html.ValidationMessageFor(m => m.Num_Lenght)
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="span4">
+                                                    @Html.LabelFor(m => m.Sample, new { @class = "control-label" })
+                                                    <div class="controls">
+                                                        @Html.TextBoxFor(m => m.Sample, new { Readonly = true, style = "width:90%" })
+                                                        <div class="validation-error">
+                                                            @Html.ValidationMessageFor(m => m.Sample)
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="control-group">
+                                                <div class="span12">
+                                                    <label class="control-label"></label>
+                                                    <div class="controls">
+                                                        @Html.CheckBoxFor(m => m.Is_By_Branch, new { })
+                                                        @Html.LabelFor(m => m.Is_By_Branch, new { @class = "control-label", style = "width:auto" })
+                                                        <div class="validation-error">
+                                                            @Html.ValidationMessageFor(model => model.Is_By_Branch)
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div class="control-group">
+                                            <div class="span6">
+                                                @Html.LabelFor(m => m.Receipt_Header, new { })
+                                            </div>
+                                            <div class="span6">
+                                                @Html.LabelFor(m => m.Receipt_Footer, new { })
+                                            </div>
+                                        </div>
+                                        <div class="control-group">
+                                            <div class="span6">
+                                                @Html.TextAreaFor(model => model.Receipt_Header, new { rows = "5", style = "width: 95%;" })
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(model => model.Receipt_Header)
+                                                </div>
+                                            </div>
+                                            <div class="span6">
+                                                @Html.TextAreaFor(model => model.Receipt_Footer, new { rows = "5", style = "width: 95%;" })
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(model => model.Receipt_Footer)
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="control-group">
+                                            <h5 style="text-decoration: underline;">@Resources.ResourcePOS.POSConfig</h5>
+                                        </div>
+                                        <div class="control-group">
+                                            <div class="span4">
+                                                <label class="control-label"></label>
+                                                <div class="controls">
+                                                    @Html.CheckBoxFor(m => m.Service_Charge_Include, new { })
+                                                    @Html.LabelFor(m => m.Service_Charge_Include, new { @class = "control-label", style = "width:auto" })
+                                                </div>
+                                            </div>
+                                            <div class="span8">
+                                                @Html.TextBoxFor(m => m.Service_Charge_Percen, new { style = "width:60px;text-align:right;margin-left:20px;" })
+                                                %
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(m => m.Service_Charge_Percen)
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="control-group">
+                                            <div class="span4">
+                                                <div class="controls">
+                                                    @Html.CheckBoxFor(m => m.Surcharge_Include, new { })
+                                                    @Html.LabelFor(m => m.Surcharge_Include, new { @class = "control-label", style = "width:auto" })
+                                                </div>
+                                            </div>
+                                            <div class="span8">
+                                                @Html.TextBoxFor(m => m.Surcharge_Percen, new { style = "width:60px;text-align:right;margin-left:20px;" })
+                                                %
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(m => m.Surcharge_Percen)
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                }
+                                <div class="control-group" style="text-align:right;">
+                                    <button type="submit" class="btn btn-white">@Resources.ResourceMain.Save</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+}
+@{
+
+
+}
+<input type="hidden" name="compname" value="" id="compname" />
+<script type="text/javascript">
+    function GetMacAddress() {
+        //This function requires following option to be enabled without prompting
+        //In Internet Options for IE 5.5 and up
+        //Tab Security (Local Internet Sites)
+        //Custom Level button
+        //"Initialize and script ActiveX control not marked as safe." option enabled
+        try {
+            var locator = new ActiveXObject("WbemScripting.SWbemLocator");
+            var service = locator.ConnectServer(".");
+
+            //Get properties of the network devices with an active IP address
+            var properties = service.ExecQuery("SELECT * FROM Win32_NetworkAdapterConfiguration" +
+            " WHERE IPEnabled=TRUE");
+
+            var e = new Enumerator(properties);
+
+            //Take first item from the list and return MACAddress
+            var p = e.item(0);
+            return p.MACAddress;
+        }
+        catch (exception) {
+            alert('Add your domain to Trusted Sites.');
+            //window.location = "about:blank";
+        }
+
+        return '';
+    }
+
+    function WriteMacAddress() {
+        var strmac = GetMacAddress();
+        var macFound = false;
+
+        if (strmac != null && strmac != 'Nothing') {
+            var hfadr = document.getElementById("<%=hfMACAdresa.ClientID%>");
+            hfadr.value = strmac;
+            macFound = true;
+        }
+        else {
+            hfadr.value = '';
+            alert('MAC address does not exist! Call IT support.');
+        }
+
+        return macFound;
+    }
+
+    $(function () {
+
+    });
+</script>

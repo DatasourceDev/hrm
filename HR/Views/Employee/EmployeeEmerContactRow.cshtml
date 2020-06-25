@@ -1,0 +1,51 @@
+﻿@model  HR.Models.EmployeeEmergencyContactViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+   var i = Model.Index;
+}
+
+<script type="text/javascript">
+   $(function () {
+      $("#Emer_Contact_Rows_" + @i + "__Relationship").chosen({ disable_search_threshold: 10 });
+   });
+</script>
+<td>
+   @Html.Hidden("Emer_Contact_Rows[" + i + "].Row_Type", RowType.ADD)
+   @Html.Hidden("Emer_Contact_Rows[" + i + "].Employee_Emergency_Contact_ID", Model.Employee_Emergency_Contact_ID)
+   <input type="text" class="form-control" id="Emer_Contact_Rows_@(i)__Name" name="Emer_Contact_Rows[@i].Name" value="@Model.Name">
+   <div class="validation-error">
+      @Html.ValidationMessage("Emer_Contact_Rows[" + i + "].Name")
+   </div>
+</td>
+<td>
+   <input type="text" class="form-control" id="Emer_Contact_Rows_@(i)__Contact_No" name="Emer_Contact_Rows[@i].Contact_No" value="@Model.Contact_No">
+   <div class="validation-error">
+      @Html.ValidationMessage("Emer_Contact_Rows[" + i + "].Contact_No")
+   </div>
+</td>
+<td>
+   <select class="chosen-select chosen-transparent form-control" id="Emer_Contact_Rows_@(i)__Relationship" name="Emer_Contact_Rows[@i].Relationship">
+      @if (Model.relationshipList != null)
+      {
+         foreach (var rrow in Model.relationshipList)
+         {
+            if (Model.Relationship == NumUtil.ParseInteger(rrow.Value))
+            {
+               <option value="@rrow.Value" selected>@rrow.Text</option>
+            }
+            else
+            {
+               <option value="@(rrow.Value != null ? rrow.Value : "0")">@rrow.Text</option>
+            }
+         }
+      }
+   </select>
+</td>
+<td class="actions text-center" style="cursor:pointer">
+   <a data-toggle="modal" onclick="return DeleteEmerContact_Onclick('erow-@i', @i);">
+      <i class="fa fa-times-circle-o fa-2x"></i>
+   </a>
+</td>

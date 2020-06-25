@@ -1,0 +1,73 @@
+﻿@model Authentication.Models.JobCostPaymentTermViewModel
+@using Authentication.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSModel.Common;
+@using Authentication.Models;
+@using SBSResourceAPI;
+@{
+   var i = Model.Index;
+}
+
+<td>
+   <script type="text/javascript">
+      $(function () {
+         InitDatepickerByID("JobCostPaymentTerm_Rows_" + @i + "__Invoice_Date");
+
+         $("#JobCostPaymentTerm_Rows_" + @i + "__Payment_Type").trigger("chosen:updated");
+         $("#JobCostPaymentTerm_Rows_" + @i + "__Payment_Type").chosen({ disable_search_threshold: 10 });
+      });
+   </script>
+   @Html.Hidden("JobCostPaymentTerm_Rows[" + i + "].Row_Type", Model.Row_Type)
+   @Html.Hidden("JobCostPaymentTerm_Rows[" + i + "].Job_Cost_PayMent_Term_ID", Model.Job_Cost_PayMent_Term_ID)
+   <input type="text" class="form-control text-right" id="JobCostPaymentTerm_Rows_@(i)__Payment" name="JobCostPaymentTerm_Rows[@i].Payment" onblur="ValidateDecimal('JobCostPaymentTerm_Rows_@(i)__Payment', '@Resource.Payment', false)" value="@Model.Payment">
+   <div class="validation-error">
+      @Html.ValidationMessage("JobCostPaymentTerm_Rows[" + i + "].Payment")
+   </div>
+</td>
+<td>
+   <select class="chosen-select chosen-transparent form-control" id="JobCostPaymentTerm_Rows_@(i)__Payment_Type" name="JobCostPaymentTerm_Rows[@i].Payment_Type">
+      @if (Model.cPaymentPeriodlst != null)
+      {
+         foreach (var prow in Model.cPaymentPeriodlst)
+         {
+            <option value="@(prow.Value)" @(Model.Payment_Type == prow.Value ? "selected" : "")>@prow.Text</option>
+         }
+      }
+   </select>
+   <div class="validation-error">
+      @Html.ValidationMessage("JobCostPaymentTerm_Rows[" + i + "].Payment_Type")
+   </div>
+</td>
+<td>
+   <input type="text" class="form-control" id="JobCostPaymentTerm_Rows_@(i)__Invoice_No" name="JobCostPaymentTerm_Rows[@i].Invoice_No" value="@Model.Invoice_No" />
+   <div class="validation-error">
+      @Html.ValidationMessage("JobCostPaymentTerm_Rows[" + i + "].Invoice_No")
+   </div>
+</td>
+<td>
+   <input type="text" class="form-control input-datepicker" id="JobCostPaymentTerm_Rows_@(i)__Invoice_Date" name="JobCostPaymentTerm_Rows[@i].Invoice_Date" value="@Model.Invoice_Date" />
+   <div class="validation-error">
+      @Html.ValidationMessage("JobCostPaymentTerm_Rows[" + i + "].Invoice_Date")
+   </div>
+</td>
+<td>
+   <input type="text" class="form-control" id="JobCostPaymentTerm_Rows_@(i)__Note" name="JobCostPaymentTerm_Rows[@i].Note" value="@Model.Note" />
+   <div class="validation-error">
+      @Html.ValidationMessage("JobCostPaymentTerm_Rows[" + i + "].Note")
+   </div>
+</td>
+<td class="text-right">
+   <input type="text" class="form-control text-right" id="JobCostPaymentTerm_Rows_@(i)__Actual_Price" name="JobCostPaymentTerm_Rows[@i].Actual_Price" value="@Model.Actual_Price" onblur="ValidateDecimal('JobCostPaymentTerm_Rows_@(i)__Actual_Price', '@Resource.Actual_Price', false)">
+   <div class="validation-error">
+      @Html.ValidationMessage("JobCostPaymentTerm_Rows[" + i + "].Actual_Price")
+   </div>
+</td>
+<td class="actions text-center" style="cursor:pointer">
+   <a data-toggle="modal" onclick="return DeletePaymentTerm_Onclick('lrow-@i', @i);" title="@Resource.Delete">
+      <i class="fa fa-times-circle-o fa-2x"></i>
+   </a>
+</td>
+
+
+

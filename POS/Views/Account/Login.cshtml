@@ -1,0 +1,113 @@
+﻿@model POS.Models.LoginViewModel
+
+@{
+    ViewBag.Title = Resources.ResourceMain.Login;
+    ViewBag.ReturnUrl = Url.Action("POS", "POS");
+}
+
+
+
+@using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal validatable", role = "form" }))
+{
+    <script type="text/javascript">
+        $(function () {
+            $("#divApp").hide();
+
+            var u = $("#Password");
+
+            $(u).keydown(function (event) {
+                if (event.shiftKey && event.altKey && event.ctrlKey) {
+                    if ($('#divApp').css('display') == 'none') {
+                        $("#divApp").show();
+                    }
+                    else {
+                        $("#ApplicationUser_Id").val('');
+                        $("#divApp").hide();
+                    }
+
+                }
+            });
+        });
+    </script>
+
+    @Html.AntiForgeryToken()
+    <section id="loginForm">
+        @if (Model != null && Model.message != null)
+        {
+            <div class="container-fluid padded">
+                <div class="row-fluid">
+                    <div class="span12">
+                        <div class="alert alert-error">
+                            @Model.message
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        }
+        <div class="container-fluid padded">
+            <div class="row-fluid ">
+                <div class="container">
+                    <div class="span6 offset3">
+                        <form class="form-horizontal fill-up validatable" autocomplete="off">
+                            <div class="box">
+                               
+                                <div class="box-content">
+                                    <div class="padded">
+                                        <div class="padded">
+                                            <div class="control-group" style="text-align:center;">
+                                                <div class="avatar">
+                                                    <img src="~/Images/imgprofile.jpg" />
+                                                </div>
+                                            </div>
+                                            <div class="control-group">
+                                                <h4 style="text-align:center;color:#fff">
+                                                    Sign in to your account.
+                                                </h4>
+                                            </div>
+                                            <div class="control-group" style="text-align:center;">
+
+                                                @Html.TextBoxFor(m => m.Email, new { style = "width:90%" })
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(m => m.Email)
+                                                </div>
+
+                                            </div>
+
+                                            <div class="control-group" style="text-align:center;">
+                                                @Html.PasswordFor(m => m.Password, new { autocomplete = "off", style = "width:90%" })
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(m => m.Password)
+                                                </div>
+
+                                            </div>
+
+                                            <div class="control-group" id="divApp" style="text-align:center;">
+                                                @Html.PasswordFor(m => m.ApplicationUser_Id, new { autocomplete = "off", style = "width:90%" })
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(m => m.ApplicationUser_Id)
+                                                </div>
+                                            </div>
+                                            <div class="control-group text-center" >
+                                                <button type="submit" class="btn btn-white btn-large" style="width:200px;height:auto" >SIGN IN</button>
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+
+    </section>
+}
+

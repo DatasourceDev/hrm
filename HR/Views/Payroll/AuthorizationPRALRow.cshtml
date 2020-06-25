@@ -1,0 +1,45 @@
+﻿@model HR.Models.PRALViewModel
+@using HR.Models
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+    var i = Model.Index;
+    _Applicable_Employee emp = new _Applicable_Employee();
+    if (Model.EmpList != null && Model.EmpList.Count() > 0)
+    {
+        emp = Model.EmpList[0];
+    }
+}
+<script type="text/javascript">
+    $(function () {
+        $(".chosen-select").chosen({ disable_search_threshold: 10 });
+    });
+</script>
+
+<td>
+    @Html.Hidden("PRAL_Rows[" + i + "].I", i)
+
+    @Html.Hidden("PRAL_Rows[" + i + "].Row_Type", RowType.ADD)
+    <select class="chosen-select chosen-transparent form-control" id="PRAL_Rows_@(i)__Employee_Profile_ID" name="PRAL_Rows[@i].Employee_Profile_ID" onchange="PRAL_Onchange(@i)">
+        @foreach (var drow in Model.EmpList)
+        {
+            <option value="@drow.Employee_Profile_ID">@drow.Name</option>
+        }
+    </select>
+    <div class="validation-error">
+        @Html.ValidationMessage("PRAL_Rows[" + i + "].Employee_Profile_ID")
+    </div>
+</td>
+<td>
+    <input type="text" class="form-control" id="PRAL_Rows_@(i)__Email" name="PRAL_Rows[@i].Email" value="@emp.Email" readonly>
+    <div class="validation-error">
+        @Html.ValidationMessage("PRAL_Rows[" + i + "].Email")
+    </div>
+</td>
+<td class="actions text-left" style="cursor:pointer">
+    <a data-toggle="modal" onclick="return DeletePRAL('arow-@i', @i);">
+        <i class="fa fa-times-circle-o fa-2x" ></i>
+    </a>
+</td>

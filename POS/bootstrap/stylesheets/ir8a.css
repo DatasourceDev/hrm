@@ -1,0 +1,198 @@
+﻿html {
+    font-size: 100%;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+}
+                /* Font Definitions */
+                @font-face {
+                    font-family: "Cambria Math";
+                    panose-1: 2 4 5 3 5 4 6 3 2 4;
+                }
+
+                @font-face {
+                    font-family: "Arial \(W1\)";
+                }
+
+                @font-face {
+                    font-family: "CG Times \(WN\)";
+                    panose-1: 0 0 0 0 0 0 0 0 0 0;
+                }
+
+                @font-face {
+                    font-family: Tahoma;
+                    panose-1: 2 11 6 4 3 5 4 4 2 4;
+                }
+                /* Style Definitions */
+                p.MsoNormal, li.MsoNormal, div.MsoNormal {
+                    margin: 0in;
+                    margin-bottom: .0001pt;
+                    text-align: justify;
+                    punctuation-wrap: simple;
+                    text-autospace: none;
+                    font-size: 12.0pt;
+                    font-family: "CG Times (WN)","serif";
+                }
+
+                h1 {
+                    margin: 0in;
+                    margin-bottom: .0001pt;
+                    page-break-after: avoid;
+                    punctuation-wrap: simple;
+                    text-autospace: none;
+                    font-size: 8.0pt;
+                    font-family: "Arial","sans-serif";
+                    color: red;
+                    font-style: italic;
+                }
+
+                h2 {
+                    margin: 0in;
+                    margin-bottom: .0001pt;
+                    page-break-after: avoid;
+                    punctuation-wrap: simple;
+                    text-autospace: none;
+                    font-size: 8.0pt;
+                    font-family: "Arial","sans-serif";
+                    color: white;
+                }
+
+                p.MsoCommentText, li.MsoCommentText, div.MsoCommentText {
+                    mso-style-link: "Comment Text Char";
+                    margin: 0in;
+                    margin-bottom: .0001pt;
+                    text-align: justify;
+                    punctuation-wrap: simple;
+                    text-autospace: none;
+                    font-size: 10.0pt;
+                    font-family: "CG Times (WN)","serif";
+                }
+
+                p.MsoHeader, li.MsoHeader, div.MsoHeader {
+                    mso-style-link: "Header Char";
+                    margin: 0in;
+                    margin-bottom: .0001pt;
+                    text-align: justify;
+                    punctuation-wrap: simple;
+                    text-autospace: none;
+                    font-size: 12.0pt;
+                    font-family: "CG Times (WN)","serif";
+                }
+
+                p.MsoFooter, li.MsoFooter, div.MsoFooter {
+                    mso-style-link: "Footer Char";
+                    margin: 0in;
+                    margin-bottom: .0001pt;
+                    text-align: justify;
+                    punctuation-wrap: simple;
+                    text-autospace: none;
+                    font-size: 12.0pt;
+                    font-family: "CG Times (WN)","serif";
+                }
+
+                p.MsoBodyText, li.MsoBodyText, div.MsoBodyText {
+                    margin-top: 0in;
+                    margin-right: 62.1pt;
+                    margin-bottom: 0in;
+                    margin-left: 0in;
+                    margin-bottom: .0001pt;
+                    text-align: center;
+                    background: navy;
+                    punctuation-wrap: simple;
+                    text-autospace: none;
+                    font-size: 8.5pt;
+                    font-family: "Arial","sans-serif";
+                    color: white;
+                    font-weight: bold;
+                }
+
+                p.MsoBodyTextIndent, li.MsoBodyTextIndent, div.MsoBodyTextIndent {
+                    margin-top: 0in;
+                    margin-right: 0in;
+                    margin-bottom: 0in;
+                    margin-left: -4.5pt;
+                    margin-bottom: .0001pt;
+                    background: white;
+                    punctuation-wrap: simple;
+                    text-autospace: none;
+                    font-size: 8.0pt;
+                    font-family: "Arial","sans-serif";
+                    font-weight: bold;
+                }
+
+                p.MsoBodyTextIndent2, li.MsoBodyTextIndent2, div.MsoBodyTextIndent2 {
+                    margin-top: 2.0pt;
+                    margin-right: 0in;
+                    margin-bottom: 0in;
+                    margin-left: 10.1pt;
+                    margin-bottom: .0001pt;
+                    text-align: justify;
+                    text-indent: -10.1pt;
+                    punctuation-wrap: simple;
+                    text-autospace: none;
+                    font-size: 8.0pt;
+                    font-family: "Arial","sans-serif";
+                    color: black;
+                }
+
+                p.MsoCommentSubject, li.MsoCommentSubject, div.MsoCommentSubject {
+                    mso-style-link: "Comment Subject Char";
+                    margin: 0in;
+                    margin-bottom: .0001pt;
+                    text-align: justify;
+                    punctuation-wrap: simple;
+                    text-autospace: none;
+                    font-size: 10.0pt;
+                    font-family: "CG Times (WN)","serif";
+                    font-weight: bold;
+                }
+
+                p.MsoAcetate, li.MsoAcetate, div.MsoAcetate {
+                    mso-style-link: "Balloon Text Char";
+                    margin: 0in;
+                    margin-bottom: .0001pt;
+                    text-align: justify;
+                    punctuation-wrap: simple;
+                    text-autospace: none;
+                    font-size: 8.0pt;
+                    font-family: "Tahoma","sans-serif";
+                }
+
+                span.BalloonTextChar {
+                    mso-style-name: "Balloon Text Char";
+                    mso-style-link: "Balloon Text";
+                    font-family: "Tahoma","sans-serif";
+                }
+
+                span.HeaderChar {
+                    mso-style-name: "Header Char";
+                    mso-style-link: Header;
+                    font-family: "CG Times (WN)","serif";
+                }
+
+                span.FooterChar {
+                    mso-style-name: "Footer Char";
+                    mso-style-link: Footer;
+                    font-family: "CG Times (WN)","serif";
+                }
+
+                span.CommentTextChar {
+                    mso-style-name: "Comment Text Char";
+                    mso-style-link: "Comment Text";
+                    font-family: "CG Times (WN)","serif";
+                }
+
+                span.CommentSubjectChar {
+                    mso-style-name: "Comment Subject Char";
+                    mso-style-link: "Comment Subject";
+                    font-family: "CG Times (WN)","serif";
+                    font-weight: bold;
+                }
+                /* Page Definitions */
+                @page WordSection1 {
+                    size: 595.45pt 841.7pt;
+                    margin: .25in .3in 13.7pt .6in;
+                }
+
+                div.WordSection1 {
+                    page: WordSection1;
+                }

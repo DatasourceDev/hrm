@@ -1,0 +1,151 @@
+﻿@model  HR.Models.ConfigulationViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnDesignationSave").click(function () {
+            if ($('#Designation_ID').val() > 0) {
+                if (!Confirm_Alert($('#Designation_ID').val())) {
+                    return;
+                }
+            }
+            if ($('#Designation_Status').val() == '@RecordStatus.Active' && $('#Designation_ID').val() != null) {
+                var data = { pDesignationID: $('#Designation_ID').val() };
+                ShowMask();
+                $.ajax({
+                    url: '@Url.Action("CheckDesignationRelation", "Configuration")',
+                    //Passes the content of an input up
+                    data: data,
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        if (data != null && data.related == true) {
+                            if (confirm('@Resource.Message_Disabled_Status_To_Inactive')) {
+                                theForm.action = '@Url.Action("Configuration", "Configuration")' + '?tabAction=designation';
+                                theForm.method = 'post';
+                                theForm.submit();
+                                return;
+                            }
+                        }
+                        else {
+                            theForm.action = '@Url.Action("Configuration", "Configuration")' + '?tabAction=designation';
+                            theForm.method = 'post';
+                            theForm.submit();
+                            return;
+                        }
+                        CloseMask();
+                    }
+                });
+            }
+            else {
+                ShowMask();
+                theForm.action = '@Url.Action("Configuration", "Configuration")' + '?tabAction=designation';
+                theForm.method = 'post';
+                theForm.submit();
+            }
+        });
+    });
+
+    function AddDesignation_Onclick() {
+        $('#btnAddDesignation').get(0).click();
+        $('#Designation_ID').val('');
+
+        $('#Designation_Name').val('');
+        $('#Designation_Status').val('@RecordStatus.Active');
+        $('#Designation_Status').trigger("chosen:updated");
+    }
+    function EditDesignation_Onclick(dID, name, status) {
+        $('#btnAddDesignation').get(0).click();
+        $('#Designation_ID').val(dID);
+
+        $('#Designation_Name').val(name);
+        $('#Designation_Status').val(status);
+        $('#Designation_Status').trigger("chosen:updated");
+    }
+</script>
+<div id="designation-tab" class="tab-pane fade in ">
+    @using (Html.BeginForm("Configuration", "Configuration", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        <a id="btnAddDesignation" href="#modal-designation" role="button" data-toggle="modal" style="display:none;"></a>
+        <div class="row">
+            <div class="col-md-12">
+                <section class="tile transparent">
+
+                    <div class="tile-header transparent">
+                        <h1><strong>@Resource.Designation</strong></h1>
+                        <div class="controls">
+                            <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                        </div>
+                    </div>
+
+
+                    <div class="tile-body">
+                        <div class="table-responsive">
+                            <table class="table table-datatable table-custom" id="designationDataTable">
+                                <thead>
+                                    <tr>
+                                        <th class="no-sort" style="width: 40px;">
+                                            <div class="checkbox check-transparent">
+                                                <input type="checkbox" value="1" id="chkallDesignation">
+                                                <label for="chkallDesignation"></label>
+                                            </div>
+                                        </th>
+                                        <th class="sort-alpha">@Resource.Designation_Name</th>
+                                        <th class="sort-alpha">@Resource.Status</th>
+                                        <th class="no-sort" width="110px">@Resource.Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{var k = 0;}
+                                    @if (Model.DesignationList != null)
+                                    {
+                                        foreach (var row in Model.DesignationList)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="checkbox check-transparent">
+                                                        <input type="checkbox" value="@row.Designation_ID" name="designas" id="designas[@k]">
+                                                        <label for="designas[@k]"></label>
+                                                    </div>
+                                                </td>
+                                                <td>@row.Name</td>
+                                                <td>@StatusUtil.Get_Record_Status(row.Record_Status)</td>
+                                                <td class="actions text-left">
+                                                    @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                    {
+                                                        <a href="#" onclick="EditDesignation_Onclick('@row.Designation_ID','@row.Name', '@row.Record_Status')"><i class="fa fa-edit fa-2x"></i></a>
+                                                    }
+                                                    @*@if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_D))
+                                                        {
+                                                            <a href="@Url.Action("Configuration", "Configuration", new { Designation_ID = row.Designation_ID, operation = UserSession.RIGHT_D, tabAction = "designation" })" onclick="return confirm('@Resource.ConfirmDelete');" title="Delete">
+                                                                <i class="fa fa-times-circle-o fa-2x"></i>
+                                                            </a>
+                                                        }*@
+                                                </td>
+                                            </tr>
+                                                    k++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    }
+</div>
+
+
+
+
+
+
+
+
+

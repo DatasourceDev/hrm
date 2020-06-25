@@ -1,0 +1,133 @@
+﻿@model  HR.Models.PayrollViewModels
+@using SBSModel.Models;
+@using HR.Models;
+@using HR.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+<script type="text/javascript">
+    function SumExpenses(donotsum) {
+        var total = 0;
+        var rowcount = $('#expensesDataTable > tbody >tr').length;
+        for (var i = 0; i < rowcount; i++) {
+            var amount = parseFloat($('input[name="Expenses_Row_Amount[' + i + ']"]').val());
+            if (!isNaN(amount)) {
+                total = total + amount;
+            }
+        }
+
+        var totalstr = formatCurrency(total);
+
+        $('#Expenses_Total_Amount').val(totalstr);
+        $('#Expenses_Amount').val(totalstr);
+        SumAll(donotsum);
+    }
+
+</script>
+<div id="expenses-tab" class="tab-pane fade in">
+    <div class="tile-header">
+        <h1><strong>@Resource.Expenses</strong></h1>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="sExpenses_Period_From" class="col-md-4 control-label">@Resource.Start_Date</label>
+                <div class="col-md-8">
+                    <input type="text" class="form-control input-datepicker" name="sExpenses_Period_From" id="sExpenses_Period_From" value="@Model.sExpenses_Period_From">
+                    <div class="validation-error">
+                        @Html.ValidationMessageFor(m => m.sExpenses_Period_From, "", new { id = "sExpenses_Period_From_Err" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="sExpenses_Period_To" class="col-md-4 control-label">@Resource.To_Date</label>
+                <div class="col-md-8">
+                    <input type="text" class="form-control input-datepicker" name="sExpenses_Period_To" id="sExpenses_Period_To" value="@Model.sExpenses_Period_To">
+                    <div class="validation-error">
+                        @Html.ValidationMessageFor(m => m.sExpenses_Period_To, "", new { id = "sExpenses_Period_To_Err" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-default" name="retrieve" value="expenses" id="btnRetrieveExpenses">@Resource.Retrieve</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group">
+            <label class="col-md-4 control-label"></label>
+            <div class="col-md-8">
+                <label class="control-label">@Model.Expenses_Period_From</label>
+                <input type="hidden" name="Expenses_Period_From" value="@Model.Expenses_Period_From">
+                @if (!string.IsNullOrEmpty(Model.Expenses_Period_To))
+                {
+                    <label class="control-label">-</label>
+                }
+                <label class="control-label">@Model.Expenses_Period_To</label>
+                <input type="hidden" name="Leave_Period_To" value="@Model.Expenses_Period_To">
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive">
+
+        <table class="table table-custom" id="expensesDataTable">
+            <thead>
+                <tr>
+                    <th>@Resource.Expenses_Type</th>
+                    <th>@Resource.Date_Applied</th>
+                    <th>@Resource.Expenses_Date</th>
+                    <th>@Resource.Currency</th>
+                    <th width="200px">@Resource.Claimable_Amount_SymbolDollar</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.expensesList != null)
+                {
+                    for (var i = 0; i < Model.expensesList.Count(); i++)
+                    {
+                        var row = Model.expensesList[i];
+                        <tr>
+                            <td>
+                                <input type="hidden" name="Expenses_Rows[@i]" value="@row.Expenses_Application_Document_ID">
+                                @row.Expenses_Config.Expenses_Name
+                            </td>
+                            <td>
+                                @DateUtil.ToDisplayDate(row.Date_Applied)
+                            </td>
+                            <td>
+                                @DateUtil.ToDisplayDate(row.Expenses_Date)
+                            </td>
+                            <td>
+                                @Model.Company_Currency_Code
+                            </td>
+                            <td class="text-right">
+                                @row.Amount_Claiming.Value.ToString("n2")
+                                @Html.Hidden("Expenses_Row_Amount[" + i + "]", NumUtil.ParseDecimal(row.Amount_Claiming.Value.ToString("n2")))
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="row " style="padding-top:30px;">
+        <div class="col-md-8">
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <div class="col-md-12">
+                    <label for="Expenses_Total_Amount" class="control-label">@Resource.Total_Amount</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-8">
+                    <input type="text" class="form-control text-right" id="Expenses_Total_Amount" value="0.00" readonly>
+                </div>
+                <div class="col-md-2">
+                    <label class="control-label">@Model.Company_Currency_Code</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

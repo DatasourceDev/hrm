@@ -1,0 +1,179 @@
+﻿<error errorId="24580f1c-5292-41d5-8d5d-46835ea48865" application="/LM/W3SVC/5/ROOT" host="LAPTOP-64514UIV" type="System.Web.HttpException" message="The controller for path '/__browserLink/requestData/bfb0f6effc984be88b4cc19ebe6894c4' was not found or does not implement IController." source="System.Web.Mvc" detail="System.Web.HttpException (0x80004005): The controller for path '/__browserLink/requestData/bfb0f6effc984be88b4cc19ebe6894c4' was not found or does not implement IController.&#xD;&#xA;   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)&#xD;&#xA;   at System.Web.Mvc.DefaultControllerFactory.CreateController(RequestContext requestContext, String controllerName)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController&amp; controller, IControllerFactory&amp; factory)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContext httpContext, AsyncCallback callback, Object state)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.System.Web.IHttpAsyncHandler.BeginProcessRequest(HttpContext context, AsyncCallback cb, Object extraData)&#xD;&#xA;   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()&#xD;&#xA;   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean&amp; completedSynchronously)" user="admin.sbs@bluecube.com.sg" time="2016-04-25T06:54:20.1126943Z" statusCode="404">
+  <serverVariables>
+    <item name="ALL_HTTP">
+      <value string="HTTP_CONNECTION:keep-alive&#xD;&#xA;HTTP_ACCEPT:application/json, text/javascript, */*; q=0.01&#xD;&#xA;HTTP_ACCEPT_ENCODING:gzip, deflate, sdch&#xD;&#xA;HTTP_ACCEPT_LANGUAGE:th,en;q=0.8&#xD;&#xA;HTTP_COOKIE:__RequestVerificationToken=w98bBReekmKN5oOJmePeqRNqBMXpn_Py2FuPfIcuYEYRTwg8PKNW9n6xsuAyMRddL5YzIrOqTFUMtoeimQjkfXRyqz01; ASP.NET_SessionId=p5tcn2bscjljj5rdbiwjwifl; .AspNet.ApplicationCookie=PonhQczoLhyssOwx2GgdynEnPCdUy8I18BAGB4YleC9puYw6kRQVDWxRhWtGTeflkbjoaJMIZ1LLpie0zJF775vPmqXuM1HPbnZBaYYSOgC5HxY_QNLyG2Cg4cMIqb2wPDm4mri8nZmMjwREGbR9pmS2BHy_fh-n2tFs2NRoakRpfJP8-_KLWirMOfriaiLj_i1B0qEInwvE3byg2QhCbOnbxRxNVKMzepvQ0Bp0GLqsHwmHC2n92krQg1keRwmIRPB45LCC8lr8ltNTRrMISFVkpSdHioloTMDEoNtqwOWgNB2incAm9tngDF7HcwmsFAe4jlPgUfpBEC_cL717ZBUUSNkPsqFaF7hxxPvHfV-nzLeQhM4_SCr84ha0s69oafO8B_8rZNX_ijAiyaoST2eZVPar_kORQ450mKhCryFt0NL2; culture=th&#xD;&#xA;HTTP_HOST:localhost:55581&#xD;&#xA;HTTP_REFERER:http://localhost:55581/Account/Resetpassword?uid=4271&#xD;&#xA;HTTP_USER_AGENT:Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36&#xD;&#xA;HTTP_X_REQUESTED_WITH:XMLHttpRequest&#xD;&#xA;" />
+    </item>
+    <item name="ALL_RAW">
+      <value string="Connection: keep-alive&#xD;&#xA;Accept: application/json, text/javascript, */*; q=0.01&#xD;&#xA;Accept-Encoding: gzip, deflate, sdch&#xD;&#xA;Accept-Language: th,en;q=0.8&#xD;&#xA;Cookie: __RequestVerificationToken=w98bBReekmKN5oOJmePeqRNqBMXpn_Py2FuPfIcuYEYRTwg8PKNW9n6xsuAyMRddL5YzIrOqTFUMtoeimQjkfXRyqz01; ASP.NET_SessionId=p5tcn2bscjljj5rdbiwjwifl; .AspNet.ApplicationCookie=PonhQczoLhyssOwx2GgdynEnPCdUy8I18BAGB4YleC9puYw6kRQVDWxRhWtGTeflkbjoaJMIZ1LLpie0zJF775vPmqXuM1HPbnZBaYYSOgC5HxY_QNLyG2Cg4cMIqb2wPDm4mri8nZmMjwREGbR9pmS2BHy_fh-n2tFs2NRoakRpfJP8-_KLWirMOfriaiLj_i1B0qEInwvE3byg2QhCbOnbxRxNVKMzepvQ0Bp0GLqsHwmHC2n92krQg1keRwmIRPB45LCC8lr8ltNTRrMISFVkpSdHioloTMDEoNtqwOWgNB2incAm9tngDF7HcwmsFAe4jlPgUfpBEC_cL717ZBUUSNkPsqFaF7hxxPvHfV-nzLeQhM4_SCr84ha0s69oafO8B_8rZNX_ijAiyaoST2eZVPar_kORQ450mKhCryFt0NL2; culture=th&#xD;&#xA;Host: localhost:55581&#xD;&#xA;Referer: http://localhost:55581/Account/Resetpassword?uid=4271&#xD;&#xA;User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36&#xD;&#xA;X-Requested-With: XMLHttpRequest&#xD;&#xA;" />
+    </item>
+    <item name="APPL_MD_PATH">
+      <value string="/LM/W3SVC/5/ROOT" />
+    </item>
+    <item name="APPL_PHYSICAL_PATH">
+      <value string="E:\Work\SBS\HRSBS2 (Dev)\Authentication\" />
+    </item>
+    <item name="AUTH_TYPE">
+      <value string="ApplicationCookie" />
+    </item>
+    <item name="AUTH_USER">
+      <value string="admin.sbs@bluecube.com.sg" />
+    </item>
+    <item name="AUTH_PASSWORD">
+      <value string="*****" />
+    </item>
+    <item name="LOGON_USER">
+      <value string="admin.sbs@bluecube.com.sg" />
+    </item>
+    <item name="REMOTE_USER">
+      <value string="admin.sbs@bluecube.com.sg" />
+    </item>
+    <item name="CERT_COOKIE">
+      <value string="" />
+    </item>
+    <item name="CERT_FLAGS">
+      <value string="" />
+    </item>
+    <item name="CERT_ISSUER">
+      <value string="" />
+    </item>
+    <item name="CERT_KEYSIZE">
+      <value string="" />
+    </item>
+    <item name="CERT_SECRETKEYSIZE">
+      <value string="" />
+    </item>
+    <item name="CERT_SERIALNUMBER">
+      <value string="" />
+    </item>
+    <item name="CERT_SERVER_ISSUER">
+      <value string="" />
+    </item>
+    <item name="CERT_SERVER_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="CERT_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="CONTENT_LENGTH">
+      <value string="0" />
+    </item>
+    <item name="CONTENT_TYPE">
+      <value string="" />
+    </item>
+    <item name="GATEWAY_INTERFACE">
+      <value string="CGI/1.1" />
+    </item>
+    <item name="HTTPS">
+      <value string="off" />
+    </item>
+    <item name="HTTPS_KEYSIZE">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SECRETKEYSIZE">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SERVER_ISSUER">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SERVER_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="INSTANCE_ID">
+      <value string="5" />
+    </item>
+    <item name="INSTANCE_META_PATH">
+      <value string="/LM/W3SVC/5" />
+    </item>
+    <item name="LOCAL_ADDR">
+      <value string="::1" />
+    </item>
+    <item name="PATH_INFO">
+      <value string="/__browserLink/requestData/bfb0f6effc984be88b4cc19ebe6894c4" />
+    </item>
+    <item name="PATH_TRANSLATED">
+      <value string="E:\Work\SBS\HRSBS2 (Dev)\Authentication\__browserLink\requestData\bfb0f6effc984be88b4cc19ebe6894c4" />
+    </item>
+    <item name="QUERY_STRING">
+      <value string="version=2" />
+    </item>
+    <item name="REMOTE_ADDR">
+      <value string="::1" />
+    </item>
+    <item name="REMOTE_HOST">
+      <value string="::1" />
+    </item>
+    <item name="REMOTE_PORT">
+      <value string="52474" />
+    </item>
+    <item name="REQUEST_METHOD">
+      <value string="GET" />
+    </item>
+    <item name="SCRIPT_NAME">
+      <value string="/__browserLink/requestData/bfb0f6effc984be88b4cc19ebe6894c4" />
+    </item>
+    <item name="SERVER_NAME">
+      <value string="localhost" />
+    </item>
+    <item name="SERVER_PORT">
+      <value string="55581" />
+    </item>
+    <item name="SERVER_PORT_SECURE">
+      <value string="0" />
+    </item>
+    <item name="SERVER_PROTOCOL">
+      <value string="HTTP/1.1" />
+    </item>
+    <item name="SERVER_SOFTWARE">
+      <value string="Microsoft-IIS/8.0" />
+    </item>
+    <item name="URL">
+      <value string="/__browserLink/requestData/bfb0f6effc984be88b4cc19ebe6894c4" />
+    </item>
+    <item name="HTTP_CONNECTION">
+      <value string="keep-alive" />
+    </item>
+    <item name="HTTP_ACCEPT">
+      <value string="application/json, text/javascript, */*; q=0.01" />
+    </item>
+    <item name="HTTP_ACCEPT_ENCODING">
+      <value string="gzip, deflate, sdch" />
+    </item>
+    <item name="HTTP_ACCEPT_LANGUAGE">
+      <value string="th,en;q=0.8" />
+    </item>
+    <item name="HTTP_COOKIE">
+      <value string="__RequestVerificationToken=w98bBReekmKN5oOJmePeqRNqBMXpn_Py2FuPfIcuYEYRTwg8PKNW9n6xsuAyMRddL5YzIrOqTFUMtoeimQjkfXRyqz01; ASP.NET_SessionId=p5tcn2bscjljj5rdbiwjwifl; .AspNet.ApplicationCookie=PonhQczoLhyssOwx2GgdynEnPCdUy8I18BAGB4YleC9puYw6kRQVDWxRhWtGTeflkbjoaJMIZ1LLpie0zJF775vPmqXuM1HPbnZBaYYSOgC5HxY_QNLyG2Cg4cMIqb2wPDm4mri8nZmMjwREGbR9pmS2BHy_fh-n2tFs2NRoakRpfJP8-_KLWirMOfriaiLj_i1B0qEInwvE3byg2QhCbOnbxRxNVKMzepvQ0Bp0GLqsHwmHC2n92krQg1keRwmIRPB45LCC8lr8ltNTRrMISFVkpSdHioloTMDEoNtqwOWgNB2incAm9tngDF7HcwmsFAe4jlPgUfpBEC_cL717ZBUUSNkPsqFaF7hxxPvHfV-nzLeQhM4_SCr84ha0s69oafO8B_8rZNX_ijAiyaoST2eZVPar_kORQ450mKhCryFt0NL2; culture=th" />
+    </item>
+    <item name="HTTP_HOST">
+      <value string="localhost:55581" />
+    </item>
+    <item name="HTTP_REFERER">
+      <value string="http://localhost:55581/Account/Resetpassword?uid=4271" />
+    </item>
+    <item name="HTTP_USER_AGENT">
+      <value string="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36" />
+    </item>
+    <item name="HTTP_X_REQUESTED_WITH">
+      <value string="XMLHttpRequest" />
+    </item>
+  </serverVariables>
+  <queryString>
+    <item name="version">
+      <value string="2" />
+    </item>
+  </queryString>
+  <cookies>
+    <item name="__RequestVerificationToken">
+      <value string="w98bBReekmKN5oOJmePeqRNqBMXpn_Py2FuPfIcuYEYRTwg8PKNW9n6xsuAyMRddL5YzIrOqTFUMtoeimQjkfXRyqz01" />
+    </item>
+    <item name="ASP.NET_SessionId">
+      <value string="p5tcn2bscjljj5rdbiwjwifl" />
+    </item>
+    <item name=".AspNet.ApplicationCookie">
+      <value string="PonhQczoLhyssOwx2GgdynEnPCdUy8I18BAGB4YleC9puYw6kRQVDWxRhWtGTeflkbjoaJMIZ1LLpie0zJF775vPmqXuM1HPbnZBaYYSOgC5HxY_QNLyG2Cg4cMIqb2wPDm4mri8nZmMjwREGbR9pmS2BHy_fh-n2tFs2NRoakRpfJP8-_KLWirMOfriaiLj_i1B0qEInwvE3byg2QhCbOnbxRxNVKMzepvQ0Bp0GLqsHwmHC2n92krQg1keRwmIRPB45LCC8lr8ltNTRrMISFVkpSdHioloTMDEoNtqwOWgNB2incAm9tngDF7HcwmsFAe4jlPgUfpBEC_cL717ZBUUSNkPsqFaF7hxxPvHfV-nzLeQhM4_SCr84ha0s69oafO8B_8rZNX_ijAiyaoST2eZVPar_kORQ450mKhCryFt0NL2" />
+    </item>
+    <item name="culture">
+      <value string="th" />
+    </item>
+  </cookies>
+</error>

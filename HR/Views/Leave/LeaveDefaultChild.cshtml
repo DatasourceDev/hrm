@@ -1,0 +1,335 @@
+﻿@model HR.Models.LeaveDefaultChildViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@{
+    ViewBag.Title = Resource.Leave_Type_Default_Child;
+}
+
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+    <script type="text/javascript">
+        $(function () {
+            Flexibly_Onchange();
+        });
+
+        function Flexibly_Onchange() {
+            if ($('#Flexibly').get(0).checked == true) {
+                $('#divlblValidityPeriod').show();
+                $('#divValidityPeriod').show();
+            }
+            else {
+                $('#divlblValidityPeriod').hide();
+                $('#divValidityPeriod').hide();
+            }
+        }
+    </script>
+    <div class="pageheader">
+        @if (Model.Did == 0)
+        {
+            <h2>@Resource.Add_New_Leave_Type<span></span></h2>
+        }
+        else
+        {
+            <h2>@Resource.Leave_Type_Details<span></span></h2>
+        }
+        <div class="breadcrumbs">
+            <ol class="breadcrumb">
+                <li>@Resource.You_Are_Here</li>
+                <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+                <li><a href="@Url.Action("LeaveDefault", "Leave")">@Resource.Leave_Type_Default</a></li>
+                <li class="active">@Resource.Leave_Type_Default_Info</li>
+            </ol>
+        </div>
+    </div>
+    using (Html.BeginForm("LeaveDefaultChild", "Leave", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        <div class="main">
+            <div class="row">
+                <div class="col-md-12">
+                    @if (Model.result != null && Model.result.Code != 0)
+                    {
+                        if (Model.result.Code < 0)
+                        {
+                            <div class="alert alert-red">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                        else if (Model.result.Code > 0)
+                        {
+                            <div class="alert alert-success">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                    }
+                    <section class="tile color transparent-black">
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.Leave_Type_Default_Info</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" value="@Model.operation" name="operation" />
+                            <input type="hidden" value="@Model.Did" name="Did" />
+                            <input type="hidden" value="@Model.Type" name="Type" />
+                            <input type="hidden" value="@((Model.Is_Default.HasValue ? Model.Is_Default.Value : true).ToString())" name="Is_Default" />
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Leave_Name" class="control-label">@Resource.Leave_Type</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input class="form-control" name="Leave_Name" id="Leave_Name" value="@Model.Leave_Name">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Leave_Name)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Leave_Description" class="control-label">@Resource.Leave_Description</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input class="form-control" name="Leave_Description" id="Leave_Description" value="@Model.Leave_Description">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Leave_Description)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Flexibly" class="control-label">@Resource.Format_Of_Taking_Leave</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8" id="divlblValidityPeriod">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Valid_Period" class="control-label">@Resource.Maternity_Validity_Period</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <div class="checkbox check-transparent" onchange="Flexibly_Onchange()">
+                                                @if (Model.Flexibly)
+                                                {
+                                                    <input type="checkbox" value="true" id="Flexibly" name="Flexibly" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" value="true" id="Flexibly" name="Flexibly">
+                                                }
+                                                <label for="Flexibly">@Resource.Flexibly</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="checkbox check-transparent">
+                                                @if (Model.Continuously)
+                                                {
+                                                    <input type="checkbox" value="true" id="Continuously" name="Continuously" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" value="true" id="Continuously" name="Continuously">
+                                                }
+                                                <label for="Continuously">@Resource.Continuously</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4" id="divValidityPeriod">
+                                    <div class="form-group">
+                                        <div class="col-md-8">
+                                            <select class="chosen-select chosen-transparent form-control" id="Valid_Period" name="Valid_Period">
+
+                                                @if (Model.Valid_Period == 6)
+                                                {
+                                                    <option value="6" selected>6</option>
+                                                    <option value="12">12</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="6">6</option>
+                                                    <option value="12" selected>12</option>
+                                                }
+
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Valid_Period)
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="control-label">@Resource.Months</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Months_To_Expiry" class="control-label">@Resource.Gender</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @for (var i = 0; i < Model.genderList.Count; i++)
+                                        {
+                                            <div class="col-md-4">
+                                                <div class="checkbox check-transparent">
+                                                    @if (Model.Condition_Rows != null && Model.Condition_Rows.Contains(NumUtil.ParseInteger(Model.genderList[i].Value)))
+                                                    {
+                                                        <input type="checkbox" value="@Model.genderList[i].Value" id="Gender_@i" name="Condition_Rows" checked>
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="checkbox" value="@Model.genderList[i].Value" id="Gender_@i" name="Condition_Rows">
+                                                    }
+
+                                                    <label for="Gender_@i">@Model.genderList[i].Text</label>
+                                                </div>
+                                            </div>
+                                        }
+                                        <div class="validation-error">
+                                            @Html.ValidationMessageFor(m => m.Condition_Rows)
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Months_To_Expiry" class="control-label">@Resource.Marital_Status</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @for (var i = 0; i < Model.maritalList.Count; i++)
+                                        {
+                                            <div class="col-md-4">
+                                                <div class="checkbox check-transparent">
+                                                    @if (Model.Condition_Rows != null && Model.Condition_Rows.Contains(NumUtil.ParseInteger(Model.maritalList[i].Value)))
+                                                    {
+                                                        <input type="checkbox" value="@Model.maritalList[i].Value" id="Marital_Status_@i" name="Condition_Rows" checked>
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="checkbox" value="@Model.maritalList[i].Value" id="Marital_Status_@i" name="Condition_Rows">
+                                                    }
+                                                    <label for="Marital_Status_@i">@Model.maritalList[i].Text</label>
+                                                </div>
+                                            </div>
+                                        }
+                                        <div class="validation-error">
+                                            @Html.ValidationMessageFor(m => m.Condition_Rows)
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <section class="tile transparent">
+                        <div class="tile-body color transparent-black rounded-corners">
+                            <div class="table-responsive">
+                                <table class="table table-datatable table-custom" id="lcitizenDataTable">
+                                    <thead>
+                                        <tr>
+                                            <th class="sort-alpha">@Resource.Citizenship</th>
+                                            <th class="sort-amount">@Resource.Default_Leave_Amount</th>
+                                            <th class="sort-alpha">@Resource.Period</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.residentalStatusList != null)
+                                        {
+                                            var i = 0;
+                                            foreach (var mstatus in Model.residentalStatusList)
+                                            {
+                                                <tr id="lrow-@i">
+                                                    <td>
+                                                        @Html.Hidden("Detail_Rows[" + i + "].Leave_Default_Child_Detail_ID", Model.Detail_Rows[i].Leave_Default_Child_Detail_ID)
+                                                        @Html.Hidden("Detail_Rows[" + i + "].Default_ID", Model.Detail_Rows[i].Default_ID)
+                                                        @Html.Hidden("Detail_Rows[" + i + "].Residential_Status", Model.Detail_Rows[i].Residential_Status)
+                                                        @mstatus.Text
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control" id="Detail_Rows_@(i)__Default_Leave_Amount" name="Detail_Rows[@i].Default_Leave_Amount" value="@Model.Detail_Rows[i].Default_Leave_Amount" onblur="ValidateDecimal('Detail_Rows_@(i)__Default_Leave_Amount', '@Resource.Default_Leave_Amount', false)">
+                                                        <div class="validation-error">
+                                                            @Html.ValidationMessage("Detail_Rows[" + i + "].Default_Leave_Amount", "", new { id = "Detail_Rows_" + i + "__Default_Leave_Amount_Err" })
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <select class="chosen-select chosen-transparent form-control" id="Detail_Rows_@(i)__Period" name="Detail_Rows[@i].Period">
+                                                            @if (Model.periodList != null)
+                                                            {
+                                                                foreach (var prow in Model.periodList)
+                                                                {
+                                                                    if (Model.Detail_Rows[i].Period == prow.Text)
+                                                                    {
+                                                                        <option value="@(prow.Value)" selected>@prow.Text</option>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <option value="@(prow.Value)">@prow.Text</option>
+                                                                    }
+                                                                }
+                                                            }
+                                                        </select>
+                                                        <div class="validation-error">
+                                                            @Html.ValidationMessage("Detail_Rows[" + i + "].Period")
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                            i++;
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <section class="tile color transparent-white">
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U) | Model.rights.Contains(UserSession.RIGHT_C))
+                                    {
+                                        <button type="submit" class="btn btn-primary" onclick="return Confirm_Alert('@Model.Did');">@Resource.Save</button>
+                                    }
+                                    <a href="@Url.Action("LeaveDefault", "Leave")" class="btn btn-default">@Resource.Back</a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+

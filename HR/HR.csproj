@@ -1,0 +1,2227 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{113613A9-853B-42B5-BC0E-64B0DD1A6453}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>HR</RootNamespace>
+    <AssemblyName>HR</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <MvcBuildViews>false</MvcBuildViews>
+    <UseIISExpress>true</UseIISExpress>
+    <IISExpressSSLPort>
+    </IISExpressSSLPort>
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <Use64BitIISExpress />
+    <UseGlobalApplicationHostFile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>2</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="antlr.runtime">
+      <HintPath>..\packages\Ical.Net.2.2.3\lib\net45\antlr.runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Elmah, Version=1.2.14706.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\elmah.corelibrary.1.2.2\lib\Elmah.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Elmah.Mvc">
+      <HintPath>..\packages\Elmah.Mvc.2.1.2\lib\net40\Elmah.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="EPPlus, Version=4.0.3.0, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\SBSModel\lib\EPPlus\EPPlus.dll</HintPath>
+    </Reference>
+    <Reference Include="Excel, Version=2.1.0.0, Culture=neutral, PublicKeyToken=93517dbe6a4012fa, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\SBSModel\lib\Excel.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp">
+      <HintPath>..\packages\iTextSharp.5.5.9\lib\itextsharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\SBSModel\lib\Microsoft.AspNet.Identity.Core.1.0.0\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.EntityFramework, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\SBSModel\lib\Microsoft.AspNet.Identity.EntityFramework.1.0.0\lib\net45\Microsoft.AspNet.Identity.EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\SBSModel\lib\Microsoft.AspNet.Identity.Owin.1.0.0\lib\net45\Microsoft.AspNet.Identity.Owin.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Owin, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.3.0.1\lib\net45\Microsoft.Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Host.SystemWeb, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Host.SystemWeb.3.0.1\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.3.0.1\lib\net45\Microsoft.Owin.Security.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security.Cookies, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.Cookies.3.0.1\lib\net45\Microsoft.Owin.Security.Cookies.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security.OAuth, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.OAuth.3.0.1\lib\net45\Microsoft.Owin.Security.OAuth.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Renci.SshNet, Version=2016.0.0.0, Culture=neutral, PublicKeyToken=1cee9f8bde3db106, processorArchitecture=MSIL">
+      <HintPath>..\packages\SSH.NET.2016.0.0\lib\net40\Renci.SshNet.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Optimization, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.1.3\lib\net40\System.Web.Optimization.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.3\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http">
+    </Reference>
+    <Reference Include="System.Net.Http.WebRequest">
+    </Reference>
+    <Reference Include="WebGrease, Version=1.6.5135.21930, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebGrease.1.6.0\lib\WebGrease.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Owin">
+      <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App_Start\BundleConfig.cs" />
+    <Compile Include="App_Start\FilterConfig.cs" />
+    <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="App_Start\Startup.Auth.cs" />
+    <Compile Include="Common\FileExtensions.cs" />
+    <Compile Include="Common\FormulaUtil.cs" />
+    <Compile Include="Common\HtmlUtil.cs" />
+    <Compile Include="Common\PaypalUtil.cs" />
+    <Compile Include="Common\ReportUtil.cs" />
+    <Compile Include="Common\UserSession.cs" />
+    <Compile Include="Common\XmlUtil.cs" />
+    <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\ApprovalController.cs" />
+    <Compile Include="Controllers\ComboController.cs" />
+    <Compile Include="Controllers\CompanyController.cs" />
+    <Compile Include="Controllers\ConfigurationController.cs" />
+    <Compile Include="Controllers\ControllerBase.cs" />
+    <Compile Include="Controllers\CustomerController.cs" />
+    <Compile Include="Controllers\EmployeeController.cs" />
+    <Compile Include="Controllers\ExpensesController.cs" />
+    <Compile Include="Controllers\FrontController.cs" />
+    <Compile Include="Controllers\GlobalLookupController.cs" />
+    <Compile Include="Controllers\JobCostController.cs" />
+    <Compile Include="Controllers\SubscriptionController.cs" />
+    <Compile Include="Controllers\SystemController.cs" />
+    <Compile Include="Controllers\TsExController.cs" />
+    <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\LeaveController.cs" />
+    <Compile Include="Controllers\PayrollController.cs" />
+    <Compile Include="Controllers\TimeController.cs" />
+    <Compile Include="Controllers\TimeSheetController.cs" />
+    <Compile Include="Controllers\UploadController.cs" />
+    <Compile Include="Controllers\UserController.cs" />
+    <Compile Include="Controllers\WServController.cs" />
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201401181933373_InitialCreate.cs" />
+    <Compile Include="Migrations\201401181933373_InitialCreate.Designer.cs">
+      <DependentUpon>201401181933373_InitialCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201401181936291_hr_intasp.cs" />
+    <Compile Include="Migrations\201401181936291_hr_intasp.Designer.cs">
+      <DependentUpon>201401181936291_hr_intasp.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="ViewModel\BankDetailViewModel .cs" />
+    <Compile Include="ViewModel\BankInfoViewModel.cs" />
+    <Compile Include="ViewModel\AccountViewModels.cs" />
+    <Compile Include="ViewModel\BranchViewModel.cs" />
+    <Compile Include="ViewModel\ConfigurationViewModel.cs" />
+    <Compile Include="ViewModel\CompanyViewModel.cs" />
+    <Compile Include="ViewModel\CustomerViewModels.cs" />
+    <Compile Include="ViewModel\ExchangeViewModel.cs" />
+    <Compile Include="ViewModel\ExpensesViewModel.cs" />
+    <Compile Include="ViewModel\GlobalLookupViewModel.cs" />
+    <Compile Include="ViewModel\JobCostViewModel.cs" />
+    <Compile Include="ViewModel\LeaveViewModel.cs" />
+    <Compile Include="ViewModel\PayrollConfigurationViewModels.cs" />
+    <Compile Include="ViewModel\PayrollViewModels.cs" />
+    <Compile Include="ViewModel\RelationshipViewModels.cs" />
+    <Compile Include="ViewModel\EmployeeViewModels.cs" />
+    <Compile Include="ViewModel\SubscriptionViewModel.cs" />
+    <Compile Include="ViewModel\SystemViewModel.cs" />
+    <Compile Include="ViewModel\TsExViewModels.cs" />
+    <Compile Include="ViewModel\TimeSheetViewModels.cs" />
+    <Compile Include="ViewModel\TimeViewModels.cs" />
+    <Compile Include="ViewModel\UserViewModel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Startup.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="assets\ckeditor\adapters\jquery.js" />
+    <Content Include="assets\ckeditor\build-config.js" />
+    <Content Include="assets\ckeditor\ckeditor.js" />
+    <Content Include="assets\ckeditor\config.js" />
+    <Content Include="assets\ckeditor\contents.css" />
+    <Content Include="assets\ckeditor\lang\af.js" />
+    <Content Include="assets\ckeditor\lang\ar.js" />
+    <Content Include="assets\ckeditor\lang\bg.js" />
+    <Content Include="assets\ckeditor\lang\bn.js" />
+    <Content Include="assets\ckeditor\lang\bs.js" />
+    <Content Include="assets\ckeditor\lang\ca.js" />
+    <Content Include="assets\ckeditor\lang\cs.js" />
+    <Content Include="assets\ckeditor\lang\cy.js" />
+    <Content Include="assets\ckeditor\lang\da.js" />
+    <Content Include="assets\ckeditor\lang\de.js" />
+    <Content Include="assets\ckeditor\lang\el.js" />
+    <Content Include="assets\ckeditor\lang\en-au.js" />
+    <Content Include="assets\ckeditor\lang\en-ca.js" />
+    <Content Include="assets\ckeditor\lang\en-gb.js" />
+    <Content Include="assets\ckeditor\lang\en.js" />
+    <Content Include="assets\ckeditor\lang\eo.js" />
+    <Content Include="assets\ckeditor\lang\es.js" />
+    <Content Include="assets\ckeditor\lang\et.js" />
+    <Content Include="assets\ckeditor\lang\eu.js" />
+    <Content Include="assets\ckeditor\lang\fa.js" />
+    <Content Include="assets\ckeditor\lang\fi.js" />
+    <Content Include="assets\ckeditor\lang\fo.js" />
+    <Content Include="assets\ckeditor\lang\fr-ca.js" />
+    <Content Include="assets\ckeditor\lang\fr.js" />
+    <Content Include="assets\ckeditor\lang\gl.js" />
+    <Content Include="assets\ckeditor\lang\gu.js" />
+    <Content Include="assets\ckeditor\lang\he.js" />
+    <Content Include="assets\ckeditor\lang\hi.js" />
+    <Content Include="assets\ckeditor\lang\hr.js" />
+    <Content Include="assets\ckeditor\lang\hu.js" />
+    <Content Include="assets\ckeditor\lang\id.js" />
+    <Content Include="assets\ckeditor\lang\is.js" />
+    <Content Include="assets\ckeditor\lang\it.js" />
+    <Content Include="assets\ckeditor\lang\ja.js" />
+    <Content Include="assets\ckeditor\lang\ka.js" />
+    <Content Include="assets\ckeditor\lang\km.js" />
+    <Content Include="assets\ckeditor\lang\ko.js" />
+    <Content Include="assets\ckeditor\lang\ku.js" />
+    <Content Include="assets\ckeditor\lang\lt.js" />
+    <Content Include="assets\ckeditor\lang\lv.js" />
+    <Content Include="assets\ckeditor\lang\mk.js" />
+    <Content Include="assets\ckeditor\lang\mn.js" />
+    <Content Include="assets\ckeditor\lang\ms.js" />
+    <Content Include="assets\ckeditor\lang\nb.js" />
+    <Content Include="assets\ckeditor\lang\nl.js" />
+    <Content Include="assets\ckeditor\lang\no.js" />
+    <Content Include="assets\ckeditor\lang\pl.js" />
+    <Content Include="assets\ckeditor\lang\pt-br.js" />
+    <Content Include="assets\ckeditor\lang\pt.js" />
+    <Content Include="assets\ckeditor\lang\ro.js" />
+    <Content Include="assets\ckeditor\lang\ru.js" />
+    <Content Include="assets\ckeditor\lang\si.js" />
+    <Content Include="assets\ckeditor\lang\sk.js" />
+    <Content Include="assets\ckeditor\lang\sl.js" />
+    <Content Include="assets\ckeditor\lang\sq.js" />
+    <Content Include="assets\ckeditor\lang\sr-latn.js" />
+    <Content Include="assets\ckeditor\lang\sr.js" />
+    <Content Include="assets\ckeditor\lang\sv.js" />
+    <Content Include="assets\ckeditor\lang\th.js" />
+    <Content Include="assets\ckeditor\lang\tr.js" />
+    <Content Include="assets\ckeditor\lang\tt.js" />
+    <Content Include="assets\ckeditor\lang\ug.js" />
+    <Content Include="assets\ckeditor\lang\uk.js" />
+    <Content Include="assets\ckeditor\lang\vi.js" />
+    <Content Include="assets\ckeditor\lang\zh-cn.js" />
+    <Content Include="assets\ckeditor\lang\zh.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\a11yhelp.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\af.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\ar.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\bg.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\ca.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\cs.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\cy.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\da.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\de.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\el.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\en-gb.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\en.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\eo.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\es.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\et.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\fa.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\fi.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\fr-ca.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\fr.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\gl.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\gu.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\he.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\hi.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\hr.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\hu.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\id.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\it.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\ja.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\km.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\ko.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\ku.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\lt.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\lv.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\mk.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\mn.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\nb.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\nl.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\no.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\pl.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\pt-br.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\pt.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\ro.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\ru.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\si.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\sk.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\sl.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\sq.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\sr-latn.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\sr.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\sv.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\th.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\tr.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\tt.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\ug.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\uk.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\vi.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\zh-cn.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\zh.js" />
+    <Content Include="assets\ckeditor\plugins\a11yhelp\dialogs\lang\_translationstatus.txt" />
+    <Content Include="assets\ckeditor\plugins\about\dialogs\about.js" />
+    <Content Include="assets\ckeditor\plugins\about\dialogs\hidpi\logo_ckeditor.png" />
+    <Content Include="assets\ckeditor\plugins\about\dialogs\logo_ckeditor.png" />
+    <Content Include="assets\ckeditor\plugins\clipboard\dialogs\paste.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\icons\bgcolor.png" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\icons\hidpi\bgcolor.png" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\icons\hidpi\textcolor.png" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\icons\textcolor.png" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\af.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\ar.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\bg.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\bn.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\bs.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\ca.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\cs.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\cy.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\da.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\de.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\el.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\en-au.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\en-ca.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\en-gb.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\en.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\eo.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\es.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\et.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\eu.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\fa.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\fi.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\fo.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\fr-ca.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\fr.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\gl.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\gu.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\he.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\hi.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\hr.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\hu.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\id.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\is.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\it.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\ja.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\ka.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\km.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\ko.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\ku.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\lt.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\lv.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\mk.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\mn.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\ms.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\nb.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\nl.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\no.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\pl.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\pt-br.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\pt.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\ro.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\ru.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\si.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\sk.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\sl.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\sq.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\sr-latn.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\sr.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\sv.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\th.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\tr.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\tt.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\ug.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\uk.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\vi.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\zh-cn.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\lang\zh.js" />
+    <Content Include="assets\ckeditor\plugins\colorbutton\plugin.js" />
+    <Content Include="assets\ckeditor\plugins\colordialog\dialogs\colordialog.js" />
+    <Content Include="assets\ckeditor\plugins\dialog\dialogDefinition.js" />
+    <Content Include="assets\ckeditor\plugins\icons.png" />
+    <Content Include="assets\ckeditor\plugins\icons_hidpi.png" />
+    <Content Include="assets\ckeditor\plugins\image\dialogs\image.js" />
+    <Content Include="assets\ckeditor\plugins\image\images\noimage.png" />
+    <Content Include="assets\ckeditor\plugins\link\dialogs\anchor.js" />
+    <Content Include="assets\ckeditor\plugins\link\dialogs\link.js" />
+    <Content Include="assets\ckeditor\plugins\link\images\anchor.png" />
+    <Content Include="assets\ckeditor\plugins\link\images\hidpi\anchor.png" />
+    <Content Include="assets\ckeditor\plugins\magicline\images\hidpi\icon-rtl.png" />
+    <Content Include="assets\ckeditor\plugins\magicline\images\hidpi\icon.png" />
+    <Content Include="assets\ckeditor\plugins\magicline\images\icon-rtl.png" />
+    <Content Include="assets\ckeditor\plugins\magicline\images\icon.png" />
+    <Content Include="assets\ckeditor\plugins\panelbutton\plugin.js" />
+    <Content Include="assets\ckeditor\plugins\pastefromword\filter\default.js" />
+    <Content Include="assets\ckeditor\plugins\preview\icons\hidpi\preview-rtl.png" />
+    <Content Include="assets\ckeditor\plugins\preview\icons\hidpi\preview.png" />
+    <Content Include="assets\ckeditor\plugins\preview\icons\preview-rtl.png" />
+    <Content Include="assets\ckeditor\plugins\preview\icons\preview.png" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\af.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\ar.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\bg.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\bn.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\bs.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\ca.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\cs.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\cy.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\da.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\de.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\el.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\en-au.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\en-ca.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\en-gb.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\en.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\eo.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\es.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\et.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\eu.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\fa.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\fi.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\fo.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\fr-ca.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\fr.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\gl.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\gu.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\he.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\hi.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\hr.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\hu.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\id.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\is.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\it.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\ja.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\ka.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\km.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\ko.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\ku.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\lt.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\lv.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\mk.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\mn.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\ms.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\nb.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\nl.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\no.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\pl.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\pt-br.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\pt.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\ro.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\ru.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\si.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\sk.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\sl.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\sq.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\sr-latn.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\sr.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\sv.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\th.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\tr.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\tt.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\ug.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\uk.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\vi.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\zh-cn.js" />
+    <Content Include="assets\ckeditor\plugins\preview\lang\zh.js" />
+    <Content Include="assets\ckeditor\plugins\preview\plugin.js" />
+    <Content Include="assets\ckeditor\plugins\preview\preview.html" />
+    <Content Include="assets\ckeditor\plugins\scayt\dialogs\options.js" />
+    <Content Include="assets\ckeditor\plugins\scayt\dialogs\toolbar.css" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\af.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\ar.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\bg.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\ca.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\cs.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\cy.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\da.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\de.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\el.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\en-gb.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\en.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\eo.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\es.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\et.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\fa.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\fi.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\fr-ca.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\fr.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\gl.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\he.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\hr.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\hu.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\id.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\it.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\ja.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\km.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\ku.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\lt.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\lv.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\nb.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\nl.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\no.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\pl.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\pt-br.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\pt.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\ru.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\si.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\sk.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\sl.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\sq.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\sv.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\th.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\tr.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\tt.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\ug.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\uk.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\vi.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\zh-cn.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\zh.js" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\lang\_translationstatus.txt" />
+    <Content Include="assets\ckeditor\plugins\specialchar\dialogs\specialchar.js" />
+    <Content Include="assets\ckeditor\plugins\tabletools\dialogs\tableCell.js" />
+    <Content Include="assets\ckeditor\plugins\table\dialogs\table.js" />
+    <Content Include="assets\ckeditor\plugins\wsc\dialogs\ciframe.html" />
+    <Content Include="assets\ckeditor\plugins\wsc\dialogs\tmpFrameset.html" />
+    <Content Include="assets\ckeditor\plugins\wsc\dialogs\wsc.css" />
+    <Content Include="assets\ckeditor\plugins\wsc\dialogs\wsc.js" />
+    <Content Include="assets\ckeditor\plugins\wsc\dialogs\wsc_ie.js" />
+    <Content Include="assets\ckeditor\samples\ajax.html" />
+    <Content Include="assets\ckeditor\samples\api.html" />
+    <Content Include="assets\ckeditor\samples\appendto.html" />
+    <Content Include="assets\ckeditor\samples\assets\inlineall\logo.png" />
+    <Content Include="assets\ckeditor\samples\assets\outputxhtml\outputxhtml.css" />
+    <Content Include="assets\ckeditor\samples\assets\sample.jpg" />
+    <Content Include="assets\ckeditor\samples\assets\uilanguages\languages.js" />
+    <Content Include="assets\ckeditor\samples\datafiltering.html" />
+    <Content Include="assets\ckeditor\samples\divreplace.html" />
+    <Content Include="assets\ckeditor\samples\index.html" />
+    <Content Include="assets\ckeditor\samples\inlineall.html" />
+    <Content Include="assets\ckeditor\samples\inlinebycode.html" />
+    <Content Include="assets\ckeditor\samples\inlinetextarea.html" />
+    <Content Include="assets\ckeditor\samples\jquery.html" />
+    <Content Include="assets\ckeditor\samples\plugins\dialog\assets\my_dialog.js" />
+    <Content Include="assets\ckeditor\samples\plugins\dialog\dialog.html" />
+    <Content Include="assets\ckeditor\samples\plugins\enterkey\enterkey.html" />
+    <Content Include="assets\ckeditor\samples\plugins\htmlwriter\assets\outputforflash\outputforflash.swf" />
+    <Content Include="assets\ckeditor\samples\plugins\htmlwriter\assets\outputforflash\swfobject.js" />
+    <Content Include="assets\ckeditor\samples\plugins\htmlwriter\outputforflash.html" />
+    <Content Include="assets\ckeditor\samples\plugins\htmlwriter\outputhtml.html" />
+    <Content Include="assets\ckeditor\samples\plugins\magicline\magicline.html" />
+    <Content Include="assets\ckeditor\samples\plugins\toolbar\toolbar.html" />
+    <Content Include="assets\ckeditor\samples\plugins\wysiwygarea\fullpage.html" />
+    <Content Include="assets\ckeditor\samples\readonly.html" />
+    <Content Include="assets\ckeditor\samples\replacebyclass.html" />
+    <Content Include="assets\ckeditor\samples\replacebycode.html" />
+    <Content Include="assets\ckeditor\samples\sample.css" />
+    <Content Include="assets\ckeditor\samples\sample.js" />
+    <Content Include="assets\ckeditor\samples\tabindex.html" />
+    <Content Include="assets\ckeditor\samples\uicolor.html" />
+    <Content Include="assets\ckeditor\samples\uilanguages.html" />
+    <Content Include="assets\ckeditor\samples\xhtmlstyle.html" />
+    <Content Include="assets\ckeditor\skins\moono\dialog.css" />
+    <Content Include="assets\ckeditor\skins\moono\dialog_ie.css" />
+    <Content Include="assets\ckeditor\skins\moono\dialog_ie7.css" />
+    <Content Include="assets\ckeditor\skins\moono\dialog_ie8.css" />
+    <Content Include="assets\ckeditor\skins\moono\dialog_iequirks.css" />
+    <Content Include="assets\ckeditor\skins\moono\editor.css" />
+    <Content Include="assets\ckeditor\skins\moono\editor_gecko.css" />
+    <Content Include="assets\ckeditor\skins\moono\editor_ie.css" />
+    <Content Include="assets\ckeditor\skins\moono\editor_ie7.css" />
+    <Content Include="assets\ckeditor\skins\moono\editor_ie8.css" />
+    <Content Include="assets\ckeditor\skins\moono\editor_iequirks.css" />
+    <Content Include="assets\ckeditor\skins\moono\icons.png" />
+    <Content Include="assets\ckeditor\skins\moono\icons_hidpi.png" />
+    <Content Include="assets\ckeditor\skins\moono\images\arrow.png" />
+    <Content Include="assets\ckeditor\skins\moono\images\close.png" />
+    <Content Include="assets\ckeditor\skins\moono\images\hidpi\close.png" />
+    <Content Include="assets\ckeditor\skins\moono\images\hidpi\lock-open.png" />
+    <Content Include="assets\ckeditor\skins\moono\images\hidpi\lock.png" />
+    <Content Include="assets\ckeditor\skins\moono\images\hidpi\refresh.png" />
+    <Content Include="assets\ckeditor\skins\moono\images\lock-open.png" />
+    <Content Include="assets\ckeditor\skins\moono\images\lock.png" />
+    <Content Include="assets\ckeditor\skins\moono\images\refresh.png" />
+    <Content Include="assets\ckeditor\styles.js" />
+    <Content Include="assets\css\app.css" />
+    <Content Include="assets\css\Landing.css" />
+    <Content Include="assets\css\minimal.css" />
+    <Content Include="assets\css\minimal.min.css" />
+    <Content Include="assets\css\vendor\animate\animate.css" />
+    <Content Include="assets\css\vendor\animate\animate.min.css" />
+    <Content Include="assets\css\vendor\bootstrap-checkbox.css" />
+    <Content Include="assets\css\vendor\bootstrap\bootstrap-dropdown-multilevel.css" />
+    <Content Include="assets\css\vendor\bootstrap\bootstrap-theme.css" />
+    <Content Include="assets\css\vendor\bootstrap\bootstrap-theme.min.css" />
+    <Content Include="assets\css\vendor\bootstrap\bootstrap.css" />
+    <Content Include="assets\css\vendor\bootstrap\bootstrap.min.css" />
+    <Content Include="assets\css\vendor\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="assets\font-awesome\css\font-awesome.css" />
+    <Content Include="assets\font-awesome\css\font-awesome.min.css" />
+    <Content Include="assets\font-awesome\fonts\fontawesome-webfont.svg" />
+    <Content Include="assets\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="assets\fullcalendar\codebase\dhtmlxscheduler.css" />
+    <Content Include="assets\fullcalendar\codebase\dhtmlxscheduler.js" />
+    <Content Include="assets\fullcalendar\codebase\dhtmlxscheduler_classic.css" />
+    <Content Include="assets\fullcalendar\codebase\dhtmlxscheduler_flat.css" />
+    <Content Include="assets\fullcalendar\codebase\dhtmlxscheduler_glossy.css" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_active_links.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_agenda_view.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_all_timed.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_collision.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_container_autoresize.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_cookie.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_daytimeline.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_drag_between.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_editors.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_expand.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_grid_view.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_html_templates.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_key_nav.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_layer.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_limit.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_map_view.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_minical.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_monthheight.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_multisection.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_multiselect.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_multisource.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_mvc.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_offline.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_outerdrag.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_pdf.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_quick_info.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_readonly.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_recurring.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_serialize.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_timeline.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_tooltip.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_treetimeline.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_units.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_url.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_week_agenda.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_wp.js" />
+    <Content Include="assets\fullcalendar\codebase\ext\dhtmlxscheduler_year_view.js" />
+    <Content Include="assets\fullcalendar\codebase\imgs\buttons.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs\but_repeat.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs\calendar.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs\clock_big.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs\clock_small.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs\collapse_expand_icon.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs\controls.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs\databg.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs\databg_now.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs\export_ical.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs\export_pdf.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs\icon.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs\images.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs\loading.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs\resize_dots.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_dhx_terrace\arrow_left.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_dhx_terrace\arrow_right.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_dhx_terrace\but_repeat.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs_dhx_terrace\calendar.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs_dhx_terrace\clock_big.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs_dhx_terrace\clock_small.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs_dhx_terrace\close_icon.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_dhx_terrace\collapse_expand_icon.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs_dhx_terrace\controls.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_dhx_terrace\databg.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_dhx_terrace\databg_now.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_dhx_terrace\export_ical.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_dhx_terrace\export_pdf.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_dhx_terrace\resize_dots.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_dhx_terrace\resizing.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_flat\agenda_bg.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs_flat\arrow_left.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_flat\arrow_right.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_flat\but_repeat.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs_flat\calendar.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs_flat\clock.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_flat\clock_big.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs_flat\clock_small.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs_flat\close_icon.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_flat\collapse_expand_icon.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs_flat\controls.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_flat\databg.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_flat\databg_now.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_flat\export_ical.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_flat\export_pdf.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_flat\resize_dots.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_flat\resizing.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\blue_tab.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\blue_tab_wide.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\buttons.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\but_repeat.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\calendar.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\clock_big.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\clock_small.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\collapse_expand_icon.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\controlls5.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\databg.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\databg_now.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\event-bg.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\export_ical.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\export_pdf.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\icon.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\left-separator.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\left-time-bg.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\lightbox.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\loading.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\move.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\multi-days-bg.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\second-top-days-bg.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\top-days-bg.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\top-separator.gif" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\white_tab.png" />
+    <Content Include="assets\fullcalendar\codebase\imgs_glossy\white_tab_wide.png" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_ar.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_be.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_ca.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_cn.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_cs.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_da.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_de.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_el.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_en.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_es.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_fi.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_fr.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_he.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_hu.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_id.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_it.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_jp.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_nb.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_nl.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_no.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_pl.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_pt.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_ro.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_ru.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_si.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_sk.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_sv.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_tr.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\locale_ua.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\locale_recurring_be.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\locale_recurring_cn.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\locale_recurring_cs.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\locale_recurring_da.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\locale_recurring_de.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\locale_recurring_el.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\locale_recurring_en.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\locale_recurring_es.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\locale_recurring_fi.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\locale_recurring_fr.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\locale_recurring_it.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\locale_recurring_nb.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\locale_recurring_nl.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\locale_recurring_pl.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\locale_recurring_pt.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\locale_recurring_ro.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\locale_recurring_ru.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\locale_recurring_sk.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\locale_recurring_sv.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\locale_recurring_ua.js" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\repeat_template_be.html" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\repeat_template_cn.html" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\repeat_template_de.html" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\repeat_template_el.html" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\repeat_template_en.html" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\repeat_template_es.html" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\repeat_template_fr.html" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\repeat_template_it.html" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\repeat_template_nl.html" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\repeat_template_ro.html" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\repeat_template_ru.html" />
+    <Content Include="assets\fullcalendar\codebase\locale\recurring\repeat_template_sk.html" />
+    <Content Include="assets\fullcalendar\datepicker\datepicker\css\datepicker.css" />
+    <Content Include="assets\fullcalendar\datepicker\datepicker\js\bootstrap-datepicker.js" />
+    <Content Include="assets\fullcalendar\images\attachment1.png" />
+    <Content Include="assets\fullcalendar\images\avatars\avatar1.jpg" />
+    <Content Include="assets\fullcalendar\images\avatars\avatar2.jpg" />
+    <Content Include="assets\fullcalendar\images\avatars\avatar3.jpg" />
+    <Content Include="assets\fullcalendar\images\avatars\avatar4.jpg" />
+    <Content Include="assets\fullcalendar\images\avatars\avatar5.png" />
+    <Content Include="assets\fullcalendar\images\bg.png" />
+    <Content Include="assets\fullcalendar\images\blue%402x.png" />
+    <Content Include="assets\fullcalendar\images\blue.png" />
+    <Content Include="assets\fullcalendar\images\core_admin.png" />
+    <Content Include="assets\fullcalendar\images\core_admin_small.png" />
+    <Content Include="assets\fullcalendar\images\groups.png" />
+    <Content Include="assets\fullcalendar\images\ie-spacer.gif" />
+    <Content Include="assets\fullcalendar\images\loading.gif" />
+    <Content Include="assets\fullcalendar\javascripts\vendor\fullcalendar\fullcalendar.js" />
+    <Content Include="assets\fullcalendar\javascripts\vendor\fullcalendar\fullcalendar.min.js" />
+    <Content Include="assets\fullcalendar\javascripts\vendor\fullcalendar\gcal.js" />
+    <Content Include="assets\fullcalendar\javascripts\vendor\fullcalendar\lang-all.js" />
+    <Content Include="assets\fullcalendar\stylesheets\fullcalendar.css" />
+    <Content Include="assets\fullcalendar\stylesheets\fullcalendar.min.css" />
+    <Content Include="assets\fullcalendar\stylesheets\fullcalendar.print.css" />
+    <Content Include="assets\images\backgrounds\1.jpg" />
+    <Content Include="assets\images\backgrounds\2.jpg" />
+    <Content Include="assets\images\backgrounds\3.jpg" />
+    <Content Include="assets\images\backgrounds\4.jpg" />
+    <Content Include="assets\images\backgrounds\5.jpg" />
+    <Content Include="assets\images\backgrounds\6.jpg" />
+    <Content Include="assets\images\backgrounds\login.jpg" />
+    <Content Include="assets\images\backgrounds\thumbs\1.jpg" />
+    <Content Include="assets\images\backgrounds\thumbs\2.jpg" />
+    <Content Include="assets\images\backgrounds\thumbs\3.jpg" />
+    <Content Include="assets\images\backgrounds\thumbs\4.jpg" />
+    <Content Include="assets\images\backgrounds\thumbs\5.jpg" />
+    <Content Include="assets\images\backgrounds\thumbs\6.jpg" />
+    <Content Include="assets\images\bootstrap-colorpicker\alpha-horizontal.png" />
+    <Content Include="assets\images\bootstrap-colorpicker\alpha.png" />
+    <Content Include="assets\images\bootstrap-colorpicker\hue-horizontal.png" />
+    <Content Include="assets\images\bootstrap-colorpicker\hue.png" />
+    <Content Include="assets\images\bootstrap-colorpicker\saturation.png" />
+    <Content Include="assets\images\chosen-sprite-transparent%402x.png" />
+    <Content Include="assets\images\chosen-sprite-transparent.png" />
+    <Content Include="assets\images\dot_pattern.png" />
+    <Content Include="assets\images\dot_pattern_inverse.png" />
+    <Content Include="assets\images\favicon.ico" />
+    <Content Include="assets\images\ici-avatar.jpg" />
+    <Content Include="assets\images\imgprofile.jpg" />
+    <Content Include="assets\images\loader.gif" />
+    <Content Include="assets\images\logo-big.png" />
+    <Content Include="assets\images\minimal-logo.png" />
+    <Content Include="assets\images\modal-close-hover.png" />
+    <Content Include="assets\images\modal-close.png" />
+    <Content Include="assets\images\noise.png" />
+    <Content Include="assets\js\Landing.js" />
+    <Content Include="assets\js\minimal.js" />
+    <Content Include="assets\js\minimal.min.js" />
+    <Content Include="assets\js\vendor\animate-numbers\jquery.animateNumbers.js" />
+    <Content Include="assets\js\vendor\blockui\jquery.blockUI.js" />
+    <Content Include="assets\js\vendor\bootstrap\bootstrap-dropdown-multilevel.js" />
+    <Content Include="assets\js\vendor\bootstrap\bootstrap.js" />
+    <Content Include="assets\js\vendor\bootstrap\bootstrap.min.js" />
+    <Content Include="assets\js\vendor\chosen\chosen.jquery.js" />
+    <Content Include="assets\js\vendor\chosen\chosen.jquery.min.js" />
+    <Content Include="assets\js\vendor\chosen\css\chosen-bootstrap.css" />
+    <Content Include="assets\js\vendor\chosen\css\chosen.min.css" />
+    <Content Include="assets\js\vendor\chosen\images\chosen-sprite%402x.png" />
+    <Content Include="assets\js\vendor\chosen\images\chosen-sprite.png" />
+    <Content Include="assets\js\vendor\colorbox\css\colorbox.css" />
+    <Content Include="assets\js\vendor\colorbox\css\images\border.png" />
+    <Content Include="assets\js\vendor\colorbox\css\images\controls.png" />
+    <Content Include="assets\js\vendor\colorbox\css\images\loading.gif" />
+    <Content Include="assets\js\vendor\colorbox\css\images\loading_background.png" />
+    <Content Include="assets\js\vendor\colorbox\jquery.colorbox-min.js" />
+    <Content Include="assets\js\vendor\colorbox\jquery.colorbox.js" />
+    <Content Include="assets\js\vendor\colorpalette\bootstrap-colorpalette.css" />
+    <Content Include="assets\js\vendor\colorpalette\bootstrap-colorpalette.js" />
+    <Content Include="assets\js\vendor\colorpicker\bootstrap-colorpicker.js" />
+    <Content Include="assets\js\vendor\colorpicker\bootstrap-colorpicker.min.js" />
+    <Content Include="assets\js\vendor\colorpicker\css\bootstrap-colorpicker.css" />
+    <Content Include="assets\js\vendor\datatables\ajax\sources\objects.txt" />
+    <Content Include="assets\js\vendor\datatables\ColReorderWithResize.js" />
+    <Content Include="assets\js\vendor\datatables\colvis\dataTables.colVis.js" />
+    <Content Include="assets\js\vendor\datatables\colvis\dataTables.colVis.min.js" />
+    <Content Include="assets\js\vendor\datatables\css\ColVis.css" />
+    <Content Include="assets\js\vendor\datatables\css\dataTables.bootstrap.css" />
+    <Content Include="assets\js\vendor\datatables\css\TableTools.css" />
+    <Content Include="assets\js\vendor\datatables\dataTables.bootstrap.js" />
+    <Content Include="assets\js\vendor\datatables\images\datatables\back_disabled.png" />
+    <Content Include="assets\js\vendor\datatables\images\datatables\back_enabled.png" />
+    <Content Include="assets\js\vendor\datatables\images\datatables\back_enabled_hover.png" />
+    <Content Include="assets\js\vendor\datatables\images\datatables\favicon.ico" />
+    <Content Include="assets\js\vendor\datatables\images\datatables\forward_disabled.png" />
+    <Content Include="assets\js\vendor\datatables\images\datatables\forward_enabled.png" />
+    <Content Include="assets\js\vendor\datatables\images\datatables\forward_enabled_hover.png" />
+    <Content Include="assets\js\vendor\datatables\images\datatables\sort_asc.png" />
+    <Content Include="assets\js\vendor\datatables\images\datatables\sort_asc_disabled.png" />
+    <Content Include="assets\js\vendor\datatables\images\datatables\sort_both.png" />
+    <Content Include="assets\js\vendor\datatables\images\datatables\sort_desc.png" />
+    <Content Include="assets\js\vendor\datatables\images\datatables\sort_desc_disabled.png" />
+    <Content Include="assets\js\vendor\datatables\jquery.dataTables.js" />
+    <Content Include="assets\js\vendor\datatables\jquery.dataTables.min.js" />
+    <Content Include="assets\js\vendor\datatables\tabletools\dataTables.tableTools.js" />
+    <Content Include="assets\js\vendor\datatables\tabletools\dataTables.tableTools.min.js" />
+    <Content Include="assets\js\vendor\datatables\tabletools\swf\copy_csv_xls.swf" />
+    <Content Include="assets\js\vendor\datatables\tabletools\swf\copy_csv_xls_pdf.swf" />
+    <Content Include="assets\js\vendor\datatables\tabletools\ZeroClipboard.js" />
+    <Content Include="assets\js\vendor\datepicker\bootstrap-datetimepicker.js" />
+    <Content Include="assets\js\vendor\datepicker\bootstrap-datetimepicker.min.js" />
+    <Content Include="assets\js\vendor\datepicker\css\bootstrap-datetimepicker.css" />
+    <Content Include="assets\js\vendor\datepicker\css\bootstrap-datetimepicker.min.css" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.ar-ma.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.ar.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.bg.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.br.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.bs.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.ca.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.cs.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.cv.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.da.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.de.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.el.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.en-au.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.en-ca.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.en-gb.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.eo.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.es.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.et.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.eu.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.fa.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.fi.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.fr-ca.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.fr.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.gl.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.he.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.hi.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.hr.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.hu.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.id.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.is.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.it.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.ja.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.ka.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.ko.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.lt.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.lv.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.ml.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.mr.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.ms-my.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.nb.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.ne.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.nl.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.nn.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.pl.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.pt-BR.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.pt.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.ro.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.ru.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.sk.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.sl.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.sq.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.sv.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.th.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.tr.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.tzm-la.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.tzm.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.uk.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.uz.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.vn.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.zh-CN.js" />
+    <Content Include="assets\js\vendor\datepicker\locales\bootstrap-datetimepicker.zh-TW.js" />
+    <Content Include="assets\js\vendor\easypiechart\jquery.easypiechart.js" />
+    <Content Include="assets\js\vendor\easypiechart\jquery.easypiechart.min.js" />
+    <Content Include="assets\js\vendor\flipclock\css\flipclock.css" />
+    <Content Include="assets\js\vendor\flipclock\flipclock.js" />
+    <Content Include="assets\js\vendor\flipclock\flipclock.min.js" />
+    <Content Include="assets\js\vendor\flot\excanvas.js" />
+    <Content Include="assets\js\vendor\flot\excanvas.min.js" />
+    <Content Include="assets\js\vendor\flot\jquery.colorhelpers.js" />
+    <Content Include="assets\js\vendor\flot\jquery.colorhelpers.min.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.animator.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.animator.min.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.canvas.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.canvas.min.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.categories.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.categories.min.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.crosshair.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.crosshair.min.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.errorbars.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.errorbars.min.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.fillbetween.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.fillbetween.min.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.image.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.image.min.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.min.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.navigate.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.navigate.min.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.orderBars.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.pie.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.pie.min.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.resize.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.resize.min.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.selection.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.selection.min.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.stack.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.stack.min.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.symbol.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.symbol.min.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.threshold.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.threshold.min.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.time.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.time.min.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.tooltip.js" />
+    <Content Include="assets\js\vendor\flot\jquery.flot.tooltip.min.js" />
+    <Content Include="assets\js\vendor\fullcalendar\fullcalendar.css" />
+    <Content Include="assets\js\vendor\fullcalendar\fullcalendar.js" />
+    <Content Include="assets\js\vendor\fullcalendar\fullcalendar.min.js" />
+    <Content Include="assets\js\vendor\fullcalendar\fullcalendar.print.css" />
+    <Content Include="assets\js\vendor\fullcalendar\gcal.js" />
+    <Content Include="assets\js\vendor\fullcalendar\jquery-ui-1.10.4.custom.js" />
+    <Content Include="assets\js\vendor\fullcalendar\jquery-ui-1.10.4.custom.min.js" />
+    <Content Include="assets\js\vendor\gmaps\jquery.ui.map.extensions.js" />
+    <Content Include="assets\js\vendor\gmaps\jquery.ui.map.full.min.js" />
+    <Content Include="assets\js\vendor\gmaps\jquery.ui.map.js" />
+    <Content Include="assets\js\vendor\gmaps\jquery.ui.map.microformat.js" />
+    <Content Include="assets\js\vendor\gmaps\jquery.ui.map.microformat.min.js" />
+    <Content Include="assets\js\vendor\gmaps\jquery.ui.map.services.js" />
+    <Content Include="assets\js\vendor\gmaps\jquery.ui.map.services.min.js" />
+    <Content Include="assets\js\vendor\gmaps\markerclusterer.min.js" />
+    <Content Include="assets\js\vendor\graphtable\jquery.graphTable-0.3.js" />
+    <Content Include="assets\js\vendor\jgrowl\css\jquery.jgrowl.min.css" />
+    <Content Include="assets\js\vendor\jgrowl\jquery.jgrowl.js" />
+    <Content Include="assets\js\vendor\jgrowl\jquery.jgrowl.min.js" />
+    <Content Include="assets\js\vendor\jquery-file-upload\cors\postmessage.html" />
+    <Content Include="assets\js\vendor\jquery-file-upload\cors\result.html" />
+    <Content Include="assets\js\vendor\jquery-file-upload\css\jquery.fileupload-noscript.css" />
+    <Content Include="assets\js\vendor\jquery-file-upload\css\jquery.fileupload-ui-noscript.css" />
+    <Content Include="assets\js\vendor\jquery-file-upload\css\jquery.fileupload-ui.css" />
+    <Content Include="assets\js\vendor\jquery-file-upload\css\jquery.fileupload.css" />
+    <Content Include="assets\js\vendor\jquery-file-upload\fileupload-main.js" />
+    <Content Include="assets\js\vendor\jquery-file-upload\img\loading.gif" />
+    <Content Include="assets\js\vendor\jquery-file-upload\img\progressbar.gif" />
+    <Content Include="assets\js\vendor\jquery-file-upload\jquery.fileupload-audio.js" />
+    <Content Include="assets\js\vendor\jquery-file-upload\jquery.fileupload-image.js" />
+    <Content Include="assets\js\vendor\jquery-file-upload\jquery.fileupload-process.js" />
+    <Content Include="assets\js\vendor\jquery-file-upload\jquery.fileupload-ui.js" />
+    <Content Include="assets\js\vendor\jquery-file-upload\jquery.fileupload-validate.js" />
+    <Content Include="assets\js\vendor\jquery-file-upload\jquery.fileupload-video.js" />
+    <Content Include="assets\js\vendor\jquery-file-upload\jquery.fileupload.js" />
+    <Content Include="assets\js\vendor\jquery-file-upload\jquery.iframe-transport.js" />
+    <Content Include="assets\js\vendor\jquery-file-upload\server\gae-go\static\favicon.ico" />
+    <Content Include="assets\js\vendor\jquery-file-upload\server\gae-go\static\robots.txt" />
+    <Content Include="assets\js\vendor\jquery-file-upload\server\gae-python\static\favicon.ico" />
+    <Content Include="assets\js\vendor\jquery-file-upload\server\gae-python\static\robots.txt" />
+    <Content Include="assets\js\vendor\jquery-file-upload\server\node\server.js" />
+    <Content Include="assets\js\vendor\jquery-file-upload\vendor\jquery.ui.widget.js" />
+    <Content Include="assets\js\vendor\jquery-ui\css\ui-lightness\images\animated-overlay.gif" />
+    <Content Include="assets\js\vendor\jquery-ui\css\ui-lightness\images\ui-bg_diagonals-thick_18_b81900_40x40.png" />
+    <Content Include="assets\js\vendor\jquery-ui\css\ui-lightness\images\ui-bg_diagonals-thick_20_666666_40x40.png" />
+    <Content Include="assets\js\vendor\jquery-ui\css\ui-lightness\images\ui-bg_flat_10_000000_40x100.png" />
+    <Content Include="assets\js\vendor\jquery-ui\css\ui-lightness\images\ui-bg_glass_100_f6f6f6_1x400.png" />
+    <Content Include="assets\js\vendor\jquery-ui\css\ui-lightness\images\ui-bg_glass_100_fdf5ce_1x400.png" />
+    <Content Include="assets\js\vendor\jquery-ui\css\ui-lightness\images\ui-bg_glass_65_ffffff_1x400.png" />
+    <Content Include="assets\js\vendor\jquery-ui\css\ui-lightness\images\ui-bg_gloss-wave_35_f6a828_500x100.png" />
+    <Content Include="assets\js\vendor\jquery-ui\css\ui-lightness\images\ui-bg_highlight-soft_100_eeeeee_1x100.png" />
+    <Content Include="assets\js\vendor\jquery-ui\css\ui-lightness\images\ui-bg_highlight-soft_75_ffe45c_1x100.png" />
+    <Content Include="assets\js\vendor\jquery-ui\css\ui-lightness\images\ui-icons_222222_256x240.png" />
+    <Content Include="assets\js\vendor\jquery-ui\css\ui-lightness\images\ui-icons_228ef1_256x240.png" />
+    <Content Include="assets\js\vendor\jquery-ui\css\ui-lightness\images\ui-icons_ef8c08_256x240.png" />
+    <Content Include="assets\js\vendor\jquery-ui\css\ui-lightness\images\ui-icons_ffd27a_256x240.png" />
+    <Content Include="assets\js\vendor\jquery-ui\css\ui-lightness\images\ui-icons_ffffff_256x240.png" />
+    <Content Include="assets\js\vendor\jquery-ui\css\ui-lightness\jquery-ui-1.10.4.custom.css" />
+    <Content Include="assets\js\vendor\jquery-ui\css\ui-lightness\jquery-ui-1.10.4.custom.min.css" />
+    <Content Include="assets\js\vendor\jquery-ui\jquery-ui-1.10.4.custom.js" />
+    <Content Include="assets\js\vendor\jquery-ui\jquery-ui-1.10.4.custom.min.js" />
+    <Content Include="assets\js\vendor\justgage\justgage.js" />
+    <Content Include="assets\js\vendor\jvectormaps\addons\gdp-data.js" />
+    <Content Include="assets\js\vendor\jvectormaps\addons\jquery-jvectormap-de-merc-en.js" />
+    <Content Include="assets\js\vendor\jvectormaps\addons\jquery-jvectormap-es-merc-en.js" />
+    <Content Include="assets\js\vendor\jvectormaps\addons\jquery-jvectormap-fr-merc-en.js" />
+    <Content Include="assets\js\vendor\jvectormaps\addons\jquery-jvectormap-us-aea-en.js" />
+    <Content Include="assets\js\vendor\jvectormaps\addons\jquery-jvectormap-us-lcc-en.js" />
+    <Content Include="assets\js\vendor\jvectormaps\addons\jquery-jvectormap-world-mill-en.js" />
+    <Content Include="assets\js\vendor\jvectormaps\addons\mall-map.js" />
+    <Content Include="assets\js\vendor\jvectormaps\css\jquery-jvectormap-1.2.2.css" />
+    <Content Include="assets\js\vendor\jvectormaps\jquery-jvectormap-1.2.2.min.js" />
+    <Content Include="assets\js\vendor\mmenu\css\addons\jquery.mmenu.counters.css" />
+    <Content Include="assets\js\vendor\mmenu\css\addons\jquery.mmenu.dragopen.css" />
+    <Content Include="assets\js\vendor\mmenu\css\addons\jquery.mmenu.header.css" />
+    <Content Include="assets\js\vendor\mmenu\css\addons\jquery.mmenu.labels.css" />
+    <Content Include="assets\js\vendor\mmenu\css\addons\jquery.mmenu.searchfield.css" />
+    <Content Include="assets\js\vendor\mmenu\css\extensions\jquery.mmenu.effects.css" />
+    <Content Include="assets\js\vendor\mmenu\css\extensions\jquery.mmenu.fullscreen.css" />
+    <Content Include="assets\js\vendor\mmenu\css\extensions\jquery.mmenu.ie8.css" />
+    <Content Include="assets\js\vendor\mmenu\css\extensions\jquery.mmenu.positioning.css" />
+    <Content Include="assets\js\vendor\mmenu\css\extensions\jquery.mmenu.themes.css" />
+    <Content Include="assets\js\vendor\mmenu\css\extensions\jquery.mmenu.widescreen.css" />
+    <Content Include="assets\js\vendor\mmenu\css\jquery.mmenu.all.css" />
+    <Content Include="assets\js\vendor\mmenu\css\jquery.mmenu.css" />
+    <Content Include="assets\js\vendor\mmenu\js\addons\jquery.mmenu.counters.js" />
+    <Content Include="assets\js\vendor\mmenu\js\addons\jquery.mmenu.counters.min.js" />
+    <Content Include="assets\js\vendor\mmenu\js\addons\jquery.mmenu.dragopen.js" />
+    <Content Include="assets\js\vendor\mmenu\js\addons\jquery.mmenu.dragopen.min.js" />
+    <Content Include="assets\js\vendor\mmenu\js\addons\jquery.mmenu.header.js" />
+    <Content Include="assets\js\vendor\mmenu\js\addons\jquery.mmenu.header.min.js" />
+    <Content Include="assets\js\vendor\mmenu\js\addons\jquery.mmenu.labels.js" />
+    <Content Include="assets\js\vendor\mmenu\js\addons\jquery.mmenu.labels.min.js" />
+    <Content Include="assets\js\vendor\mmenu\js\addons\jquery.mmenu.searchfield.js" />
+    <Content Include="assets\js\vendor\mmenu\js\addons\jquery.mmenu.searchfield.min.js" />
+    <Content Include="assets\js\vendor\mmenu\js\jquery.mmenu.js" />
+    <Content Include="assets\js\vendor\mmenu\js\jquery.mmenu.min.all.js" />
+    <Content Include="assets\js\vendor\mmenu\js\jquery.mmenu.min.js" />
+    <Content Include="assets\js\vendor\modals\classie.js" />
+    <Content Include="assets\js\vendor\modals\css-filters-polyfill.js" />
+    <Content Include="assets\js\vendor\modals\cssParser.js" />
+    <Content Include="assets\js\vendor\modals\css\component.css" />
+    <Content Include="assets\js\vendor\modals\modalEffects.js" />
+    <Content Include="assets\js\vendor\modernizr\modernizr.min.js" />
+    <Content Include="assets\js\vendor\momentjs\moment-with-langs.js" />
+    <Content Include="assets\js\vendor\momentjs\moment-with-langs.min.js" />
+    <Content Include="assets\js\vendor\momentjs\moment.min.js" />
+    <Content Include="assets\js\vendor\morris\css\morris.css" />
+    <Content Include="assets\js\vendor\morris\morris.js" />
+    <Content Include="assets\js\vendor\morris\morris.min.js" />
+    <Content Include="assets\js\vendor\nestable\css\style.css" />
+    <Content Include="assets\js\vendor\nestable\jquery.nestable.js" />
+    <Content Include="assets\js\vendor\nicescroll\jquery.nicescroll.js" />
+    <Content Include="assets\js\vendor\nicescroll\jquery.nicescroll.min.js" />
+    <Content Include="assets\js\vendor\no-ui-slider\css\jquery.nouislider.min.css" />
+    <Content Include="assets\js\vendor\no-ui-slider\jquery.nouislider.js" />
+    <Content Include="assets\js\vendor\no-ui-slider\jquery.nouislider.min.js" />
+    <Content Include="assets\js\vendor\owl-carousel\css\owl.carousel.css" />
+    <Content Include="assets\js\vendor\owl-carousel\css\owl.theme.css" />
+    <Content Include="assets\js\vendor\owl-carousel\owl.carousel.js" />
+    <Content Include="assets\js\vendor\owl-carousel\owl.carousel.min.js" />
+    <Content Include="assets\js\vendor\parsley\parsley.min.js" />
+    <Content Include="assets\js\vendor\rickshaw\css\rickshaw.min.css" />
+    <Content Include="assets\js\vendor\rickshaw\d3.v2.js" />
+    <Content Include="assets\js\vendor\rickshaw\raphael-min.js" />
+    <Content Include="assets\js\vendor\rickshaw\rickshaw.min.js" />
+    <Content Include="assets\js\vendor\skycons\skycons.js" />
+    <Content Include="assets\js\vendor\sparkline\jquery.sparkline.js" />
+    <Content Include="assets\js\vendor\sparkline\jquery.sparkline.min.js" />
+    <Content Include="assets\js\vendor\summernote\css\summernote-bs2.css" />
+    <Content Include="assets\js\vendor\summernote\css\summernote-bs3.css" />
+    <Content Include="assets\js\vendor\summernote\css\summernote.css" />
+    <Content Include="assets\js\vendor\summernote\summernote.js" />
+    <Content Include="assets\js\vendor\summernote\summernote.min.js" />
+    <Content Include="assets\js\vendor\superbox\css\style.css" />
+    <Content Include="assets\js\vendor\superbox\img\close.gif" />
+    <Content Include="assets\js\vendor\superbox\img\logo.png" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-1.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-10.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-11.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-12.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-13.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-14.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-15.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-16.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-17.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-18.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-19.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-2.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-20.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-21.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-22.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-23.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-24.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-3.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-4.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-5.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-6.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-7.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-8.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-full-9.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-1.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-10.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-11.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-12.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-13.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-14.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-15.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-16.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-17.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-18.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-19.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-2.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-20.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-21.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-22.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-23.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-24.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-3.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-4.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-5.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-6.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-7.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-8.jpg" />
+    <Content Include="assets\js\vendor\superbox\img\superbox\superbox-thumb-9.jpg" />
+    <Content Include="assets\js\vendor\superbox\superbox.js" />
+    <Content Include="assets\js\vendor\superbox\superbox.min.js" />
+    <Content Include="assets\js\vendor\tabdrop\bootstrap-tabdrop.min.js" />
+    <Content Include="assets\js\vendor\tabdrop\css\tabdrop.css" />
+    <Content Include="assets\js\vendor\touch-punch\jquery.ui.touch-punch.js" />
+    <Content Include="assets\js\vendor\touch-punch\jquery.ui.touch-punch.min.js" />
+    <Content Include="assets\js\vendor\typeahead\css\typeahead.js-bootstrap.css" />
+    <Content Include="assets\js\vendor\typeahead\typeahead.js" />
+    <Content Include="assets\js\vendor\typeahead\typeahead.min.js" />
+    <Content Include="assets\js\vendor\videobackground\css\jquery.videobackground.css" />
+    <Content Include="assets\js\vendor\videobackground\jquery.videobackground.js" />
+    <Content Include="assets\js\vendor\wizard\jquery.bootstrap.wizard.js" />
+    <Content Include="assets\js\vendor\wizard\jquery.bootstrap.wizard.min.js" />
+    <Content Include="assets\signaturepad\assets\flashcanvas.js" />
+    <Content Include="assets\signaturepad\assets\flashcanvas.swf" />
+    <Content Include="assets\signaturepad\assets\journal.svg" />
+    <Content Include="assets\signaturepad\assets\jquery.signaturepad.css" />
+    <Content Include="assets\signaturepad\assets\json2.min.js" />
+    <Content Include="assets\signaturepad\assets\pen.cur" />
+    <Content Include="assets\signaturepad\examples\accept-multiple-signatures.html" />
+    <Content Include="assets\signaturepad\examples\accept-signature.html" />
+    <Content Include="assets\signaturepad\examples\full-window.html" />
+    <Content Include="assets\signaturepad\examples\regenerate-signature.html" />
+    <Content Include="assets\signaturepad\examples\require-drawn-signature.html" />
+    <Content Include="assets\signaturepad\examples\sample-signature-output.js" />
+    <Content Include="assets\signaturepad\jquery.signaturepad.js" />
+    <Content Include="assets\signaturepad\jquery.signaturepad.min.js" />
+    <Content Include="assets\signaturepad\LICENSE.txt" />
+    <Content Include="css\Landing.css" />
+    <Content Include="frontpage\assets\css\css\ajax-loader.gif" />
+    <Content Include="frontpage\assets\css\css\lightbox.css" />
+    <Content Include="frontpage\assets\css\css\lightbox.min.css" />
+    <Content Include="frontpage\assets\css\css\slick-theme.css" />
+    <Content Include="frontpage\assets\css\css\slick.css" />
+    <Content Include="frontpage\assets\css\images\close.png" />
+    <Content Include="frontpage\assets\css\images\loading.gif" />
+    <Content Include="frontpage\assets\css\images\next.png" />
+    <Content Include="frontpage\assets\css\images\prev.png" />
+    <Content Include="frontpage\assets\css\minimal.css" />
+    <Content Include="frontpage\assets\css\minimal.min.css" />
+    <Content Include="frontpage\assets\css\vendor\animate\animate.css" />
+    <Content Include="frontpage\assets\css\vendor\animate\animate.min.css" />
+    <Content Include="frontpage\assets\css\vendor\bootstrap-checkbox.css" />
+    <Content Include="frontpage\assets\css\vendor\bootstrap\bootstrap-theme.css" />
+    <Content Include="frontpage\assets\css\vendor\bootstrap\bootstrap-theme.min.css" />
+    <Content Include="frontpage\assets\css\vendor\bootstrap\bootstrap.css" />
+    <Content Include="frontpage\assets\css\vendor\bootstrap\bootstrap.min.css" />
+    <Content Include="frontpage\assets\css\vendor\ribbons\3d-corner-ribbons.css" />
+    <Content Include="frontpage\assets\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="frontpage\assets\images\backgrounds\1.jpg" />
+    <Content Include="frontpage\assets\images\backgrounds\2.jpg" />
+    <Content Include="frontpage\assets\images\backgrounds\3.jpg" />
+    <Content Include="frontpage\assets\images\backgrounds\4.jpg" />
+    <Content Include="frontpage\assets\images\backgrounds\5.jpg" />
+    <Content Include="frontpage\assets\images\backgrounds\6.jpg" />
+    <Content Include="frontpage\assets\images\backgrounds\thumbs\1.jpg" />
+    <Content Include="frontpage\assets\images\backgrounds\thumbs\2.jpg" />
+    <Content Include="frontpage\assets\images\backgrounds\thumbs\3.jpg" />
+    <Content Include="frontpage\assets\images\backgrounds\thumbs\4.jpg" />
+    <Content Include="frontpage\assets\images\backgrounds\thumbs\5.jpg" />
+    <Content Include="frontpage\assets\images\backgrounds\thumbs\6.jpg" />
+    <Content Include="frontpage\assets\images\banner-freetrial.jpg" />
+    <Content Include="frontpage\assets\images\banner-home%402x.jpg" />
+    <Content Include="frontpage\assets\images\banner-home.jpg" />
+    <Content Include="frontpage\assets\images\clients\3docean.png" />
+    <Content Include="frontpage\assets\images\clients\activeden.png" />
+    <Content Include="frontpage\assets\images\clients\audiojungle.png" />
+    <Content Include="frontpage\assets\images\clients\codecanyon.png" />
+    <Content Include="frontpage\assets\images\clients\graphicriver.png" />
+    <Content Include="frontpage\assets\images\clients\photodune.png" />
+    <Content Include="frontpage\assets\images\clients\random-avatar1.jpg" />
+    <Content Include="frontpage\assets\images\clients\random-avatar2.jpg" />
+    <Content Include="frontpage\assets\images\clients\random-avatar3.jpg" />
+    <Content Include="frontpage\assets\images\clients\random-avatar4.jpg" />
+    <Content Include="frontpage\assets\images\clients\random-avatar5.jpg" />
+    <Content Include="frontpage\assets\images\clients\random-avatar6.jpg" />
+    <Content Include="frontpage\assets\images\clients\random-avatar7.jpg" />
+    <Content Include="frontpage\assets\images\clients\random-avatar8.jpg" />
+    <Content Include="frontpage\assets\images\clients\themeforest.png" />
+    <Content Include="frontpage\assets\images\clients\tutorials.png" />
+    <Content Include="frontpage\assets\images\clients\videohive.png" />
+    <Content Include="frontpage\assets\images\divider-icon.png" />
+    <Content Include="frontpage\assets\images\dummy.jpg" />
+    <Content Include="frontpage\assets\images\favicon.ico" />
+    <Content Include="frontpage\assets\images\gallery\1.jpg" />
+    <Content Include="frontpage\assets\images\gallery\10.jpg" />
+    <Content Include="frontpage\assets\images\gallery\11.jpg" />
+    <Content Include="frontpage\assets\images\gallery\12.jpg" />
+    <Content Include="frontpage\assets\images\gallery\13.jpg" />
+    <Content Include="frontpage\assets\images\gallery\14.jpg" />
+    <Content Include="frontpage\assets\images\gallery\15.jpg" />
+    <Content Include="frontpage\assets\images\gallery\16.jpg" />
+    <Content Include="frontpage\assets\images\gallery\17.jpg" />
+    <Content Include="frontpage\assets\images\gallery\18.jpg" />
+    <Content Include="frontpage\assets\images\gallery\19.jpg" />
+    <Content Include="frontpage\assets\images\gallery\2.jpg" />
+    <Content Include="frontpage\assets\images\gallery\20.jpg" />
+    <Content Include="frontpage\assets\images\gallery\3.jpg" />
+    <Content Include="frontpage\assets\images\gallery\4.jpg" />
+    <Content Include="frontpage\assets\images\gallery\5.jpg" />
+    <Content Include="frontpage\assets\images\gallery\6.jpg" />
+    <Content Include="frontpage\assets\images\gallery\7.jpg" />
+    <Content Include="frontpage\assets\images\gallery\8.jpg" />
+    <Content Include="frontpage\assets\images\gallery\9.jpg" />
+    <Content Include="frontpage\assets\images\icon-feature-customisable.png" />
+    <Content Include="frontpage\assets\images\icon-feature-livesupport.png" />
+    <Content Include="frontpage\assets\images\icon-feature-PAT.png" />
+    <Content Include="frontpage\assets\images\icon-feature-updates.png" />
+    <Content Include="frontpage\assets\images\loader.gif" />
+    <Content Include="frontpage\assets\images\logo-sbsolution%402x.png" />
+    <Content Include="frontpage\assets\images\logo-sbsolution.png" />
+    <Content Include="frontpage\assets\images\logo.PNG" />
+    <Content Include="frontpage\assets\images\minimal-logo.png" />
+    <Content Include="frontpage\assets\images\mockup.png" />
+    <Content Include="frontpage\assets\images\noise.png" />
+    <Content Include="frontpage\assets\images\pricing.jpg" />
+    <Content Include="frontpage\assets\images\projects\minimal.jpg" />
+    <Content Include="frontpage\assets\images\projects\minoral.jpg" />
+    <Content Include="frontpage\assets\images\projects\thekamarel.jpg" />
+    <Content Include="frontpage\assets\images\projects\thumbs\minimal.jpg" />
+    <Content Include="frontpage\assets\images\projects\thumbs\minoral.jpg" />
+    <Content Include="frontpage\assets\images\projects\thumbs\thekamarel.jpg" />
+    <Content Include="frontpage\assets\images\section-bg-1.jpg" />
+    <Content Include="frontpage\assets\images\section-bg-2.jpg" />
+    <Content Include="frontpage\assets\images\separator.png" />
+    <Content Include="frontpage\assets\images\slide.png" />
+    <Content Include="frontpage\assets\images\slider\1.png" />
+    <Content Include="frontpage\assets\images\slider\2.png" />
+    <Content Include="frontpage\assets\images\slider\3.png" />
+    <Content Include="frontpage\assets\images\subpage-title-bg.jpg" />
+    <Content Include="frontpage\assets\js\minimal.js" />
+    <Content Include="frontpage\assets\js\minimal.min.js" />
+    <Content Include="frontpage\assets\js\vendor\appear\jquery.appear.js" />
+    <Content Include="frontpage\assets\js\vendor\bootstrap\bootstrap.js" />
+    <Content Include="frontpage\assets\js\vendor\bootstrap\bootstrap.min.js" />
+    <Content Include="frontpage\assets\js\vendor\jflickrfeed\colorbox\colorbox.css" />
+    <Content Include="frontpage\assets\js\vendor\jflickrfeed\colorbox\images\controls.png" />
+    <Content Include="frontpage\assets\js\vendor\jflickrfeed\colorbox\images\loading.gif" />
+    <Content Include="frontpage\assets\js\vendor\jflickrfeed\colorbox\jquery.colorbox-min.js" />
+    <Content Include="frontpage\assets\js\vendor\jflickrfeed\cycle\jquery.cycle.all.min.js" />
+    <Content Include="frontpage\assets\js\vendor\jflickrfeed\example.html" />
+    <Content Include="frontpage\assets\js\vendor\jflickrfeed\jflickrfeed.js" />
+    <Content Include="frontpage\assets\js\vendor\jflickrfeed\jflickrfeed.min.js" />
+    <Content Include="frontpage\assets\js\vendor\jflickrfeed\setup.js" />
+    <Content Include="frontpage\assets\js\vendor\jflickrfeed\style.css" />
+    <Content Include="frontpage\assets\js\vendor\mixitup\jquery.mixitup.js" />
+    <Content Include="frontpage\assets\js\vendor\modernizr-2.6.2-respond-1.1.0.min.js" />
+    <Content Include="frontpage\assets\js\vendor\nivo-lightbox\css\nivo-lightbox.css" />
+    <Content Include="frontpage\assets\js\vendor\nivo-lightbox\css\themes\default\close%402x.png" />
+    <Content Include="frontpage\assets\js\vendor\nivo-lightbox\css\themes\default\close.png" />
+    <Content Include="frontpage\assets\js\vendor\nivo-lightbox\css\themes\default\default.css" />
+    <Content Include="frontpage\assets\js\vendor\nivo-lightbox\css\themes\default\loading%402x.gif" />
+    <Content Include="frontpage\assets\js\vendor\nivo-lightbox\css\themes\default\loading.gif" />
+    <Content Include="frontpage\assets\js\vendor\nivo-lightbox\css\themes\default\next%402x.png" />
+    <Content Include="frontpage\assets\js\vendor\nivo-lightbox\css\themes\default\next.png" />
+    <Content Include="frontpage\assets\js\vendor\nivo-lightbox\css\themes\default\prev%402x.png" />
+    <Content Include="frontpage\assets\js\vendor\nivo-lightbox\css\themes\default\prev.png" />
+    <Content Include="frontpage\assets\js\vendor\nivo-lightbox\nivo-lightbox.js" />
+    <Content Include="frontpage\assets\js\vendor\nivo-lightbox\nivo-lightbox.min.js" />
+    <Content Include="frontpage\assets\js\vendor\owl-carousel\css\AjaxLoader.gif" />
+    <Content Include="frontpage\assets\js\vendor\owl-carousel\css\grabbing.png" />
+    <Content Include="frontpage\assets\js\vendor\owl-carousel\css\owl.carousel.css" />
+    <Content Include="frontpage\assets\js\vendor\owl-carousel\css\owl.theme.css" />
+    <Content Include="frontpage\assets\js\vendor\owl-carousel\css\owl.transitions.css" />
+    <Content Include="frontpage\assets\js\vendor\owl-carousel\owl.carousel.js" />
+    <Content Include="frontpage\assets\js\vendor\owl-carousel\owl.carousel.min.js" />
+    <Content Include="frontpage\assets\js\vendor\parallax\jquery.parallax-1.1.3.js" />
+    <Content Include="frontpage\assets\js\vendor\skrollr\skrollr.js" />
+    <Content Include="frontpage\assets\js\vendor\skrollr\skrollr.min.js" />
+    <Content Include="frontpage\assets\js\vendor\text-rotator\css\simpletextrotator.css" />
+    <Content Include="frontpage\assets\js\vendor\text-rotator\jquery.simple-text-rotator.js" />
+    <Content Include="frontpage\assets\js\vendor\tweet-js\css\jquery.tweet.css" />
+    <Content Include="frontpage\assets\js\vendor\tweet-js\jquery.tweet.js" />
+    <Content Include="frontpage\assets\js\vendor\tweet-js\jquery.tweet.min.js" />
+    <Content Include="frontpage\assets\js\vendor\vticker\jquery.vticker.min.js" />
+    <Content Include="Images\admin.png" />
+    <Content Include="Images\authentication.png" />
+    <Content Include="Images\avatar.jpg" />
+    <Content Include="Images\avatar1.jpg" />
+    <Content Include="Images\barcode-icon.png" />
+    <Content Include="Images\bootstrap-colorpicker\alpha-horizontal.png" />
+    <Content Include="Images\bootstrap-colorpicker\alpha.png" />
+    <Content Include="Images\bootstrap-colorpicker\hue-horizontal.png" />
+    <Content Include="Images\bootstrap-colorpicker\hue.png" />
+    <Content Include="Images\bootstrap-colorpicker\saturation.png" />
+    <Content Include="Images\checked.png" />
+    <Content Include="Images\crm.png" />
+    <Content Include="Images\dashboard.png" />
+    <Content Include="Images\employee.png" />
+    <Content Include="Images\expense.png" />
+    <Content Include="Images\gallery.png" />
+    <Content Include="Images\inventory.png" />
+    <Content Include="Images\LandingPage\apply-leave%402.png" />
+    <Content Include="Images\LandingPage\apply-leave.png" />
+    <Content Include="Images\LandingPage\country-formula%402.png" />
+    <Content Include="Images\LandingPage\country-formula.png" />
+    <Content Include="Images\LandingPage\create-department%402.png" />
+    <Content Include="Images\LandingPage\create-department.png" />
+    <Content Include="Images\LandingPage\Create-employee-records%402.png" />
+    <Content Include="Images\LandingPage\Create-employee-records.png" />
+    <Content Include="Images\LandingPage\expense%402.png" />
+    <Content Include="Images\LandingPage\expense.png" />
+    <Content Include="Images\LandingPage\maternity-leave%402.png" />
+    <Content Include="Images\LandingPage\maternity-leave.png" />
+    <Content Include="Images\LandingPage\pat-cpf%402.png" />
+    <Content Include="Images\LandingPage\pat-cpf.png" />
+    <Content Include="Images\LandingPage\pat-iras%402.png" />
+    <Content Include="Images\LandingPage\pat-iras.png" />
+    <Content Include="Images\LandingPage\user-guide%402.png" />
+    <Content Include="Images\LandingPage\user-guide.png" />
+    <Content Include="Images\leave.png" />
+    <Content Include="Images\loader.gif" />
+    <Content Include="Images\logo.PNG" />
+    <Content Include="Images\payroll.png" />
+    <Content Include="Images\pos.png" />
+    <Content Include="Images\product.png" />
+    <Content Include="Images\quotation.png" />
+    <Content Include="Images\recruitment.png" />
+    <Content Include="Images\sales.png" />
+    <Content Include="Images\sbslogo.png" />
+    <Content Include="Images\sign.PNG" />
+    <Content Include="Images\time.png" />
+    <Content Include="Images\unchecked.png" />
+    <Content Include="Images\unnamed.jpg" />
+    <Content Include="Payroll\CPF_E_Submission\0ymfbzws.wnp.TXT" />
+    <Content Include="Payroll\CPF_E_Submission\2m1qnrtu.000.TXT" />
+    <Content Include="Payroll\CPF_E_Submission\c5zinihs.4uo.TXT" />
+    <Content Include="Payroll\CPF_E_Submission\d1rpl3d5.vu5.TXT" />
+    <Content Include="Payroll\CPF_E_Submission\euydkv54.xav.TXT" />
+    <Content Include="Payroll\CPF_E_Submission\hae24kw0.bch.TXT" />
+    <Content Include="Payroll\CPF_E_Submission\hla4jmb4.ntx.TXT" />
+    <Content Include="Payroll\CPF_E_Submission\kxfchlut.lif.TXT" />
+    <Content Include="Payroll\CPF_E_Submission\nxoxli3p.nxd.TXT" />
+    <Content Include="Payroll\CPF_E_Submission\qesollw0.bjp.TXT" />
+    <Content Include="Payroll\CPF_E_Submission\tnv04c2m.b4k.TXT" />
+    <Content Include="Payroll\CPF_E_Submission\wldw5jvt.tar.TXT" />
+    <Content Include="Payroll\CPF_E_Submission\yotr4w0f.qr0.TXT" />
+    <Content Include="favicon.ico" />
+    <Content Include="Global.asax" />
+    <Content Include="Payroll\CPF_E_Submission\2drdtghu.rbr.undefined" />
+    <Content Include="Payroll\CPF_E_Submission\2mchsuvf.dk0.undefined" />
+    <Content Include="Payroll\CPF_E_Submission\a55wncxr.l5u.DTL" />
+    <Content Include="Payroll\CPF_E_Submission\adla3rfl.q0e.DTL" />
+    <Content Include="Payroll\CPF_E_Submission\ban3drly.lpj.DAT" />
+    <Content Include="Payroll\CPF_E_Submission\fpnwv1jp.ql1.DAT" />
+    <Content Include="Payroll\CPF_E_Submission\o32o53wn.d5v.DAT" />
+    <Content Include="Payroll\CPF_E_Submission\sykgxs20.1w4.DTL" />
+    <Content Include="Payroll\CPF_E_Submission\tj0zrnu2.30c.DAT" />
+    <Content Include="Payroll\CPF_E_Submission\zhyphcwl.mp0.undefined" />
+    <Content Include="Fonts\THSarabunNew Bold.ttf" />
+    <Content Include="Fonts\THSarabunNew BoldItalic.ttf" />
+    <Content Include="Fonts\THSarabunNew Italic.ttf" />
+    <Content Include="Fonts\THSarabunNew.ttf" />
+    <Content Include="assets\ckeditor\CHANGES.md" />
+    <Content Include="assets\ckeditor\LICENSE.md" />
+    <Content Include="assets\ckeditor\plugins\scayt\LICENSE.md" />
+    <Content Include="assets\ckeditor\plugins\scayt\README.md" />
+    <Content Include="assets\ckeditor\plugins\wsc\LICENSE.md" />
+    <Content Include="assets\ckeditor\plugins\wsc\README.md" />
+    <Content Include="assets\ckeditor\README.md" />
+    <Content Include="assets\ckeditor\samples\assets\posteddata.php" />
+    <Content Include="assets\ckeditor\samples\plugins\htmlwriter\assets\outputforflash\outputforflash.fla" />
+    <Content Include="assets\ckeditor\samples\sample_posteddata.php" />
+    <Content Include="assets\ckeditor\skins\moono\readme.md" />
+    <Content Include="assets\css\scss\bourbon\addons\_button.scss" />
+    <Content Include="assets\css\scss\bourbon\addons\_clearfix.scss" />
+    <Content Include="assets\css\scss\bourbon\addons\_font-family.scss" />
+    <Content Include="assets\css\scss\bourbon\addons\_hide-text.scss" />
+    <Content Include="assets\css\scss\bourbon\addons\_html5-input-types.scss" />
+    <Content Include="assets\css\scss\bourbon\addons\_position.scss" />
+    <Content Include="assets\css\scss\bourbon\addons\_prefixer.scss" />
+    <Content Include="assets\css\scss\bourbon\addons\_retina-image.scss" />
+    <Content Include="assets\css\scss\bourbon\addons\_size.scss" />
+    <Content Include="assets\css\scss\bourbon\addons\_timing-functions.scss" />
+    <Content Include="assets\css\scss\bourbon\addons\_triangle.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_animation.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_appearance.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_backface-visibility.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_background-image.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_background.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_border-image.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_border-radius.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_box-sizing.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_columns.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_flex-box.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_font-face.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_hidpi-media-query.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_image-rendering.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_inline-block.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_keyframes.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_linear-gradient.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_perspective.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_placeholder.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_radial-gradient.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_transform.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_transition.scss" />
+    <Content Include="assets\css\scss\bourbon\css3\_user-select.scss" />
+    <Content Include="assets\css\scss\bourbon\functions\_compact.scss" />
+    <Content Include="assets\css\scss\bourbon\functions\_flex-grid.scss" />
+    <Content Include="assets\css\scss\bourbon\functions\_grid-width.scss" />
+    <Content Include="assets\css\scss\bourbon\functions\_linear-gradient.scss" />
+    <Content Include="assets\css\scss\bourbon\functions\_modular-scale.scss" />
+    <Content Include="assets\css\scss\bourbon\functions\_px-to-em.scss" />
+    <Content Include="assets\css\scss\bourbon\functions\_radial-gradient.scss" />
+    <Content Include="assets\css\scss\bourbon\functions\_tint-shade.scss" />
+    <Content Include="assets\css\scss\bourbon\functions\_transition-property-name.scss" />
+    <Content Include="assets\css\scss\bourbon\helpers\_deprecated-webkit-gradient.scss" />
+    <Content Include="assets\css\scss\bourbon\helpers\_gradient-positions-parser.scss" />
+    <Content Include="assets\css\scss\bourbon\helpers\_linear-positions-parser.scss" />
+    <Content Include="assets\css\scss\bourbon\helpers\_radial-arg-parser.scss" />
+    <Content Include="assets\css\scss\bourbon\helpers\_radial-positions-parser.scss" />
+    <Content Include="assets\css\scss\bourbon\helpers\_render-gradients.scss" />
+    <Content Include="assets\css\scss\bourbon\helpers\_shape-size-stripper.scss" />
+    <Content Include="assets\css\scss\bourbon\_bourbon-deprecated-upcoming.scss" />
+    <Content Include="assets\css\scss\bourbon\_bourbon.scss" />
+    <Content Include="assets\css\scss\components\_calendar.scss" />
+    <Content Include="assets\css\scss\components\_chat.scss" />
+    <Content Include="assets\css\scss\components\_colors.scss" />
+    <Content Include="assets\css\scss\components\_datatables.scss" />
+    <Content Include="assets\css\scss\components\_example-pages.scss" />
+    <Content Include="assets\css\scss\components\_file-upload.scss" />
+    <Content Include="assets\css\scss\components\_gallery.scss" />
+    <Content Include="assets\css\scss\components\_invoice.scss" />
+    <Content Include="assets\css\scss\components\_mail.scss" />
+    <Content Include="assets\css\scss\components\_nestable.scss" />
+    <Content Include="assets\css\scss\components\_owl-carousel.scss" />
+    <Content Include="assets\css\scss\components\_profile.scss" />
+    <Content Include="assets\css\scss\components\_responsive.scss" />
+    <Content Include="assets\css\scss\components\_summernote.scss" />
+    <Content Include="assets\css\scss\components\_tasks.scss" />
+    <Content Include="assets\css\scss\components\_timeline.scss" />
+    <Content Include="assets\css\scss\inc\_colors.scss" />
+    <Content Include="assets\css\scss\inc\_mixins.scss" />
+    <Content Include="assets\css\scss\inc\_variables.scss" />
+    <Content Include="assets\css\scss\minimal.scss" />
+    <Content Include="assets\css\vendor\bootstrap\bootstrap-theme.css.map" />
+    <Content Include="assets\css\vendor\bootstrap\bootstrap.css.map" />
+    <Content Include="assets\css\vendor\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="assets\css\vendor\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="assets\css\vendor\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="assets\font-awesome\fonts\fontawesome-webfont.eot" />
+    <Content Include="assets\font-awesome\fonts\fontawesome-webfont.ttf" />
+    <Content Include="assets\font-awesome\fonts\fontawesome-webfont.woff" />
+    <Content Include="assets\font-awesome\fonts\fontawesome-webfont.woff2" />
+    <Content Include="assets\font-awesome\fonts\FontAwesome.otf" />
+    <Content Include="assets\font-awesome\less\animated.less" />
+    <Content Include="assets\font-awesome\less\bordered-pulled.less" />
+    <Content Include="assets\font-awesome\less\core.less" />
+    <Content Include="assets\font-awesome\less\fixed-width.less" />
+    <Content Include="assets\font-awesome\less\font-awesome.less" />
+    <Content Include="assets\font-awesome\less\icons.less" />
+    <Content Include="assets\font-awesome\less\larger.less" />
+    <Content Include="assets\font-awesome\less\list.less" />
+    <Content Include="assets\font-awesome\less\mixins.less" />
+    <Content Include="assets\font-awesome\less\path.less" />
+    <Content Include="assets\font-awesome\less\rotated-flipped.less" />
+    <Content Include="assets\font-awesome\less\stacked.less" />
+    <Content Include="assets\font-awesome\less\variables.less" />
+    <Content Include="assets\font-awesome\scss\font-awesome.scss" />
+    <Content Include="assets\font-awesome\scss\_animated.scss" />
+    <Content Include="assets\font-awesome\scss\_bordered-pulled.scss" />
+    <Content Include="assets\font-awesome\scss\_core.scss" />
+    <Content Include="assets\font-awesome\scss\_fixed-width.scss" />
+    <Content Include="assets\font-awesome\scss\_icons.scss" />
+    <Content Include="assets\font-awesome\scss\_larger.scss" />
+    <Content Include="assets\font-awesome\scss\_list.scss" />
+    <Content Include="assets\font-awesome\scss\_mixins.scss" />
+    <Content Include="assets\font-awesome\scss\_path.scss" />
+    <Content Include="assets\font-awesome\scss\_rotated-flipped.scss" />
+    <Content Include="assets\font-awesome\scss\_stacked.scss" />
+    <Content Include="assets\font-awesome\scss\_variables.scss" />
+    <Content Include="assets\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="assets\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="assets\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="assets\fullcalendar\datepicker\datepicker\less\datepicker.less" />
+    <Content Include="assets\js\vendor\datatables\images\datatables\Sorting icons.psd" />
+    <Content Include="assets\js\vendor\datatables\tabletools\as3\lib\AlivePDF.swc" />
+    <Content Include="assets\js\vendor\datatables\tabletools\as3\ZeroClipboard.as" />
+    <Content Include="assets\js\vendor\datatables\tabletools\as3\ZeroClipboardPdf.as" />
+    <Content Include="assets\js\vendor\gmaps\json\demo.json" />
+    <Content Include="assets\js\vendor\jquery-file-upload\server\gae-go\app.yaml" />
+    <Content Include="assets\js\vendor\jquery-file-upload\server\gae-go\app\main.go" />
+    <Content Include="assets\js\vendor\jquery-file-upload\server\gae-python\app.yaml" />
+    <Content Include="assets\js\vendor\jquery-file-upload\server\gae-python\main.py" />
+    <Content Include="assets\js\vendor\jquery-file-upload\server\node\.gitignore" />
+    <Content Include="assets\js\vendor\jquery-file-upload\server\node\package.json" />
+    <Content Include="assets\js\vendor\jquery-file-upload\server\node\public\files\.gitignore" />
+    <Content Include="assets\js\vendor\jquery-file-upload\server\node\public\files\thumbnail\.gitignore" />
+    <Content Include="assets\js\vendor\jquery-file-upload\server\node\tmp\.gitignore" />
+    <Content Include="assets\js\vendor\jquery-file-upload\server\php\files\.gitignore" />
+    <Content Include="assets\js\vendor\jquery-file-upload\server\php\files\.htaccess" />
+    <Content Include="assets\js\vendor\jquery-file-upload\server\php\index.php" />
+    <Content Include="assets\js\vendor\jquery-file-upload\server\php\UploadHandler.php" />
+    <Content Include="assets\js\vendor\jvectormaps\json\france-elections.json" />
+    <Content Include="assets\js\vendor\jvectormaps\json\us-unemployment.json" />
+    <Content Include="assets\js\vendor\mmenu\scss\addons\jquery.mmenu.counters.scss" />
+    <Content Include="assets\js\vendor\mmenu\scss\addons\jquery.mmenu.dragopen.scss" />
+    <Content Include="assets\js\vendor\mmenu\scss\addons\jquery.mmenu.header.scss" />
+    <Content Include="assets\js\vendor\mmenu\scss\addons\jquery.mmenu.labels.scss" />
+    <Content Include="assets\js\vendor\mmenu\scss\addons\jquery.mmenu.searchfield.scss" />
+    <Content Include="assets\js\vendor\mmenu\scss\extensions\jquery.mmenu.effects.scss" />
+    <Content Include="assets\js\vendor\mmenu\scss\extensions\jquery.mmenu.fullscreen.scss" />
+    <Content Include="assets\js\vendor\mmenu\scss\extensions\jquery.mmenu.ie8.scss" />
+    <Content Include="assets\js\vendor\mmenu\scss\extensions\jquery.mmenu.positioning.scss" />
+    <Content Include="assets\js\vendor\mmenu\scss\extensions\jquery.mmenu.themes.scss" />
+    <Content Include="assets\js\vendor\mmenu\scss\extensions\jquery.mmenu.widescreen.scss" />
+    <Content Include="assets\js\vendor\mmenu\scss\inc\_arrows.scss" />
+    <Content Include="assets\js\vendor\mmenu\scss\inc\_colors.scss" />
+    <Content Include="assets\js\vendor\mmenu\scss\inc\_sizing.scss" />
+    <Content Include="assets\js\vendor\mmenu\scss\inc\_variables.scss" />
+    <Content Include="assets\js\vendor\mmenu\scss\jquery.mmenu.all.scss" />
+    <Content Include="assets\js\vendor\mmenu\scss\jquery.mmenu.scss" />
+    <Content Include="assets\signaturepad\.editorconfig" />
+    <Content Include="assets\signaturepad\.gitignore" />
+    <Content Include="assets\signaturepad\.jshintrc" />
+    <Content Include="assets\signaturepad\assets\journal.eot" />
+    <Content Include="assets\signaturepad\assets\journal.ttf" />
+    <Content Include="assets\signaturepad\assets\journal.woff" />
+    <Content Include="assets\signaturepad\CHANGELOG.md" />
+    <Content Include="assets\signaturepad\Gruntfile.coffee" />
+    <Content Include="assets\signaturepad\package.json" />
+    <Content Include="assets\signaturepad\pen.psd" />
+    <Content Include="assets\signaturepad\README.md" />
+    <Content Include="frontpage\assets\css\minimal.min.css.map" />
+    <Content Include="frontpage\assets\css\scss\bourbon\addons\_button.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\addons\_clearfix.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\addons\_font-family.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\addons\_hide-text.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\addons\_html5-input-types.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\addons\_position.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\addons\_prefixer.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\addons\_retina-image.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\addons\_size.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\addons\_timing-functions.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\addons\_triangle.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_animation.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_appearance.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_backface-visibility.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_background-image.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_background.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_border-image.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_border-radius.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_box-sizing.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_columns.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_flex-box.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_font-face.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_hidpi-media-query.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_image-rendering.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_inline-block.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_keyframes.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_linear-gradient.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_perspective.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_placeholder.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_radial-gradient.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_transform.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_transition.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\css3\_user-select.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\functions\_compact.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\functions\_flex-grid.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\functions\_grid-width.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\functions\_linear-gradient.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\functions\_modular-scale.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\functions\_px-to-em.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\functions\_radial-gradient.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\functions\_tint-shade.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\functions\_transition-property-name.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\helpers\_deprecated-webkit-gradient.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\helpers\_gradient-positions-parser.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\helpers\_linear-positions-parser.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\helpers\_radial-arg-parser.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\helpers\_radial-positions-parser.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\helpers\_render-gradients.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\helpers\_shape-size-stripper.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\_bourbon-deprecated-upcoming.scss" />
+    <Content Include="frontpage\assets\css\scss\bourbon\_bourbon.scss" />
+    <Content Include="frontpage\assets\css\scss\inc\_colors.scss" />
+    <Content Include="frontpage\assets\css\scss\inc\_mixins.scss" />
+    <Content Include="frontpage\assets\css\scss\inc\_variables.scss" />
+    <Content Include="frontpage\assets\css\scss\minimal.scss" />
+    <Content Include="frontpage\assets\css\vendor\bootstrap\bootstrap-theme.css.map" />
+    <Content Include="frontpage\assets\css\vendor\bootstrap\bootstrap.css.map" />
+    <Content Include="frontpage\assets\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="frontpage\assets\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="frontpage\assets\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="frontpage\assets\js\vendor\tweet-js\02a914dad85d48d393701deedc3bf638.json" />
+    <Content Include="frontpage\assets\js\vendor\tweet-js\41ae3b9f0b4a661d4b7480f773d8e46a.json" />
+    <Content Include="frontpage\assets\js\vendor\tweet-js\bd050bd04ac22145102943a594cf98fa.json" />
+    <Content Include="frontpage\assets\js\vendor\tweet-js\index.php" />
+    <Content Include="frontpage\assets\js\vendor\tweet-js\lib\tmhOAuth.php" />
+    <Content Include="frontpage\assets\js\vendor\tweet-js\lib\tmhUtilities.php" />
+    <Content Include="frontpage\assets\css\css\fonts\slick.ttf" />
+    <Content Include="frontpage\assets\css\css\fonts\slick.woff" />
+    <None Include="Properties\PublishProfiles\HR.pubxml" />
+    <Content Include="Scripts\app-control.js" />
+    <Content Include="Scripts\app-validate.js" />
+    <Content Include="Scripts\bootstrap-select\dist\css\bootstrap-select.css" />
+    <Content Include="Scripts\bootstrap-select\dist\css\bootstrap-select.min.css" />
+    <Content Include="Scripts\bootstrap-select\dist\js\bootstrap-select.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\bootstrap-select.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-bg_BG.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-bg_BG.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-cs_CZ.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-cs_CZ.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-da_DK.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-da_DK.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-de_DE.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-de_DE.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-en_US.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-en_US.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-es_CL.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-es_CL.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-eu.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-eu.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-fa_IR.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-fa_IR.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-fr_FR.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-fr_FR.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-hu_HU.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-hu_HU.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-it_IT.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-it_IT.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-ko_KR.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-ko_KR.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-nl_NL.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-nl_NL.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-pl_PL.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-pl_PL.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-pt_BR.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-pt_BR.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-pt_PT.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-pt_PT.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-ro_RO.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-ro_RO.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-ru_RU.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-ru_RU.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-sk_SK.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-sk_SK.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-sl_SI.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-sl_SI.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-sv_SE.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-sv_SE.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-tr_TR.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-tr_TR.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-ua_UA.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-ua_UA.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-zh_CN.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-zh_CN.min.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-zh_TW.js" />
+    <Content Include="Scripts\bootstrap-select\dist\js\i18n\defaults-zh_TW.min.js" />
+    <Content Include="Scripts\bootstrap-select\js\bootstrap-select.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-bg_BG.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-cs_CZ.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-da_DK.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-de_DE.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-en_US.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-es_CL.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-eu.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-fa_IR.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-fr_FR.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-hu_HU.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-it_IT.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-ko_KR.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-nl_NL.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-pl_PL.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-pt_BR.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-pt_PT.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-ro_RO.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-ru_RU.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-sk_SK.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-sl_SI.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-sv_SE.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-tr_TR.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-ua_UA.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-zh_CN.js" />
+    <Content Include="Scripts\bootstrap-select\js\i18n\defaults-zh_TW.js" />
+    <Content Include="Scripts\bootstrap-tagsinput\src\bootstrap-tagsinput-angular.js" />
+    <Content Include="Scripts\bootstrap-tagsinput\src\bootstrap-tagsinput.css" />
+    <Content Include="Scripts\bootstrap-tagsinput\src\bootstrap-tagsinput.js" />
+    <Content Include="Scripts\bootstrap-tour-0.11.0\css\bootstrap-tour-standalone.css" />
+    <Content Include="Scripts\bootstrap-tour-0.11.0\css\bootstrap-tour-standalone.min.css" />
+    <Content Include="Scripts\bootstrap-tour-0.11.0\css\bootstrap-tour.css" />
+    <Content Include="Scripts\bootstrap-tour-0.11.0\css\bootstrap-tour.min.css" />
+    <Content Include="Scripts\bootstrap-tour-0.11.0\js\bootstrap-tour-standalone.js" />
+    <Content Include="Scripts\bootstrap-tour-0.11.0\js\bootstrap-tour-standalone.min.js" />
+    <Content Include="Scripts\bootstrap-tour-0.11.0\js\bootstrap-tour.js" />
+    <Content Include="Scripts\bootstrap-tour-0.11.0\js\bootstrap-tour.min.js" />
+    <Content Include="Scripts\bootstrap.js" />
+    <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="Scripts\html2canvas.js" />
+    <Content Include="Scripts\html2canvas.svg.js" />
+    <None Include="Scripts\jquery-1.10.2.intellisense.js" />
+    <Content Include="Scripts\jquery-1.10.2.js" />
+    <Content Include="Scripts\jquery-1.10.2.min.js" />
+    <None Include="Scripts\jquery-2.1.4.intellisense.js" />
+    <Content Include="Scripts\jquery-2.1.4.js" />
+    <Content Include="Scripts\jquery-2.1.4.min.js" />
+    <Content Include="Scripts\jquery-barcode.js" />
+    <Content Include="Scripts\jquery-barcode.min.js" />
+    <Content Include="Scripts\jquery-file-upload\css\demo-ie8.css" />
+    <Content Include="Scripts\jquery-file-upload\css\demo.css" />
+    <Content Include="Scripts\jquery-file-upload\css\jquery.fileupload-noscript.css" />
+    <Content Include="Scripts\jquery-file-upload\css\jquery.fileupload-ui-noscript.css" />
+    <Content Include="Scripts\jquery-file-upload\css\jquery.fileupload-ui.css" />
+    <Content Include="Scripts\jquery-file-upload\css\jquery.fileupload.css" />
+    <Content Include="Scripts\jquery-file-upload\css\style.css" />
+    <Content Include="Scripts\jquery-file-upload\js\app.js" />
+    <Content Include="Scripts\jquery-file-upload\js\cors\jquery.postmessage-transport.js" />
+    <Content Include="Scripts\jquery-file-upload\js\cors\jquery.xdr-transport.js" />
+    <Content Include="Scripts\jquery-file-upload\js\jquery.fileupload-angular.js" />
+    <Content Include="Scripts\jquery-file-upload\js\jquery.fileupload-audio.js" />
+    <Content Include="Scripts\jquery-file-upload\js\jquery.fileupload-image.js" />
+    <Content Include="Scripts\jquery-file-upload\js\jquery.fileupload-jquery-ui.js" />
+    <Content Include="Scripts\jquery-file-upload\js\jquery.fileupload-process.js" />
+    <Content Include="Scripts\jquery-file-upload\js\jquery.fileupload-ui.js" />
+    <Content Include="Scripts\jquery-file-upload\js\jquery.fileupload-validate.js" />
+    <Content Include="Scripts\jquery-file-upload\js\jquery.fileupload-video.js" />
+    <Content Include="Scripts\jquery-file-upload\js\jquery.fileupload.js" />
+    <Content Include="Scripts\jquery-file-upload\js\jquery.iframe-transport.js" />
+    <Content Include="Scripts\jquery-file-upload\js\main.js" />
+    <Content Include="Scripts\jquery-file-upload\js\vendor\jquery.ui.widget.js" />
+    <Content Include="Scripts\jquery-ui-1.10.3.js" />
+    <Content Include="Scripts\jquery-ui-1.10.3.min.js" />
+    <Content Include="Scripts\jquery-ui-1.11.4.js" />
+    <Content Include="Scripts\jquery-ui-1.11.4.min.js" />
+    <Content Include="Scripts\jquery.tmpl.min.js" />
+    <None Include="Scripts\jquery.validate-vsdoc.js" />
+    <Content Include="Scripts\jquery.validate.js" />
+    <Content Include="Scripts\jquery.validate.min.js" />
+    <Content Include="Scripts\jquery.validate.unobtrusive.js" />
+    <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="Scripts\lightbox\lightbox-plus-jquery.js" />
+    <Content Include="Scripts\lightbox\lightbox-plus-jquery.min.js" />
+    <Content Include="Scripts\lightbox\lightbox.js" />
+    <Content Include="Scripts\lightbox\lightbox.min.js" />
+    <Content Include="Scripts\modernizr-2.6.2.js" />
+    <Content Include="Scripts\modernizr-2.8.3.js" />
+    <Content Include="Scripts\respond.js" />
+    <Content Include="Scripts\respond.matchmedia.addListener.js" />
+    <Content Include="Scripts\respond.matchmedia.addListener.min.js" />
+    <Content Include="Scripts\respond.min.js" />
+    <Content Include="Scripts\views\inventory.js" />
+    <Content Include="Scripts\views\productinfo.js" />
+    <Content Include="Scripts\lightbox\lightbox-plus-jquery.min.map" />
+    <Content Include="Scripts\lightbox\lightbox.min.map" />
+    <None Include="Scripts\_references.js" />
+    <Content Include="uploadImages\DSC_0391.jpg" />
+    <Content Include="uploadImages\secondarytile.png" />
+    <Content Include="Views\TsEx\TsEx.cshtml" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Views\Web.config" />
+    <Content Include="Views\_ViewStart.cshtml" />
+    <Content Include="Views\Shared\Error.cshtml" />
+    <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\Account\ErrorPage.cshtml" />
+    <Content Include="Views\Account\Login.cshtml" />
+    <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Employee\EmployeeInfo.cshtml" />
+    <Content Include="Views\Employee\Employee.cshtml" />
+    <Content Include="Views\Configuration\Configuration.cshtml" />
+    <Content Include="Views\Employee\BankInfoRow.cshtml" />
+    <Content Include="Views\Leave\LeaveType.cshtml" />
+    <Content Include="Views\Leave\TeamCalendar.cshtml" />
+    <Content Include="Views\Leave\Application.cshtml" />
+    <Content Include="Views\Leave\Record.cshtml" />
+    <Content Include="Views\Leave\LeaveManagement.cshtml" />
+    <Content Include="Views\Leave\LeaveAdjustment.cshtml" />
+    <Content Include="Views\Expenses\ExpensesType.cshtml" />
+    <Content Include="Views\Expenses\Application.cshtml" />
+    <Content Include="Views\Expenses\Record.cshtml" />
+    <Content Include="Views\Approval\Approval.cshtml" />
+    <Content Include="Views\Expenses\ExpensesManagement.cshtml" />
+    <Content Include="Views\Payroll\CPFFormula.cshtml" />
+    <Content Include="Views\Payroll\Authorization.cshtml" />
+    <Content Include="Views\Payroll\Payroll.cshtml" />
+    <Content Include="Views\Payroll\PayrollInfo.cshtml" />
+    <Content Include="Views\Payroll\_PayrollAllowanceRow.cshtml" />
+    <Content Include="Views\Payroll\SelectedCPFFormula.cshtml" />
+    <Content Include="Views\Payroll\_PayrollOvertimeRow.cshtml" />
+    <Content Include="Views\Payroll\PayrollSlip.cshtml" />
+    <Content Include="Views\Payroll\IR8A.cshtml" />
+    <Content Include="Views\Payroll\IR8APDF2015.cshtml" />
+    <Content Include="Views\Leave\LeaveReport.cshtml" />
+    <Content Include="Views\Expenses\ExpenseReport.cshtml" />
+    <Content Include="Views\Employee\EmployeeReport.cshtml" />
+    <Content Include="Views\Payroll\PayrollReport.cshtml" />
+    <Content Include="Views\Employee\EmployeeProfileActionRow.cshtml" />
+    <Content Include="Views\Leave\LeaveTypeDetailRow.cshtml" />
+    <Content Include="Views\Payroll\DonationFormula.cshtml" />
+    <Content Include="Views\Payroll\SelectedDonationFormula.cshtml" />
+    <Content Include="Views\Payroll\_PayrollDonationRow.cshtml" />
+    <Content Include="Views\Payroll\Configuration.cshtml" />
+    <Content Include="Views\Leave\Configuration.cshtml" />
+    <Content Include="Views\Expenses\Configuration.cshtml" />
+    <Content Include="Views\Expenses\ExpensesTypeDetailRow.cshtml" />
+    <Content Include="Views\Employee\EmployeeEmerContactRow.cshtml" />
+    <Content Include="Views\Employee\EmployeeHistAllowanceRow.cshtml" />
+    <Content Include="Views\Account\ResetPassword.cshtml" />
+    <Content Include="Views\Account\ResetPasswordComplete.cshtml" />
+    <Content Include="Views\Account\MessagePage.cshtml" />
+    <Content Include="Views\Leave\Dashboard.cshtml" />
+    <Content Include="Views\Payroll\ConfigurationMaster.cshtml" />
+    <Content Include="Views\Expenses\ApplicationDetailRow.cshtml" />
+    <Content Include="Views\Approval\ApproverRow.cshtml" />
+    <Content Include="Views\Approval\ReviewerRow.cshtml" />
+    <Content Include="Views\Payroll\AuthorizationPRALRow.cshtml" />
+    <Content Include="Views\Expenses\DashBoard.cshtml" />
+    <Content Include="Views\Payroll\Payslip.cshtml" />
+    <Content Include="Views\Employee\Browse.cshtml" />
+    <Content Include="Views\Employee\ImageViewer.cshtml" />
+    <Content Include="Views\Expenses\ExpensesCategory.cshtml" />
+    <Content Include="Views\Payroll\CPFGenerateFile.cshtml" />
+    <Content Include="Views\Payroll\CPFGenerateConfig.cshtml" />
+    <Content Include="Views\Payroll\CPFGenerateFileDetail.cshtml" />
+    <Content Include="Views\Leave\LeaveTypeChild.cshtml" />
+    <Content Include="Views\Leave\LeaveDefaultNormal.cshtml" />
+    <Content Include="Views\Leave\LeaveDefaultTypeDetailRow.cshtml" />
+    <Content Include="Views\Leave\LeaveDefault.cshtml" />
+    <Content Include="Views\Leave\LeaveDefaultChild.cshtml" />
+    <Content Include="Views\Leave\LeaveTypeExtraRow.cshtml" />
+    <Content Include="Views\Payroll\IR8AGenerateConfig.cshtml" />
+    <Content Include="Views\Payroll\IR8AGenerateFile.cshtml" />
+    <Content Include="Views\Payroll\IR8AGenerateFileDetail.cshtml" />
+    <Content Include="Views\Account\SessionTimeout.cshtml" />
+    <Content Include="Views\Employee\EmployeeAttachmentRow.cshtml" />
+    <Content Include="Views\Employee\_InfoAccess.cshtml" />
+    <Content Include="Views\Employee\_InfoEmployee.cshtml" />
+    <Content Include="Views\Employee\_InfoHistory.cshtml" />
+    <Content Include="Views\Employee\_InfoContacts.cshtml" />
+    <Content Include="Views\Employee\_InfoBank.cshtml" />
+    <Content Include="Views\Employee\_InfoAttach.cshtml" />
+    <Content Include="Views\Employee\_InfoFamilyMe.cshtml" />
+    <Content Include="Views\Employee\_InfoDialog.cshtml" />
+    <Content Include="Views\Employee\_InfoHistoryDetail.cshtml" />
+    <Content Include="Views\Configuration\ExchangeRateInfo.cshtml" />
+    <Content Include="Views\Configuration\ExchangeRateInfoRow.cshtml" />
+    <Content Include="Views\Configuration\ExchangeRateInfoDetailRow.cshtml" />
+    <Content Include="Views\Payroll\IR8A2014.cshtml" />
+    <Content Include="Views\Payroll\IR8A2015.cshtml" />
+    <Content Include="Views\Payroll\IR8APDF2014.cshtml" />
+    <Content Include="Views\Employee\EmployeeImport.cshtml" />
+    <Content Include="Views\Leave\LeaveImport.cshtml" />
+    <Content Include="Views\Expenses\ExpensesImport.cshtml" />
+    <Content Include="Views\Payroll\PayrollImport.cshtml" />
+    <Content Include="Views\Payroll\_NotificationScheduler.cshtml" />
+    <Content Include="Views\Payroll\_PayrollAllowance.cshtml" />
+    <Content Include="Views\Payroll\_PayrollOvertime.cshtml" />
+    <Content Include="Views\Payroll\_PayrollDonation.cshtml" />
+    <Content Include="Views\Payroll\_PayrollLeave.cshtml" />
+    <Content Include="Views\Payroll\_PayrollExpenses.cshtml" />
+    <Content Include="Views\Configuration\_CompanyInfo.cshtml" />
+    <Content Include="Views\Configuration\_Branch.cshtml" />
+    <Content Include="Views\Configuration\_Pattern.cshtml" />
+    <Content Include="Views\Configuration\_Department.cshtml" />
+    <Content Include="Views\Configuration\_Designation.cshtml" />
+    <Content Include="Views\Configuration\_Fiscal.cshtml" />
+    <Content Include="Views\Configuration\_WorkingDays.cshtml" />
+    <Content Include="Views\Configuration\_Exchange.cshtml" />
+    <Content Include="Views\Leave\LeaveReports.cshtml" />
+    <Content Include="Views\Expenses\ExpenseReports.cshtml" />
+    <Content Include="Views\Expenses\_ApplicationDetail.cshtml" />
+    <Content Include="Views\Payroll\IRA8BGenerateFile.cshtml" />
+    <Content Include="Views\Payroll\IRA8BGenerateFileDetail.cshtml" />
+    <Content Include="Views\Payroll\IR8SGenerateFile.cshtml" />
+    <Content Include="Views\Payroll\IR8SGenerateFileDetail.cshtml" />
+    <Content Include="Views\Payroll\IRA8AGenerateFile.cshtml" />
+    <Content Include="Views\Payroll\IRA8AGenerateFileDetail.cshtml" />
+    <Content Include="Views\Shared\_Layout_Landing.cshtml" />
+    <Content Include="Views\Home\Landing.cshtml" />
+    <Content Include="Views\Payroll\Manual_Payslip.cshtml" />
+    <Content Include="Views\Home\_UpgradeStorage.cshtml" />
+    <Content Include="Views\Home\Landing_New.cshtml" />
+    <Content Include="Views\Shared\ExpensesDocPrint.cshtml" />
+    <Content Include="Views\Payroll\IR8A2016.cshtml" />
+    <Content Include="Views\Payroll\IR8APDF2016.cshtml" />
+    <Content Include="Views\TsEx\TsExInfo.cshtml" />
+    <Content Include="Views\TsEx\_ExRow.cshtml" />
+    <Content Include="Views\TsEx\_ExDlg.cshtml" />
+    <Content Include="Views\TsEx\_TsRow.cshtml" />
+    <Content Include="Views\TimeSheet\Application.cshtml" />
+    <Content Include="Views\TimeSheet\Configuration.cshtml" />
+    <Content Include="Views\TimeSheet\Record.cshtml" />
+    <Content Include="Views\TimeSheet\TimeSheetManagement.cshtml" />
+    <Content Include="Views\TimeSheet\TimeSheetTransactionReport.cshtml" />
+    <Content Include="Views\Time\Arrangement.cshtml" />
+    <Content Include="Views\Time\Configuration.cshtml" />
+    <Content Include="Views\Time\DetailTransactionByEmp.cshtml" />
+    <Content Include="Views\Time\SummaryReport.cshtml" />
+    <Content Include="Views\Time\TransactionReport.cshtml" />
+    <Content Include="Views\Time\_ArgDlg.cshtml" />
+    <Content Include="Views\Time\_ConfDevice.cshtml" />
+    <Content Include="Views\Time\_ConfDeviceDlg.cshtml" />
+    <Content Include="Views\Time\_ConfMap.cshtml" />
+    <Content Include="Views\Time\_ConfMapRow.cshtml" />
+    <Content Include="Views\Company\AssignUser.cshtml" />
+    <Content Include="Views\Company\BankDetail.cshtml" />
+    <Content Include="Views\Company\BankDetailList.cshtml" />
+    <Content Include="Views\Company\Branch.cshtml" />
+    <Content Include="Views\Company\BranchList.cshtml" />
+    <Content Include="Views\Company\Company.cshtml" />
+    <Content Include="Views\Company\CompanyInfo.cshtml" />
+    <Content Include="Views\Company\CompanyRegister.cshtml" />
+    <Content Include="Views\Company\PaymentComplete.cshtml" />
+    <Content Include="Views\Company\PaymentError.cshtml" />
+    <Content Include="Views\Customer\Customer.cshtml" />
+    <Content Include="Views\Customer\CustomerInfo.cshtml" />
+    <Content Include="Views\Front\Feature.cshtml" />
+    <Content Include="Views\Front\FreeTrial.cshtml" />
+    <Content Include="Views\Front\Front.cshtml" />
+    <Content Include="Views\Front\Pricing.cshtml" />
+    <Content Include="Views\Front\SetPassword.cshtml" />
+    <Content Include="Views\Front\SetPasswordSuccess.cshtml" />
+    <Content Include="Views\Front\Successful.cshtml" />
+    <Content Include="Views\Front\Support.cshtml" />
+    <Content Include="Views\GlobalLookup\CompanyGlobalLookup.cshtml" />
+    <Content Include="Views\GlobalLookup\CompanyGlobalLookupInfo.cshtml" />
+    <Content Include="Views\GlobalLookup\MasterGlobalLookup.cshtml" />
+    <Content Include="Views\GlobalLookup\MasterGlobalLookupInfo.cshtml" />
+    <Content Include="Views\JobCost\JobCost.cshtml" />
+    <Content Include="Views\JobCost\JobCostInfo.cshtml" />
+    <Content Include="Views\JobCost\JobCostInfoExport.cshtml" />
+    <Content Include="Views\JobCost\_JobCostBudgetRow.cshtml" />
+    <Content Include="Views\JobCost\_JobCostInfoRow.cshtml" />
+    <Content Include="Views\Subscription\BillingReport.cshtml" />
+    <Content Include="Views\Subscription\CompanySignUp.cshtml" />
+    <Content Include="Views\Subscription\DailyUsageReport.cshtml" />
+    <Content Include="Views\Subscription\DetailSignUp.cshtml" />
+    <Content Include="Views\Subscription\ModuleSignUp.cshtml" />
+    <Content Include="Views\Subscription\PaymentComplete.cshtml" />
+    <Content Include="Views\Subscription\PaymentError.cshtml" />
+    <Content Include="Views\Subscription\RegistrationComplete.cshtml" />
+    <Content Include="Views\Subscription\Subscription.cshtml" />
+    <Content Include="Views\Subscription\SubscriptionReport.cshtml" />
+    <Content Include="Views\User\User.cshtml" />
+    <Content Include="Views\User\UserInfo.cshtml" />
+    <Content Include="Views\User\UserReport.cshtml" />
+    <Content Include="Views\System\PageRoleInfo.cshtml" />
+    <Content Include="Views\System\RoleInfoRow.cshtml" />
+    <Content Include="Views\System\SystemConfiguration.cshtml" />
+    <Content Include="Views\System\UserRoleInfo.cshtml" />
+    <Content Include="Scripts\bootstrap-select\dist\css\bootstrap-select.css.map" />
+    <Content Include="Scripts\bootstrap-select\dist\js\bootstrap-select.js.map" />
+    <Content Include="Scripts\bootstrap-select\js\.jshintrc" />
+    <Content Include="Scripts\bootstrap-select\less\bootstrap-select.less" />
+    <Content Include="Scripts\bootstrap-select\less\variables.less" />
+    <Content Include="Scripts\jquery-2.1.4.min.map" />
+    <Content Include="Views\Employee\_InfoUserAccount.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Views\Employee\_InfoUserRole.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Views\Shared\_Layout_Front.cshtml" />
+    <Content Include="Views\TsEx\_TsExInfoNew.cshtml" />
+    <Content Include="Views\TsEx\_TsExInfoMngt.cshtml" />
+    <Content Include="Views\TsEx\_ExDlgMngt.cshtml" />
+    <Content Include="Views\Expenses\TransactionSummary.cshtml" />
+    <Content Include="Views\Shared\_EmailTsExEmp.cshtml" />
+    <Content Include="Views\Shared\_EmalTsExApproval.cshtml" />
+    <Content Include="Views\Payroll\IR8A2017.cshtml" />
+    <Content Include="Views\Payroll\IR8APDF2017.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="App_Data\" />
+    <Folder Include="assets\js\vendor\jquery-file-upload\server\php\files\thumbnail\" />
+    <Folder Include="assets\js\vendor\mmenu\.sass-cache\226386f32b5401963b0cf9af1a8924d1571b221b\" />
+    <Folder Include="assets\js\vendor\mmenu\.sass-cache\3ad528b4ef3a14e5ce5321fb156b569f28f00e8e\" />
+    <Folder Include="assets\js\vendor\mmenu\.sass-cache\726017c259c168958ed0d26b21c24fbf77581542\" />
+    <Folder Include="assets\js\vendor\mmenu\.sass-cache\c05e2efb423e8e22cf85393f83284463d4151618\" />
+    <Folder Include="Views\Alpha7\" />
+    <Folder Include="Views\FileExtensions\" />
+    <Folder Include="Views\WServ\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="packages.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <None Include="Project_Readme.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201401181933373_InitialCreate.resx">
+      <DependentUpon>201401181933373_InitialCreate.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201401181936291_hr_intasp.resx">
+      <DependentUpon>201401181936291_hr_intasp.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CivinTecAccessManager\CivinTecAccessManager.csproj">
+      <Project>{41e72c63-f5ae-4832-a8d2-a1be07795c24}</Project>
+      <Name>CivinTecAccessManager</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SBSModel\SBSModel.csproj">
+      <Project>{4546a10e-59b8-46d1-a323-9908f24bd86b}</Project>
+      <Name>SBSModel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SBSResourceAPI\SBSResourceAPI.csproj">
+      <Project>{79e9badf-1319-422f-bec7-df01e9a25754}</Project>
+      <Name>SBSResourceAPI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SBSWorkFlowAPI\SBSWorkFlowAPI.csproj">
+      <Project>{bd0baa27-d16b-47ec-b0f3-8b2e9644bfde}</Project>
+      <Name>SBSWorkFlowAPI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Time\SBSTimeModel\SBSTimeModel.csproj">
+      <Project>{f68a7f60-94d4-4fd7-b92c-7d33590b8fae}</Project>
+      <Name>SBSTimeModel</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
+  </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>49485</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:59485/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target> -->
+</Project>

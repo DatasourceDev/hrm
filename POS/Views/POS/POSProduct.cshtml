@@ -1,0 +1,735 @@
+﻿@using POS.Common;
+@using POS.Models;
+@using SBSModel.Common;
+@using SBSModel.Models;
+@model  POS.Models.POSViewModel
+@{
+    ViewBag.Title = @Resources.ResourcePOS.POS;
+}
+
+@Scripts.Render("~/notify/scripts")
+<link href="~/Content/notifyjs/notifyjs.css" rel="stylesheet" />
+
+<style type="text/css">
+    #relatedProductsContainer div {
+        margin: 5px;
+    }
+</style>
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnAddProductOther").click(function () {
+            var pName = $('#Product_Name').val();
+            var pQty = $('#Product_Qty').val();
+            var pPrice = $('#Product_Price').val();
+
+            var pCategoryId = 0;
+            var pProductCode = '';
+
+            if ($('#QuickAddProduct').is(':checked')) {
+                pCategoryId = $('#ddlCategoryList').val();
+                pProductCode = $('#Product_Code').val();
+            }
+
+            $('#Product_Name_Err').get(0).setAttribute("class", "field-validation-valid")
+            $('#Product_Qty_Err').get(0).setAttribute("class", "field-validation-valid")
+            $('#Product_Price_Err').get(0).setAttribute("class", "field-validation-valid")
+            if ($('#Product_Name_Err').get(0).childNodes.length > 0) $('#Product_Name_Err').get(0).removeChild($('#Product_Name_Err').get(0).childNodes[0]);
+            if ($('#Product_Qty_Err').get(0).childNodes.length > 0) $('#Product_Qty_Err').get(0).removeChild($('#Product_Qty_Err').get(0).childNodes[0]);
+            if ($('#Product_Price_Err').get(0).childNodes.length > 0) $('#Product_Price_Err').get(0).removeChild($('#Product_Price_Err').get(0).childNodes[0]);
+
+            var valid = true;
+            if (pName == null || pName == "") {
+                $('#Product_Name_Err').get(0).setAttribute("class", "field-validation-error")
+
+                var spanErr = document.createElement("span");
+                spanErr.textContent = "The Product Name field is required.";
+                $('#Product_Name_Err').get(0).appendChild(spanErr);
+
+                valid = false;
+            }
+            else {
+                if (pName.length > 500) {
+                    $('#Product_Name_Err').get(0).setAttribute("class", "field-validation-error")
+
+                    var spanErr = document.createElement("span");
+                    spanErr.textContent = "The field Product Name must be a string or array type with a maximum length of '500'.";
+                    $('#Product_Name_Err').get(0).appendChild(spanErr);
+
+                    valid = false;
+                }
+            }
+            if (pQty == null || pQty == "") {
+                $('#Product_Qty_Err').get(0).setAttribute("class", "field-validation-error")
+
+                var spanErr = document.createElement("span");
+                spanErr.textContent = "The Quatity field is required.";
+                $('#Product_Qty_Err').get(0).appendChild(spanErr);
+
+                valid = false;
+            }
+            else {
+                var qty = parseInt(pQty);
+                if (isNaN(qty) || qty <= 0) {
+                    $('#Product_Qty_Err').get(0).setAttribute("class", "field-validation-error")
+
+                    var spanErr = document.createElement("span");
+                    spanErr.textContent = "The value '" + pQty + "' is not valid for Quatity.";
+                    $('#Product_Qty_Err').get(0).appendChild(spanErr);
+
+                    valid = false;
+                }
+                else {
+                    $('#Product_Qty').val(qty);
+                    pQty = qty;
+                }
+            }
+
+            if (pPrice == null || pPrice == "") {
+                $('#Product_Price_Err').get(0).setAttribute("class", "field-validation-error")
+
+                var spanErr = document.createElement("span");
+                spanErr.textContent = "The Price field is required.";
+                $('#Product_Price_Err').get(0).appendChild(spanErr);
+
+                valid = false;
+            }
+            else {
+                var price = parseFloat(pPrice).toFixed(2);
+                if (isNaN(price) || price <= 0) {
+                    $('#Product_Price_Err').get(0).setAttribute("class", "field-validation-error")
+
+                    var spanErr = document.createElement("span");
+                    spanErr.textContent = "The value '" + pPrice + "' is not valid for Price.";
+                    $('#Product_Price_Err').get(0).appendChild(spanErr);
+
+                    valid = false;
+                }
+                else {
+                    $('#Product_Price').val(price);
+                    pPrice = price;
+                }
+            }
+
+            if (valid) {
+                var rowcount = $('#selProductdataTables > tbody >tr').length;
+                ShowProgress();
+                var data = { pIndex: rowcount, pProductID: -1, pProductName: pName, pQty: pQty, pPrice: pPrice, pProductCode: pProductCode, pProductCategoryId: pCategoryId };
+                $.ajax({
+                    url: '@Url.Action("AddOtherProduct", "POS")',
+                    //Passes the content of an input up
+                    data: data,
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        var str = '<tr id="productRow-' + rowcount + '" class="row-product">';
+                        str = str + data + '</tr>';
+                        $('#selProductdataTables > tbody').append(str);
+
+                        SumAll();
+                        $("#modal-product-other").modal('hide');
+
+                        $('#Product_Name').val('');
+                        $('#Product_Qty').val('1');
+                        $('#Product_Price').val('');
+                        $('#ddlCategoryList').val('');
+                        $('#Product_Code').val('');
+
+                        $('#Product_Name_Err').get(0).setAttribute("class", "field-validation-valid")
+                        $('#Product_Qty_Err').get(0).setAttribute("class", "field-validation-valid")
+                        $('#Product_Price_Err').get(0).setAttribute("class", "field-validation-valid")
+                        if ($('#Product_Name_Err').get(0).childNodes.length > 0) $('#Product_Name_Err').get(0).removeChild($('#Product_Name_Err').get(0).childNodes[0]);
+                        if ($('#Product_Qty_Err').get(0).childNodes.length > 0) $('#Product_Qty_Err').get(0).removeChild($('#Product_Qty_Err').get(0).childNodes[0]);
+                        if ($('#Product_Price_Err').get(0).childNodes.length > 0) $('#Product_Price_Err').get(0).removeChild($('#Product_Price_Err').get(0).childNodes[0]);
+
+                        CloseProgress();
+                    }
+                });
+
+                if (pCategoryId > 0) {
+
+                    if (thisCategoryHavePurchases(pCategoryId)) {
+                        var url = '@Url.Action("customerpurchases", "pos")';
+                        url = url + '?pCategoryId=' + pCategoryId;
+
+                        initNotificationStyle(url);
+                        showNotification('You have customers who purchased items in the same category.');
+            }
+
+                }
+            }
+
+
+        });
+
+        $('#QuickAddProduct').change(function () {
+            if ($(this).is(":checked")) {
+
+                $('#qProductCategory').show();
+                $('#qProductCode').show();
+
+            } else {
+
+                $('#qProductCategory').hide();
+                $('#qProductCode').hide();
+
+            }
+    });
+
+    });
+
+
+
+    function SelectCategory(selIndex, cID) {
+        var allcnt = parseInt('@(Model.productCategory != null ? Model.productCategory.Count : 0)');
+        for (var i = 0; i < allcnt; i++) {
+            if (selIndex == i) {
+                $('#Product_Category_ID').val(cID);
+                $('#Action').val('@POSAction.NewSale');
+                ShowProgress();
+                theForm.action = '@Url.Action("POS", "POS")';
+                theForm.method = 'post';
+                theForm.submit();
+            }
+        }
+
+
+    }
+
+    function SelectTable(no) {
+        $('#Table_No').val(no);
+        var allcnt = parseInt('@(Model.productTable != null ? Model.productTable.No_Of_Table : 0)');
+        for (var i = 0; i < allcnt ; i++) {
+            var li = $('#liTable-' + i).get(0);
+            var a = $('#aTable-' + i).get(0);
+            $('#aTable-' + i).removeClass("active");
+            if (parseInt(no) == i + 1) {
+                $('#aTable-' + i).addClass("active");
+            }
+        }
+    }
+
+    function addNewProduct(productId) {
+        if ($('#Opening_Bill').val() == 'true') {
+            var amount = parseFloat($('#Open_Bill_Amount').val()).toFixed(2);
+            if (!isNaN(amount)) {
+                if ($('#btnAttr') != null) $('#btnAttr').remove();
+                if ($('#modal-attr') != null) $('#modal-attr').remove();
+                var rowcount = $('#selProductdataTables > tbody >tr').length;
+                var data = { pIndex: rowcount, pProductID: productId, pOpenBill: true, pOpenBillAmount: amount };
+                $.ajax({
+                    url: '@Url.Action("AddProduct", "POS")',
+                    //Passes the content of an input up
+                    data: data,
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        var str = '<tr id="productRow-' + rowcount + '" class="row-product" style="cursor: pointer;" >';
+                        str = str + data + '</tr>';
+                        $('#selProductdataTables > tbody').append(str);
+
+                        if ($('#btnAttr').get(0) != null) {
+                            document.getElementById('btnAttr').click();
+                        }
+
+                        $("#btnOpenBill").get(0).style.color = "#666";
+                        $("#btnOpenBill").get(0).style.borderColor = "#666";
+                        $("#iOpenBill").get(0).setAttribute("class", "icon icon-check-empty");
+                        $("#Opening_Bill").val(false);
+                        $('#Open_Bill_Amount').val('');
+
+                        SumAll();
+                        CloseProgress();
+                    }
+                });
+            }
+        }
+        else {
+            if ($('#btnAttr') != null) $('#btnAttr').remove();
+            if ($('#modal-attr') != null) $('#modal-attr').remove();
+            var rowcount = $('#selProductdataTables > tbody >tr').length;
+
+            var data = { pIndex: rowcount, pProductID: productId };
+            $.ajax({
+                url: '@Url.Action("AddProduct", "POS")',
+                //Passes the content of an input up
+                data: data,
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    var str = '<tr id="productRow-' + rowcount + '" class="row-product" style="cursor: pointer;" >';
+                    str = str + data + '</tr>';
+                    $('#selProductdataTables > tbody').append(str);
+                    if ($('#btnAttr').get(0) != null) {
+                        document.getElementById('btnAttr').click();
+                    }
+                    SumAll();
+                    CloseProgress();
+                }
+            });
+
+            //Temporary comment by Gali 13-JAN-2015
+            //getRelatedProducts(productId);
+        }
+    }
+
+    //Temporary comment by Gali 13-JAN-2015
+    @*function getRelatedProducts(productId) {
+        var data = { pProductId: productId };
+        $.ajax({
+            url: '@Url.Action("GetRelatedProducts", "POS")',
+            //Passes the content of an input up
+            data: data,
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                destroyCarousel();
+
+                $('#relatedProductsContainer').empty();
+                $('#relatedProductsContainer').append(data);
+
+                initCarousel();
+
+                CloseProgress();
+            }
+        });
+    };*@
+
+    //Temporary comment by Gali 13-JAN-2015
+    //function initCarousel() {
+    //    $("#relatedProductsContainer").owlCarousel({
+    //        autoPlay: 4000,
+    //        itemsDesktop: [1199, 3],
+    //        itemsDesktopSmall: [979, 3],
+    //        responsive: true,
+    //        items: 4
+    //    });
+    //};
+
+    //Temporary comment by Gali 13-JAN-2015
+    //function destroyCarousel() {
+    //    var owl = $('#relatedProductsContainer');
+    //    owl.owlCarousel();
+    //    owl.data('owlCarousel').destroy();
+    //};
+
+
+    function Round(value, decimals) {
+        return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
+    }
+
+    $(function () {
+        CalHeightProductPanel('#pnlProduct');
+        CalHeightSelProductPanel('#pnlSelProduct');
+    });
+
+    function CalHeightSelProductPanel(id) {
+        var fixheight = 0;
+        //fixheight += 80; // Top bar
+        //fixheight += 20; // Top bar botoom padding
+        //fixheight += 40; // box padding
+        //fixheight += 110; // Top button
+        //fixheight += 10; // padding footer
+
+        //fixheight += 36; // table no
+        //fixheight += 36; // subtotal
+        //fixheight += 84; // bottom button
+        fixheight += 375; // Top bar
+
+        var screenheight = (screen.height - 53);
+        var dynamic = screenheight - fixheight;
+
+        if ($(id).get(0) != null) {
+            $(id).get(0).style.maxHeight = dynamic + 'px';
+            $(id).get(0).style.minHeight = dynamic + 'px';
+            $(id).get(0).style.overflowY = "auto";
+        }
+
+    }
+
+    function CalHeightProductPanel(id) {
+        var fixheight = 0;
+        fixheight += 80; // Top bar
+        fixheight += 20; // Top bar botoom padding
+        fixheight += 40; // box padding
+        fixheight += 55; // Searchbar
+        fixheight += 84; // top button
+        fixheight += 10; // padding footer
+
+        var screenheight = screen.height - 53;
+        var dynamic = screenheight - fixheight;
+
+        if ($(id).get(0) != null) {
+            $(id).get(0).style.maxHeight = dynamic + 'px';
+            $(id).get(0).style.minHeight = dynamic + 'px';
+            $(id).get(0).style.overflowY = "auto";
+        }
+    }
+
+    function thisCategoryHavePurchases(pCategoryId) {
+
+        var haveCustomers = false;
+
+        var pData = { pCategoryId: pCategoryId }
+
+        $.ajax({
+            url: '@Url.Action("GetCustomerPurchases", "POS")',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: pData,
+            async: false
+        }).done(function (data) {
+            if (data.Count > 0) {
+                haveCustomers = true;
+            }
+        }).fail(function (response) {
+            haveCustomers = false;
+        });
+
+        return haveCustomers;
+    };
+
+    function showNotification(message) {
+
+        $.notify({
+            title: message,
+            redirect: 'Check them out!'
+        }, {
+            style: 'foo',
+            autoHide: false,
+            clickToHide: true,
+            position: "left top",
+            showAnimation: "slideDown",
+            showDuration: 700,
+            hideAnimation: "slideUp"
+        });
+    };
+
+    function initNotificationStyle(redirectUrl) {
+        var strConfirmButton = '';
+
+        if (redirectUrl != null) {
+            strConfirmButton += '<button class="yes" data-notify-text="redirect" onclick="redirect(\'' + redirectUrl + '\')"></button>';
+        } else {
+            strConfirmButton += "<button class='yes' data-notify-text='redirect' ></button>";
+    }
+
+        $.notify.addStyle('foo', {
+            html:
+              "<div>" +
+                "<div class='clearfix'>" +
+                  "<div class='title' data-notify-html='title'/>" +
+                  "<div class='buttons'>" +
+                    "<button class='no'>Hide this!</button>" +
+                    strConfirmButton +
+                  "</div>" +
+                "</div>" +
+              "</div>"
+        });
+    };
+
+    function redirect(url) {
+        //$(location).attr('href', url);
+        window.open(url, '_blank');
+    };
+
+</script>
+<div class="main-content" style="color:#fff;">
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="padded">
+                <div class="span12" style="position:relative;">
+
+                    <div class="box span7" style="background: rgba(0,0,0,0.2); top:0; bottom:0;position:relative;">
+                        <div class="control-group " id="pnlSearchProduct">
+                            <div class="span10">
+                                @Html.TextBoxFor(model => model.searchProduct, "{0:dd/mm/yyyy}", new { style = "width:100%" })
+                            </div>
+                            <div class="span2">
+                                <button type="submit" class="btn btn-white" style="width:100%" name="searchAction" value="1"><p><i class="icon icon-search"></i> @Resources.ResourcePOS.Search</p></button>
+                            </div>
+                        </div>
+
+                        <div class="control-group col-md-12">
+
+                            @if (Model.Business_Type == BusinessType.FoodAndBeverage) {
+                                <a data-toggle="modal" href="#modal-table" id="btnTable">
+                                    <div class="btn btn-white btn-large" style="width:20%;"><p>@Resources.ResourcePOS.DisplayTables</p></div>
+                                </a>
+                                <div id="modal-table" class="modal hide fade">
+                                    <div class="modal-body">
+                                        <div class="control-group text-center">
+                                            <label class="control-label" style="font-weight: 600; font-size: 20px; line-height: 40px">Select Table</label>
+                                        </div>
+                                        <div class="control-group text-center">
+                                            <ul class="nav nav-pills">
+                                                @if (Model.productTable != null) {
+                                                    for (var i = 0; i < Model.productTable.No_Of_Table; i++) {
+                                                        var active = "";
+                                                        var table = "";
+                                                        var no = "";
+                                                        if (!string.IsNullOrEmpty(Model.productTable.Prefix)) {
+
+                                                        }
+                                                        if (Model.productTable.No_Of_Table.HasValue) {
+                                                            var len = Model.productTable.No_Of_Table.Value.ToString().Length;
+                                                            no = (i + 1).ToString();
+                                                            table = table + no;
+                                                        }
+                                                        if (Model.Table_No == no) {
+                                                            active = "active";
+                                                        }
+                                                        <li id="liTable-@i" style="width: 125px; height: 80px; ">
+
+                                                            <a id="aTable-@i" href="#" class="@active" data-dismiss="modal" onclick="SelectTable('@no');">
+                                                                <div class="btn btn-white btn-large">
+                                                                    <p>
+                                                                        @table
+                                                                    </p>
+                                                                </div>
+                                                            </a>
+                                                        </li>
+                                                    }
+                                                }
+
+                                            </ul>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            }
+
+                            <a data-toggle="modal" href="#modal-category" id="btnCategory" onclick="return FilterCategory_AllOnclick();"><div class="btn btn-white btn-large" style="width:20%;"><p>@Resources.ResourcePOS.Category</p></div></a>
+                            @{
+                                Html.RenderPartial("POSDlgCategory", Model);
+                            }
+
+
+                            @if (Model.Business_Type == BusinessType.FoodAndBeverage) {
+                                Html.RenderPartial("POSDlgOpenBill", Model);
+                            }
+                        </div>
+
+                        @if (Model.result != null && Model.result.Code != 0) {
+                            if (Model.result.Code < 0) {
+                                <div class="control-group">
+                                    <div class="alert alert-error">
+                                        @UserSession.GetMsg(Model.result.Code, Model.result.Msg, Model.result.Field)
+                                        <br />
+                                    </div>
+                                </div>
+                            } else if (Model.result.Code > 0) {
+                                <div class="control-group">
+                                    <div class="alert alert-success">
+                                        @UserSession.GetMsg(Model.result.Code, Model.result.Msg, Model.result.Field)
+                                        <br />
+                                    </div>
+                                </div>
+                            }
+                        }
+
+                        <div class="control-group text-center">
+                            <div id="pnlProduct">
+                                <ul class="nav nav-pills">
+                                    @if (Model.products != null) {
+                                        int i = 0;
+                                        foreach (var row in Model.products) {
+                                            var img = "";
+                                            if (row.Product_Image != null) {
+                                                var image = row.Product_Image.Where(w => w.Is_Main == true).FirstOrDefault();
+                                                if (image != null && image.Image != null) {
+                                                    var base64 = Convert.ToBase64String(image.Image);
+                                                    img = String.Format("data:image/gif;base64,{0}", base64);
+                                                }
+                                            }
+                                            <li id="liProduct-@i" style="width: 200px;height:210px; text-align: center; display:inline-block;">
+                                                @if (row.Product_ID > 0) {
+                                                    <a style="color: #fff;padding:0;text-align:left;" onclick="addNewProduct('@row.Product_ID');">
+                                                        @if (!string.IsNullOrEmpty(img)) {
+                                                            <div class="product-item-pic" style="background-image: url('@img') ;"></div>
+                                                        } else {
+                                                            <div class="product-item-nopic" style="background-image: url('@Url.Content("~/Images/product.png")');"></div>
+                                                        }
+                                                        <p style="text-align:left;padding:15px;font-size:15px;">@(row.Product_Name)</p>
+                                                        <p style="color:rgba(255,255,255,0.5);padding-left:15px;font-size:15px;bottom:0;position:relative;">@((row.Selling_Price.HasValue ? row.Selling_Price.Value : 0).ToString("n2")) </p>
+                                                    </a>
+                                                } else {
+                                                    <a style="color: #fff; padding: 0; text-align: center; " data-toggle="modal" href="#modal-product-other" id="btnProductOther">
+                                                        <div class="product-item-pic" style="background-image: url('@Url.Content("~/Images/product_add.png")');"></div>
+                                                        @*<span style="text-align:left;padding:15px;font-size:15px;">
+                                                            <img src="~/Images/product_add.png" style="width:140px;height:100px;" />
+                                                        </span>*@
+                                                        <p style="text-align:center;padding:15px;font-size:15px;">Add Other Product</p>
+                                                    </a>
+
+                                                    <div id="modal-product-other" class="modal hide fade">
+                                                        <div class="modal-body">
+                                                            <div class="control-group">
+                                                                <div class="span12">
+                                                                    <div class="control-group">
+                                                                        <span style="font-weight:600;font-size:20px">Other</span>
+                                                                    </div>
+
+                                                                    <div class="control-group" id="qProductCategory" style="display: none;">
+                                                                        <div class="controls">
+                                                                            @Html.Label("Product_Category", "Product Category", new { @class = "control-label", style = "font-size:18px; width: 25%;" })
+                                                                            @Html.DropDownList("ddlCategoryList", new SelectList(Model.CategoryList, "Value", "Text"), new { style="width: 50%;"})
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="control-group" id="qProductCode" style="display: none;">
+                                                                        <div class="controls">
+                                                                            @Html.Label("Product_Code", "Product Code", new { @class = "control-label", style = "font-size:18px; width: 25%;" })
+                                                                            @Html.TextBox("Product_Code", "", new { style = "width:50%;", @class = "bg-white" })
+                                                                            <div class="validation-error">
+                                                                                <span id="Product_Code_Err"></span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="control-group">
+                                                                        <div class="controls">
+                                                                            @Html.Label("Product_Name", "Product Name", new { @class = "control-label", style = "font-size:18px; width: 25%;" })
+                                                                            @Html.TextBox("Product_Name", "", new { style = "width:50%;", @class = "bg-white" })
+
+                                                                            <div class="validation-error">
+                                                                                <span id="Product_Name_Err"></span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="control-group">
+                                                                        <div class="controls">
+                                                                            @Html.Label("Product_Qty", "Qty", new { @class = "control-label", style = "font-size:18px; width: 25%;" })
+                                                                            @Html.TextBox("Product_Qty", "1", new { style = "width:50%;text-align:right; ", @class = "bg-white" })
+                                                                            <div class="validation-error">
+                                                                                <span id="Product_Qty_Err"></span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="control-group">
+                                                                        <div class="controls">
+                                                                            @Html.Label("Product_Price", "Price", new { @class = "control-label", style = "font-size:18px; width: 25%;" })
+                                                                            @Html.TextBox("Product_Price", "", new { style = "width:50%;text-align:right;", @class = "bg-white" })
+                                                                            <div class="validation-error">
+                                                                                <span id="Product_Price_Err"></span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="control-group">
+                                                                        <div class="controls">
+                                                                            @Html.Label("Quick_Add", "Quick Add", new { @class = "control-label", style = "font-size:18px; width: 25%;" })
+                                                                            @Html.CheckBoxFor(m => m.QuickAddProduct, new { onclick = "quickAddChange();" })
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+
+                                                            <div class="control-group ">
+                                                                <a id="btnAddProductOther" href="#">
+                                                                    <div class="btn btn-info btn-large">
+                                                                        <p>Add</p>
+                                                                    </div>
+                                                                </a>
+                                                                <a href="#" data-dismiss="modal">
+                                                                    <div class="btn btn-white btn-large">
+                                                                        <p>
+                                                                            Cancel
+                                                                        </p>
+                                                                    </div>
+                                                                </a>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+
+                                                }
+
+
+
+                                            </li>
+                                                i++;
+                                        }
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    @*Temporary comment by Gali 13-JAN-2015*@
+                    @*<div class="span7 overlay" style="margin-left:0%;" id="rp-container">
+                        <div id="rp-header">Related Products</div>
+                        <div class="owl-carousel" id="relatedProductsContainer">
+                            @{
+                                Html.RenderPartial("POSRelatedProducts", Model);
+                            }
+                        </div>
+                    </div>
+                    @Scripts.Render("~/owl/scripts")
+                    <script type="text/javascript">
+                        $(document).ready(function () {
+                            //Temp Comment By Gali on 14-JAN-2016
+                            //initCarousel();
+
+                            //$("#rp-container").accordion({
+                            //    collapsible: true,
+                            //    active: false
+                            //});
+                        });
+                        </script>*@
+
+                    <div class="box span5" style="background: rgba(0,0,0,0.7); position:relative;">
+                        @{
+                            Html.RenderPartial("POSSelectProduct", Model);
+                        }
+
+
+                        <div class="control-group">
+                            <hr class="divider" />
+                            @if (Model.Business_Type == BusinessType.FoodAndBeverage) {
+                                <div class="row-fluid">
+                                    <div class="span6">
+                                        @Html.LabelFor(m => m.Table_No, new { @class = "display-text-medium" })
+                                    </div>
+                                    <div class="span6 text-right">
+                                        @Html.TextBox("Table_No", Model.Table_No, new { @class = "display-text display-text-amount display-text-medium", Readonly = true })
+                                    </div>
+                                </div>
+                                <hr class="divider" />
+                            }
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    @Html.LabelFor(m => m.Total_Amount, new { @class = "display-text-medium" })
+                                </div>
+                                <div class="span6 text-right">
+                                    @Html.TextBox("Total_Amount", Model.Total_Amount, new { style = "display:none;", Readonly = true })
+                                    @Html.TextBox("Total_Amount_Label", (Model.Total_Amount).ToString("n2"), new { @class = "display-text display-text-amount display-text-medium", Readonly = true })
+                                </div>
+                            </div>
+                            <hr class="divider" />
+                        </div>
+
+
+                        <div class="control-group" style="overflow-x:auto">
+                            <table style="width:99%" class="table-button">
+                                <tr>
+                                    <td>
+                                        @if (string.IsNullOrEmpty(Model.Status)) {
+                                            <a data-toggle="modal" id="btnHoldBill" class="btn btn-white btn-large">
+                                                <p>Hold Bill</p>
+                                            </a>
+                                        } else {
+                                            <a data-toggle="modal" id="btnHoldBill" disabled="disabled" class="btn btn-white btn-large"><p>Hold Bill</p> </a>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a id="btnViewHoldBill" href="@Url.Action("ViewHoldBill", "POS")" class="btn btn-white btn-large"><p>View Hold Bill</p> </a>
+                                    </td>
+                                    <td>
+                                        <a id="btnProceed" data-toggle="modal" class="btn btn-lightblue btn-large"><p>Proceed</p> </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,1749 @@
+﻿@using POS.Common;
+@using POS.Models;
+@using SBSModel.Common;
+@using SBSModel.Models;
+@model  POS.Models.POSViewModel
+@{
+    ViewBag.Title = @Resources.ResourcePOS.POS;
+
+
+}
+
+
+<style type="text/css">
+    .product-item-nopic {
+        /*width: 160px;*/
+        height: 100px;
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        padding: 3px;
+        display: block;
+        background-color: #fff;
+        border-radius: 6px;
+    }
+
+    .product-item-pic {
+        /*width: 160px;*/
+        height: 100px;
+        background-position: center;
+        background-repeat: no-repeat;
+        padding: 3px;
+        display: block;
+        background-size: contain;
+        background-color: #fff;
+        border-radius: 6px;
+    }
+
+    input[type=checkbox] {
+        /* All browsers except webkit*/
+        transform: scale(2);
+        /* Webkit browsers*/
+        -webkit-transform: scale(2);
+    }
+
+    .btn-action {
+        width: 120px;
+        height: 60px;
+        margin-bottom: 4px;
+    }
+
+    .overlay {
+        background-color: #000;
+        background: rgba(3, 3, 3, 0.9);
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        z-index: 10000;
+    }
+
+    #rp-header {
+        text-align: center;
+        background-color: rgb(0, 0, 0);
+        border-bottom: 20px, solid, white;
+        cursor: pointer;
+    }
+</style>
+<style type="text/css">
+    .highlight {
+        background-color: rgba(0,0,0,0.4);
+    }
+
+    .pbtnbar {
+    }
+
+    .pbutton {
+        text-align: center;
+    }
+
+    .pnumber {
+        overflow-x: auto;
+        width: 350px;
+    }
+
+    .table-no-boder tr {
+        border: none;
+    }
+
+        .table-no-boder tr td {
+            border: none;
+        }
+</style>
+
+
+@using (Html.BeginForm("POS", "POS", FormMethod.Post, new { @class = "form-horizontal validatable", role = "form", id = "theForm" })) {
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Product_Category_ID)
+    @Html.HiddenFor(m => m.Action)
+    @Html.HiddenFor(m => m.operation)
+    @Html.HiddenFor(m => m.Pos_Select_Mode)
+    @Html.HiddenFor(m => m.Payment_Type)
+    @Html.HiddenFor(m => m.Card_Type_Name)
+    @Html.HiddenFor(m => m.Discount_Type)
+    @Html.HiddenFor(m => m.Service_Charge_Include)
+    @Html.HiddenFor(m => m.Service_Charge_Rate)
+    @Html.HiddenFor(m => m.Surcharge_Percen)
+    @Html.HiddenFor(m => m.Surcharge_Amount)
+    @Html.HiddenFor(m => m.Surcharge_Include)
+    @Html.HiddenFor(m => m.Surcharge_Master)
+    @Html.HiddenFor(m => m.Surcharge_Visa)
+    @Html.HiddenFor(m => m.Surcharge_AMEX)
+    @Html.HiddenFor(m => m.Surcharge_Diner)
+    @Html.HiddenFor(m => m.Surcharge_JCB)
+
+    @Html.HiddenFor(m => m.Page_Action)
+    @Html.HiddenFor(m => m.Business_Type)
+    @Html.HiddenFor(m => m.Receipt_ID)
+    @Html.HiddenFor(m => m.Status)
+    @Html.HiddenFor(m => m.useGST)
+    @Html.HiddenFor(m => m.valGST)
+
+    //Added by sun 18-08-2015
+    @Html.HiddenFor(m => m.Visa)
+    @Html.HiddenFor(m => m.Master)
+    @Html.HiddenFor(m => m.AMEX)
+    @Html.HiddenFor(m => m.DinersClub)
+    @Html.HiddenFor(m => m.JCB)
+    @Html.HiddenFor(m => m.Company_ID)
+    @Html.HiddenFor(m => m.Currency_Code)
+    <input type="hidden" id="Select_Surcharge_Percen" value="@(Model.Surcharge_Percen.HasValue ? Model.Surcharge_Percen.Value : 0)" />
+
+    <script type="text/javascript">
+        $(function () {
+            if ('@Model.Ch_Category_Di' == 'True') {
+                $('#btnCategory').get(0).click();
+            }
+
+
+            var receiptdata = cleanString('@Model.ReceiptData');
+            if (receiptdata != '') {
+                sendMessage(receiptdata, '@Model.Terminal_IP_Address');
+            }
+
+
+            if ('@Model.Action' == '@POSAction.NewSale') {
+                if ('@Model.Business_Type' == '@BusinessType.FoodAndBeverage') {
+                    $('#dataTables').get(0).style.minHeight = "460px";      //336px
+                    $('#dataTables').get(0).style.maxHeight = "460px";      //336px
+                }
+            }
+            else if ('@Model.Action' == '@POSAction.ProcessPayment') {
+                ChkBackOrder_Onchange();
+
+                if ('@Model.Status' == '@ReceiptStatus.Paid' | '@Model.Status' == '@ReceiptStatus.Void') {
+                    $('#Receipt_No').val('@Model.Receipt_No');
+                    Disable("divReceipt");
+                    $('#btnBack').removeAttr("disabled");
+                }
+                if ('@Model.Status' == '@ReceiptStatus.BackOrder') {
+                    Disable("divSelProduct");
+                }
+
+                Discount_Type_Onclick('@Model.Discount_Type');
+                BindData();
+            }
+
+
+            $("#btnProceed").click(function () {
+                var selcount = 0;
+                var rowcount = $('#selProductdataTables > tbody >tr').length;
+                for (var i = 0; i < rowcount; i++) {
+
+                    if ($('#Product_Rows_' + i + '__Row_Type').val() != '@RowType.DELETE') {
+
+                        selcount += 1;
+                    }
+
+                }
+                if (selcount == 0) {
+                    alert('Please select an item from list.');
+                    return;
+                }
+
+                $('#Action').val('@POSAction.ProcessPayment');
+                ShowProgress();
+                theForm.action = '@Url.Action("POS", "POS")';
+                theForm.method = 'post';
+                theForm.submit();
+            });
+
+            $("#btnHoldBill").click(function () {
+                if ($("#btnHoldBill").attr("disabled") == null) {
+                    HoldBill(5);
+                }
+
+            });
+            $("#btnHoldBillPrint").click(function () {
+                if ($("#btnHoldBillPrint").attr("disabled") == null) {
+                    HoldBill(6);
+                }
+
+            });
+            $("#btnBack").click(function () {
+                $('#Action').val('@POSAction.NewSale');
+                ShowProgress();
+                theForm.action = '@Url.Action("POS", "POS")';
+                theForm.method = 'post';
+                theForm.submit();
+            });
+
+            SumAll();
+
+        });
+
+        function HoldBill(action) {
+            if ('@Model.Action' == '@POSAction.ProcessPayment') {
+                if ('@Model.Status' == '@ReceiptStatus.BackOrder' || '@Model.Status' == '@ReceiptStatus.Paid') {
+                    return;
+                }
+            }
+
+
+            var selcount = 0;
+            var rowcount = $('#selProductdataTables > tbody >tr').length;
+            for (var i = 0; i < rowcount; i++) {
+                if ($('#Product_Rows_' + i + '__Row_Type').val() != '@RowType.DELETE') {
+                    selcount += 1;
+                }
+            }
+            if (selcount == 0) {
+                alert('Please select an item from list.');
+                return;
+            }
+
+            if (action == '@POSAction.HoldBillAndPrintReceipt') {
+
+                var rowcount = $('#selProductdataTables > tbody >tr').length;
+                if (rowcount <= 0) {
+                    alert('Please select an item from list.');
+                    return;
+                }
+            }
+
+            $('#Action').val(action);
+            ShowProgress();
+            theForm.action = '@Url.Action("POS", "POS")';
+            theForm.method = 'post';
+            theForm.submit();
+        }
+
+
+        function SumAll() {
+            var total = 0;
+            var totalqty = 0;
+            var discount = 0;
+            var gst_amt = 0;
+            var svcChargeAmount = 0;
+            var rowcount = $('#selProductdataTables > tbody >tr').length;
+            var gstValue = parseFloat(@Model.valGST);
+            var svcChargeRate = parseFloat(@Model.Service_Charge_Rate);
+
+            for (var i = 0; i < rowcount; i++) {
+                if ($('#Product_Rows_' + i + '__Row_Type').val() != '@RowType.DELETE') {
+                    var price = parseFloat($('input[name="Product_Rows[' + i + '].Price"]').val());
+                    var qty = parseFloat($('input[name="Product_Rows[' + i + '].Qty"]').val());
+                    var pdiscount = parseFloat($('input[name="Product_Rows[' + i + '].Discount"]').val());
+                    if (isNaN(price)) { pdiscount = 0 };
+                    if (isNaN(qty)) { pdiscount = 0 };
+                    if (isNaN(pdiscount)) { pdiscount = 0 };
+                    if (!isNaN(price) && !isNaN(qty)) {
+                        total = total + ((price - pdiscount) * qty);
+                        totalqty = totalqty + qty;
+                    }
+                }
+
+            }
+
+            svcChargeAmount = total * (svcChargeRate / 100);
+            //Added by NayThway on 16-Jun-2015
+            gst_amt = total * (gstValue / (gstValue + 100));
+
+            $('#Total_Qty').val(totalqty);
+            $('#Total_Qty_Label').val(formatNumber(totalqty));
+
+            $('#Total_Amount').val(total);
+            $('#Total_Amount_Label').val(formatCurrency(total));
+
+            $('#Service_Charge_Amount').val(svcChargeAmount);
+            $('#Service_Charge_Amount_Label').val(formatCurrency(svcChargeAmount));
+
+            //Added by NayThway on 30-May-2015
+            $('#Total_GST_Amount').val(gst_amt);
+            $('#Total_GST_Amount_Label').val(formatCurrency(gst_amt));
+
+
+            if ('@Model.Action' == '@POSAction.NewSale') {
+                $('#Net_Amount').val(total + svcChargeAmount - discount);
+                $('#Net_Amount_Label').val(formatCurrency(total + svcChargeAmount - discount));
+            }
+            else if ('@Model.Action' == '@POSAction.ProcessPayment') {
+                BindData();
+            }
+        }
+
+
+
+        function sendMessage(request, printerIP) {
+            var url = 'http://' + printerIP + ':90/StarWebPRNT/SendMessage';
+
+            var trader = new StarWebPrintTrader({ url: url });
+
+            trader.onReceive = function (response) {
+                var msg = '- onReceive -\n\n';
+
+                msg += 'TraderSuccess : [ ' + response.traderSuccess + ' ]\n';
+
+                //      msg += 'TraderCode : [ ' + response.traderCode + ' ]\n';
+
+                msg += 'TraderStatus : [ ' + response.traderStatus + ',\n';
+
+                if (trader.isCoverOpen({ traderStatus: response.traderStatus })) { msg += '\tCoverOpen,\n'; }
+                if (trader.isOffLine({ traderStatus: response.traderStatus })) { msg += '\tOffLine,\n'; }
+                if (trader.isCompulsionSwitchClose({ traderStatus: response.traderStatus })) { msg += '\tCompulsionSwitchClose,\n'; }
+                if (trader.isEtbCommandExecute({ traderStatus: response.traderStatus })) { msg += '\tEtbCommandExecute,\n'; }
+                if (trader.isHighTemperatureStop({ traderStatus: response.traderStatus })) { msg += '\tHighTemperatureStop,\n'; }
+                if (trader.isNonRecoverableError({ traderStatus: response.traderStatus })) { msg += '\tNonRecoverableError,\n'; }
+                if (trader.isAutoCutterError({ traderStatus: response.traderStatus })) { msg += '\tAutoCutterError,\n'; }
+                if (trader.isBlackMarkError({ traderStatus: response.traderStatus })) { msg += '\tBlackMarkError,\n'; }
+                if (trader.isPaperEnd({ traderStatus: response.traderStatus })) { msg += '\tPaperEnd,\n'; }
+                if (trader.isPaperNearEnd({ traderStatus: response.traderStatus })) { msg += '\tPaperNearEnd,\n'; }
+
+                msg += '\tEtbCounter = ' + trader.extractionEtbCounter({ traderStatus: response.traderStatus }).toString() + ' ]\n';
+
+                //      msg += 'Status : [ ' + response.status + ' ]\n';
+                //
+                //      msg += 'ResponseText : [ ' + response.responseText + ' ]\n';
+
+            }
+
+            trader.onError = function (response) {
+                var msg = '- onError -\n\n';
+
+                msg += '\tStatus:' + response.status + '\n';
+
+                msg += '\tResponseText:' + response.responseText;
+
+            }
+
+            trader.sendMessage({ request: request });
+        }
+
+        function cleanString(message) {
+            var msg = message.split('&gt;').join('>').split('&lt;').join('<').split('&quot;').join('"').split('nline;').join('\x0a');
+            return msg;
+        }
+
+    </script>
+
+    if (Model.Action == POSAction.NewSale)
+    {
+        @Html.HiddenFor(m => m.Total_Qty)
+        @Html.HiddenFor(m => m.Net_Amount)
+        @Html.HiddenFor(m => m.Total_GST_Amount)
+        @Html.HiddenFor(m => m.Service_Charge_Amount)
+        @Html.HiddenFor(m => m.Cash_Payment)
+        @Html.HiddenFor(m => m.Visa_Payment)
+        @Html.HiddenFor(m => m.Master_Card_Payment)
+        @Html.HiddenFor(m => m.Diners_Club_Payment)
+        @Html.HiddenFor(m => m.AMEX_Payment)
+        @Html.HiddenFor(m => m.JCB_Payment)
+        @Html.HiddenFor(m => m.Nets_Payment)
+        @Html.HiddenFor(m => m.Discount)
+        @Html.HiddenFor(m => m.Receipt_No)
+        @Html.HiddenFor(m => m.Combine_Payment)
+
+
+        if ((Model.operation == UserSession.RIGHT_C && Model.rights != null && Model.rights.Contains(UserSession.RIGHT_C)) ||
+            (Model.operation == UserSession.RIGHT_U && Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))) {
+            Html.RenderPartial("POSProduct", Model);
+            
+
+
+        }
+
+    }
+    else if (Model.Action == POSAction.ProcessPayment)
+    {
+        <script type="text/javascript">
+
+            function DisplaySurchargeLabel() {
+                var chk = $('#Combine_Payment').get(0);
+                if (chk != null && chk.checked == true) {
+                    var amexPayment = parseFloat($('#AMEX_Payment').val());
+                    var dinersClubPayment = parseFloat($('#Diners_Club_Payment').val());
+                    var jcbPayment = parseFloat($('#JCB_Payment').val());
+                    var masterCardPayment = parseFloat($('#Master_Card_Payment').val());
+                    var visaPayment = parseFloat($('#Visa_Payment').val());
+
+                    if (isNaN(amexPayment)) amexPayment = 0;
+                    if (isNaN(dinersClubPayment)) dinersClubPayment = 0;
+                    if (isNaN(masterCardPayment)) masterCardPayment = 0;
+                    if (isNaN(jcbPayment)) jcbPayment = 0;
+                    if (isNaN(visaPayment)) visaPayment = 0;
+
+                    var display = "";
+                    if (masterCardPayment > 0) {
+                        var surpercen = parseFloat('@(Model.Surcharge_Master.HasValue ? Model.Surcharge_Master.Value : 0)');
+                        display += "Master: " + surpercen + "%, ";
+                    }
+                    if (visaPayment > 0) {
+                        var surpercen = parseFloat('@(Model.Surcharge_Visa.HasValue ? Model.Surcharge_Visa.Value : 0)');
+                        display += "Visa: " + surpercen + "%, ";
+                    }
+                    if (amexPayment > 0) {
+                        var surpercen = parseFloat('@(Model.Surcharge_AMEX.HasValue ? Model.Surcharge_AMEX.Value : 0)');
+                        display += "AMEX: " + surpercen + "%, ";
+                    }
+                    if (dinersClubPayment > 0) {
+                        var surpercen = parseFloat('@(Model.Surcharge_Diner.HasValue ? Model.Surcharge_Diner.Value : 0)');
+                        display += "Diner's Club: " + surpercen + "%, ";
+                    }
+                    if (jcbPayment > 0) {
+                        var surpercen = parseFloat('@(Model.Surcharge_JCB.HasValue ? Model.Surcharge_JCB.Value : 0)');
+                        display += "JCB: " + surpercen + "%, ";
+                    }
+                    if (display.length > 0) {
+                        display = display.substr(0, display.length - 2);
+                        $('#Surcharge_Percen_Label').html('@Resources.ResourcePOS.Surcharge' + " (" + display + ")");
+                    }
+                    else {
+                        $('#Surcharge_Percen_Label').html('@Resources.ResourcePOS.Surcharge');
+                    }
+
+                }
+                else {
+                    var percen = $('#Select_Surcharge_Percen').val();
+                    if (isDecimal(percen) == true)
+                        percen = formatCurrency(percen);
+                    else
+                        percen = formatNumber(percen);
+                    $('#Surcharge_Percen_Label').html('@Resources.ResourcePOS.Surcharge' + " (" + percen + "%)");
+                }
+
+            }
+
+            $(function () {
+                $('#Surcharge_Percen_Label').html('@Resources.ResourcePOS.Surcharge' + " (" + $('#Select_Surcharge_Percen').val() + "%)");
+                DisplaySurchargeLabel();
+
+                $("#btnPrintReceipt").click(function () {
+                    if ('@Model.Status' != '@ReceiptStatus.Paid' && '@Model.Status' != '@ReceiptStatus.Void')
+                        SaveReceipt(3);
+                });
+
+                $("#btnProceedCredit").click(function () {
+                    if ('@Model.Status' != '@ReceiptStatus.Paid' && '@Model.Status' != '@ReceiptStatus.Void')
+                        SaveReceipt(4);
+                });
+
+                $("#btnDiscount").click(function () { Mode_Onchange('@PosPaymentMode.Discount') });
+                $("#btnMember").click(function () { Mode_Onchange('@PosPaymentMode.Member') });
+                $("#btnNets").click(function () { Mode_Onchange('@PosPaymentMode.Nets') });
+                $("#btnMasterCard").click(function () {
+                    $('#Card_Type_Name').val('@CreditCardType.MasterCard');
+                    $('#Select_Surcharge_Percen').val('@(Model.Surcharge_Master.HasValue ? Model.Surcharge_Master.Value : 0)');
+
+                    DisplaySurchargeLabel();
+                    Mode_Onchange('@PosPaymentMode.Credit');
+                });
+                $("#btnVisa").click(function () {
+                    $('#Card_Type_Name').val('@CreditCardType.Visa');
+                    $('#Select_Surcharge_Percen').val('@(Model.Surcharge_Visa.HasValue ? Model.Surcharge_Visa.Value : 0)');
+                    DisplaySurchargeLabel();
+                    Mode_Onchange('@PosPaymentMode.Credit');
+                });
+                $("#btnAMEX").click(function () {
+                    $('#Card_Type_Name').val('@CreditCardType.AMEX');
+                    $('#Select_Surcharge_Percen').val('@(Model.Surcharge_AMEX.HasValue ? Model.Surcharge_AMEX.Value : 0)');
+                    DisplaySurchargeLabel();
+                    Mode_Onchange('@PosPaymentMode.Credit');
+                });
+                $("#btnDiners").click(function () {
+                    $('#Card_Type_Name').val('@CreditCardType.DinersClub');
+                    $('#Select_Surcharge_Percen').val('@(Model.Surcharge_Diner.HasValue ? Model.Surcharge_Diner.Value : 0)');
+                    DisplaySurchargeLabel();
+                    Mode_Onchange('@PosPaymentMode.Credit');
+                });
+                $("#btnJCB").click(function () {
+                    $('#Card_Type_Name').val('@CreditCardType.JCB');
+                    $('#Select_Surcharge_Percen').val('@(Model.Surcharge_JCB.HasValue ? Model.Surcharge_JCB.Value : 0)');
+                    DisplaySurchargeLabel();
+                    Mode_Onchange('@PosPaymentMode.Credit');
+                });
+                $("#btnCash").click(function () { Mode_Onchange('@PosPaymentMode.Cash') });
+
+                $("#btnWalkIn").click(function () { WalkIn_OnClick() });
+            });
+
+            function SaveReceipt(action) {
+                var rowcount = $('#selProductdataTables > tbody >tr').length;
+                if (rowcount <= 0) {
+                    alert('Please select an item from list.');
+                    return;
+                }
+
+                var surchargePercen = parseFloat($('#Select_Surcharge_Percen').val());
+                var svcCharge = parseFloat($('#Service_Charge_Amount').val());
+                var subtotal = parseFloat($('#Total_Amount').val());
+                var discount = parseFloat($('#Discount').val());
+                var cashPayment = parseFloat($('#Cash_Payment').val());
+                var amexPayment = parseFloat($('#AMEX_Payment').val());
+                var dinersClubPayment = parseFloat($('#Diners_Club_Payment').val());
+                var jcbPayment = parseFloat($('#JCB_Payment').val());
+                var masterCardPayment = parseFloat($('#Master_Card_Payment').val());
+                var visaPayment = parseFloat($('#Visa_Payment').val());
+                var netsPayment = parseFloat($('#Nets_Payment').val());
+                var redeem = parseFloat($('#Redeem_Credits').val());
+
+                var memberDiscount = parseFloat($('#Select_Member_Discount').val());
+                var receivedAmount = 0;
+
+                if (isNaN(subtotal)) subtotal = 0;
+                if (isNaN(discount)) discount = 0;
+                if (isNaN(cashPayment)) cashPayment = 0;
+                if (isNaN(amexPayment)) amexPayment = 0;
+                if (isNaN(dinersClubPayment)) dinersClubPayment = 0;
+                if (isNaN(masterCardPayment)) masterCardPayment = 0;
+                if (isNaN(jcbPayment)) jcbPayment = 0;
+                if (isNaN(visaPayment)) visaPayment = 0;
+                if (isNaN(netsPayment)) netsPayment = 0;
+                if (isNaN(redeem)) redeem = 0;
+                if (isNaN(svcCharge)) svcCharge = 0;
+                if (isNaN(memberDiscount)) memberDiscount = 0;
+                if (isNaN(surchargePercen)) surchargePercen = 0;
+
+                var discountamount = 0;
+                var memberDiscountAmount = 0;
+                var balanceDue = 0;
+                var surcharge = 0;
+                var cardTypeName = $('#Card_Type_Name').val();
+
+
+                var memberDiscountType = $('#Select_Member_Discount_Type').val();
+                if (memberDiscountType == '@DiscountType.Percen') {
+                    memberDiscountAmount = subtotal * (memberDiscount / 100);
+                }
+                else {
+                    memberDiscountAmount = memberDiscount;
+                }
+
+                var discountType = $('#Discount_Type').val();
+                if (discountType == '@DiscountType.Percen') {
+                    discountamount = (subtotal - memberDiscountAmount) * (discount / 100);
+                }
+                else {
+                    discountamount = discount;
+                }
+
+
+                balanceDue = ((subtotal + svcCharge) - memberDiscountAmount) - discountamount;
+
+                var combinePayment = false;
+                var chk = $('#Combine_Payment').get(0);
+                if (chk != null && chk.checked == true) {
+                    combinePayment = true;
+                }
+
+                var paymentType = $('#Payment_Type').val();
+                if (combinePayment) {
+                    receivedAmount = cashPayment + (visaPayment + masterCardPayment + dinersClubPayment + amexPayment + jcbPayment) + netsPayment + redeem;
+                }
+                else {
+                    if (paymentType == '@PaymentType.Cash') {
+                        receivedAmount = cashPayment;
+                        $('#AMEX_Payment').val(0);
+                        $('#Diners_Club_Payment').val(0);
+                        $('#JCB_Payment').val(0);
+                        $('#Master_Card_Payment').val(0);
+                        $('#Visa_Payment').val(0);
+                        $('#Nets_Payment').val(0);
+                        $('#Redeem_Credits').val(0);
+                    }
+                    else if (paymentType == '@PaymentType.Nets') {
+                        receivedAmount = netsPayment;
+                        $('#AMEX_Payment').val(0);
+                        $('#Diners_Club_Payment').val(0);
+                        $('#JCB_Payment').val(0);
+                        $('#Master_Card_Payment').val(0);
+                        $('#Visa_Payment').val(0);
+                        $('#Cash_Payment').val(0);
+                        $('#Redeem_Credits').val(0);
+                    } else if (paymentType == '@PaymentType.Redeem') {
+                        receivedAmount = redeem;
+                        $('#AMEX_Payment').val(0);
+                        $('#Diners_Club_Payment').val(0);
+                        $('#JCB_Payment').val(0);
+                        $('#Master_Card_Payment').val(0);
+                        $('#Visa_Payment').val(0);
+                        $('#Cash_Payment').val(0);
+                        $('#Nets_Payment').val(0);
+                    }
+                    else if (paymentType == '@PaymentType.Credit_Card') {
+                        if (cardTypeName == '@CreditCardType.Visa') {
+                            receivedAmount = visaPayment;
+                        } else if (cardTypeName == '@CreditCardType.MasterCard') {
+                            receivedAmount = masterCardPayment;
+                        } else if (cardTypeName == '@CreditCardType.AMEX') {
+                            receivedAmount = amexPayment;
+                        } else if (cardTypeName == '@CreditCardType.DinersClub') {
+                            receivedAmount = dinersClubPayment;
+                        } else if (cardTypeName == '@CreditCardType.JCB') {
+                            receivedAmount = jcbPayment;
+                        }
+
+                        $('#Cash_Payment').val(0);
+                        $('#Nets_Payment').val(0);
+                    }
+                }
+
+
+                if ('@Model.Surcharge_Include' == 'True' && surchargePercen > 0) {
+                    if (combinePayment) {
+
+                        if (visaPayment > 0) {
+                            var surpercen = parseFloat('@(Model.Surcharge_Visa.HasValue ? Model.Surcharge_Visa.Value : 0)');
+                            if (visaPayment > (balanceDue + (balanceDue * (surpercen / 100)))) {
+                                surcharge += (balanceDue * (surpercen / 100));
+                                visaPayment = balanceDue + surcharge;
+                            }
+                            else {
+                                surcharge += (visaPayment * (surpercen / 100));
+                            }
+                        }
+                        if (masterCardPayment > 0) {
+                            var surpercen = parseFloat('@(Model.Surcharge_Master.HasValue ? Model.Surcharge_Master.Value : 0)');
+                            if (masterCardPayment > (balanceDue + (balanceDue * (surpercen / 100)))) {
+                                surcharge += (balanceDue * (surpercen / 100));
+                                masterCardPayment = balanceDue + surcharge;
+                            }
+                            else {
+                                surcharge += (masterCardPayment * (surpercen / 100));
+                            }
+                        }
+                        if (amexPayment > 0) {
+                            var surpercen = parseFloat('@(Model.Surcharge_AMEX.HasValue ? Model.Surcharge_AMEX.Value : 0)');
+                            if (amexPayment > (balanceDue + (balanceDue * (surpercen / 100)))) {
+                                surcharge += (balanceDue * (surpercen / 100));
+                                amexPayment = balanceDue + surcharge;
+                            }
+                            else {
+                                surcharge += (amexPayment * (surpercen / 100));
+                            }
+                        }
+                        if (dinersClubPayment > 0) {
+                            var surpercen = parseFloat('@(Model.Surcharge_Diner.HasValue ? Model.Surcharge_Diner.Value : 0)');
+                            if (dinersClubPayment > (balanceDue + (balanceDue * (surpercen / 100)))) {
+                                surcharge += (balanceDue * (surpercen / 100));
+                                dinersClubPayment = balanceDue + surcharge;
+                            }
+                            else {
+                                surcharge += (dinersClubPayment * (surpercen / 100));
+                            }
+                        }
+                        if (jcbPayment > 0) {
+                            var surpercen = parseFloat('@(Model.Surcharge_JCB.HasValue ? Model.Surcharge_JCB.Value : 0)');
+                            if (jcbPayment > (balanceDue + (balanceDue * (surpercen / 100)))) {
+                                surcharge += (balanceDue * (surpercen / 100));
+                                jcbPayment = balanceDue + surcharge;
+                            }
+                            else {
+                                surcharge += (jcbPayment * (surpercen / 100));
+                            }
+                        }
+                        receivedAmount = cashPayment + (visaPayment + masterCardPayment + amexPayment + dinersClubPayment + jcbPayment) + netsPayment + redeem;
+
+                        balanceDue = balanceDue + surcharge;
+
+                    }
+                    else {
+                        if (paymentType == '@PaymentType.Credit_Card') {
+                            if (cardTypeName == '@CreditCardType.Visa') {
+                                if (visaPayment > (balanceDue + (balanceDue * surchargePercen / 100))) {
+                                    surcharge = balanceDue * (surchargePercen / 100);
+                                    visaPayment = balanceDue + surcharge;
+                                    receivedAmount = visaPayment;
+                                }
+                            } else if (cardTypeName == '@CreditCardType.MasterCard') {
+                                if (masterCardPayment > (balanceDue + (balanceDue * surchargePercen / 100))) {
+                                    surcharge = balanceDue * (surchargePercen / 100);
+                                    masterCardPayment = balanceDue + surcharge;
+                                    receivedAmount = masterCardPayment;
+                                }
+                            } else if (cardTypeName == '@CreditCardType.AMEX') {
+                                if (amexPayment > (balanceDue + (balanceDue * surchargePercen / 100))) {
+                                    surcharge = balanceDue * (surchargePercen / 100);
+                                    amexPayment = balanceDue + surcharge;
+                                    receivedAmount = amexPayment;
+                                }
+                            } else if (cardTypeName == '@CreditCardType.DinersClub') {
+                                if (dinersClubPayment > (balanceDue + (balanceDue * surchargePercen / 100))) {
+                                    surcharge = balanceDue * (surchargePercen / 100);
+                                    dinersClubPayment = balanceDue + surcharge;
+                                    receivedAmount = dinersClubPayment;
+                                }
+                            } else if (cardTypeName == '@CreditCardType.JCB') {
+                                if (jcbPayment > (balanceDue + (balanceDue * surchargePercen / 100))) {
+                                    surcharge = balanceDue * (surchargePercen / 100);
+                                    jcbPayment = balanceDue + surcharge;
+                                    receivedAmount = jcbPayment;
+                                }
+                            }
+
+                            balanceDue = balanceDue + surcharge;
+                        }
+
+                    }
+                }
+
+
+                var backorder = false;
+                var chk = $('#Back_Order').get(0);
+                if (chk != null && chk.checked == true && '@Model.Status' != '@ReceiptStatus.BackOrder') {
+                    backorder = true;
+                }
+
+                if (!backorder) {
+                    if (balanceDue > receivedAmount) {
+                        alert('The Received Amount cannot be less than Balance Due.');
+                        return;
+                    }
+                }
+
+                var customerName = $('#Customer_Name').val();
+                var contactNo = $('#Contact_No').val();
+
+                //Added by Nay on 07-Oct-2015
+                if (backorder) {
+                    if (customerName == "") {
+                        alert('Customer Name cannot be blank if Transaction is Back Order!');
+                        return;
+                    }
+                    if (contactNo == "") {
+                        alert('Contact No cannot be blank if Transaction is Back Order!');
+                        return;
+                    }
+                }
+
+                if (discountamount > subtotal) {
+                    alert('The Discount Amount must be less than Subtotal Amount.');
+                    return;
+                }
+
+                if (combinePayment) {
+                    if ((netsPayment + (visaPayment + masterCardPayment + dinersClubPayment + amexPayment + jcbPayment)) > balanceDue) {
+                        alert('The Nets and Credit/Debit Amount must be less than Balance Due.');
+                        return;
+                    }
+
+                }
+
+                $('#Action').val(action);
+                ShowProgress();
+                theForm.action = '@Url.Action("POS", "POS")';
+                theForm.method = 'post';
+                theForm.submit();
+            }
+
+            function BindData() {
+
+                var paymentType = '@PaymentType.Cash';
+                var surchargePercen = parseFloat($('#Select_Surcharge_Percen').val());
+                var svcCharge = parseFloat($('#Service_Charge_Amount').val());
+                var subtotal = parseFloat($('#Total_Amount').val());
+                var discount = parseFloat($('#Discount').val());
+                var cashPayment = parseFloat($('#Cash_Payment').val());
+                var amexPayment = parseFloat($('#AMEX_Payment').val());
+                var visaPayment = parseFloat($('#Visa_Payment').val());
+                var dinersClubPayment = parseFloat($('#Diners_Club_Payment').val());
+                var masterCardPayment = parseFloat($('#Master_Card_Payment').val());
+                var jcbPayment = parseFloat($('#JCB_Payment').val());
+                var netsPayment = parseFloat($('#Nets_Payment').val());
+
+                var redeem = parseFloat($('#Redeem_Credits').val());
+                var memberDiscount = $('#Select_Member_Discount').val();
+
+                var surcharge = 0;
+                var receivedAmount = 0;
+
+                if (isNaN(subtotal)) subtotal = 0;
+                if (isNaN(discount)) discount = 0;
+                if (isNaN(cashPayment)) cashPayment = 0;
+                if (isNaN(amexPayment)) amexPayment = 0;
+                if (isNaN(visaPayment)) visaPayment = 0;
+                if (isNaN(dinersClubPayment)) dinersClubPayment = 0;
+                if (isNaN(masterCardPayment)) masterCardPayment = 0;
+                if (isNaN(jcbPayment)) jcbPayment = 0;
+                if (isNaN(netsPayment)) netsPayment = 0;
+                if (isNaN(svcCharge)) svcCharge = 0;
+                if (isNaN(redeem)) redeem = 0;
+                if (isNaN(memberDiscount)) memberDiscount = 0;
+                if (isNaN(surchargePercen)) surchargePercen = 0;
+
+                var combinePayment = false;
+                var chk = $('#Combine_Payment').get(0);
+                if (chk != null && chk.checked == true) {
+                    combinePayment = true;
+                }
+
+                var mode = $('#Pos_Select_Mode').val();
+                var selPayment = $('#Payment_Type').val();
+                var cardTypeName = $('#Card_Type_Name').val();
+
+                if (mode == '@PosPaymentMode.Cash') {
+                    paymentType = '@PaymentType.Cash';
+                }
+                else if (mode == '@PosPaymentMode.Nets') {
+                    paymentType = '@PaymentType.Nets';
+                }
+                else if (mode == '@PosPaymentMode.Credit') {
+                    paymentType = '@PaymentType.Credit_Card';
+                }
+                else if (mode == '@PosPaymentMode.Member') {
+                    paymentType = '@PaymentType.Redeem';
+                }
+                else {
+                    if (selPayment == '@PaymentType.Cash') {
+                        paymentType = '@PaymentType.Cash';
+                    }
+                    else if (selPayment == '@PaymentType.Nets') {
+                        paymentType = '@PaymentType.Nets';
+                    }
+                    else if (selPayment == '@PaymentType.Credit_Card') {
+                        paymentType = '@PaymentType.Credit_Card';
+                    }
+                    else if (selPayment == '@PaymentType.Redeem') {
+                        paymentType = '@PaymentType.Redeem';
+                    }
+                }
+
+                $('#Surcharge_Amount').val(0);
+                $('#Surcharge_Amount_Label').val(formatCurrency(0));
+
+                if (combinePayment == true) {
+                    receivedAmount = cashPayment + (visaPayment + masterCardPayment + amexPayment + dinersClubPayment + jcbPayment) + netsPayment + redeem;
+                    //Edited By Jane 19-08-2015
+                    $('#Cash_Payment_Label').val(formatCurrency(cashPayment));
+                    $('#Nets_Payment_Label').val(formatCurrency(netsPayment));
+                    $('#Visa_Payment_Label').val(formatCurrency(visaPayment));
+                    $('#Master_Card_Payment_Label').val(formatCurrency(masterCardPayment));
+                    $('#AMEX_Payment_Label').val(formatCurrency(amexPayment));
+                    $('#Diners_Club_Payment_Label').val(formatCurrency(dinersClubPayment));
+                    $('#JCB_Payment_Label').val(formatCurrency(jcbPayment));
+                    $('#Redeem_Credits_Label').val(formatCurrency(redeem));
+                }
+                else {
+                    if (paymentType == '@PaymentType.Cash') {
+                        receivedAmount = cashPayment;
+
+                        netsPayment = 0;
+                        visaPayment = 0;
+                        masterCardPayment = 0;
+                        amexPayment = 0;
+                        dinersClubPayment = 0;
+                        jcbPayment = 0;
+                        redeem = 0;
+                        //Edited By Jane 19-08-2015
+                        $('#Cash_Payment_Label').val(formatCurrency(cashPayment));
+                        $('#Nets_Payment_Label').val('0.00');
+                        $('#Visa_Payment_Label').val('0.00');
+                        $('#Master_Card_Payment_Label').val('0.00');
+                        $('#AMEX_Payment_Label').val('0.00');
+                        $('#Diners_Club_Payment_Label').val('0.00');
+                        $('#JCB_Payment_Label').val('0.00');
+                        $('#Redeem_Credits_Label').val('0.00');
+                    }
+                    else if (paymentType == '@PaymentType.Nets') {
+                        receivedAmount = netsPayment;
+                        cashPayment = 0;
+                        visaPayment = 0;
+                        masterCardPayment = 0;
+                        amexPayment = 0;
+                        dinersClubPayment = 0;
+                        jcbPayment = 0;
+                        redeem = 0;
+                        $('#Nets_Payment_Label').val(formatCurrency(netsPayment));
+                        $('#Cash_Payment_Label').val('0.00');
+                        $('#Visa_Payment_Label').val('0.00');
+                        $('#Master_Card_Payment_Label').val('0.00');
+                        $('#AMEX_Payment_Label').val('0.00');
+                        $('#Diners_Club_Payment_Label').val('0.00');
+                        $('#JCB_Payment_Label').val('0.00');
+                        $('#Redeem_Credits_Label').val('0.00');
+                    }
+                    else if (paymentType == '@PaymentType.Credit_Card') {
+
+                        cashPayment = 0;
+                        netsPayment = 0;
+                        redeem = 0;
+                        if (cardTypeName == '@CreditCardType.Visa') {
+                            receivedAmount = visaPayment;
+                            masterCardPayment = 0;
+                            amexPayment = 0;
+                            dinersClubPayment = 0;
+                            jcbPayment = 0;
+                            $('#Visa_Payment_Label').val(formatCurrency(visaPayment));
+                            $('#Master_Card_Payment_Label').val('0.00');
+                            $('#AMEX_Payment_Label').val('0.00');
+                            $('#Diners_Club_Payment_Label').val('0.00');
+                            $('#JCB_Payment_Label').val('0.00');
+                        } else if (cardTypeName == '@CreditCardType.MasterCard') {
+                            receivedAmount = masterCardPayment;
+                            visaPayment = 0;
+                            amexPayment = 0;
+                            dinersClubPayment = 0;
+                            jcbPayment = 0;
+                            $('#Master_Card_Payment_Label').val(formatCurrency(masterCardPayment));
+                            $('#Visa_Payment_Label').val('0.00');
+                            $('#AMEX_Payment_Label').val('0.00');
+                            $('#Diners_Club_Payment_Label').val('0.00');
+                            $('#JCB_Payment_Label').val('0.00');
+                        } else if (cardTypeName == '@CreditCardType.AMEX') {
+                            receivedAmount = amexPayment;
+                            visaPayment = 0;
+                            masterCardPayment = 0;
+                            dinersClubPayment = 0;
+                            jcbPayment = 0;
+                            $('#AMEX_Payment_Label').val(formatCurrency(amexPayment));
+                            $('#Visa_Payment_Label').val('0.00');
+                            $('#Master_Card_Payment_Label').val('0.00');
+                            $('#Diners_Club_Payment_Label').val('0.00');
+                            $('#JCB_Payment_Label').val('0.00');
+                        } else if (cardTypeName == '@CreditCardType.DinersClub') {
+                            receivedAmount = dinersClubPayment;
+                            visaPayment = 0;
+                            masterCardPayment = 0;
+                            amexPayment = 0;
+                            jcbPayment = 0;
+                            $('#Diners_Club_Payment_Label').val(formatCurrency(dinersClubPayment));
+                            $('#Visa_Payment_Label').val('0.00');
+                            $('#Master_Card_Payment_Label').val('0.00');
+                            $('#AMEX_Payment_Label').val('0.00');
+                            $('#JCB_Payment_Label').val('0.00');
+                            $('#Redeem_Credits_Label').val('0.00');
+
+
+                        } else if (cardTypeName == '@CreditCardType.JCB') {
+                            receivedAmount = jcbPayment;
+                            visaPayment = 0;
+                            masterCardPayment = 0;
+                            amexPayment = 0;
+                            dinersClubPayment = 0;
+                            $('#JCB_Payment_Label').val(formatCurrency(jcbPayment));
+                            $('#Diners_Club_Payment_Label').val('0.00');
+                            $('#Visa_Payment_Label').val('0.00');
+                            $('#Master_Card_Payment_Label').val('0.00');
+                            $('#AMEX_Payment_Label').val('0.00');
+
+                        }
+                        $('#Redeem_Credits_Label').val('0.00');
+                        $('#Cash_Payment_Label').val('0.00');
+                        $('#Nets_Payment_Label').val('0.00');
+                    }
+                    else if (paymentType == '@PaymentType.Redeem') {
+                        receivedAmount = redeem;
+                        cashPayment = 0;
+                        visaPayment = 0;
+                        masterCardPayment = 0;
+                        amexPayment = 0;
+                        dinersClubPayment = 0;
+                        jcbPayment = 0;
+                        netsPayment = 0;
+
+                        $('#Redeem_Credits_Label').val(formatCurrency(redeem));
+                        $('#Nets_Payment_Label').val('0.00');
+                        $('#Cash_Payment_Label').val('0.00');
+                        $('#Visa_Payment_Label').val('0.00');
+                        $('#Master_Card_Payment_Label').val('0.00');
+                        $('#AMEX_Payment_Label').val('0.00');
+                        $('#Diners_Club_Payment_Label').val('0.00');
+                        $('#JCB_Payment_Label').val('0.00');
+                    }
+                }
+
+                var memberDiscountAmount = memberDiscount;
+                var memberDiscountType = $('#Select_Member_Discount_Type').val();
+                if (memberDiscountType == '@DiscountType.Percen') {
+                    memberDiscountAmount = subtotal * (memberDiscount / 100);
+                }
+
+                if (memberDiscountAmount > subtotal) {
+                    memberDiscountAmount = subtotal;
+                    if (memberDiscountType == '@DiscountType.Percen') {
+                        memberDiscount = 100;
+                    }
+                    else {
+                        memberDiscount = subtotal;
+                    }
+                }
+
+                var discountAmount = discount;
+                var discountType = $('#Discount_Type').val();
+                if (discountType == '@DiscountType.Percen') {
+                    discountAmount = (subtotal - memberDiscountAmount) * (discount / 100);
+                }
+
+                if (discountAmount > (subtotal - memberDiscountAmount)) {
+                    discountAmount = (subtotal - memberDiscountAmount);
+                    if (discountType == '@DiscountType.Percen') {
+                        discount = 100;
+                    }
+                    else {
+                        discount = subtotal;
+                    }
+                }
+
+                var balanceDue = (((subtotal + svcCharge) - memberDiscountAmount) - discountAmount);
+                var change = 0;
+
+                if ('@Model.Surcharge_Include' == 'True' && surchargePercen > 0) {
+                    DisplaySurchargeLabel();
+                    if (combinePayment) {
+                        if (visaPayment > 0) {
+                            var surpercen = parseFloat('@(Model.Surcharge_Visa.HasValue ? Model.Surcharge_Visa.Value : 0)');
+                            if (visaPayment > (balanceDue + (balanceDue * (surpercen / 100)))) {
+                                surcharge += (balanceDue * (surpercen / 100));
+                                visaPayment = balanceDue + surcharge;
+
+                                $('#Visa_Payment').val(visaPayment);
+                                $('#Visa_Payment_Label').val(formatCurrency(visaPayment));
+                            }
+                            else {
+                                surcharge += (visaPayment * (surpercen / 100));
+                            }
+                        }
+                        if (masterCardPayment > 0) {
+                            var surpercen = parseFloat('@(Model.Surcharge_Master.HasValue ? Model.Surcharge_Master.Value : 0)');
+                            if (masterCardPayment > (balanceDue + (balanceDue * (surpercen / 100)))) {
+                                surcharge += (balanceDue * (surpercen / 100));
+                                masterCardPayment = balanceDue + surcharge;
+
+                                $('#Master_Card_Payment').val(masterCardPayment);
+                                $('#Master_Card_Payment_Label').val(formatCurrency(masterCardPayment));
+                            }
+                            else {
+                                surcharge += (masterCardPayment * (surpercen / 100));
+                            }
+                        }
+                        if (amexPayment > 0) {
+                            var surpercen = parseFloat('@(Model.Surcharge_AMEX.HasValue ? Model.Surcharge_AMEX.Value : 0)');
+                            if (amexPayment > (balanceDue + (balanceDue * (surpercen / 100)))) {
+                                surcharge += (balanceDue * (surpercen / 100));
+                                amexPayment = balanceDue + surcharge;
+
+                                $('#AMEX_Payment').val(amexPayment);
+                                $('#AMEX_Payment_Label').val(formatCurrency(amexPayment));
+                            }
+                            else {
+                                surcharge += (amexPayment * (surpercen / 100));
+                            }
+                        }
+                        if (dinersClubPayment > 0) {
+                            var surpercen = parseFloat('@(Model.Surcharge_Diner.HasValue ? Model.Surcharge_Diner.Value : 0)');
+                            if (dinersClubPayment > (balanceDue + (balanceDue * (surpercen / 100)))) {
+                                surcharge += (balanceDue * (surpercen / 100));
+                                dinersClubPayment = balanceDue + surcharge;
+
+                                $('#Diners_Club_Payment').val(dinersClubPayment);
+                                $('#Diners_Club_Payment_Label').val(formatCurrency(dinersClubPayment));
+                            }
+                            else {
+                                surcharge += (dinersClubPayment * (surpercen / 100));
+                            }
+                        }
+                        if (jcbPayment > 0) {
+                            var surpercen = parseFloat('@(Model.Surcharge_JCB.HasValue ? Model.Surcharge_JCB.Value : 0)');
+                            if (jcbPayment > (balanceDue + (balanceDue * (surpercen / 100)))) {
+                                surcharge += (balanceDue * (surpercen / 100));
+                                jcbPayment = balanceDue + surcharge;
+
+                                $('#JCB_Payment').val(jcbPayment);
+                                $('#JCB_Payment_Label').val(formatCurrency(jcbPayment));
+                            }
+                            else {
+                                surcharge += (jcbPayment * (surpercen / 100));
+                            }
+                        }
+
+                        receivedAmount = cashPayment + (visaPayment + masterCardPayment + amexPayment + dinersClubPayment + jcbPayment) + netsPayment + redeem;
+
+
+
+                        balanceDue = balanceDue + surcharge;
+
+                        $('#Surcharge_Amount').val(surcharge);
+                        $('#Surcharge_Amount_Label').val(formatCurrency(surcharge));
+                    }
+                    else {
+                        if (paymentType == '@PaymentType.Credit_Card') {
+                            surcharge = balanceDue * (surchargePercen / 100);
+
+                            if (cardTypeName == '@CreditCardType.Visa') {
+                                if (visaPayment > (balanceDue + (balanceDue * (surchargePercen / 100)))) {
+                                    surcharge = balanceDue * (surchargePercen / 100);
+                                    visaPayment = balanceDue + surcharge;
+                                    receivedAmount = visaPayment;
+
+                                    $('#Visa_Payment').val(visaPayment);
+                                    $('#Visa_Payment_Label').val(formatCurrency(visaPayment));
+                                }
+                            } else if (cardTypeName == '@CreditCardType.MasterCard') {
+                                if (masterCardPayment > (balanceDue + (balanceDue * (surchargePercen / 100)))) {
+                                    surcharge = balanceDue * (surchargePercen / 100);
+                                    masterCardPayment = balanceDue + surcharge;
+                                    receivedAmount = masterCardPayment;
+
+                                    $('#Master_Card_Payment').val(masterCardPayment);
+                                    $('#Master_Card_Payment_Label').val(formatCurrency(masterCardPayment));
+                                }
+                            } else if (cardTypeName == '@CreditCardType.DinersClub') {
+                                if (dinersClubPayment > (balanceDue + (balanceDue * (surchargePercen / 100)))) {
+                                    surcharge = balanceDue * (surchargePercen / 100);
+                                    dinersClubPayment = balanceDue + surcharge;
+                                    receivedAmount = dinersClubPayment;
+
+                                    $('#Diners_Club_Payment').val(dinersClubPayment);
+                                    $('#Diners_Club_Payment_Label').val(formatCurrency(dinersClubPayment));
+                                }
+                            } else if (cardTypeName == '@CreditCardType.AMEX') {
+                                if (amexPayment > (balanceDue + (balanceDue * (surchargePercen / 100)))) {
+                                    surcharge = balanceDue * (surchargePercen / 100);
+                                    amexPayment = balanceDue + surcharge;
+                                    receivedAmount = amexPayment;
+
+                                    $('#AMEX_Payment').val(amexPayment);
+                                    $('#AMEX_Payment_Label').val(formatCurrency(amexPayment));
+                                }
+                            } else if (cardTypeName == '@CreditCardType.JCB') {
+                                if (jcbPayment > (balanceDue + (balanceDue * (surchargePercen / 100)))) {
+                                    surcharge = balanceDue * (surchargePercen / 100);
+                                    jcbPayment = balanceDue + surcharge;
+                                    receivedAmount = jcbPayment;
+
+                                    $('#JCB_Payment').val(jcbPayment);
+                                    $('#JCB_Payment_Label').val(formatCurrency(jcbPayment));
+                                }
+                            }
+                            balanceDue = balanceDue + surcharge;
+
+                            $('#Surcharge_Amount').val(surcharge);
+                            $('#Surcharge_Amount_Label').val(formatCurrency(surcharge));
+                        }
+                    }
+                }
+                else {
+                    if (combinePayment) {
+                        if (visaPayment > 0) {
+                            if (visaPayment > balanceDue) {
+                                visaPayment = balanceDue;
+                                receivedAmount = visaPayment;
+                                $('#Visa_Payment').val(visaPayment);
+                                $('#Visa_Payment_Label').val(formatCurrency(visaPayment));
+                            }
+                        }
+                        if (masterCardPayment > 0) {
+                            if (masterCardPayment > balanceDue) {
+                                masterCardPayment = balanceDue;
+                                receivedAmount = masterCardPayment;
+                                $('#Master_Card_Payment').val(masterCardPayment);
+                                $('#Master_Card_Payment_Label').val(formatCurrency(masterCardPayment));
+                            }
+                        }
+                        if (amexPayment > 0) {
+                            if (amexPayment > balanceDue) {
+                                amexPayment = balanceDue;
+                                receivedAmount = amexPayment;
+                                $('#AMEX_Payment').val(amexPayment);
+                                $('#AMEX_Payment_Label').val(formatCurrency(amexPayment));
+                            }
+                        }
+                        if (dinersClubPayment > 0) {
+                            if (dinersClubPayment > balanceDue) {
+                                dinersClubPayment = balanceDue;
+                                receivedAmount = dinersClubPayment;
+                                $('#Diners_Club_Payment').val(dinersClubPayment);
+                                $('#Diners_Club_Payment_Label').val(formatCurrency(dinersClubPayment));
+                            }
+                        }
+                        if (jcbPayment > 0) {
+                            if (jcbPayment > balanceDue) {
+                                jcbPayment = balanceDue;
+                                receivedAmount = jcbPayment;
+                                $('#JCB_Payment').val(jcbPayment);
+                                $('#JCB_Payment_Label').val(formatCurrency(jcbPayment));
+                            }
+                        }
+                    }
+                    else {
+                        if (paymentType == '@PaymentType.Credit_Card') {
+                            if (visaPayment > balanceDue) {
+                                visaPayment = balanceDue;
+                                receivedAmount = visaPayment;
+                                $('#Visa_Payment').val(visaPayment);
+                                $('#Visa_Payment_Label').val(formatCurrency(visaPayment));
+                            }
+                            if (masterCardPayment > balanceDue) {
+                                masterCardPayment = balanceDue;
+                                receivedAmount = masterCardPayment;
+                                $('#Master_Card_Payment').val(masterCardPayment);
+                                $('#Master_Card_Payment_Label').val(formatCurrency(masterCardPayment));
+                            }
+                            if (amexPayment > balanceDue) {
+                                amexPayment = balanceDue;
+                                receivedAmount = amexPayment;
+                                $('#AMEX_Payment').val(amexPayment);
+                                $('#AMEX_Payment_Label').val(formatCurrency(amexPayment));
+                            }
+                            if (dinersClubPayment > balanceDue) {
+                                dinersClubPayment = balanceDue;
+                                receivedAmount = dinersClubPayment;
+                                $('#Diners_Club_Payment').val(dinersClubPayment);
+                                $('#Diners_Club_Payment_Label').val(formatCurrency(dinersClubPayment));
+                            }
+                            if (jcbPayment > balanceDue) {
+                                jcbPayment = balanceDue;
+                                receivedAmount = jcbPayment;
+                                $('#JCB_Payment').val(jcbPayment);
+                                $('#JCB_Payment_Label').val(formatCurrency(jcbPayment));
+                            }
+                        }
+                    }
+                }
+
+                if (paymentType == '@PaymentType.Nets') {
+                    if (netsPayment > balanceDue) {
+                        netsPayment = balanceDue;
+                        if (combinePayment) {
+                            receivedAmount = cashPayment + (visaPayment + masterCardPayment + dinersClubPayment + amexPayment + jcbPayment) + netsPayment + redeem;
+                        }
+                        else {
+                            receivedAmount = netsPayment;
+                        }
+                        $('#Nets_Payment').val(netsPayment);
+                        $('#Nets_Payment_Label').val(formatCurrency(netsPayment));
+                    }
+                }
+
+                if (paymentType == '@PaymentType.Redeem') {
+                    if (redeem > balanceDue) {
+                        redeem = balanceDue;
+                        if (combinePayment) {
+                            receivedAmount = cashPayment + (visaPayment + masterCardPayment + dinersClubPayment + amexPayment + jcbPayment) + netsPayment + redeem;
+                        }
+                        else {
+                            receivedAmount = redeem;
+                        }
+                        $('#Redeem_Credits').val(redeem);
+                        $('#Redeem_Credits_Label').val(formatCurrency(redeem));
+                    }
+                }
+                if (receivedAmount > balanceDue) {
+                    change = receivedAmount - balanceDue;
+                }
+
+                $('#Total_Amount').val(subtotal);
+                $('#Total_Amount_Label').val(formatCurrency(subtotal));
+
+                $('#Changes').val(change);
+
+
+                $('#Discount').val(discount.toFixed(2));
+                $('#Discount_Label').val(formatCurrency(discount));
+
+                $('#Net_Amount').val(balanceDue.toFixed(2));
+                $('#Net_Amount_Label').val(formatCurrency(balanceDue));
+
+                $('#btnPayment').hide();
+                $('#btnDiscountTypePercen').hide();
+                $('#btnDiscountTypeAmount').hide();
+                $('#btnProceedCredit').hide();
+
+                var btnDiscount = $('#btnDiscount').get(0);
+                var btnMasterCard = $('#btnMasterCard').get(0);
+                var btnVisa = $('#btnVisa').get(0);
+                var btnAMEX = $('#btnAMEX').get(0);
+                var btnDiners = $('#btnDiners').get(0);
+                var btnJCB = $('#btnJCB').get(0);
+                var btnCash = $('#btnCash').get(0);
+
+                var btnMember = $('#btnMember').get(0);
+                var btnNets = $('#btnNets').get(0);
+
+                $('#btnDiscount').removeClass("active");
+                $('#btnMasterCard').removeClass("active");
+                $('#btnVisa').removeClass("active");
+                $('#btnAMEX').removeClass("active");
+                $('#btnDiners').removeClass("active");
+                $('#btnJCB').removeClass("active");
+                $('#btnCash').removeClass("active");
+                $('#btnMember').removeClass("active");
+                $('#btnWalkIn').removeClass("active");
+                $('#btnNets').removeClass("active");
+
+                $('#pnlCustomerDetails').hide();
+                $('#pnlMember').hide();
+                $('#pnlNumber').show();
+
+                $('#Text2').get(0).removeAttribute("disabled");
+
+                if (mode == '@PosPaymentMode.Discount') {
+
+                    $('#btnDiscount').addClass("active");
+
+                    $('#Text_Label1').val('Subtotal');
+                    $('#Text_Label2').val('Discount');
+                    $('#Text_Label3').val('Balance Due');
+
+
+                    $('#btnDiscountTypePercen').show();
+                    $('#btnDiscountTypeAmount').show();
+
+
+                    $('#Text1').val(formatCurrency(subtotal));
+
+                    $('#Text2').val(discount);
+                    if (discount > 0) {
+                        if ($('#Text2').val().indexOf(".") >= 0) {
+                            // have point
+                            var digit = $('#Text2').val().substring($('#Text2').val().indexOf("."));
+                            if (digit.length > 2) {
+                                $('#Text2').val(discount.toFixed(2));
+                            }
+                        }
+                    }
+                    $('#Text3').val(formatCurrency(balanceDue));
+                }
+                else if (mode == '@PosPaymentMode.Cash') {
+                    $('#Payment_Type').val('@PaymentType.Cash');
+
+                    $('#btnCash').addClass("active");
+
+                    $('#btnPayment').show();
+
+                    $('#Text_Label1').val('Balance Due');
+                    $('#Text_Label2').val('Cash Tendered');
+                    $('#Text_Label3').val('Change');
+
+                    $('#Text1').val(formatCurrency(balanceDue));
+                    $('#Text2').val(cashPayment);
+                    $('#Text3').val(formatCurrency(change));
+                }
+                else if (mode == '@PosPaymentMode.Nets') {
+                    $('#Payment_Type').val('@PaymentType.Nets');
+
+                    $('#btnNets').addClass("active");
+
+                    $('#btnPayment').show();
+
+                    $('#Text_Label1').val('Balance Due');
+                    $('#Text_Label2').val('Payment Amount');
+                    $('#Text_Label3').val('Change');
+
+                    $('#Text1').val(formatCurrency(balanceDue));
+                    $('#Text2').val(netsPayment);
+                    if (netsPayment > 0) {
+                        if ($('#Text2').val().indexOf(".") >= 0) {
+                            // have point
+                            var digit = $('#Text2').val().substring($('#Text2').val().indexOf("."));
+                            if (digit.length > 2) {
+                                $('#Text2').val(netsPayment.toFixed(2));
+                            }
+                        }
+                    }
+                    $('#Text3').val(formatCurrency(change));
+                }
+
+
+                else if (mode == '@PosPaymentMode.Member') {
+
+                    $('#Payment_Type').val('@PaymentType.Redeem');
+
+                    $('#btnMember').addClass("active");
+
+                    $('#Text_Label1').val('Balance Due');
+                    $('#Text_Label2').val('Redeem Credits');
+                    $('#Text_Label3').val('Change');
+
+                    $('#Text1').val(formatCurrency(balanceDue));
+                    $('#Text2').val(formatCurrency(redeem));
+
+                    $('#Text2').get(0).setAttribute("disabled", "disabled");
+
+
+                    if (redeem > 0) {
+                        if ($('#Text2').val().indexOf(".") >= 0) {
+                            // have point
+                            var digit = $('#Text2').val().substring($('#Text2').val().indexOf("."));
+                            if (digit.length > 2) {
+                                $('#Text2').val(redeem.toFixed(2));
+                            }
+                        }
+                    }
+                    $('#Text3').val(formatCurrency(change));
+
+                    $('#btnMember').addClass("active");
+
+                    $('#pnlNumber').hide();
+                    $('#pnlCustomerDetails').hide();
+                    $('#pnlMember').show();
+
+
+                } else if (mode == '@PosPaymentMode.WalkIn') {
+                    $('#btnWalkIn').addClass("active");
+                }
+                else if (mode == '@PosPaymentMode.Credit') {
+                    $('#Payment_Type').val('@PaymentType.Credit_Card');
+                    var creditPayment = 0;
+
+                    if (cardTypeName == '@CreditCardType.MasterCard') {
+                        $('#btnMasterCard').addClass("active");
+                        creditPayment = masterCardPayment;
+                    } else if (cardTypeName == '@CreditCardType.Visa') {
+                        $('#btnVisa').addClass("active");
+                        creditPayment = visaPayment;
+                    } else if (cardTypeName == '@CreditCardType.AMEX') {
+                        $('#btnAMEX').addClass("active");
+                        creditPayment = amexPayment;
+                    } else if (cardTypeName == '@CreditCardType.DinersClub') {
+                        $('#btnDiners').addClass("active");
+                        creditPayment = dinersClubPayment;
+                    } else if (cardTypeName == '@CreditCardType.JCB') {
+                        $('#btnJCB').addClass("active");
+                        creditPayment = jcbPayment;
+                    }
+
+                    $('#btnProceedCredit').show();
+
+                    $('#Text_Label1').val('Balance Due');
+                    $('#Text_Label2').val('Payment Amount');
+                    $('#Text_Label3').val('Change');
+
+                    $('#Text1').val(formatCurrency(balanceDue));
+                    $('#Text2').val(creditPayment);
+                    if (creditPayment > 0) {
+                        if ($('#Text2').val().indexOf(".") >= 0) {
+                            // have point
+                            var digit = $('#Text2').val().substring($('#Text2').val().indexOf("."));
+                            if (digit.length > 2) {
+                                $('#Text2').val(creditPayment.toFixed(2));
+                            }
+                        }
+                    }
+
+                    $('#Text3').val(formatCurrency(change));
+                }
+                else if (mode == '@PosPaymentMode.BackOrder' || mode == '@PosPaymentMode.WalkIn') {
+                    $('#pnlNumber').hide();
+                    $('#pnlMember').hide();
+                    $('#pnlCustomerDetails').show();
+
+                }
+
+
+                if ('@Model.Surcharge_Include' == 'True') {
+                    if ($('#Payment_Type').val() == '@PaymentType.Credit_Card') {
+                    }
+                    else if (combinePayment) {
+                        if (visaPayment > 0 || masterCardPayment > 0 || amexPayment > 0 || dinersClubPayment > 0 || jcbPayment > 0) {
+
+                        }
+                    }
+                }
+
+                var remain = balanceDue - receivedAmount;
+                if (change > 0)
+                    remain = 0;
+
+                $('#Text4').val(formatCurrency(remain));
+
+            }
+
+            function Text2_Onchange() {
+                var discountType = $('#Discount_Type').val();
+                var txt2 = $('#Text2').val();
+
+                var amount = parseFloat($('#Text2').val());
+                if (isNaN(amount)) {
+                    amount = 0;
+                }
+                else {
+                    if (txt2.indexOf(".") >= 0) {
+                        // have point
+                        var digit = txt2.substring(txt2.indexOf("."));
+                        if (digit.length > 2) {
+                            amount = parseFloat($('#Text2').val()).toFixed(2);
+                        }
+                        else if (digit.length > 1) {
+                            amount = parseFloat($('#Text2').val()).toFixed(1);
+                        }
+                    }
+                }
+                $('#Text2').val(amount);
+
+                var mode = $('#Pos_Select_Mode').val();
+                var cardType = $('#Card_Type_Name').val();
+
+                if (mode == '@PosPaymentMode.Discount') {
+                    $('#Discount').val(amount);
+                }
+                else if (mode == '@PosPaymentMode.Cash') {
+                    $('#Cash_Payment').val(amount);
+                    $('#Cash_Payment_Label').val(formatCurrency(amount));
+                }
+                else if (mode == '@PosPaymentMode.Nets') {
+                    $('#Nets_Payment').val(amount);
+                    $('#Nets_Payment_Label').val(formatCurrency(amount));
+                }
+                else if (mode == '@PosPaymentMode.Member') {
+                    $('#Redeem_Credits').val(redeem);
+                    $('#Redeem_Credits_Label').val(formatCurrency(redeem));
+                }
+                else if (mode == '@PosPaymentMode.Credit') {
+                    if (cardType == '@CreditCardType.Visa') {
+                        $('#Visa_Payment').val(amount);
+                        $('#Visa_Payment_Label').val(formatCurrency(amount));
+                    } else if (cardType == '@CreditCardType.MasterCard') {
+                        $('#Master_Card_Payment').val(amount);
+                        $('#Master_Card_Payment_Label').val(formatCurrency(amount));
+                    } else if (cardType == '@CreditCardType.AMEX') {
+                        $('#AMEX_Payment').val(amount);
+                        $('#AMEX_Payment_Label').val(formatCurrency(amount));
+                    } else if (cardType == '@CreditCardType.DinersClub') {
+                        $('#Diners_Club_Payment').val(amount);
+                        $('#Diners_Club_Payment_Label').val(formatCurrency(amount));
+                    } else if (cardType == '@CreditCardType.JCB') {
+                        $('#JCB_Payment').val(amount);
+                        $('#JCB_Payment_Label').val(formatCurrency(amount));
+                    }
+                }
+
+                BindData();
+
+            }
+
+            function Mode_Onchange(mode) {
+                $('#Pos_Select_Mode').val(mode);
+                BindData();
+            }
+
+            function Text2_Number_Onclick(num) {
+                var mode = $('#Pos_Select_Mode').val();
+
+                if (num == "C") {
+                    $('#Text2').val('0');
+                    Text2_Onchange();
+                }
+                else if (num == ".") {
+                    if (mode == '@PosPaymentMode.Discount') {
+                        var discount = $('#Text2').val();
+
+                        if (discount.indexOf(".") < 0) {
+                            // not have point
+                            discount = discount + num;
+                            $('#Text2').val(discount);
+                        }
+                        if ((discount + 1).length >= 14)
+                            return;
+
+
+                    }
+                    else if (mode == '@PosPaymentMode.Cash' | mode == '@PosPaymentMode.Credit' | mode == '@PosPaymentMode.Nets') {
+                        var cashPayment = $('#Text2').val();
+
+                        if (cashPayment.indexOf(".") < 0) {
+                            cashPayment = cashPayment + num;
+                            $('#Text2').val(cashPayment);
+                        }
+                        if ((cashPayment + 1).length >= 14)
+                            return;
+                    }
+
+                }
+                else {
+                    if (mode == '@PosPaymentMode.Discount') {
+                        var discount = $('#Text2').val();
+
+                        if (discount.indexOf(".") >= 0) {
+                            // have point
+                            var digit = discount.substring(discount.indexOf("."));
+                            if (digit.length > 2) {
+                                return;
+                            }
+                        }
+
+                        if ((discount + num).length >= 14)
+                            return;
+
+                        var discountType = $('#Discount_Type').val();
+                        if (discountType == '@DiscountType.Percen') {
+                            var discountamount = parseFloat(discount + num);
+                            if (discountamount > 100)
+                                return;
+                        }
+
+                        discount = discount + num;
+                        $('#Text2').val(discount);
+                    }
+                    else if (mode == '@PosPaymentMode.Cash' | mode == '@PosPaymentMode.Credit' | mode == '@PosPaymentMode.Nets') {
+                        var cashPayment = $('#Text2').val();
+
+                        if (cashPayment.indexOf(".") >= 0) {
+                            // have point
+                            var digit = cashPayment.substring(cashPayment.indexOf("."));
+                            if (digit.length > 2) {
+                                return;
+                            }
+                        }
+                        if ((cashPayment + num).length >= 14)
+                            return;
+
+                        cashPayment = cashPayment + num;
+                        $('#Text2').val(cashPayment);
+                    }
+                    Text2_Onchange();
+                }
+
+            }
+
+
+
+
+
+            function Payment_Onclick() {
+                if ('@Model.Status' != '@ReceiptStatus.Paid' && '@Model.Status' != '@ReceiptStatus.Void')
+                    SaveReceipt(4);
+            }
+
+
+            function Discount_Type_Onclick(type) {
+                $('#Discount_Type').val(type);
+
+                if (type == '@DiscountType.Percen') {
+                    $('#Text2_Discount_Type_Label').val('%');
+                    $('#Discount_Type_Label').val('%');
+                }
+                else {
+                    $('#Text2_Discount_Type_Label').val('@Model.Currency_Code');
+                    $('#Discount_Type_Label').val('@Model.Currency_Code');
+                }
+
+                BindData();
+            }
+
+            function ChkBackOrder_Onchange() {
+
+
+                if ('@Model.Action' == '@POSAction.ProcessPayment') {
+                    var chk = $('#Back_Order').get(0);
+
+                    if (chk != null && chk.checked == true) {
+                        if ($('#btnHoldBill').get(0) != null) $('#btnHoldBill').get(0).setAttribute("disabled", "disabled");
+                        if ($('#btnHoldBillPrint').get(0) != null) $('#btnHoldBillPrint').get(0).setAttribute("disabled", "disabled");
+                        // Commented by Nay on 09-Oct-2015
+                        // Purpose : Allow to show anything for Customer Details Info:
+                        if ('@Model.Status' != '@ReceiptStatus.BackOrder') {
+                            //$('#btnWalkIn').get(0).click();
+                            Mode_Onchange('@PosPaymentMode.BackOrder');
+                            Enable('pnlCustomerDetails');
+                        }
+
+                    }
+                    else {
+                        if ('@Model.Status' == '@ReceiptStatus.Paid') {
+                            if ($('#btnHoldBill').get(0) != null) $('#btnHoldBill').get(0).setAttribute("disabled", "disabled");
+                            if ($('#btnHoldBillPrint').get(0) != null) $('#btnHoldBillPrint').get(0).setAttribute("disabled", "disabled");
+                        } else {
+                            if ($('#btnHoldBill').get(0) != null) $('#btnHoldBill').get(0).removeAttribute("disabled");
+                            if ($('#btnHoldBillPrint').get(0) != null) $('#btnHoldBillPrint').get(0).removeAttribute("disabled");
+                            @*if ('@Model.Status' != '@ReceiptStatus.BackOrder') {
+                                Disable('pnlCustomerDetails');
+                            }*@
+
+                        }
+
+                        // Commented by Nay on 09-Oct-2015
+                        // Purpose : Allow to show anything for Customer Details Info:
+                        //$('#divCustomerName').hide();
+                        //$('#divContactNo').hide();
+                        //$('#divCustomerEmail').hide();
+                        //$('#divRemark').hide();
+                    }
+                }
+            }
+
+            function WalkIn_OnClick() {
+                if ('@Model.Status' != '@ReceiptStatus.Paid' && '@Model.Status' != '@ReceiptStatus.Hold' && '@Model.Status' != '@ReceiptStatus.Void' && '@Model.Status' != '@ReceiptStatus.BackOrder') {
+                    Mode_Onchange('@PosPaymentMode.WalkIn');
+                    $('#pnlNumber').hide();
+                    $('#pnlMember').hide();
+                    $('#pnlCustomerDetails').show();
+
+                    if ($('#Select_Member_ID').val() == '') {
+                        Enable('pnlCustomerDetails');
+                    } else {
+                        Disable('pnlCustomerDetails');
+                        $('#Remark').attr('readonly', false);
+                    }
+                } else {
+                    $('#pnlNumber').hide();
+                    $('#pnlMember').hide();
+                    $('#pnlCustomerDetails').show();
+                    Disable('pnlCustomerDetails');
+                }
+            }
+
+            function ChkCombinePayment_Onchange() {
+                BindData();
+            }
+        </script>
+
+        @Html.HiddenFor(m => m.Card_Type)
+        @Html.HiddenFor(m => m.Card_Branch)
+
+
+        if ((Model.operation == UserSession.RIGHT_C && Model.rights != null && Model.rights.Contains(UserSession.RIGHT_C)) ||
+            (Model.operation == UserSession.RIGHT_U && Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))) {
+            Html.RenderPartial("POSPayment", Model);
+        }
+
+    }
+
+}
+
+
+@{
+    Html.RenderPartial("POSDlgQty", Model);
+    Html.RenderPartial("POSDlgDiscount", Model);
+    Html.RenderPartial("POSDlgMember", new POSMemberViewModel() {
+        Member_Status = "New",
+        Company_ID = Model.Company_ID,
+        Member_Discount = Model.Member_Discount,
+        Member_Discount_Type = Model.Member_Discount_Type,
+        Select_Discount = Model.Member_Discount,
+        Select_Discount_Type = Model.Member_Discount_Type,
+        Birthday_Discount = Model.Birthday_Discount,
+        Birthday_Discount_Type = Model.Birthday_Discount_Type,
+        Currency_Code = Model.Currency_Code,
+        Is_Payment = true,
+
+    });
+}

@@ -1,0 +1,219 @@
+﻿@model  HR.Models.ExpensesViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Models;
+@using SBSWorkFlowAPI.ModelsAndService;
+@using SBSResourceAPI;
+@using SBSWorkFlowAPI.Constants;
+@{
+   ViewBag.Title = @Resource.Expenses_Record;
+}
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+   <script type="text/javascript">
+      $(function () {
+         var addRowLink = '<a href="@Url.Action("Application", "Expenses", new { operation = EncryptUtil.Encrypt(UserSession.RIGHT_C) })" class="btn btn-greensea  btn-sm add-row">@Resource.New_Expenses</a>'
+         InitDatepicker();
+         InitDatatable("#eDataTable", addRowLink, null);
+      })
+
+   </script>
+        <!-- page header -->
+   <div class="pageheader">
+      <h2> @Resource.Expenses_Record</h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li class="active">@Resource.Expenses_Record</li>
+         </ol>
+      </div>
+   </div>
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+            <!-- tile grading -->
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+            <section class="tile color transparent-black filter" id="secfilter">
+               <div class="tile-header transparent">
+                  <h1 onclick="CollapseHeader(null)" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                  <div class="controls">
+                     <a href="#" class="minimize filter" id="btncollapse"><i class="fa fa-search  color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body ">
+                  @using (Html.BeginForm("Record", "Expenses", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                  {
+                     @Html.AntiForgeryToken()
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Process_Date_Applied" class="control-label">@Resource.Date_Applied</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control input-datepicker" id="Process_Date_Applied" name="Process_Date_Applied" value="@Model.Process_Date_Applied">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Process_Date_Applied)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Overall_Status" class="control-label">@Resource.Status</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Overall_Status" name="Overall_Status">
+                                    @if (Model.eStatuslist != null)
+                                    {
+                                       foreach (var row in Model.eStatuslist)
+                                       {
+                                          if (Model.Overall_Status == row.Value)
+                                          {
+                                    <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                          }
+                                          else
+                                          {
+                                    <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                          }
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Overall_Status)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <div style="height:30px;"></div>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <button type="submit" class="btn btn-default">@Resource.Filter</button>
+                                 <a href="@Url.Action("ExpensesImport", "Expenses")" class="btn btn-default">@Resource.Import_Excel</a>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  }
+               </div>
+            </section>
+            <section class="tile color transparent-black">
+               <div class="tile-header transparent">
+                  <h1><strong>@Resource.Expenses_Record</strong></h1>
+                  <div class="controls">
+                     <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body">
+                  <div class="table-responsive">
+                     <table class="table table-datatable table-custom" id="eDataTable">
+                        <thead>
+                           <tr>
+                              <th class="sort-alpha">@Resource.Expenses_No_SymbolDot</th>
+                              <th class="sort-alpha">@Resource.Expenses_Title</th>
+                              <th class="sort-alpha">@Resource.Date_Applied</th>
+                              <th class="sort-amount">@Resource.Amount_Spent</th>
+                              <th class="sort-amount">@Resource.Amount_Claiming</th>
+                              <th class="sort-alpha">@Resource.Status</th>
+                              <th width="110px" class="no-sort">@Resource.Action</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           @if (Model.ExpensesProcessedLst != null && Model.ExpensesProcessedLst.Count > 0)
+                           {
+                              int no = 1;
+                              foreach (var row in Model.ExpensesProcessedLst)
+                              {
+                                 if(row.TsEXes.Count > 0)
+                                 {
+                                    continue;
+                                 }
+                                 var totalAmount = 0M;
+                                 var claimAmoutn = 0M;
+                                 if (row.Expenses_Application_Document != null)
+                                 {
+                                    totalAmount = row.Expenses_Application_Document.Sum(s => s.Total_Amount.HasValue ? s.Total_Amount.Value : 0);
+                                    claimAmoutn = row.Expenses_Application_Document.Sum(s => s.Amount_Claiming.HasValue ? s.Amount_Claiming.Value : 0);
+                                 }
+                                 <tr>
+                                    <td>@row.Expenses_No</td>
+                                    <td>@row.Expenses_Title</td>
+                                    <td>@DateUtil.ToDisplayDate(row.Date_Applied)</td>
+                                    <td class="text-right">@NumUtil.FormatCurrency(totalAmount, 2)</td>
+                                    <td class="text-right">@NumUtil.FormatCurrency(claimAmoutn, 2)</td>
+                                    <td>
+                                       @if (string.IsNullOrEmpty(row.Cancel_Status))
+                                       {
+                                          if (row.Overall_Status == WorkflowStatus.Pending || row.Overall_Status == WorkflowStatus.Approved)
+                                          {
+                                             @Resource.Pending
+                                          }
+                                          else
+                                          {
+                                             @StatusUtil.Get_Overall_Status(row.Overall_Status)
+
+                                          }
+                                       }
+                                       else
+                                       {
+                                          @StatusUtil.Get_Overall_Status(row.Cancel_Status)
+                                       }
+                                    </td>
+                                    <td class="actions text-left">
+                                       @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                       {
+                                          if (row.Overall_Status == WorkflowStatus.Draft || row.Overall_Status == WorkflowStatus.Rejected)
+                                          { //********  Workflow Draft  ********//
+                                             <a href="@Url.Action("Application", "Expenses", new { eID = EncryptUtil.Encrypt(row.Expenses_Application_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })" title="@Resource.Edit"><i class="fa fa fa-edit fa-2x"></i></a>
+
+                                             <a href="@Url.Action("ExpensesDelete", "Expenses", new { eID = EncryptUtil.Encrypt(row.Expenses_Application_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_D) })" onclick="return confirm('@Resource.Confirm_Delete_Msg');" title="@Resource.Delete"><i class="fa fa-times-circle-o fa-2x"></i></a>
+                                          }
+                                          else
+                                          {
+                                             <a href="@Url.Action("Application", "Expenses", new { eID = EncryptUtil.Encrypt(row.Expenses_Application_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })" title="@Resource.View"><i class="fa fa-file-o  fa-2x"></i></a>
+                                             //********  Smart Dev  ********//
+                                             if (row.Cancel_Status != WorkflowStatus.Cancelled)
+                                             {
+                                                <a target="_blank" href="@Url.Action("ExpensesDocPrint", "Expenses", new { eID = EncryptUtil.Encrypt(row.Expenses_Application_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U)})" title="@Resource.Print"><i class="fa fa-print fa-2x"></i></a>
+                                             }
+                                          }
+                                       }
+                                    </td>
+                                 </tr>
+                                       no++;
+                              }
+                           }
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+            </section>
+         </div>
+      </div>
+   </div>
+}

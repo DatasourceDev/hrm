@@ -1,0 +1,195 @@
+﻿@model Authentication.Models.InvoiceViewModels
+@using SBSModel.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+    ViewBag.Title = @Resource.Invoice;
+}
+@{
+    var headertext = Resource.Invoice + " for ";
+    headertext += DateUtil.GetFullMonth(Model.Invoice_Month) + " " + Model.Invoice_Year;
+}
+
+<div class="main-content">
+    <div id="divReport" style="padding: 5px; font-size: 10px">     
+        <br />  <br />  
+        <table style="width: 100%;" class="header-form" border="0">
+            <tr style="height:120px">
+                <td width="30%">&nbsp;</td>
+                <td >&nbsp;</td>
+            </tr>
+            <tr style="height:120px">
+                <td width="30%">&nbsp;</td>
+                <td >&nbsp;</td>
+            </tr>
+            <tr>
+                <td colspan="2" style=" font-weight: 800;">
+                    <span style="text-align: center;">@headertext</span>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style=" font-weight: 800;">
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td style="font-weight:700;width : 30%;">
+                    @Resource.Invoice_No
+                </td>
+                <td style=" text-align: left; width: 70%;">: @Model.Invoice_No</td>
+            </tr>
+            <tr>
+                <td style=" font-weight:700;">
+                    @Resource.Invoice_Date
+                </td>
+                <td style=" text-align: left;">
+                    : @DateUtil.ToDisplayDDMMMYYYY(Model.Generated_On.Value)
+                </td>
+            </tr>
+            <tr>
+                <td style=" font-weight:700;">
+                    @Resource.Due_Date
+                </td>
+                <td>
+                    : @DateUtil.ToDisplayDDMMMYYYY(Model.Due_Date)
+                </td>
+            </tr>
+            <tr>
+                <td style=" font-weight:700;">@Resource.Attention_To</td>
+                <td>: @Model.Invoice_To</td>
+            </tr>
+            <tr>
+                <td style=" font-weight:700">
+                    @Resource.Email
+                </td>
+                <td>                    
+                   : @Model.Invoice_To_Address                    
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <br />
+                </td>
+                <td></td>
+            </tr>
+        </table>
+        <div class="tile-body ">
+                <table class="table table-datatable table-custom" id="moduleDataTable">
+                    <thead>
+                        <tr bgcolor="#ccc" class="text-highlight">
+                            <td width="7%">&nbsp;&nbsp;@Resource.No</td>
+                            <td width="80%" class="sort-alpha">@Resource.Description</td>
+                            <td width="13%" class="sort-numeric">@Resource.Amount_USD</td>                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ decimal totalAmt = 0;
+                           int rowCount = 0; 
+                         }                       
+                        @if (Model.Outstanding_Invoices.Count > 0)   
+                        {
+                            foreach(var o in Model.Outstanding_Invoices)
+                            {
+                                rowCount++;
+                                DateTime dt = new DateTime(o.Invoice_Year.Value, o.Invoice_Month.Value, 1);
+                                <tr>
+                                    <td>&nbsp;&nbsp;@rowCount</td>
+                                    <td>@Resource.Outstanding_Balance (@dt.ToString("MMM"))</td>                                    
+                                    <td>
+                                        @o.Due_Amount.Value.ToString("n2")
+                                    </td>
+                                </tr>      
+                                totalAmt += o.Due_Amount.Value;                    
+                            }                                                        
+                        }
+                        <tr>
+                            <td>&nbsp;&nbsp;@(rowCount + 1)</td>
+                            <td>@Model.Product_Name</td>
+                            <td>
+                                @Model.Due_Amount.Value.ToString("n2")
+                            </td>
+                        </tr>
+                        @if (Model.Storage_Upgrade_List.Count > 0)
+                        {
+                            rowCount = Model.Outstanding_Invoices.Count + 1;
+                            foreach (var o in Model.Storage_Upgrade_List)
+                            {
+                                rowCount++;
+                                var uStorage = o.Upgrade_Space;
+                                var uUnit = "MB";
+                                if (o.Upgrade_Space >= 1000)
+                                {
+                                    uStorage = o.Upgrade_Space / 1000;
+                                    uUnit = "GB";
+                                }
+                                <tr>
+                                    <td>&nbsp;&nbsp;@rowCount</td>
+                                    <td>@Resource.Upgrade_Storage - @uStorage @uUnit (@DateUtil.ToDisplayDDMMMYYYY(o.Upgrade_On.Value))</td>
+                                    <td>
+                                        @o.Price.ToString("n2")
+                                    </td>
+                                </tr>
+                                totalAmt += o.Price;
+                            }
+                        }                                       
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-footer-summary" style="font-size:12px">
+                            <td></td>
+                            <td >@Resource.Total_Amount_USD</td>
+                            <td >
+                                @(Model.Due_Amount + totalAmt)
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>                                          
+                <br />           
+            @{ DateTime dt1 = new DateTime(Model.Invoice_Year.Value, Model.Invoice_Month.Value, 1); }
+                <table style="width: 100%;">
+                    <tr>
+                        <td colspan="2" style="font-weight:700;">
+                            @Resource.Detail_Tran @dt1.ToString("MMM")
+                        </td>
+                    </tr>
+                </table>
+                <div class="tile-body ">
+                    <div class="table-responsive">
+                        <table class="table table-datatable table-custom" id="moduleDataTable">
+                            <thead>
+                                <tr bgcolor="#ccc" class="text-highlight">
+                                    <th width="50%" class="sort-numeric">&nbsp;&nbsp;@Resource.Date</th>
+                                    <th width="37%" class="sort-alpha">@Resource.Number_Of_Users</th>
+                                    <th width="13%" class="sort-alpha">@Resource.Amount_USD</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{  decimal sumtotal = 0;
+                                    int licenses = 0;
+                                }
+                                @foreach (var row in Model.InvTrans)
+                                {
+                                <tr>
+                                    <td>&nbsp;&nbsp;@DateUtil.ToDisplayDDMMMYYYY(row.StartDate) - @DateUtil.ToDisplayDDMMMYYYY(row.EndDate) (@row.NoOfDays Days)</td>
+                                    <td>@row.NoOfUsers</td>
+                                    <td>@row.Amount.ToString("n2")</td>
+                                </tr>
+                                    sumtotal += row.Amount;
+                                    licenses += row.NoOfUsers;
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-footer-summary" style="font-size:12px">
+                                    <td>&nbsp;&nbsp;@Resource.Total</td>
+                                    <td>@licenses</td>
+                                    <td>@sumtotal.ToString("n2")</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>                
+            </div>        
+    </div>
+    @*<div id="footer">
+        <p> @Resource.Message_This_Is_A_Computer_Generated_Invoice</p>
+    </div>*@    
+</div>

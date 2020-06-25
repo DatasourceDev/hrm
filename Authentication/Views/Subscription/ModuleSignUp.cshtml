@@ -1,0 +1,397 @@
+﻿@model Authentication.Models.SignUpViewModel
+@using Authentication.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@{
+   ViewBag.Title = Resource.Sign_Up;
+   Layout = "~/Views/Shared/_Layout_Front.cshtml";
+
+}
+
+<script type="text/javascript">
+   $(function () {
+      Module_Onchange();
+   });
+
+   function Module_Onchange() {
+
+      var selcnt = 0;
+      var ul = $("#ulSelModule").get(0);
+      $("#ulSelModule li").remove();
+      @for (var i = 0; i < (Model.ModuleList != null ? Model.ModuleList.Count : 0); i++)
+        {
+                @:if ($("#" + '@Model.ModuleList[i].Module_Detail_ID').get(0) != null) { var opt = $("#" + '@Model.ModuleList[i].Module_Detail_ID').get(0); if (opt.checked == true) { var li = document.createElement("li"); li.appendChild(document.createTextNode('@Model.ModuleList[i].Module_Detail_Name')); ul.appendChild(li); selcnt++; } }
+                                                                          }
+      if ($("#ulSelModule li").length == 0) {
+         $("#btnSave").attr("disabled", "disabled");
+      }
+      else {
+         $("#btnSave").get(0).removeAttribute("disabled");
+      }
+   }
+
+</script>
+
+<div id="breadcrumbs" class="breadcrumbs bg-1">
+   <div class="container">
+      <ol class="breadcrumb">
+         @if (Model.Company_ID.HasValue)
+         {
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li><a href="@Url.Action("CompanyInfo", "Company", new { pComID = EncryptUtil.Encrypt(Model.Company_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })">@Resource.Company_Info</a></li>
+            <li class="active">@Resource.Select_Modules</li>
+         }
+         else
+         {
+            <li><a href="@Url.Action("Front", "Front", new { })">@Resource.Home</a></li>
+            <li>@Resource.Subscription</li>
+            <li class="active">@Resource.Select_Modules</li>
+         }
+      </ol>
+      <h2><strong>@Model.Company_Name @Resource.Select_Modules</strong></h2>
+   </div>
+</div>
+
+<section class="section">
+   <div class="container">
+      <div class="row">
+         <div class="col-md-12">
+
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+            <!-- tile widget -->
+         </div>
+      </div>
+
+      @using (Html.BeginForm("ModuleSignUp", "Subscription", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+      {
+         @Html.AntiForgeryToken()
+         <input type="hidden" name="Company_ID" value="@Model.Company_ID" />
+         <input type="hidden" name="First_Name" value="@Model.First_Name" />
+         <input type="hidden" name="Middle_Name" value="@Model.Middle_Name" />
+         <input type="hidden" name="Last_Name" value="@Model.Last_Name" />
+         <input type="hidden" name="Phone" value="@Model.Phone" />
+         <input type="hidden" name="Email" value="@Model.Email" />
+         <input type="hidden" name="Company_Name" value="@Model.Company_Name" />
+         <input type="hidden" name="Address" value="@Model.Address" />
+         <input type="hidden" name="Country_ID" value="@Model.Country_ID" />
+         <input type="hidden" name="State_ID" value="@Model.State_ID" />
+         <input type="hidden" name="ZipCode" value="@Model.Zip_Code" />
+         <input type="hidden" name="A7_Group_ID" value="@Model.A7_Group_ID" />
+         <input type="hidden" name="A7_User_ID" value="@Model.A7_User_ID" />
+         <div class="row">
+            <div class="col-md-12">
+
+               <section class="tile transparent" id="colorbox-gallery">
+                  @*<div class="tile-widget color transparent-black rounded-top-corners">
+                         <ul class="tile-navbar bg-transparent-black-3">
+                             <li>
+                                 <div class="checkbox check-transparent">
+                                     <input type="checkbox" value="1" id="selectall2">
+                                     <label for="selectall2">Select All</label>
+                                 </div>
+                             </li>
+                         </ul>
+                     </div>*@
+                  <!-- /tile widget -->
+
+                  <div class="tile-body color transparent-black colorbox">
+                     <div class="row">
+                        <div class="col-md-9">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Select_Module)
+                           </div>
+                           @if (Model.ModuleList != null)
+                           {
+                              //------------------------------------------New Module------------------------------------------//
+                              var display = true;
+                              if (Model.SubscriptionList != null)
+                              {
+                                 var uniqeSubs = Model.SubscriptionList.Select(s => s.Module_Detail_ID).Distinct();
+                                 if (Model.ModuleList.Count() == uniqeSubs.Count())
+                                 {
+                                    display = false;
+                                 }
+                              }
+                              if (display)
+                              {
+                                 <div class="plan-type">
+                                    <h4 class="uppercase"><strong>@Resource.New_Module</strong></h4>
+                                 </div>
+
+                                 var i = 0;
+                                 foreach (var row in Model.ModuleList.OrderBy(o => o.Module_Detail_ID))
+                                 {
+                                    Subscription sub = null;
+                                    if (Model.SubscriptionList != null)
+                                    {
+                                       sub = Model.SubscriptionList.Where(w => w.Module_Detail_ID == row.Module_Detail_ID).FirstOrDefault();
+                                    }
+                                    if (sub != null)
+                                    {
+                                       continue;
+                                    }
+                                    <div class="colorbox-list img-view" style="min-height:200px;max-height:200px;">
+
+                                       <div class="row">
+                                          <div class="col-md-4 text-center">
+                                             <div class="row">
+                                                <div class="col-md-12 text-center" style="padding-top:10px;">
+                                                   <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/Images/@(row.Module_Detail_Name.ToLower()).png" data-img="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/Images/@(row.Module_Detail_Name.ToLower()).png" class="colorbox-img" style="height:60px;display:inline" />
+                                                </div>
+                                             </div>
+                                             <div class="row">
+                                                <div class="col-md-12 text-center" style="padding-top:10px;">
+                                                   <strong>@row.Module_Detail_Name</strong>
+                                                </div>
+                                             </div>
+                                          </div>
+                                          <div class="col-md-8 text-left">
+                                             <p>@row.Module_Detail_Description</p>
+                                          </div>
+                                       </div>
+
+                                       <div class="overlay">
+                                          <div class="media-info">
+                                             <div class="checkbox">
+                                                <input type="hidden" value="@row.Module_Detail_ID" />
+                                                @if (row.Module_Detail_Name == ModuleCode.Employee)
+                                                {
+                                                   <input type="hidden" name="Select_Module" value="@row.Module_Detail_ID" />
+                                                   <input type="checkbox" id="@row.Module_Detail_ID" class="toggle" onchange="Module_Onchange()" checked disabled>
+                                                }
+                                                else
+                                                {
+                                                   <input type="checkbox" value="@row.Module_Detail_ID" id="@row.Module_Detail_ID" name="Select_Module" class="toggle" onchange="Module_Onchange()" @(Model.Select_Module != null && Model.Select_Module.Contains(row.Module_Detail_ID) ? "checked" : "")>
+                                                }
+                                                <label for="@row.Module_Detail_ID"></label>
+                                             </div>
+                                             <h2>@row.Module_Detail_Name</h2>
+                                          </div>
+                                       </div>
+                                    </div>
+                                                i++;
+                                 }
+
+                              }
+
+                              //------------------------------------------Extend Module------------------------------------------//
+
+                              if (Model.SubscriptionList != null && Model.SubscriptionList.Count != 0)
+                              {
+                                 <div class="plan-type">
+                                    <h4 class="uppercase"><strong>@Resource.Extend_Module</strong></h4>
+                                 </div>
+
+                                 var j = 0;
+                                 foreach (var prow in Model.ModuleList)
+                                 {
+                                    Subscription sub = null;
+                                    if (Model.SubscriptionList != null)
+                                    {
+                                       sub = Model.SubscriptionList.Where(w => w.Module_Detail_ID == prow.Module_Detail_ID).FirstOrDefault();
+                                    }
+                                    if (sub == null)
+                                    {
+                                       continue;
+                                    }
+                                    <div class="colorbox-list img-view" style="min-height:200px;max-height:200px;">
+
+                                       <div class="row">
+                                          <div class="col-md-4 text-center">
+                                             <div class="row">
+                                                <div class="col-md-12 text-center" style="padding-top:10px;">
+                                                   <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/Images/@(prow.Module_Detail_Name.ToLower()).png" data-img="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/Images/@(prow.Module_Detail_Name.ToLower()).png" class="colorbox-img" style="height:60px;display:inline" />
+                                                </div>
+                                             </div>
+                                             <div class="row">
+                                                <div class="col-md-12 text-center" style="padding-top:10px;">
+                                                   <strong>@prow.Module_Detail_Name</strong>
+                                                </div>
+                                             </div>
+                                          </div>
+                                          <div class="col-md-8 text-left">
+                                             <p>@prow.Module_Detail_Description</p>
+                                          </div>
+                                       </div>
+
+                                       @if (sub != null)
+                                       {
+                                          <div class="overlay">
+                                             <div class="media-info">
+                                                <div class="checkbox">
+                                                   <input type="hidden" value="@prow.Module_Detail_ID" />
+                                                   <input type="checkbox" value="@prow.Module_Detail_ID" id="@prow.Module_Detail_ID" name="Select_Module" class="toggle" onchange="Module_Onchange()">
+                                                   <label for="@prow.Module_Detail_ID"></label>
+                                                </div>
+                                                <h2>@prow.Module_Detail_Name</h2>
+                                                <span>
+                                                   @Resource.Added: @DateUtil.GetFullMonth(sub.Start_Date.Value.Month) @sub.Start_Date.Value.Day.ToString("00") @sub.Start_Date.Value.Year
+                                                </span>
+                                                <br />
+                                                <span>
+                                                   @Resource.End_Contract: @sub.Period_Month @Resource.Month
+                                                </span>
+                                             </div>
+                                          </div>
+                                       }
+                                    </div>
+                                       j++;
+                                 }
+                              }
+                           }
+                        </div>
+
+                        <div class="col-md-3">
+                           <div class="pricing-tables">
+                              <div class="plan">
+                                 <div class="plan-type">
+                                    <h4 class="uppercase"><strong>@Resource.Summary</strong></h4>
+                                 </div>
+                                 <div class="plan-features">
+                                    <ul id="ulSelModule"></ul>
+                                 </div>
+                                 <div class="order-btn"><button id="btnSave" type="submit" class="btn btn-primary" style="width:200px;height:40px;" disabled>@Resource.Next</button></div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </section>
+            </div>
+         </div>
+      }
+   </div>
+</section>
+
+<script>
+   $(document).ready(function () {
+      $('.colorbox .colorbox-list .overlay').colorbox({
+         photo: true,
+         opacity: .9,
+         rel: 'group1',
+         scalePhotos: true,
+         scrolling: false,
+         maxWidth: '100%',
+         maxHeight: '100%',
+         transition: 'elastic',
+         href: function () {
+
+            var url = $(this).prev().data('img');
+            if (url == null) {
+               var obj = $(this).prev();
+               while (url == null) {
+                  var url = obj.children().data('img');
+                  obj = obj.children();
+
+                  if (obj == null) {
+                     break;
+                  }
+               }
+            }
+
+            return url;
+         },
+      });
+
+      //colorbox image selecting
+
+      var checkColorboxSelected = function () {
+         $('#colorbox-gallery .img-view .checkbox :checkbox').each(function () {
+            var el = $(this);
+
+            if (!el.is(':checked')) {
+               enableToolsColorbox(false);
+            } else {
+               el.parents('.img-view').addClass('selected');
+               enableToolsColorbox(true);
+            }
+
+         });
+      };
+
+      $('#colorbox-gallery .img-view .checkbox').click(function () {
+         var el = $(this);
+         if (!el.find(':checkbox').is(':checked')) {
+            el.parents('.img-view').removeClass('selected');
+            enableToolsColorbox(false);
+         } else {
+            el.parents('.img-view').addClass('selected');
+            enableToolsColorbox(true);
+         }
+      });
+
+      $('#colorbox-gallery #selectall2').click(function () {
+         if ($(this).prop('checked')) {
+            $(this).parents('.tile').each(function () {
+               $(this).find('.img-view .checkbox :checkbox').prop('checked', true);
+               $(this).find('.img-view').addClass('selected');
+            });
+            enableToolsColorbox(true);
+         } else {
+            $(this).parents('.tile').each(function () {
+               $(this).find('.img-view .checkbox :checkbox').prop('checked', false);
+               $(this).find('.img-view').removeClass('selected');
+            });
+            enableToolsColorbox(false);
+         }
+         Module_Onchange();
+      });
+
+      var enableToolsColorbox = function (enable) {
+
+         if (enable) {
+
+            $('#colorbox-gallery .gallery-tool').removeClass('disabled');
+
+         } else {
+
+            var selected = false;
+
+            $('#colorbox-gallery .colorbox .img-view').each(function () {
+               if ($(this).hasClass('selected')) {
+                  selected = true;
+               }
+            });
+
+            if (!selected) {
+               $('#colorbox-gallery .gallery-tool').addClass('disabled');
+            }
+         }
+      }
+
+      checkColorboxSelected();
+
+      $('.img-view .media-info .btn.dropdown-toggle').on('click', function (e) {
+         $(this).next().toggle();
+         e.stopPropagation();
+      });
+
+      $('.img-view .media-info .dropdown-menu').on('click', function (e) {
+         e.stopPropagation();
+         $(this).toggle();
+      });
+
+      $('.img-view .media-info .checkbox').on('click', function (e) {
+         e.stopPropagation();
+      });
+
+
+   })
+
+</script>

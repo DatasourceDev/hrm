@@ -1,0 +1,77 @@
+﻿@model  Authentication.Models.BranchViewModel
+@using SBSResourceAPI;
+
+
+<script type="text/javascript">
+    var form = $("#branch-form").removeData("validator").removeData("unobtrusiveValidation");
+    $.validator.unobtrusive.parse(form);
+
+    $(function () {
+        form.validate({});
+        $("#btnBranchSave").click(function () {
+            if (form.valid()) {
+                var data = form.serialize();
+                $.ajax({
+                    url: '@Url.Action("SaveBranch", "Company")',
+                    //Passes the content of an input up
+                    data: {},
+                    datatype: 'html',
+                    data: data,
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        $("#editBranchModalContainerID").modal('hide');
+                        $('#branchList').html(data);
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+<form id="branch-form" class=" form-horizontal validatable">
+    @Html.HiddenFor(m => m.Company_ID)
+    @Html.HiddenFor(m => m.Branch_ID)
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h6 id="modal-formLabel">@Resource.Branch</h6>
+    </div>
+    <div class="modal-body">
+        <div class="row-fluid">
+            <div class="span12">
+                <div class="control-group">
+                    @Html.LabelFor(m => m.Branch_Code, new { @class = "control-label" })
+                    <div class="controls">
+                        @Html.TextBoxFor(m => m.Branch_Code, new { @class = "", style = "width: 90%;" })
+                        <div class="validation-error">
+                            @Html.ValidationMessageFor(m => m.Branch_Code)
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    @Html.LabelFor(m => m.Branch_Name, new { @class = "control-label" })
+                    <div class="controls">
+                        @Html.TextBoxFor(m => m.Branch_Name, new { @class = "", style = "width: 90%;" })
+                        <div class="validation-error">
+                            @Html.ValidationMessageFor(m => m.Branch_Name)
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    @Html.LabelFor(m => m.Branch_Desc, new { @class = "control-label" })
+                    <div class="controls">
+                        @Html.TextAreaFor(m => m.Branch_Desc, new { @class = "", style = "width: 90%;", rows = "5" })
+                        <div class="validation-error">
+                            @Html.ValidationMessageFor(m => m.Branch_Desc)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-blue" id="btnBranchSave" type="button">@Resource.Save_Changes</button>
+        <button class="btn btn-default" data-dismiss="modal">@Resource.Close</button>
+    </div>
+</form>
+
+

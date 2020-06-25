@@ -1,0 +1,235 @@
+﻿@model HR.Models.CompanyViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSModel.Common;
+@using HR.Common;
+@using SBSResourceAPI;
+@{
+    ViewBag.Title = @Resource.Company;
+
+    var company_level = Model.Company_Levelg;
+    var EndUser = Companylevel.EndUser;
+}
+
+<script type="text/javascript">
+    $(function () {
+        InitDatepicker();
+
+        if ('@company_level' != '@EndUser') {
+            var addRowLink = '<a href="@Url.Action("CompanyRegister", "Company", new { pBelongToID = EncryptUtil.Encrypt(Model.Belong_To), operation = EncryptUtil.Encrypt(UserSession.RIGHT_C) })" class="btn btn-greensea  btn-sm add-row">@Resource.Register_New_Company</a>'
+            InitDatatable('comDataTable', addRowLink, InitDatatableApplyLink({
+                name: "apply",
+                tabAction: null,
+                hasActive: true,
+                hasInactive: true
+            }), 1, 'asc');
+        }
+        else {
+            InitDatatable('comDataTable', null, null, 1, 'asc');
+        }
+    })
+
+</script>
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+        <!-- page header -->
+    <div class="pageheader">
+        <h2>@Resource.Company</h2>
+        <div class="breadcrumbs">
+            <ol class="breadcrumb">
+                <li>@Resource.You_Are_Here</li>
+                <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+                <li class="active">@Resource.Company</li>
+            </ol>
+        </div>
+    </div>
+        
+        
+    <div class="main">
+        
+        <div class="row">
+            
+            <div class="col-md-12">
+               @if (Model.result != null && Model.result.Code != 0)
+                {
+                    if (Model.result.Code < 0)
+                    {
+                        <div class="alert alert-red">
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        </div>
+                    }
+                    else if (Model.result.Code > 0)
+                    {
+                        <div class="alert alert-success">
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        </div>
+                    }
+                }
+
+                @using (Html.BeginForm("Company", "Company", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+                <!-- tile grading -->
+                    <section class="tile color transparent-black filter" id="secfilter">
+                        <div class="tile-header transparent">
+                            <h1 onclick="CollapseHeader(null)" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize filter" id="btncollapse"><i class="fa fa-search  color-white"></i></a>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="search_Country" class="control-label">@Resource.Country</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <select class="chosen-select chosen-transparent form-control" id="search_Country" name="search_Country">
+                                                @if (Model.countryList != null)
+                                                {
+                                                    foreach (var row in Model.countryList)
+                                                    {
+                                                        if (Model.search_Country == NumUtil.ParseInteger(row.Value))
+                                                        {
+                                                            <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.search_Country)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="search_Registration_Date" class="control-label ">@Resource.Date_Of_Registration</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <input type="text" class="form-control input-datepicker" name="search_Registration_Date" id="search_Registration_Date" value="@Model.search_Registration_Date" />
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.search_Registration_Date)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <button type="submit" class="btn btn-default">@Resource.Filter</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="tile color transparent-black">
+                        
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.Company</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+                        
+                        
+                        <div class="tile-body">
+                            <div class="table-responsive">
+                                <table class="table table-datatable table-custom" id="comDataTable">
+                                    <thead>
+                                        @*Edit By sun 07-09-2015*@
+                                        @*<tr>
+                                                <td colspan="6">
+                                                    <select class="chosen-select form-control" name="operation">
+                                                        <option value="@UserSession.RIGHT_D">Delete</option>
+                                                    </select>
+                                                    <button type="submit" class="btn btn-default" onclick="return confirm('@Resources.ResourceMain.ConfirmDelete')">@Resources.ResourceMain.Apply</button>
+                                                </td>
+                                            </tr>*@
+                                        <tr>
+                                            <th class="no-sort" style="width: 40px;">
+                                                <div class="checkbox check-transparent">
+                                                    <input type="checkbox" value="1" id="chkallCompany">
+                                                    <label for="chkallCompany"></label>
+                                                </div>
+                                            </th>
+                                            <th class="sort-alpha">@Resource.Company</th>
+                                            <th class="sort-alpha">@Resource.Country</th>
+                                            <th class="sort-alpha">@Resource.Date_Of_Registration</th>
+                                            <th class="sort-alpha">@Resource.Status</th>
+                                            <th class="no-sort" style="width:110px;">@Resource.Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.CompanyList != null)
+                                        {
+                                            var i = 0;
+                                            foreach (var row in Model.CompanyList)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <div class="checkbox check-transparent">
+                                                            <input type="checkbox" value="@row.Company_ID" name="companies" id="companies[@i]">
+                                                            <label for="companies[@i]"></label>
+                                                        </div>
+                                                    </td>
+                                                    <td>@row.Name</td>
+                                                    <td>
+                                                        @if (row.Country != null)
+                                                        {
+                                                            @row.Country.Description
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        @DateUtil.ToDisplayDate(row.Registration_Date)
+                                                    </td>
+                                                    <td>
+                                                        @StatusUtil.Get_Record_Status(row.Company_Status)
+                                                    </td>
+                                                    <td class="actions text-left">
+                                                        @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                        {
+                                                            <a href="@Url.Action("CompanyInfo", "Company", new { pComID = EncryptUtil.Encrypt(row.Company_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                                        }
+
+                                                        //Edit By sun 07-09-2015
+                                                        @*@if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_D))
+                                                            {
+                                                                <a href="@Url.Action("CompanyInfo", "Company", new { pComID = EncryptUtil.Encrypt(row.Company_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_D) }) " onclick="return confirm('@Resources.ResourceMain.ConfirmDelete');" title="Delete">
+                                                                    <i class="fa fa-times-circle-o fa-2x"></i>
+                                                                </a>
+                                                            }*@
+                                                    </td>
+                                                </tr>
+                                                        i++;
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                    </section>
+                
+                }
+            </div>
+            
+        </div>
+        
+    </div>
+        
+}

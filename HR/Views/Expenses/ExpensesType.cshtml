@@ -1,0 +1,1055 @@
+﻿@model HR.Models.ExpensesTypeViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@{
+    ViewBag.Title = Resource.Expenses_Type;
+}
+
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+    <script type="text/javascript">
+
+        var dslist = new Array();
+        var dsTextlist = new Array();
+        var dcnt = '@(Model.designationList != null ? Model.designationList.Count : 0)';
+        $(function () {
+
+            @for (var i = 0; i < (Model.designationList != null ? Model.designationList.Count : 0) ; i++)
+           {
+              var value = Model.designationList[i].Value != null ? Model.designationList[i].Value : "0";
+              var text = Model.designationList[i].Value != null ? Model.designationList[i].Text : Resource.ALL;
+
+              @:dslist.push('@value'); dsTextlist.push('@text');
+            }
+
+            Claimable_Type_Onchange();
+
+            $("#Claimable_Type").change(function () {
+                Claimable_Type_Onchange();
+            });
+
+            Is_MileAge_Onchange();
+            $('#Is_MileAge').click(function () {
+                Is_MileAge_Onchange();
+            });
+
+            $("#clear").click(function () {
+                $('#Department_ID').css("display", "none");
+                $('#isDepartment').val("0");
+            });
+
+            $("#btnDetailSubmit").click(function () {
+
+                ClearValidate('#Designations');
+                ClearValidate('#Amount_Per_Year');
+                ClearValidate('#Amount_Per_Month');
+                ClearValidate('#Year_Service');
+                ClearValidate('#Amount');
+                ClearValidate('#Pecentage');
+
+                var valid = true;
+                if (ValidateArrayRequire('Designations', '@Resource.Designation', true) == false) {
+                    valid = false;
+                }
+
+                if (ValidateNumber('Year_Service', '@Resource.Year_Service', true, true) == false) {
+                    valid = false;
+                }
+
+                var chkPerMonth = $('#Select_Per_Month').get(0);
+                if (chkPerMonth != null && chkPerMonth.checked == true) {
+                    if (ValidateDecimal('Amount_Per_Month', '@Resource.Amount_Per_Month', true) == false) {
+                        valid = false;
+                    }
+                }
+                else {
+                    if (ValidateDecimal('Amount_Per_Year', '@Resource.Amount_Per_Year', true) == false) {
+                        valid = false;
+                    }
+                }
+
+                var chk = $('#Select_Amount').get(0);
+                if (chk != null && chk.checked == true) {
+                    if (ValidateDecimal('Amount', '@Resource.Amount', true) == false) {
+                        valid = false;
+                    }
+                }
+                else {
+                    if (ValidateDecimal('Pecentage', '@Resource.Pecentage', true) == false) {
+                        valid = false;
+                    }
+                }
+
+                if (!valid) {
+                    return;
+                }
+
+                var pYear = parseInt($('#Year_Service').val());
+                var pAmount = parseFloat($('#Amount').val());
+                var pPercentage = parseFloat($('#Pecentage').val());
+                var pAmountPerMonth = parseFloat($('#Amount_Per_Month').val());
+                var pAmountPerYear = parseFloat($('#Amount_Per_Year').val());
+                var pDesignation = new Array();
+
+                if ($('#Event_Click').val() == '@RowType.EDIT') {
+                    var index = parseInt($('#Index').val());
+                    if (index != null && !isNaN(index)) {
+
+                        var dtexts = "";
+                        $("[name='Detail_Rows[" + index + "].Designations']").remove();
+                        var dstr = "[";
+                        var dselcnt = 0;
+
+                        for (var i = 0; i < dcnt ; i++) {
+                            if ($("#Designations-" + i).get(0).checked == true) {
+                                if (dselcnt > 0) {
+                                    dstr = dstr + ',';
+                                }
+                                dstr = dstr + dslist[i];
+                                dselcnt++;
+                                dtexts = dtexts + dsTextlist[i] + "\r\n";
+                                var d = "<input type='hidden' name='Detail_Rows[" + index + "].Designations' value='" + dslist[i] + "' />";
+                                $('#td-' + index).append(d);
+
+                                pDesignation.push(dslist[i]);
+                            }
+                        }
+
+                        dstr = dstr + "]"
+                        $('#Detail_Rows_' + index + '__Year_Service').val(pYear);
+                        if (chkPerMonth.checked) {
+                            pAmountPerYear = 0;
+                            $('#Detail_Rows_' + index + '__Select_Per_Month').val(true);
+                            $('#Detail_Rows_' + index + '__Amount_Per_Year').val(0);
+                            $('#Detail_Rows_' + index + '__Amount_Per_Month').val(pAmountPerMonth);
+                            $('#Detail_Rows_' + index + '__Amount_Per_Year_Text').val('');
+                            $('#Detail_Rows_' + index + '__Amount_Per_Month_Text').val(formatCurrency(pAmountPerMonth) + " " + '@Resource.Per_Month');
+
+                            $('#Detail_Rows_' + index + '__Amount_Per_Year_Text').hide();
+                            $('#Detail_Rows_' + index + '__Amount_Per_Month_Text').show();
+                        }
+                        else {
+                            pAmountPerMonth = 0;
+                            $('#Detail_Rows_' + index + '__Select_Per_Month').val(false);
+                            $('#Detail_Rows_' + index + '__Amount_Per_Month').val(0);
+                            $('#Detail_Rows_' + index + '__Amount_Per_Year').val(pAmountPerYear);
+                            $('#Detail_Rows_' + index + '__Amount_Per_Month_Text').val('');
+                            $('#Detail_Rows_' + index + '__Amount_Per_Year_Text').val(formatCurrency(pAmountPerYear) + " " + '@Resource.Per_Year');
+
+                            $('#Detail_Rows_' + index + '__Amount_Per_Year_Text').show();
+                            $('#Detail_Rows_' + index + '__Amount_Per_Month_Text').hide();
+                        }
+
+                        $('#Detail_Rows_' + index + '__Designations_Text').val(dtexts);
+                        $('#Detail_Rows_' + index + '__Year_Service_Text').val(pYear);
+                        $('#Detail_Rows_' + index + '__Designations_Text').get(0).rows = dselcnt;
+
+                        if (chk.checked) {
+                            pPercentage = 0;
+                            $('#Detail_Rows_' + index + '__Select_Amount').val(true);
+                            $('#Detail_Rows_' + index + '__Select_Percentage').val(false);
+                            $('#Detail_Rows_' + index + '__Amount').val(pAmount);
+                            $('#Detail_Rows_' + index + '__Pecentage').val(0);
+                            $('#Detail_Rows_' + index + '__Max_Amount_Text').val(formatCurrency(pAmount));
+                        }
+                        else {
+                            pAmount = 0;
+                            $('#Detail_Rows_' + index + '__Select_Amount').val(false);
+                            $('#Detail_Rows_' + index + '__Select_Percentage').val(true);
+                            $('#Detail_Rows_' + index + '__Amount').val(0);
+                            $('#Detail_Rows_' + index + '__Pecentage').val(pPercentage);
+                            $('#Detail_Rows_' + index + '__Max_Amount_Text').val(formatCurrency(pPercentage) + "%");
+                        }
+
+                        var clickevent = "EditDetail_Onclick('" + index + "','" + $('#Expenses_Config_ID').val() + "','" + $('#Group_ID').val() + "','" + $('#Row_Type').val() + "'," + dstr + ",'" + pAmountPerYear + "','" + pYear + "','" + chk.checked + "','" + pAmount + "','" + !chk.checked + "','" + pPercentage + "','" + chkPerMonth.checked + "','" + pAmountPerMonth + "')";
+                        $('#btnEditDetail-' + index).attr("onclick", clickevent);
+                        $('#btnClose').get(0).click();
+                    }
+                }
+                else {
+
+                    for (var i = 0; i < dcnt ; i++) {
+                        if ($("#Designations-" + i).get(0).checked == true) {
+                            pDesignation.push(dslist[i]);
+                        }
+                    }
+
+                    var rowcount = $('#eDetailDataTable > tbody >tr').length;
+                    var data = { pIndex: rowcount, pDesignation: pDesignation, pYear: pYear, pAmountPerYear: pAmountPerYear, pSelectAmount: chk.checked, pAmount: pAmount, pPercentage: pPercentage, pSelectPerMonth: chkPerMonth.checked, pAmountPerMonth: pAmountPerMonth };
+                    ShowMask();
+                    $.ajax({
+                        url: '@Url.Action("AddNewExpensesDetail", "Expenses")',
+                        //Passes the content of an input up
+                        data: data,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            var str = '<tr  id="erow-' + rowcount + '">';
+                            str = str + data + '</tr>';
+                            $('#eDetailDataTable > tbody').append(str);
+                            $('#btnOpenDlgDetail').get(0).click();
+                            $('#btnClose').get(0).click();
+                            CloseMask();
+                        }
+                    });
+                }
+            });
+        })
+
+        function AddDetail_Onclick() {
+            ClearValidate('#Designations');
+            ClearValidate('#Amount_Per_Year');
+            ClearValidate('#Amount_Per_Month');
+            ClearValidate('#Year_Service');
+            ClearValidate('#Amount');
+            ClearValidate('#Pecentage');
+
+            $('#btnOpenDlgDetail').get(0).click();
+            $('#Event_Click').val('@RowType.ADD');
+            $('#Expenses_Config_ID').val('');
+            $('#Index').val('');
+            $('#Group_ID').val('');
+            $('#Row_Type').val('@RowType.ADD');
+            $('#Year_Service').val(0);
+            $('#Select_Per_Year').prop('checked', true);
+            $('#Select_Per_Month').prop('checked', false);
+            $('#Amount_Per_Month').val(0);
+            $('#Amount_Per_Year').val(0);
+            $('#Amount').val(0);
+            $('#Pecentage').val(0);
+
+            $('#Select_Amount').prop('checked', true);
+            $('#Select_Percentage').prop('checked', false);
+
+            if ($("[name='Designations']") != null) {
+                for (var i = 0 ; i < $("[name='Designations']").length; i++) {
+                    $("[name='Designations']").get(i).checked = false;
+                }
+            }
+            Designations_Onchange();
+        }
+
+        function EditDetail_Onclick(index, eConfigID, groupID, rowType, designations, amountPerYear, yearService, selectAmount, amount, selectPercentage, pecentage, selectPerMonth, amountPerMonth) {
+            ClearValidate('#Designations');
+            ClearValidate('#Amount_Per_Year');
+            ClearValidate('#Amount_Per_Month');
+            ClearValidate('#Year_Service');
+            ClearValidate('#Amount');
+            ClearValidate('#Pecentage');
+
+            $('#btnOpenDlgDetail').get(0).click();
+            $('#Event_Click').val('@RowType.EDIT');
+            $('#Expenses_Config_ID').val(eConfigID);
+            $('#Index').val(index);
+
+            $('#Year_Service').val(parseInt(yearService));
+            if (selectAmount == "True" || selectAmount == "true") {
+                $('#Amount').val(amount);
+                $('#Pecentage').val(0);
+                $('#Select_Amount').prop('checked', true);
+                $('#Select_Percentage').prop('checked', false);
+            }
+            else {
+                $('#Amount').val(0);
+                $('#Pecentage').val(pecentage);
+                $('#Select_Amount').prop('checked', false);
+                $('#Select_Percentage').prop('checked', true);
+            }
+            if (selectPerMonth == "True" || selectPerMonth == "true") {
+                $('#Amount_Per_Year').val(0);
+                $('#Amount_Per_Month').val(amountPerMonth);
+                $('#Select_Per_Year').prop('checked', false);
+                $('#Select_Per_Month').prop('checked', true);
+            }
+            else {
+                $('#Amount_Per_Year').val(amountPerYear);
+                $('#Amount_Per_Month').val(0);
+                $('#Select_Per_Year').prop('checked', true);
+                $('#Select_Per_Month').prop('checked', false);
+            }
+
+            if (designations != null) {
+                for (var i = 0; i < dcnt ; i++) {
+                    $("[name='Designations']").get(i).checked = false;
+                    for (var j = 0 ; j < designations.length ; j++) {
+                        if (dslist[i] == designations[j]) {
+                            $("[name='Designations']").get(i).checked = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            Designations_Onchange();
+        }
+
+        function DeleteDetail(rowid, index) {
+            if (confirm('@Resource.Confirm_Delete_Msg')) {
+                $('#Detail_Rows_' + index + '__Row_Type').val('@RowType.DELETE');
+                $('#' + rowid).hide();
+            }
+        }
+
+        function VerifyYearService() {
+            var year = $('#Year_Service').val();
+            if (year != null) {
+                if (year > 50 || year < 0) {
+                    alert('@Resource.Message_Year_Is_Not_Proper');
+                    $('#Year_Service').val('');
+                }
+            }
+        }
+
+        function Designations_Onchange() {
+            var haveAll = false;
+
+            for (var i = 0; i < dcnt ; i++) {
+                var ds = $("#Designations-" + i).get(0);
+                if (i == 0) {
+                    if (ds.checked == true) {
+                        haveAll = true;
+                    }
+                }
+                else {
+                    if (haveAll == true) {
+                        $("#Designations-" + i).get(0).checked = false;
+                        $("#Designations-" + i).prop('disabled', true);
+                    }
+                    else {
+                        $("#Designations-" + i).prop('disabled', false);
+                    }
+                }
+            }
+        }
+
+        function Claimable_Type_Onchange() {
+            if ($("#Claimable_Type option:selected").text() == "Per Department") {
+                $('#isDepartment').val("1");
+                $('#Department_ID').prop('disabled', false)
+            } else {
+                $('#Department_ID').prop('disabled', true)
+                $('#isDepartment').val("0");
+                $('#Department_ID').val("");
+            }
+            $('#Department_ID').trigger("chosen:updated");
+        }
+
+        function Is_MileAge_Onchange() {
+            var opt = $('#Is_MileAge').get(0);
+            $('#divMileage').hide();
+            if (opt.checked == true) {
+                $('#divMileage').show();
+            }
+        }
+
+    </script>
+    <div class="pageheader">
+        @if (Model.eid > 0)
+        {
+            <h2>@Resource.Expenses_Type_Details<span></span></h2>
+        }
+        else
+        {
+            <h2>@Resource.Add_New_Expenses_Type <span></span></h2>
+        }
+
+        <div class="breadcrumbs">
+            <ol class="breadcrumb">
+                <li>@Resource.You_Are_Here</li>
+                <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li><a href="@Url.Action("Configuration", "Expenses", new { tabAction = "expenses" })">@Resource.Expenses_Type</a></li>
+                <li class="active">@Resource.Expenses_Type</li>
+            </ol>
+        </div>
+    </div>
+    using (Html.BeginForm("ExpensesType", "Expenses", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+
+        @Html.AntiForgeryToken()
+        <input type="hidden" value="@Model.operation" name="operation" />
+        <input type="hidden" value="@Model.eid" name="eid" />
+        <input type="hidden" value="@Model.Company_Currency" name="Company_Currency" />
+        <input type="hidden" name="isDepartment" id="isDepartment" value="0" />
+
+        <div class="main">
+            <div class="row">
+                <div class="col-md-12">
+                    @if (Model.result != null && Model.result.Code != 0)
+                    {
+
+                        if (Model.result.Code < 0)
+                        {
+                            <div class="alert alert-red">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                        else if (Model.result.Code > 0)
+                        {
+                            <div class="alert alert-success">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                    }
+                    <section class="tile color transparent-black">
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.Expenses_Type</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Expenses_Name" class="control-label">@Resource.Category</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <select class="chosen-select chosen-transparent form-control" id="Expenses_Category_ID" name="Expenses_Category_ID">
+                                                @if (Model.ExpensesCategoryList != null)
+                                                {
+                                                    foreach (var row in Model.ExpensesCategoryList)
+                                                    {
+                                                        if (Model.Expenses_Category_ID == NumUtil.ParseInteger(row.Value))
+                                                        {
+                                                            <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Expenses_Category_ID)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Expenses_Name" class="control-label">@Resource.Expenses_Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control" id="Expenses_Name" name="Expenses_Name" value="@Model.Expenses_Name">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Expenses_Name)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Expenses_Description" class="control-label">@Resource.Expenses_Desc</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input class="form-control" name="Expenses_Description" id="Expenses_Description" value="@Model.Expenses_Description">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Expenses_Description)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <div class="checkbox check-transparent">
+                                                @if (Model.Is_MileAge.HasValue && Model.Is_MileAge.Value)
+                                                {
+                                                    <input type="checkbox" value="true" id="Is_MileAge" name="Is_MileAge" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" value="true" id="Is_MileAge" name="Is_MileAge">
+                                                }
+                                                <label for="Is_MileAge">@Resource.Mileage</label>
+                                            </div>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Is_MileAge)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="divMileage">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <div class="col-md-12">
+                                                <label for="UOM_ID" class="control-label">@Resource.Unit_Of_Measurement</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-12">
+                                                <select class="chosen-select chosen-transparent form-control" id="UOM_ID" name="UOM_ID">
+                                                    @foreach (var row in Model.uomList)
+                                                    {
+                                                        if (Model.UOM_ID == NumUtil.ParseInteger(row.Value))
+                                                        {
+                                                            <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                                        }
+                                                    }
+                                                </select>
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(m => m.UOM_ID)
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <div class="col-md-12">
+                                                <label for="Amount_Per_UOM" class="control-label">@Resource.Amount_Per_UOM</label>
+                                            </div>
+                                        </div>
+                                       <div class="form-group">
+                                          <div class="col-md-8">
+                                             <input type="text" class="form-control text-right" id="Amount_Per_UOM" name="Amount_Per_UOM" value="@Model.Amount_Per_UOM">
+                                             <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Amount_Per_UOM)
+                                             </div>
+                                          </div>
+                                          <div class="col-md-4">
+                                             <input type="text" class="form-control"  value="@Model.Company_Currency" readonly>
+                                          </div>
+                                       </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Claimable_Type" class="control-label">@Resource.Claimable_Type</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <select class="chosen-select chosen-transparent form-control" id="Claimable_Type" name="Claimable_Type">
+                                                @if (Model.claimtypeList != null)
+                                                {
+                                                    foreach (var row in Model.claimtypeList)
+                                                    {
+                                                        if (Model.Claimable_Type == row.Value)
+                                                        {
+                                                            <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Claimable_Type)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label class="control-label">@Resource.Allowed_Over_Amount_Per_Year</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Allowed_Over_Amount_Per_Year)
+                                                {
+                                                    <input type="radio" name="Allowed_Over_Amount_Per_Year" id="Allowed_Over_Amount_Per_YearY" value="true" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Allowed_Over_Amount_Per_Year" id="Allowed_Over_Amount_Per_YearY" value="true">
+                                                }
+                                                <label for="Allowed_Over_Amount_Per_YearY">@Resource.Yes</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Allowed_Over_Amount_Per_Year)
+                                                {
+                                                    <input type="radio" name="Allowed_Over_Amount_Per_Year" id="Allowed_Over_Amount_Per_YearN" value="false">
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Allowed_Over_Amount_Per_Year" id="Allowed_Over_Amount_Per_YearN" value="false" checked>
+                                                }
+                                                <label for="Allowed_Over_Amount_Per_YearN">@Resource.No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Department_ID" class="control-label">@Resource.Department</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <select class="chosen-select chosen-transparent form-control" id="Department_ID" name="Department_ID">
+                                    @if (Model.departmentList != null)
+                                                {
+                                       foreach (var row in Model.departmentList)
+                                       {
+                                          if (Model.Department_ID == NumUtil.ParseInteger(row.Value))
+                                                    {
+                                             <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                    }
+                                                    else
+                                                    {
+                                             <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                          }
+                                                    }
+                                                }
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Department_ID)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label class="control-label">@Resource.Allowed_Probation</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Allowed_Probation)
+                                                {
+                                                    <input type="radio" name="Allowed_Probation" id="Allowed_ProbationY" value="true" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Allowed_Probation" id="Allowed_ProbationY" value="true">
+                                                }
+
+                                                <label for="Allowed_ProbationY">@Resource.Yes</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Allowed_Probation)
+                                                {
+                                                    <input type="radio" name="Allowed_Probation" id="Allowed_ProbationN" value="false">
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Allowed_Probation" id="Allowed_ProbationN" value="false" checked>
+                                                }
+                                                <label for="Allowed_ProbationN">@Resource.No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    @*-------------------------------*@
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label class="control-label">@Resource.Accumulative</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Is_Accumulative)
+                                                {
+                                                    <input type="radio" name="Is_Accumulative" id="AccumulativeY" value="true" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Is_Accumulative" id="AccumulativeY" value="true">
+                                                }
+                                                <label for="AccumulativeY">@Resource.Yes</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Is_Accumulative)
+                                                {
+                                                    <input type="radio" name="Is_Accumulative" id="AccumulativeN" value="false">
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Is_Accumulative" id="AccumulativeN" value="false" checked>
+                                                }
+                                                <label for="AccumulativeN">@Resource.No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @*-------------------------------*@
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <section class="tile transparent">
+                        <div class="tile-body color transparent-black rounded-corners">
+                            <div class="row">
+                                <div class="col-md-12 text-center">
+                                    <a class="btn btn-greensea  btn-sm add-row" onclick="AddDetail_Onclick()">@Resource.Add_An_Item</a>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-datatable table-custom" id="eDetailDataTable">
+                                    <thead>
+                                        <tr>
+                                            <th>@Resource.Designation</th>
+                                            <th>@Resource.Year_Service</th>
+                                            <th>@Resource.Total_Amount</th>
+                                            <th>@Resource.Max_Amount_Per_Claim</th>
+                                            <th class="no-sort" width="110px">@Resource.Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.Detail_Rows != null)
+                                        {
+                                            var i = 0;
+                                            foreach (var row in Model.Detail_Rows)
+                                            {
+                                                var designations = Newtonsoft.Json.JsonConvert.SerializeObject(row.Designations);
+                                                var desinationsText = "";
+                                                <tr id="erow-@i">
+                                                    <td id="td-@i">
+
+                                                        @if (Model.Detail_Rows[i].Row_Type == RowType.DELETE)
+                                                        {
+                                                            <script type="text/javascript">
+                                                                $(function () {
+                                                                    $('#' + 'erow-@i').hide();
+                                                                });
+                                                            </script>
+                                                        }
+                                                        @if (Model.Detail_Rows[i].Row_Type == null)
+                                                        {
+                                                            @Html.Hidden("Detail_Rows[" + i + "].Row_Type", RowType.EDIT)
+                                                        }
+                                                        else
+                                                        {
+                                                            @Html.Hidden("Detail_Rows[" + i + "].Row_Type", Model.Detail_Rows[i].Row_Type)
+                                                        }
+                                                        @Html.Hidden("Detail_Rows[" + i + "].Expenses_Config_ID", Model.Detail_Rows[i].Expenses_Config_ID)
+                                                        @Html.Hidden("Detail_Rows[" + i + "].Group_ID", Model.Detail_Rows[i].Group_ID)
+
+                                                        @if (Model.Detail_Rows[i].Designations != null)
+                                                        {
+                                                            var j = 0;
+                                                            foreach (var drow in Model.Detail_Rows[i].Designations)
+                                                            {
+                                                                foreach (var d in Model.designationList)
+                                                                {
+                                                                    if (NumUtil.ParseInteger(d.Value) == drow)
+                                                                    {
+                                                                        if (j > 0)
+                                                                        {
+                                                                            desinationsText = desinationsText + Environment.NewLine;
+                                                                        }
+                                                                        desinationsText = desinationsText + d.Text;
+                                                                        <input type="hidden" name="Detail_Rows[@i].Designations" value="@d.Value" />
+                                                                        break;
+                                                                    }
+                                                                }
+                                                                j++;
+                                                            }
+                                                            <textarea class="form-control input-table-transparent" id="Detail_Rows_@(i)__Designations_Text" rows="@row.Designations.Length">@desinationsText</textarea>
+                                                        }
+                                                        <div class="validation-error">
+                                                            @Html.ValidationMessage("Detail_Rows[" + i + "].Designations")
+                                                        </div>
+                                                    </td>
+
+                                                    <td>
+                                                        <input type="text" class="form-control input-table-transparent" id="Detail_Rows_@(i)__Year_Service_Text" value="@Model.Detail_Rows[i].Year_Service">
+                                                        <input type="hidden" id="Detail_Rows_@(i)__Year_Service" name="Detail_Rows[@i].Year_Service" value="@Model.Detail_Rows[i].Year_Service">
+                                                        <div class="validation-error">
+                                                            @Html.ValidationMessage("Detail_Rows[" + i + "].Year_Service")
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-right">
+                                                        @if (Model.Detail_Rows[i].Select_Per_Month)
+                                                        {
+                                                            <input type="hidden" id="Detail_Rows_@(i)__Select_Per_Month" name="Detail_Rows[@i].Select_Per_Month" value="true">
+                                                            <input type="text" class="form-control input-table-transparent text-right" id="Detail_Rows_@(i)__Amount_Per_Year_Text" value="" style="display:none">
+                                                            <input type="text" class="form-control input-table-transparent text-right" id="Detail_Rows_@(i)__Amount_Per_Month_Text" value="@((Model.Detail_Rows[i].Amount_Per_Month.HasValue ? Model.Detail_Rows[i].Amount_Per_Month.Value : 0).ToString("n2")+" "+ Resource.Per_Month)">
+                                                            <input type="hidden" id="Detail_Rows_@(i)__Amount_Per_Month" name="Detail_Rows[@i].Amount_Per_Month" value="@Model.Detail_Rows[i].Amount_Per_Month">
+                                                            <input type="hidden" id="Detail_Rows_@(i)__Amount_Per_Year" name="Detail_Rows[@i].Amount_Per_Year" value="0">
+                                                            <div class="validation-error">
+                                                                @Html.ValidationMessage("Detail_Rows[" + i + "].Amount_Per_Month")
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <input type="hidden" id="Detail_Rows_@(i)__Select_Per_Month" name="Detail_Rows[@i].Select_Per_Month" value="false">
+                                                            <input type="text" class="form-control input-table-transparent text-right" id="Detail_Rows_@(i)__Amount_Per_Month_Text" value="" style="display:none">
+    <input type="text" class="form-control input-table-transparent text-right" id="Detail_Rows_@(i)__Amount_Per_Year_Text" value="@((Model.Detail_Rows[i].Amount_Per_Year.HasValue ? Model.Detail_Rows[i].Amount_Per_Year.Value : 0).ToString("n2") + " " + Resource.Per_Year)">
+                                                            <input type="hidden" id="Detail_Rows_@(i)__Amount_Per_Year" name="Detail_Rows[@i].Amount_Per_Year" value="@Model.Detail_Rows[i].Amount_Per_Year">
+                                                            <input type="hidden" id="Detail_Rows_@(i)__Amount_Per_Month" name="Detail_Rows[@i].Amount_Per_Month" value="0">
+                                                            <div class="validation-error">
+                                                                @Html.ValidationMessage("Detail_Rows[" + i + "].Amount_Per_Year")
+                                                            </div>
+                                                        }
+                                                    </td>
+                                                    <td class="text-right">
+                                                        @if (Model.Detail_Rows[i].Select_Amount)
+                                                        {
+                                                            <input type="hidden" id="Detail_Rows_@(i)__Select_Amount" name="Detail_Rows[@i].Select_Amount" value="true">
+                                                            <input type="hidden" id="Detail_Rows_@(i)__Select_Percentage" name="Detail_Rows[@i].Select_Percentage" value="false">
+                                                            <input type="hidden" id="Detail_Rows_@(i)__Amount" name="Detail_Rows[@i].Amount" value="@Model.Detail_Rows[i].Amount">
+                                                            <input type="hidden" id="Detail_Rows_@(i)__Pecentage" name="Detail_Rows[@i].Pecentage" value="@Model.Detail_Rows[i].Pecentage">
+                                                            <input type="text" class="form-control input-table-transparent text-right" id="Detail_Rows_@(i)__Max_Amount_Text" value="@((Model.Detail_Rows[i].Amount.HasValue ? Model.Detail_Rows[i].Amount.Value : 0).ToString("n2")) ">
+                                                        }
+                                                        else
+                                                        {
+                                                            <input type="hidden" id="Detail_Rows_@(i)__Select_Amount" name="Detail_Rows[@i].Select_Amount" value="false">
+                                                            <input type="hidden" id="Detail_Rows_@(i)__Select_Percentage" name="Detail_Rows[@i].Select_Percentage" value="true">
+                                                            <input type="hidden" id="Detail_Rows_@(i)__Pecentage" name="Detail_Rows[@i].Pecentage" value="@Model.Detail_Rows[i].Pecentage">
+                                                            <input type="hidden" id="Detail_Rows_@(i)__Amount" name="Detail_Rows[@i].Amount" value="@Model.Detail_Rows[i].Amount">
+                                                            <input type="text" class="form-control input-table-transparent text-right" id="Detail_Rows_@(i)__Max_Amount_Text" value="@((Model.Detail_Rows[i].Pecentage.HasValue ? Model.Detail_Rows[i].Pecentage.Value : 0).ToString("n2") + "%") ">
+                                                        }
+                                                    </td>
+                                                    <td class="actions text-left">
+                                                        @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                        {
+                                                            <a href="#" id="btnEditDetail-@i" onclick="EditDetail_Onclick('@i', '@row.Expenses_Config_ID','@row.Group_ID','@row.Row_Type',@designations, '@row.Amount_Per_Year','@row.Year_Service', '@(row.Select_Amount.ToString())', '@row.Amount','@(row.Select_Percentage.ToString())', '@row.Pecentage', '@row.Select_Per_Month.ToString()','@row.Amount_Per_Month' )" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                                        }
+                                                        @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_D))
+                                                        {
+                                                            <a data-toggle="modal" onclick="return DeleteDetail('erow-@i', @i);" href="#" title="@Resource.Delete">
+                                                                <i class="fa fa-times-circle-o fa-2x"></i>
+                                                            </a>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                                        i++;
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <section class="tile color transparent-white">
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U) | Model.rights.Contains(UserSession.RIGHT_C))
+                                    {
+                                        <button type="submit" class="btn btn-primary" onclick="return Confirm_Alert('@Model.eid');">@Resource.Save</button>
+                                    }
+                                    <a href="@Url.Action("Configuration", "Expenses", new { tabAction = "expenses" })" class="btn btn-default">@Resource.Back</a>
+                                    <a id="btnOpenDlgDetail" href="#modal-detail" role="button" data-toggle="modal" style="display:none;"></a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modal-detail" tabindex="-1" role="dialog" aria-labelledby="modalConfirmLabel" aria-hidden="true">
+            <input type="hidden" id="Expenses_Config_ID">
+            <input type="hidden" id="Index">
+            <input type="hidden" id="Group_ID">
+            <input type="hidden" id="Row_Type">
+            <input type="hidden" id="Event_Click">
+
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title"><strong>@Resource.Item_Details</strong></h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <label for="Designations" class="control-label">@Resource.Designation</label>
+                                        <div class="validation-error">
+                                            <span id="Designations_Err"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12" style="height:300px;overflow-y:auto">
+                                        <table class="table table-datatable table-custom" id="Designations">
+                                            <tbody>
+                                                @if (Model != null && Model.designationList != null && Model.designationList.Count > 0)
+                                                {
+                                                    var i = 0;
+                                                    foreach (var row in Model.designationList)
+                                                    {
+                                                        <tr>
+                                                            <td style="width:30px">
+                                                                <div class="checkbox">
+                                                                    <input type="checkbox" value="@row.Value" id="Designations-@i" name="Designations" onchange="Designations_Onchange()">
+                                                                    <label for="Designations-@i"></label>
+                                                                </div>
+                                                            </td>
+                                                            <td>@row.Text</td>
+                                                        </tr>
+
+                                                        i++;
+                                                    }
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <label for="Year_Service" class="control-label">@Resource.Year_Service</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <input type="text" class="form-control input-datepicker" id="Year_Service" name="Year_Service" value="@Model.Year_Service" onchange="VerifyYearService(this)">
+                                        <div class="validation-error">
+                                            <span id="Year_Service_Err"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <label class="control-label">@Resource.Total_Amount</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-6">
+                                        <div class="radio ">
+                                            @if (Model.Select_Per_Month)
+                                            {
+                                                <input type="radio" name="Select_Per_Month" id="Select_Per_Year" value="true">
+                                            }
+                                            else
+                                            {
+                                                <input type="radio" name="Select_Per_Month" id="Select_Per_Year" value="false" checked>
+                                            }
+                                            <label for="Select_Per_Year">@Resource.Per_Year</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control input-datepicker" id="Amount_Per_Year" name="Amount_Per_Year" value="@Model.Amount_Per_Year">
+                                        <div class="validation-error">
+                                            <span id="Amount_Per_Year_Err"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="control-label">@Model.Company_Currency</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-6">
+                                        <div class="radio ">
+                                            @if (Model.Select_Per_Month)
+                                            {
+                                                <input type="radio" name="Select_Per_Month" id="Select_Per_Month" value="false" checked>
+                                            }
+                                            else
+                                            {
+                                                <input type="radio" name="Select_Per_Month" id="Select_Per_Month" value="true">
+                                            }
+                                            <label for="Select_Per_Month">@Resource.Per_Month</label>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control " id="Amount_Per_Month" name="Amount_Per_Month" value="@Model.Amount_Per_Month">
+                                        <div class="validation-error">
+                                            <span id="Amount_Per_Month_Err"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="control-label">@Model.Company_Currency</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <label class="control-label">@Resource.Max_Amount_Per_Claim</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-1">
+                                        <div class="radio ">
+                                            @if (Model.Select_Amount)
+                                            {
+                                                <input type="radio" name="Select_Amount" id="Select_Amount" value="true">
+                                            }
+                                            else
+                                            {
+                                                <input type="radio" name="Select_Amount" id="Select_Amount" value="false" checked>
+                                            }
+                                            <label for="Select_Amount"></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" name="Amount" id="Amount" value="@Model.Amount">
+                                        <div class="validation-error">
+                                            <span id="Amount_Err"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="control-label">@Model.Company_Currency</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-1">
+                                        <div class="radio ">
+                                            @if (Model.Select_Percentage)
+                                            {
+                                                <input type="radio" name="Select_Amount" id="Select_Percentage" value="true">
+                                            }
+                                            else
+                                            {
+                                                <input type="radio" name="Select_Amount" id="Select_Percentage" value="false" checked>
+                                            }
+                                            <label for="Select_Percentage"></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" name="Pecentage" id="Pecentage" value="@Model.Select_Percentage">
+                                        <div class="validation-error">
+                                            <span id="Pecentage_Err"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="control-label">@("% * " + Resource.Total_Amount)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btnClose" type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+                        <button id="btnDetailSubmit" type="button" class="btn btn-primary" onclick="return Confirm_Alert($('#Expenses_Config_ID').val());">@Resource.Save_Change</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="md-overlay"></div><!-- the overlay element -->
+    }
+}
+
+

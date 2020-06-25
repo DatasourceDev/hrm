@@ -1,0 +1,65 @@
+/*----Added by sun 06-06-2016 ----*/
+
+GO
+CREATE TABLE Time_Sheet 
+(
+ Time_Sheet_ID   INT    NOT NULL IDENTITY(1,1),
+ Company_ID    INT     NULL, 
+ Employee_Profile_ID  INT     NULL, 
+ Date_Of_Date   Datetime	null,
+ Indent_No    nvarchar(150)   NULL,
+ Job_Cost_ID int  null,
+ Customer_ID int NULL,
+ Clock_In	Time(7)	null,
+ Clock_Out	Time(7)	null,
+ Duration decimal(18,2) NULL ,
+ Note varchar(300) NULL,
+ Overall_Status nvarchar(50) NULL,
+ Record_Status nvarchar(50) NULL,
+ Create_By    nvarchar(150) NULL,
+ Create_On   Datetime	null,
+ Update_By	varchar (150)	null,
+ Update_On	Datetime	null,
+ CONSTRAINT [pk_Time_Sheet] PRIMARY KEY CLUSTERED ([Time_Sheet_ID] ASC),
+ )
+
+GO
+ALTER TABLE [dbo].[Time_Sheet]
+    ADD [Request_ID]     INT       NULL
+
+ALTER TABLE [dbo].[Time_Sheet]
+    ADD [Supervisor]     INT       NULL
+
+ALTER TABLE [dbo].[Time_Sheet]
+    ADD [Request_Cancel_ID]     INT       NULL
+
+ALTER TABLE [dbo].[Time_Sheet]
+    ADD [Employee_Name]     nvarchar(150) NULL
+
+ALTER TABLE [dbo].[Time_Sheet]
+	ADD [Indent_Name]     nvarchar(300) NULL
+
+ALTER TABLE [dbo].[Time_Sheet]
+	ADD [Customer_Name]     nvarchar(150) NULL
+
+ALTER TABLE [dbo].[Time_Sheet]
+	ADD [Hour_Rate]     DECIMAL (18, 2) NULL
+
+ALTER TABLE [dbo].[Time_Sheet]
+	drop column [Customer_ID]    
+  
+ALTER TABLE [dbo].[Time_Sheet]
+    ADD [Cancel_Status]     nvarchar(50) NULL
+
+Alter table [dbo].[Time_Sheet] Alter Column Note nvarchar(300)
+
+
+alter table Time_Sheet
+drop column Launch_Duration 
+alter table Time_Sheet
+drop column Duration 
+
+alter table Time_Sheet
+add  Launch_Duration time  null
+alter table Time_Sheet
+add  Duration time  null

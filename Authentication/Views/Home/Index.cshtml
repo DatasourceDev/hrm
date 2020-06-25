@@ -1,0 +1,934 @@
+﻿@model  Authentication.Models.DashBoardViewModel
+@using SBSModel.Common;
+@using SBSModel.Common;
+@using SBSModel.Models;
+@using SBSWorkFlowAPI.Models;
+@using SBSWorkFlowAPI.ModelsAndService;
+@using Authentication.Common;
+@using System;
+@using System.Collections;
+@using SBSResourceAPI;
+@using SBSWorkFlowAPI.Constants;
+@{
+   ViewBag.Title = Resource.DashBoard;
+   //var subscriptions = UserSession.getSubscription(Request.RequestContext.HttpContext);
+   //Dictionary<String, List<string>> rights = UserSession.getUserPageRights(Request.RequestContext.HttpContext);
+   Hashtable hashtable = new Hashtable();
+}
+@{
+   var userlogin = UserSession.getUser(Request.RequestContext.HttpContext);
+   var requests = new List<Request>();
+   var requestIDs = new List<int>();
+   var hist = new EmploymentHistoryService().GetCurrentEmploymentHistoryByProfile(userlogin.Profile_ID);
+   if (hist != null)
+   {
+      var aService = new SBSWorkFlowAPI.Service();
+      var r = aService.GetMyRequests(userlogin.Company_ID.Value, hist.Department_ID.Value, userlogin.Profile_ID, ModuleCode.HR, ApprovalType.Leave);
+      if (r.Item2.IsSuccess && r.Item1 != null)
+      {
+         requests = r.Item1.ToList();
+         requestIDs = r.Item1.Select(s => s.Request_ID).ToList();
+      }
+   }
+}
+@{
+   var erequests = new List<Request>();
+   var erequestIDs = new List<int>();
+   if (hist != null)
+   {
+      var aService = new SBSWorkFlowAPI.Service();
+      var r = aService.GetMyRequests(userlogin.Company_ID.Value, hist.Department_ID.Value, userlogin.Profile_ID, ModuleCode.HR, ApprovalType.Expense);
+      if (r.Item2.IsSuccess && r.Item1 != null)
+      {
+         erequests = r.Item1.ToList();
+         erequestIDs = r.Item1.Select(s => s.Request_ID).ToList();
+      }
+   }
+}
+
+<script src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/fullcalendar/javascripts/vendor/fullcalendar/fullcalendar.min.js"></script>
+<link href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/fullcalendar/stylesheets/fullcalendar.min.css" rel="stylesheet">
+<link href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/css/minimal.css" rel="stylesheet">
+<script type="text/javascript">
+   //initialize file upload button function
+   $(document)
+     .on('change', '.btn-file :file', function () {
+        var input = $(this),
+        numFiles = input.get(0).files ? input.get(0).files.length : 1,
+        label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+        input.trigger('fileselect', [numFiles, label]);
+     });
+
+   $(function () {
+      //Set Mandatory
+      if ($('#Start_Date').val() == null || $('#Start_Date').val() == '') {
+         MandatoryColor('Start_Date');
+      }
+      else {
+         MandatoryRemoveColor('Start_Date');
+      }
+
+      if ($('#End_Date').val() == null || $('#End_Date').val() == '') {
+         MandatoryColor('End_Date');
+      }
+      else {
+         MandatoryRemoveColor('End_Date');
+      }
+
+      if ($('#Expenses_Date').val() == null || $('#Expenses_Date').val() == '') {
+         MandatoryColor('Expenses_Date');
+      }
+      else {
+         MandatoryRemoveColor('Expenses_Date');
+      }
+
+      if ($('#Expenses_Title').val() == null || $('#Expenses_Title').val() == '') {
+         MandatoryColor('Expenses_Title');
+      }
+      else {
+         MandatoryRemoveColor('Expenses_Title');
+      }
+
+      if ($('#Amount_Claiming').val() == null || $('#Amount_Claiming').val() == '') {
+         MandatoryColor('Amount_Claiming');
+      }
+      else {
+         MandatoryRemoveColor('Amount_Claiming   ');
+      }
+
+      InitDatepicker();
+      //initialize file upload button
+      $('.btn-file :file').on('fileselect', function (event, numFiles, label) {
+         //alert(event.currentTarget.id);
+         var ctrlName = "#Uploadfile";
+         if (event.currentTarget.id == "LeaveFile")
+            ctrlName = "#LeaveFile";
+         //alert(ctrlName);
+         var sizeIsnull = $(ctrlName)[0].files[0];
+         if (sizeIsnull != null) {
+            var fsize = $(ctrlName)[0].files[0].size;
+            if (fsize > 2097150) {
+               alert('@Resource.Message_Please_Upload_File_Size_Is_Less_Than_2_MB');
+               $(ctrlName).after($(ctrlName).clone(true)).remove();
+               $(ctrlName).parents('.input-group').find(':text').val('');
+               return false;
+            }
+
+            var input = $(this).parents('.input-group').find(':text'),
+                log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+            console.log(log);
+
+            if (input.length) {
+               input.val(log);
+            } else {
+               if (log) alert(log);
+            }
+         }
+      });
+
+      $('#Expenses_Config_ID').change(function () {
+         var onbehalfProfileID = 0;
+         applicationConfig(onbehalfProfileID);
+      });
+
+      $('#Expenses_Config_ID').trigger("chosen:updated");
+
+      function applicationConfig(dosave, paramProfileID) {
+         if (parseInt('@(Model.expensesConfigList != null ? Model.expensesConfigList.Count : 0)') > 0) {
+            if ($('#Expenses_Config_ID').val() != null && $('#Expenses_Config_ID').val() != '' && $('#Expense_Date').val() != null && $('#Expense_Date').val() != '') {
+               $('#Balance').val(0);
+               $('#Amount_Claiming').val(0);
+               //ShowMask();
+               $.ajax({
+                  type: "GET",
+                  url: "ApplicationConfig",
+                  data: { Expenses_Config_ID: $('#Expenses_Config_ID').val(), Total_Amount: $('#Amount_Claiming').val(), pExpenses_Date: $('#Expense_Date').val(), pProfileID: paramProfileID },
+                  //dataType: "script"
+               }).done(function (msg) {
+                  $('#Balance').val(msg);
+                  //alert($('#Balance').val());
+               });
+            }
+         }
+      }
+
+      var d = new Date(),
+      date = (d.getUTCFullYear()) + '/' + (d.getUTCMonth() + 1) + '/' + (d.getUTCDate());
+
+      $('#Expense_Date').datetimepicker({
+         mask: true,
+         timepicker: false,
+         format: 'Y/m/d',
+         value: date
+      });
+
+      $('#btnExpense').click(function () {
+         alert($('#Balance').val());
+      });
+   });
+   function Leave_Config_OnChange() {
+      alert("leave on change");
+   }
+   function Date_Onchange() {
+      /*For calculate Maternity end date and days taken*/
+      var weektaken = parseInt($('#Maternity_Weeks_Taken').val());
+      var weekleft = parseInt($('#Maternity_Weeks_Left').val());
+      var isfirstPeriod = $('#Maternity_Is_First_Period').val();
+      var workdays = '@(Model.Working_Days != null ? Model.Working_Days.Count() : 0)'
+      var flexibly = $('#Flexibly').val();
+      var continuously = $('#Continuously').val();
+      var entitle = $('#Entitle').val();
+      var wdays = 7;
+      if ($('#Leave_Name').val() == '@LeaveType.MaternityLeave') {
+         if (flexibly.toLowerCase() == "true" && continuously.toLowerCase() == "true") {
+            if (isfirstPeriod.toLowerCase() == 'true') {
+               if (entitle == weektaken)
+                  wdays = workdays;
+               else
+                  wdays = 7;
+            }
+            else
+               wdays = workdays;
+         }
+         else if (flexibly.toLowerCase() == "true") {
+            if (isfirstPeriod.toLowerCase() == 'true')
+               wdays = 7;
+            else
+               wdays = workdays;
+         }
+         else if (continuously.toLowerCase() == "true") {
+            wdays = workdays;
+         }
+      }
+      else if ($('#Leave_Name').val() == '@LeaveType.PaternityLeave') {
+         wdays = 7;
+      }
+
+      var daystaken = weektaken * wdays;
+      $.ajax({
+         type: 'POST',
+         url: 'GetEndDate',
+         contentType: 'application/json; charset=utf-8',
+         data: JSON.stringify({ pStartDate: $('#Start_Date').val(), pDaysTaken: daystaken, pWorkingDays: wdays }),
+         dataType: 'json',
+         success: function (data) {
+            $('#End_Date').val(data.enddate);
+            $('#End_Date_Text').val(data.enddate);
+         }
+      });
+   }
+</script>
+<div class="pageheader">
+   <h2>@Resource.DashBoard</h2>
+   <div class="breadcrumbs">
+      <ol class="breadcrumb">
+         <li>@Resource.You_Are_Here</li>
+         <li class="active">@Resource.DashBoard</li>
+      </ol>
+   </div>
+</div>
+
+
+@using (Html.BeginForm("Index", "Home", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data" }))
+{
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+         </div>
+      </div>
+      <div class="row cards">
+         <div class="card-container col-lg-3 col-sm-6 col-sm-12">
+            <div class="card card-amethyst">
+               <div class="front">
+                  <div class="media">
+                     <span class="pull-left">
+                        <i class="fa fa-users media-object"></i>
+                     </span>
+                     <div class="media-body">
+                        <small>Employees</small>
+                        <h2 class="media-heading animate-number" data-value="@Model.Total_Employees" data-animation-duration="1500">@Model.Total_Employees</h2>
+                        <small>till today</small>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="card-container col-lg-3 col-sm-6 col-sm-12">
+            <div class="card card-slategray">
+               <div class="front">
+                  <div class="media">
+                     <span class="pull-left">
+                        <i class="fa fa-folder media-object"></i>
+                     </span>
+                     <div class="media-body">
+                        <small>Disk Utilization</small>
+                        <h2 class="media-heading animate-number" data-value="@Model.Diskspace_Usage MB" data-animation-duration="1500">@Model.Diskspace_Usage MB</h2>
+                        <small>till today</small>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="card-container col-lg-3 col-sm-6 col-sm-12">
+            <div class="card card-redbrown">
+               <div class="front">
+                  <div class="media">
+                     <span class="pull-left">
+                        <i class="fa fa-users media-object"></i>
+                     </span>
+                     <div class="media-body">
+                        <small>Billing Amount</small>
+                        <h2 class="media-heading animate-number" data-value="@Model.Total_Billing_Amt" data-animation-duration="1500">@Model.Total_Billing_Amt</h2>
+                        <small>till today</small>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="card-container col-lg-3 col-sm-6 col-sm-12">
+            <div class="card card-green">
+               <div class="front">
+                  <div class="media">
+                     <span class="pull-left">
+                        <i class="fa fa-usd media-object"></i>
+                     </span>
+                     <div class="media-body">
+                        <small>Payroll Amount</small>
+                        <h2 class="media-heading animate-number" data-value="@Model.Total_Payroll_Amt" data-animation-duration="1500">@Model.Total_Payroll_Amt</h2>
+                        <small>this month</small>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div class="row">
+         <div class="col-md-8">
+            @if (Model.Display_Leave)
+            {
+               <section class="tile color transparent-black">
+                  <div class="tile-header transparent">
+                     <h1><strong>@Resource.Quick_Leave</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                     </div>
+                  </div>
+                  <div class="tile-body">
+                     <div class="row">
+                        <div class="col-md-6">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Name" class="control-label">@Resource.Start_Date</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-7">
+                                 <input type="text" class="form-control input-datepicker" id="Start_Date" name="Start_Date" value="@Model.Start_Date">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Start_Date)
+                                 </div>
+                              </div>
+                              @*<div class="col-sm-5" id="divStartDatePeriod">
+                                     <select class="chosen-select chosen-transparent form-control" id="Start_Date_Period" name="Start_Date_Period" onchange="Date_Onchange()">
+                                         @foreach (var row in Model.periodList)
+                                         {
+                                             <option value="@row.Value" @(Model.Start_Date_Period == row.Value ? "selected" : "")>@row.Text</option>
+                                         }
+                                     </select>
+                                     <div class="validation-error">
+                                         @Html.ValidationMessageFor(m => m.Start_Date_Period)
+                                     </div>
+                                 </div>*@
+                           </div>
+                        </div>
+                        <div class="col-md-6">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Name" class="control-label">@Resource.End_Date</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-7">
+                                 <input type="text" class="form-control input-datepicker" id="End_Date" name="End_Date" value="@Model.End_Date">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Start_Date)
+                                 </div>
+                              </div>
+                              @*<div class="col-sm-5" id="divEndDatePeriod">
+                                     <select class="chosen-select chosen-transparent form-control" id="End_Date_Period" name="End_Date_Period">
+                                         @foreach (var row in Model.periodList)
+                                         {
+                                             if (Model.End_Date_Period == row.Value)
+                                             {
+                                                 <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                             }
+                                             else
+                                             {
+                                                 <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                             }
+                                         }
+                                     </select>
+                                     <div class="validation-error">
+                                         @Html.ValidationMessageFor(m => m.End_Date_Period)
+                                     </div>
+                                 </div>*@
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-6">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Last_Name" class="control-label">@Resource.Leave_Type</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Leave_Config_ID" name="Leave_Config_ID" onchange="Leave_Config_OnChange(this)">
+                                    @foreach (var row in Model.LeaveBalanceList)
+                                    {
+                                       var lconfig = row.Leave_Config;
+                                       <option value="@(lconfig.Leave_Config_ID != null ? lconfig.Leave_Config_ID : 0)">@lconfig.Leave_Name</option>
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Leave_Config_ID)
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <button id="btnLeave" name="pageAction" type="submit" class="btn btn-default" value="Leave">@Resource.Submit</button>
+                                 <a href="@Url.Action("Application", "Leave", new { })" class="btn btn-default">@Resource.Go_To_Full_Application</a>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-6">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Designation" class="control-label">@Resource.File</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <div class="input-group">
+                                    <span class="input-group-btn">
+                                       <span class="btn btn-primary btn-file">
+                                          <i class="fa fa-upload"></i><input id="LeaveFile" type="file" name="file">
+                                       </span>
+                                    </span>
+                                    <input type="text" class="form-control" readonly />
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </section>
+               <script type="text/javascript">
+                  function getDaysInMonth(m, y) {
+                     return /4|6|9|11/.test(m) ? 30 : m == 2 ? (!(y % 4) && y % 100) || !(y % 400) ? 29 : 28 : 31;
+                  }
+
+                  $(function () {
+                     $("#teamcalendar").fullCalendar({
+                        header: { left: "prev,next", center: "title", right: "month" },
+                        firstDay: 1,
+                        editable: false,
+                        droppable: false,
+                        dayClick: function (date, allDay, jsEvent, view) {
+                           var day = date.dates();
+                           if (String(day).length == 1) {
+                              day = "0" + String(day);
+                           }
+                           var month = date.months() + 1;
+                           if (String(month).length == 1) {
+                              month = "0" + String(month);
+                           }
+                           var year = date.years();
+                           var strdate = day + '/' + month + '/' + year;
+                           var url = '@Url.Action("Application", "Leave")' + '?pStartDate=' + encodeURIComponent(strdate);
+                           //window.location.href = url;
+                           window.open(url, '_blank');
+                        },
+                        eventClick: function (calEvent, jsEvent, view) {
+                           if ('@userlogin.Profile_ID' != calEvent.profile_id) {
+                              return false;
+                           }
+
+                           var url = '@Url.Action("Application", "Leave")' + '?pDocID=' + encodeURIComponent(calEvent.id) + '&operation=' + encodeURIComponent('@EncryptUtil.Encrypt(UserSession.RIGHT_U)');
+                           //window.location.href = url;
+                           window.open(url, '_blank');
+                        },
+                        eventAfterAllRender: function (view) {
+                           //Added by sun 04-12-2015
+                           var cols = $('.fc-month-view [class*="fc-day"].fc-widget-content');
+                           for (var i = 0; i < cols.length; i++) {
+                              var datestr = $(cols[i]).attr("data-date");
+                              var subYear = datestr.substring(0, 4);
+                              var subMonth = datestr.substring(5, 7);
+                              var strM = subMonth.replace(/\b0+/g, "");
+                              var subDay = datestr.substring(8, 10);
+                              var strD = subDay.replace(/\b0+/g, "");
+
+                              @foreach (var day in Model.HolidayList)
+                                                {
+                                                    @:if (('@day.date.Month' == strM) && ('@day.date.Day' == strD) && ('@day.date.Year' == subYear))
+                                                                                                                                                                                                                                                                                                                         @: {
+                                                                                                                                                                                                                                                                                                                         @:$("td[data-date=" + datestr + "]").removeClass('fc-day-number');
+                                                                                                                                                                                                                                                                                                                         @:$("td[data-date=" + datestr + "]").addClass('fc-day-number')
+                                                                                                                                                                                                                                                                                                                         @:$("td[data-date=" + datestr + "]").addClass('fc-state-highlight-holiday').append('</br><div class ="fc-content holiday-left"><span class="fc-title holiday-text">' + '@day.name' + '</span></div>');
+                                                                                                                                                                                                                                                                                                                         @:
+                              }
+                                                                                                                                                                                                              }
+                           }
+                        },
+                        events: [
+                        @if (Model.LeaveList != null)
+                                                {
+                                                    var j = 0;
+                                                    var i = 0;
+                                                    foreach (var row in Model.LeaveList)
+                                                    {
+                                                        //r = year , // n = month
+                                                        if (!hashtable.Contains(row.Employee_Profile_ID))
+                                                        {
+                                                            //hashtable[row.Employee_Profile_ID] = colors[0];
+                                                            //colors.RemoveAt(0);
+                                                            //Edit by sun 16-11-2015
+                                                            if (Model.Collor != null && Model.Collor[j] != null)
+                                                            {
+                                                                hashtable[row.Employee_Profile_ID] = Model.Collor[j];
+                                                                j++;
+                                                            }
+                                                            else
+                                                            {
+                                                                hashtable[row.Employee_Profile_ID] = "#ff4a43";
+                                                                j = 0;
+                                                            }
+                                                        }
+
+                                                           if (row.Start_Date.HasValue && row.End_Date.HasValue)
+                                                        {
+                                                            var startyear = row.Start_Date.Value.Year;
+                                                            var startmonth = row.Start_Date.Value.Month -1;
+                                                            var startday = row.Start_Date.Value.Day;
+                                                            var desc = row.Employee_Profile.User_Profile.Name;
+
+                                                            var endyear = row.End_Date.Value.Year;
+                                                            var endmonth = row.End_Date.Value.Month -1;
+
+                                                            var endday = row.End_Date.Value.Day + 1;
+                                                            var dayInmonth = DateTime.DaysInMonth(row.End_Date.Value.Year, row.End_Date.Value.Month);
+                                                             if(row.End_Date.Value.Day + 1 > dayInmonth)
+                                                             {
+                                                                  endday = 1;
+                                                                  endmonth = endmonth + 1;
+                                                                 if(endmonth > 11)
+                                                                 {
+                                                                     endmonth = 0;
+                                                                     endyear = endyear + 1;
+                                                                 }
+                                                             }
+                                                            var leavecolour = hashtable[row.Employee_Profile_ID];
+                                                            if (row.Leave_Config != null )
+                                                            {
+                                                                //leavecolour = row.Leave_Config.Global_Lookup_Data.Colour_Config;
+                                                                desc = desc + " " + row.Leave_Config.Leave_Name;
+                                                            }
+                                                             if (i != 0)
+                                                            {
+                                                                @:,
+                                                                                                                 }
+                                                          @:{ title: '@desc', start: new Date('@startyear', '@startmonth', '@startday'), end: new Date('@endyear', '@endmonth', '@endday'), color: '@leavecolour', id: '@EncryptUtil.Encrypt(row.Leave_Application_Document_ID)', profile_id: '@row.Employee_Profile.Profile_ID', allDay: true }
+                                                                                                            }
+                                                        else if (row.Start_Date.HasValue )
+                                                        {
+                                                            var startyear = row.Start_Date.Value.Year;
+                                                            var startmonth = row.Start_Date.Value.Month -1;
+                                                            var startday = row.Start_Date.Value.Day;
+                                                            var leavecolour = hashtable[row.Employee_Profile_ID];
+
+
+                                                            var desc = row.Employee_Profile.User_Profile.Name;
+                                                            if (row.Leave_Config != null )
+                                                            {
+                                                                //leavecolour = row.Leave_Config.Global_Lookup_Data.Colour_Config;
+                                                                desc = desc + " " + row.Leave_Config.Leave_Name;
+                                                            }
+
+                                                            if (i != 0)
+                                                            {
+                                                                @:,
+                                                                                                                }
+
+                                                           @:{ title: '@desc', start: new Date('@startyear', '@startmonth', '@startday'), color: '@leavecolour', id: '@row.Leave_Application_Document_ID', profile_id: '@row.Employee_Profile.Profile_ID', allDay: true }
+                                                                                                            }
+                                                        i++;
+                                              }
+                                          }
+                        ]
+                     })
+                  });
+               </script>
+            }
+            @if (Model.Display_Expenses)
+            {
+               <section class="tile color transparent-black">
+                  <div class="tile-header transparent">
+                     <h1><strong>@Resource.Quick_Expense</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                     </div>
+                  </div>
+                  <div class="tile-body">
+                     <div class="row">
+                        <div class="col-md-12">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Name" class="control-label">@Resource.Expenses_Title</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <input type="text" class="form-control" id="Expenses_Title" name="Expenses_Title" value="@Model.Expenses_Title">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Expenses_Title)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="row">
+                        <div class="col-md-6">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Name" class="control-label">@Resource.Expenses_Type</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <select class="chosen-select form-control" id="Expenses_Config_ID" name="Expenses_Config_ID">
+                                    @if (Model.expensesConfigList != null)
+                                    {
+                                       foreach (var row in Model.expensesConfigList)
+                                       {
+                                          <option value="@row.Expenses_Config_ID">@row.Expenses_Name</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    <span id="Expenses_Config_ID_Err"></span>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-6">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Expenses_Date" class="control-label">@Resource.Expenses_Date</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <input type="text" class="form-control input-datepicker" id="Expense_Date" name="Expenses_Date" value="@Model.Expenses_Date">
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="row">
+                        <div class="col-md-6">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Amount" class="control-label">@Resource.Amount</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <input type="text" class="form-control text-right" id="Amount_Claiming" name="Amount_Claiming" value="@Model.Amount_Claiming" onblur="ValidateDecimal('Amount_Claiming', '@Resource.Amount_Claiming', false)">
+                                 <input type="hidden" id="Balance" name="Balance">
+                                 <div class="validation-error">
+                                    <span id="Total_Amount_Err"></span>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <button id="btnExpense" name="pageAction" type="submit" class="btn btn-default" value="Expense">@Resource.Submit</button>
+                                 <a href="@Url.Action("Application", "Leave", new { })" class="btn btn-default">@Resource.Go_To_Full_Application</a>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-6">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Designation" class="control-label">@Resource.Upload_Receipt</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <div class="input-group">
+                                    <span class="input-group-btn">
+                                       <span class="btn btn-primary btn-file">
+                                          <i class="fa fa-upload"></i><input id="Uploadfile" type="file" name="file">
+                                       </span>
+                                    </span>
+                                    <input type="text" class="form-control" readonly />
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+               </section>
+            }
+            <section class="tile color transparent-black">
+               <div class="tile-body">
+                  <div class="row">
+                     <div id="teamcalendar"></div>
+                  </div>
+                  <img style="width: 15px; height: 15px; vertical-align: text-bottom;" class="fc-state-highlight-holiday" /> @Resource.Public_Holiday
+               </div>
+            </section>
+         </div>
+         <div class="col-md-4">
+            @if (Model.Display_Leave)
+            {
+               <section class="tile color transparent-black">
+                  <div class="tile-header transparent">
+                     <h1><strong>@Resource.Remaining_Leave</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                     </div>
+                  </div>
+
+                  <div class="tile-body">
+                     <div class="row" style="max-height: 297px; overflow-y: auto">
+                        <ul class="inline">
+                           <li class="col-md-12">
+                              <ul class="progress-list">
+
+                                 @if (Model.LeaveBalanceList != null)
+                                 {
+                                    foreach (var row in Model.LeaveBalanceList)
+                                    {
+                                       var lconfig = row.Leave_Config;
+                                       var lleft = row.Leave_Left;
+                                       if (lconfig == null)
+                                       {
+                                          continue;
+                                       }
+
+                                       string str = "";
+                                       string percen = "";
+                                       var entitleAll = 0M;
+                                       var left = 0M;
+                                       var weeksleft = 0M;
+                                       if (lleft != null)
+                                       {
+                                          entitleAll = lleft.EntitleAll;
+                                          left = lleft.Left;
+                                          weeksleft = lleft.Weeks_Left;
+                                       }
+
+                                       if (lconfig.Type == LeaveConfigType.Normal)
+                                       {
+                                          var entitleAlldiv = entitleAll;
+                                          if (entitleAlldiv == 0)
+                                          {
+                                             entitleAlldiv = 1;
+                                          }
+
+                                          percen = NumUtil.FormatCurrency((left / entitleAlldiv) * 100);
+                                          str = NumUtil.FormatCurrency(left) + " " + Resource.Out_Of_Tolower + " " + NumUtil.FormatCurrency(entitleAll) + " " + Resource.Days;
+                                       }
+                                       else
+                                       {
+                                          var entitleAlldiv = entitleAll;
+                                          if (entitleAlldiv == 0)
+                                          {
+                                             entitleAlldiv = 1;
+                                          }
+                                          percen = NumUtil.FormatCurrency((weeksleft / entitleAlldiv) * 100);
+                                          str = NumUtil.FormatCurrency(left) + " " + Resource.Out_Of_Tolower + " " + NumUtil.FormatCurrency(entitleAll) + " " + Resource.Weeks;
+                                       }
+
+                                       <li>
+                                          <div class="details">
+                                             <div class="title">@lconfig.Leave_Name</div>
+                                          </div>
+                                          <div class="status pull-right">
+                                             <span class="animate-number" data-value="@str" data-animation-duration="1500">0</span>
+                                          </div>
+                                          <div class="clearfix"></div>
+                                          <div class="progress progress-little">
+                                             <div class="progress-bar progress-bar-green animate-progress-bar" data-percentage="@percen%" style="width: 0%;"></div>
+                                          </div>
+                                       </li>
+                                    }
+                                 }
+                              </ul>
+                           </li>
+                        </ul>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-12">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <a href="@Url.Action("Application", "Leave", new { })" class="btn btn-default">@Resource.Apply_Leave</a>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </section>
+            }
+
+            @*@if (Model.Display_Expenses)
+               {
+                   <section class="tile color transparent-black">
+                       <div class="tile-header transparent">
+                           <h1><strong>@Resource.Pending_Expenses</strong></h1>
+                           <div class="controls">
+                               <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                           </div>
+                       </div>
+                       <div class="tile-body">
+                           <div class="row" style="max-height: 180px; overflow-y: auto; ">
+                               <table class="table">
+                                   <tbody>
+                                       @if (Model.ExpensesList != null)
+                                       {
+                                           foreach (var row in Model.ExpensesList)
+                                           {
+                                               var status = "";
+
+                                               if (string.IsNullOrEmpty(row.Cancel_Status))
+                                               {
+                                                  status = StatusUtil.Get_Overall_Status(row.Overall_Status);
+                                                  if (row.Overall_Status != WorkflowStatus.Pending)
+                                                  {
+                                                     continue;
+                                                  }
+                                               }
+                                               else
+                                               {
+                                                  status = StatusUtil.Get_Overall_Status(row.Cancel_Status);
+                                                  if (row.Overall_Status != WorkflowStatus.Canceling)
+                                                  {
+                                                     continue;
+                                                  }
+                                               }
+
+                                               if (true)
+                                               {
+                                                   var totalAmount = 0M;
+                                                   var claimAmount = 0M;
+                                                   if (row.Expenses_Application_Document != null)
+                                                   {
+                                                       totalAmount = row.Expenses_Application_Document.Sum(s => s.Total_Amount.HasValue ? s.Total_Amount.Value : 0);
+                                                       claimAmount = row.Expenses_Application_Document.Sum(s => s.Amount_Claiming.HasValue ? s.Amount_Claiming.Value : 0);
+                                                   }
+                                                   <tr>
+                                                       <td style="padding-left:15px;">
+                                                           <div class="row">
+                                                               <div class="col-sm-12" style="">
+                                                                   <div class="form-group">
+                                                                       <div class="col-sm-12"><i class="fa fa-clock-o"> @DateUtil.ToDisplayDate(row.Date_Applied)</i></div>
+                                                                   </div>
+                                                                  <div class="form-group">
+                                                                     <div class="col-sm-12">
+                                                                        <strong>@row.Expenses_Title @row.Expenses_No</strong>
+                                                                        <br />
+                                                                        @Resource.Expense_Of <span class="color-green" style="font-weight:700;">@NumUtil.FormatCurrency(claimAmount) @Model.Currency_Code</span>
+                                                                        <br />
+                                                                        @Resource.Is <span class="color-orange" style="font-weight:700;font-size:16px;text-decoration:underline">@status</span>
+                                                                     </div>
+                                                                  </div>
+                                                               </div>
+                                                           </div>
+                                                       </td>
+                                                       <td class="actions text-right" style="padding-right:15px"><a style="padding-right:0px;margin-right:0px;" href="@Url.Action("Application", "Expenses", new { eID = EncryptUtil.Encrypt(row.Expenses_Application_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })"><i class="fa fa-file-o fa-2x"></i></a> </td>
+                                                   </tr>
+                                               }
+                                           }
+                                       }
+                                   </tbody>
+                               </table>
+                           </div>
+                           <div class="row">
+                               <div class="col-md-12">
+                                   <div class="form-group">
+                                       <div class="col-md-12">
+                                           <a class="btn btn-default" href="@Url.Action("Record", "Expenses")">@Resource.View_All_Applications</a>
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
+                   </section>
+               }
+
+               @if (Model.Display_Payroll)
+               {
+                   <section class="tile color transparent-black">
+                       <div class="tile-header transparent">
+                           <h1><strong>@Resource.Payslip</strong></h1>
+                           <div class="controls">
+                               <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                           </div>
+                       </div>
+                       <div class="tile-body">
+                           @if (Model.payroll != null && Model.payroll.Process_Status == PayrollStatus.Comfirm)
+                           {
+                               <div class="row">
+                                   <div class="col-md-12">
+                                       <div class="form-group">
+                                           <div class="col-md-12 text-center">
+                                               <i class="fa fa-file-powerpoint-o fa-5x"></i>
+                                           </div>
+                                       </div>
+                                       <div class="form-group">
+                                           <div class="col-md-12 text-center">
+                                               @Resource.Your @DateUtil.GetFullMonth(Model.payroll.Process_Month) @Resource.Payslip_Is_Ready
+                                           </div>
+                                       </div>
+                                       <div class="form-group">
+                                           <div class="col-md-12 text-center">
+                                               <a target="_blank" class="btn btn-default" href="@Url.Action("PayrollPrintSlip", "Payroll", new { prm_id = EncryptUtil.Encrypt(Model.payroll.PRM_ID) })">@(DateUtil.GetFullMonth(Model.payroll.Process_Month) + " " + Model.payroll.Process_Year)</a>
+                                           </div>
+                                       </div>
+                                   </div>
+                               </div>
+                           }
+                       </div>
+                   </section>
+               }*@
+
+
+         </div>
+      </div>
+   </div>
+}
+
+<!-- Page content end -->

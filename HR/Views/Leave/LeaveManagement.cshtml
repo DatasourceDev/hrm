@@ -1,0 +1,772 @@
+﻿@model  HR.Models.LeaveManagementViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using HR.Common;
+@using SBSWorkFlowAPI.Models;
+@using SBSWorkFlowAPI.ModelsAndService;
+@using SBSResourceAPI;
+@using SBSWorkFlowAPI.Constants;
+@{
+   ViewBag.Title = @Resource.Leave_Management;
+
+}
+@{
+   var userlogin = UserSession.getUser(Request.RequestContext.HttpContext);
+   var requests = new List<Request>();
+   var requestIDs = new List<int>();
+   int? emploginID = null;
+   var hist = new EmploymentHistoryService().GetCurrentEmploymentHistoryByProfile(userlogin.Profile_ID);
+   if (hist != null)
+   {
+      emploginID = hist.Employee_Profile_ID;
+      var aService = new SBSWorkFlowAPI.Service();
+      var r = aService.GetMyTasks(userlogin.Company_ID.Value, hist.Department_ID.Value, userlogin.Profile_ID, ModuleCode.HR, ApprovalType.Leave, "");
+      if (r.Item2.IsSuccess && r.Item1 != null)
+      {
+         requests = r.Item1.ToList();
+         requestIDs = r.Item1.Select(s => s.Request_ID).ToList();
+      }
+   }
+}
+
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+   <script type="text/javascript">
+      $(function () {
+         InitDatepicker();
+
+         var module = '@Model.tabAction';
+         if ('@string.IsNullOrEmpty(Model.tabAction)' == "True") {
+            module = "pending";
+         }
+         var liID = "li-" + module;
+         var tabID = module + "-tab";
+         $("#" + liID).addClass("active");
+         $("#" + tabID).addClass("active");
+
+         InitDatatable('pendingDataTable', null, null, 1, 'asc');
+         InitDatatable('processedDataTable', null, null, 1, 'asc');
+      })
+
+   </script>
+
+        <!-- page header -->
+   <div class="pageheader">
+      <h2> @Resource.Leave_Management</h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action(" index", "Home" )">@Resource.DashBoard</a></li>
+            <li class="active">@Resource.Leave_Management</li>
+         </ol>
+      </div>
+   </div>
+
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+            <!-- tile grading -->
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+
+            <!-- tile widget -->
+            <section class="tile color transparent-black">
+               <div class="tile-widget nopadding color transparent-white rounded-top-corners">
+                  <ul class="nav nav-tabs tabdrop">
+                     <li id="li-pending"><a href="#pending-tab" data-toggle="tab">@Resource.Pending</a></li>
+                     <li id="li-processed"><a href="#processed-tab" data-toggle="tab">@Resource.Rejected / @Resource.Approved / @Resource.Cancelled</a></li>
+                  </ul>
+               </div>
+               <div class="tile-body tab-content rounded-bottom-corners">
+                  <div id="pending-tab" class="tab-pane fade in">
+                     <div class="row">
+                        <div class="col-md-12">
+                           <section class="tile color transparent filter" id="secfilter1">
+                              <div class="tile-header transparent">
+                                 <h1 onclick="CollapseHeader(null, 'btncollapse1', 'secfilter1')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                                 <div class="controls">
+                                    <a href="#" class="minimize filter" id="btncollapse1"><i class="fa fa-search  color-white"></i></a>
+                                 </div>
+                              </div>
+                              <div class="tile-body">
+                                 @using (Html.BeginForm("LeaveManagement", "Leave", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                                 {
+                                    @Html.AntiForgeryToken()
+                                    <div class="row">
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="search_Pending_Emp" class="control-label">@Resource.Request_From</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <select class="chosen-select chosen-transparent form-control" id="search_Pending_Emp" name="search_Pending_Emp">
+                                                   <option value="">-</option>
+                                                   @if (Model.employeeList != null)
+                                                   {
+                                                      foreach (var row in Model.employeeList)
+                                                      {
+                                                         <option value="@row.Profile_ID" @(Model.search_Pending_Emp == row.Profile_ID ? "selected" : "")>@UserSession.GetUserName(row)</option>
+                                                      }
+                                                   }
+                                                </select>
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.search_Pending_Emp)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="search_Pending_Date_AppliedFrom" class="control-label">@Resource.Date_Applied</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <input type="text" class="form-control input-datepicker" id="search_Pending_Date_AppliedFrom" name="search_Pending_Date_AppliedFrom" value="@Model.search_Pending_Date_AppliedFrom">
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.search_Pending_Date_AppliedFrom)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="search_Pending_Date_AppliedTo" class="control-label">@Resource.To</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <input type="text" class="form-control input-datepicker" id="search_Pending_Date_AppliedTo" name="search_Pending_Date_AppliedTo" value="@Model.search_Pending_Date_AppliedTo">
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.search_Pending_Date_AppliedTo)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                    <div class="row">
+                                       <div class="col-md-6">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <button type="submit" class="btn btn-default" name="tabAction" value="pending">@Resource.Filter</button>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 }
+                              </div>
+                           </section>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-12">
+                           <section class="tile transparent">
+                              <div class="tile-header transparent">
+                                 <h1><strong>@Resource.Pending_Applications</strong></h1>
+                                 <div class="controls">
+                                    <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                 </div>
+                              </div>
+                              <div class="tile-body">
+                                 <div class="table-responsive">
+                                    <table class="table table-datatable table-custom" id="pendingDataTable">
+                                       <thead>
+                                          <tr>
+                                             <th class="sort-alpha">@Resource.Employee</th>
+                                             <th class="sort-alpha">@Resource.Date_Applied</th>
+                                             <th class="sort-alpha">@Resource.Leave_Type</th>
+                                             <th class="sort-alpha">@Resource.Start_Date</th>
+                                             <th class="sort-alpha">@Resource.End_Date</th>
+                                             <th class="sort-numeric">@Resource.Days_Taken</th>
+                                             <th class="sort-alpha">@Resource.Status</th>
+                                             <th class="no-sort" width="110px">@Resource.Action</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody>
+                                          @if (Model.LeaveApplicationDocumentList != null)
+                                          {
+                                             int no = 1;
+                                             foreach (var row in Model.LeaveApplicationDocumentList)
+                                             {
+                                                var show = false;
+                                                var status = "";
+                                                if (Model.search_Pending_Emp.HasValue)
+                                                {
+                                                   if (row.Employee_Profile.Profile_ID != Model.search_Pending_Emp)
+                                                   {
+                                                      continue;
+                                                   }
+                                                }
+                                                if (!string.IsNullOrEmpty(Model.search_Pending_Date_AppliedFrom))
+                                                {
+                                                   if (row.Date_Applied.Value < DateUtil.ToDate(Model.search_Pending_Date_AppliedFrom))
+                                                   {
+                                                      continue;
+                                                   }
+                                                }
+                                                if (!string.IsNullOrEmpty(Model.search_Pending_Date_AppliedTo))
+                                                {
+                                                   if (row.Date_Applied.Value > DateUtil.ToDate(Model.search_Pending_Date_AppliedTo))
+                                                   {
+                                                      continue;
+                                                   }
+                                                }
+                                                if (string.IsNullOrEmpty(row.Cancel_Status))
+                                                {
+                                                   if (row.Overall_Status == WorkflowStatus.Closed)
+                                                   {
+                                                      continue;
+                                                   }
+                                                   else if (row.Overall_Status == WorkflowStatus.Rejected)
+                                                   {
+                                                      continue;
+                                                   }
+                                                }
+                                                else
+                                                {
+                                                   if (row.Cancel_Status == WorkflowStatus.Cancellation_Rejected)
+                                                   {
+                                                      continue;
+                                                   }
+                                                   else if (row.Cancel_Status == WorkflowStatus.Cancelled)
+                                                   {
+                                                      continue;
+                                                   }
+                                                }
+                                                if (string.IsNullOrEmpty(row.Cancel_Status))
+                                                {
+                                                   //Normal
+                                                   if (requestIDs.Contains(row.Request_ID.HasValue ? row.Request_ID.Value : 0))
+                                                   {
+                                                      var request = requests.Where(w => w.Request_ID == row.Request_ID).FirstOrDefault();
+                                                      if (request != null && request.Task_Assignment != null)
+                                                      {
+                                                         status = request.Status;
+                                                         if (request.Status == WorkflowStatus.Pending || request.Status == WorkflowStatus.Approved)
+                                                         {
+                                                            var task = request.Task_Assignment.Where(w => w.Record_Status == WfRecordStatus.Active).OrderBy(o => o.Approval_Level).FirstOrDefault();
+                                                            if (task != null && task.Profile_ID == userlogin.Profile_ID)
+                                                            {
+                                                               show = true;
+                                                            }
+                                                         }
+                                                      }
+                                                   }
+                                                   else if (row.Supervisor == emploginID)
+                                                   {
+                                                      show = true;
+                                                   }
+
+                                                }
+                                                else
+                                                {
+                                                   if (row.Cancel_Status == WorkflowStatus.Canceling)
+                                                   {
+                                                      if (requestIDs.Contains(row.Request_ID.HasValue ? row.Request_Cancel_ID.Value : 0))
+                                                      {
+                                                         var request = requests.Where(w => w.Request_ID == row.Request_Cancel_ID).FirstOrDefault();
+                                                         if (request != null && request.Task_Assignment != null)
+                                                         {
+                                                            status = request.Status;
+
+                                                            var task = request.Task_Assignment.Where(w => w.Record_Status == WfRecordStatus.Active).OrderBy(o => o.Approval_Level).FirstOrDefault();
+                                                            if (task != null && task.Profile_ID == userlogin.Profile_ID)
+                                                            {
+                                                               show = true;
+                                                            }
+                                                         }
+
+                                                      }
+                                                      else if (row.Supervisor == emploginID)
+                                                      {
+                                                         show = true;
+                                                      }
+                                                   }
+                                                }
+                                                if (show)
+                                                {
+                                                   <tr>
+                                                      <td>
+                                                         @UserSession.GetUserName(row.Employee_Profile.User_Profile)
+                                                      </td>
+                                                      <td>@DateUtil.ToDisplayDate(row.Date_Applied)</td>
+                                                      <td>
+                                                         @if (row.Leave_Config != null)
+                                                         {
+                                                            @row.Leave_Config.Leave_Name
+                                                         }
+                                                      </td>
+                                                      <td>
+                                                         @(DateUtil.ToDisplayDate(row.Start_Date) + " " + row.Start_Date_Period)
+                                                      </td>
+                                                      <td>
+                                                         @if (row.End_Date.HasValue)
+                                                         {
+                                                            @(DateUtil.ToDisplayDate(row.End_Date) + " " + row.End_Date_Period)
+                                                         }
+                                                         else
+                                                         {
+                                                            @(DateUtil.ToDisplayDate(row.Start_Date) + " " + row.Start_Date_Period)
+                                                         }
+                                                      </td>
+                                                      <td class="text-right">
+                                                         @row.Days_Taken
+                                                      </td>
+                                                      <td>
+                                                         @if (!string.IsNullOrEmpty(row.Cancel_Status))
+                                                         {
+                                                            @StatusUtil.Get_Overall_Status(row.Cancel_Status)
+                                                         }
+                                                         else
+                                                         {
+                                                            if (row.Overall_Status == WorkflowStatus.Pending || row.Overall_Status == WorkflowStatus.Approved)
+                                                            {
+                                                               @Resource.Pending
+                                                            }
+                                                            else
+                                                            {
+                                                               @StatusUtil.Get_Overall_Status(row.Overall_Status)
+                                                            }
+                                                         }
+
+                                                      </td>
+                                                      <td class="actions text-left">
+                                                         <a href="@Url.Action("Application", "Leave", new { pdocid = EncryptUtil.Encrypt(row.Leave_Application_Document_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U), pappr = EncryptUtil.Encrypt("Manage"), tabAction = "pending" })"><i class="fa fa-file-o  fa-2x"></i></a>
+                                                      </td>
+                                                   </tr>
+                                                         no++;
+                                                }
+                                             }
+                                          }
+                                       </tbody>
+                                    </table>
+                                 </div>
+                              </div>
+                           </section>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div id="processed-tab" class="tab-pane fade in">
+                     <div class="row">
+                        <div class="col-md-12">
+                           <section class="tile color transparent filter" id="secfilter2">
+                              <div class="tile-header transparent">
+                                 <h1 onclick="CollapseHeader(null, 'btncollapse2', 'secfilter2')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                                 <div class="controls">
+                                    <a href="#" class="minimize filter" id="btncollapse2"><i class="fa fa-search  color-white"></i></a>
+                                 </div>
+                              </div>
+                              <div class="tile-body">
+                                 @using (Html.BeginForm("LeaveManagement", "Leave", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                                 {
+                                    @Html.AntiForgeryToken()
+                                    <div class="row">
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="search_Process_Emp" class="control-label">@Resource.Request_From</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <select class="chosen-select chosen-transparent form-control" id="search_Process_Emp" name="search_Process_Emp">
+                                                   <option value="">-</option>
+                                                   @if (Model.employeeList != null)
+                                                   {
+                                                      foreach (var row in Model.employeeList)
+                                                      {
+                                                         if (Model.search_Process_Emp == row.Profile_ID)
+                                                         {
+                                                            <option value="@row.Profile_ID" selected>@UserSession.GetUserName(row)</option>
+                                                         }
+                                                         else
+                                                         {
+                                                            <option value="@row.Profile_ID">@UserSession.GetUserName(row)</option>
+                                                         }
+                                                      }
+                                                   }
+                                                </select>
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.search_Process_Emp)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="search_Process_Date_AppliedFrom" class="control-label">@Resource.Date_Applied</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <input type="text" class="form-control input-datepicker" id="search_Process_Date_AppliedFrom" name="search_Process_Date_AppliedFrom" value="@Model.search_Process_Date_AppliedFrom">
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.search_Process_Date_AppliedFrom)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="search_Process_Date_AppliedTo" class="control-label">@Resource.To</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <input type="text" class="form-control input-datepicker" id="search_Process_Date_AppliedTo" name="search_Process_Date_AppliedTo" value="@Model.search_Process_Date_AppliedTo">
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.search_Process_Date_AppliedTo)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                    <div class="row">
+                                       <div class="col-md-6">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <button type="submit" class="btn btn-default" name="tabAction" value="processed">@Resource.Filter</button>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 }
+                              </div>
+                           </section>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-12">
+                           <section class="tile transparent">
+                              <div class="tile-header transparent">
+                                 <h1><strong>@Resource.Rejected / @Resource.Approved / @Resource.Cancelled</strong></h1>
+                                 <div class="controls">
+                                    <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                 </div>
+                              </div>
+                              <div class="tile-body">
+                                 <div class="table-responsive">
+                                    <table class="table table-datatable table-custom" id="processedDataTable">
+                                       <thead>
+                                          <tr>
+                                             <th class="sort-alpha">@Resource.Employee</th>
+                                             <th class="sort-alpha">@Resource.Date_Applied</th>
+                                             <th class="sort-alpha">@Resource.Leave_Type</th>
+                                             <th class="sort-alpha">@Resource.Start_Date</th>
+                                             <th class="sort-alpha">@Resource.End_Date</th>
+                                             <th class="sort-numeric">@Resource.Days_Taken</th>
+                                             <th class="sort-alpha">@Resource.Status</th>
+                                             <th class="no-sort" width="110px">@Resource.Action</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody>
+                                          @if (Model.LeaveApplicationDocumentList != null)
+                                          {
+                                             int no = 1;
+                                             foreach (var row in Model.LeaveApplicationDocumentList)
+                                             {
+                                                var show = false;
+                                                var status = "";
+                                                var approval = "";
+
+
+                                                if (Model.search_Process_Emp.HasValue)
+                                                {
+                                                   if (row.Employee_Profile.Profile_ID != Model.search_Process_Emp)
+                                                   {
+                                                      continue;
+                                                   }
+                                                }
+                                                if (!string.IsNullOrEmpty(Model.search_Process_Date_AppliedFrom))
+                                                {
+                                                   if (row.Date_Applied.Value < DateUtil.ToDate(Model.search_Pending_Date_AppliedFrom))
+                                                   {
+                                                      continue;
+                                                   }
+
+                                                }
+                                                if (!string.IsNullOrEmpty(Model.search_Process_Date_AppliedTo))
+                                                {
+                                                   if (row.Date_Applied.Value > DateUtil.ToDate(Model.search_Process_Date_AppliedTo))
+                                                   {
+                                                      continue;
+                                                   }
+                                                }
+
+                                                if (string.IsNullOrEmpty(row.Cancel_Status))
+                                                {
+                                                   if (!row.Request_ID.HasValue && row.Employee_Profile.Profile_ID == userlogin.Profile_ID && !row.Supervisor.HasValue)
+                                                   {
+                                                      show = true;
+                                                   }
+                                                   else if (requestIDs.Contains(row.Request_ID.HasValue ? row.Request_ID.Value : 0))
+                                                   {
+                                                      var request = requests.Where(w => w.Request_ID == row.Request_ID.Value).FirstOrDefault();
+                                                      if (request != null && request.Task_Assignment != null)
+                                                      {
+                                                         status = request.Status;
+                                                         if (request.Status == WorkflowStatus.Approved || request.Status == WorkflowStatus.Rejected || request.Status == WorkflowStatus.Closed)
+                                                         {
+                                                            var task = request.Task_Assignment.Where(w => w.Record_Status == WfRecordStatus.InActive & w.Profile_ID == userlogin.Profile_ID).FirstOrDefault();
+                                                            if (task != null)
+                                                            {
+                                                               var active = request.Task_Assignment.Where(w => w.Record_Status == WfRecordStatus.Active & w.Profile_ID != userlogin.Profile_ID).FirstOrDefault();
+                                                               if (active != null)
+                                                               {
+                                                                  approval = active.Name;
+                                                               }
+                                                               show = true;
+                                                            }
+                                                         }
+                                                      }
+                                                   }
+                                                   else if (row.Supervisor == emploginID)
+                                                   {
+                                                      if (row.Overall_Status == WorkflowStatus.Closed || row.Overall_Status == WorkflowStatus.Rejected)
+                                                      {
+                                                         show = true;
+                                                      }
+                                                   }
+
+                                                }
+                                                else
+                                                {
+                                                   if (!row.Request_Cancel_ID.HasValue && row.Employee_Profile.Profile_ID == userlogin.Profile_ID && !row.Supervisor.HasValue)
+                                                   {
+                                                      show = true;
+                                                   }
+                                                   else if (requestIDs.Contains(row.Request_Cancel_ID.HasValue ? row.Request_Cancel_ID.Value : 0))
+                                                   {
+                                                      var request = requests.Where(w => w.Request_ID == row.Request_Cancel_ID).FirstOrDefault();
+                                                      if (request != null && request.Task_Assignment != null)
+                                                      {
+                                                         status = request.Status;
+                                                         var task = request.Task_Assignment.Where(w => w.Profile_ID == userlogin.Profile_ID).FirstOrDefault();
+                                                         if (task != null)
+                                                         {
+                                                             var selfactive = request.Task_Assignment.Where(w => w.Record_Status == WfRecordStatus.Active & w.Profile_ID == userlogin.Profile_ID).FirstOrDefault();
+                                                             if (selfactive == null)
+                                                             {
+                                                                var active = request.Task_Assignment.Where(w => w.Record_Status == WfRecordStatus.Active & w.Profile_ID != userlogin.Profile_ID).FirstOrDefault();
+                                                                if (active != null)
+                                                                {
+                                                                   if (row.Cancel_Status == WorkflowStatus.Canceling)
+                                                                   {
+                                                                      approval = active.Name;
+                                                                      show = true;
+                                                                   }
+                                                                }
+                                                             }
+                                                            if (row.Cancel_Status != WorkflowStatus.Canceling)
+                                                            {
+                                                               show = true;
+                                                            }
+
+                                                         }
+
+                                                      }
+                                                   }
+                                                   else if (requestIDs.Contains(row.Request_ID.HasValue ? row.Request_ID.Value : 0))
+                                                   {
+                                                      var request = requests.Where(w => w.Request_ID == row.Request_ID).FirstOrDefault();
+                                                      if (request != null && request.Task_Assignment != null)
+                                                      {
+                                                         status = request.Status;
+                                                         if (request.Status == WorkflowStatus.Approved || request.Status == WorkflowStatus.Rejected || request.Status == WorkflowStatus.Closed || request.Status == WorkflowStatus.Cancelled || request.Status == WorkflowStatus.Cancellation_Rejected)
+                                                         {
+                                                            var task = request.Task_Assignment.Where(w => w.Record_Status == WfRecordStatus.InActive & w.Profile_ID == userlogin.Profile_ID).FirstOrDefault();
+                                                            if (task != null)
+                                                            {
+                                                               if (row.Cancel_Status == WorkflowStatus.Approved)
+                                                               {
+                                                                  approval = task.Name;
+                                                               }
+                                                               show = true;
+                                                            }
+                                                         }
+                                                      }
+                                                   }
+                                                   else if (row.Supervisor == emploginID)
+                                                   {
+                                                      if (row.Cancel_Status == WorkflowStatus.Cancelled || row.Cancel_Status == WorkflowStatus.Cancellation_Rejected)
+                                                      {
+                                                         show = true;
+                                                      }
+                                                   }
+
+                                                }
+
+
+                                                if (show)
+                                                {
+                                                   <tr>
+                                                      <td>
+                                                         @UserSession.GetUserName(row.Employee_Profile.User_Profile)
+                                                      </td>
+
+                                                      <td>@DateUtil.ToDisplayDate(row.Date_Applied)</td>
+                                                      <td>
+                                                         @if (row.Leave_Config != null)
+                                                         {
+                                                            @row.Leave_Config.Leave_Name
+                                                         }
+                                                      </td>
+                                                      <td>
+                                                         @(DateUtil.ToDisplayDate(row.Start_Date) + " " + row.Start_Date_Period)
+                                                      </td>
+                                                      <td>
+                                                         @if (row.End_Date.HasValue)
+                                                         {
+                                                            @(DateUtil.ToDisplayDate(row.End_Date) + " " + row.End_Date_Period)
+                                                         }
+                                                         else
+                                                         {
+                                                            @(DateUtil.ToDisplayDate(row.Start_Date) + " " + row.Start_Date_Period)
+
+                                                         }
+                                                      </td>
+                                                      <td class="text-right">
+                                                         @row.Days_Taken
+                                                      </td>
+
+                                                      <td>
+                                                         @if (!string.IsNullOrEmpty(row.Cancel_Status))
+                                                         {
+                                                            @StatusUtil.Get_Overall_Status(row.Cancel_Status)
+                                                         }
+                                                         else
+                                                         {
+                                                            if (row.Overall_Status == WorkflowStatus.Pending || row.Overall_Status == WorkflowStatus.Approved)
+                                                            {
+                                                               @Resource.Pending
+                                                            }
+                                                            else
+                                                            {
+                                                               @StatusUtil.Get_Overall_Status(row.Overall_Status)
+                                                            }
+                                                         }
+
+                                                      </td>
+                                                      <td class="actions text-left">
+                                                         <a href="@Url.Action("Application", "Leave", new { pdocid = EncryptUtil.Encrypt(row.Leave_Application_Document_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U), pappr = EncryptUtil.Encrypt("Manage"), tabAction = "processed" })"><i class="fa fa-file-o  fa-2x"></i></a>
+                                                      </td>
+                                                   </tr>
+                                                         no++;
+                                                }
+                                             }
+                                          }
+                                       </tbody>
+                                    </table>
+                                 </div>
+                              </div>
+                           </section>
+                        </div>
+                     </div>
+                  </div>
+                  <!-- / Tab panes -->
+
+                  <div id="delegation-tab" class="tab-pane fade in">
+                     <div class="tile-header transparent">
+                        <h1><strong>@Resource.Delegation</strong></h1>
+                     </div>
+                     @using (Html.BeginForm("LeaveManagement", "Leave", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                     {
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(m => m.Approval_Delegation_ID)
+
+                        <div class="row">
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="Start_Date" class="control-label">@Resource.Start_Date</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <input type="text" class="form-control input-datepicker" id="Start_Date" name="Start_Date" value="@Model.Start_Date">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Start_Date)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="End_Date" class="control-label">@Resource.End_Date</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <input type="text" class="form-control input-datepicker" id="End_Date" name="End_Date" value="@Model.End_Date">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.End_Date)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="Delegation_Profile_ID" class="control-label">@Resource.Delegate_Approval_To</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <select class="chosen-select chosen-transparent form-control" id="Delegation_Profile_ID" name="Delegation_Profile_ID">
+                                       @foreach (var row in Model.employeeList)
+                                       {
+                                          if (Model.Delegation_Profile_ID == row.Profile_ID)
+                                          {
+                                             <option value="@row.Profile_ID" selected>@UserSession.GetUserName(row)</option>
+                                          }
+                                          else
+                                          {
+                                             <option value="@row.Profile_ID">@UserSession.GetUserName(row)</option>
+                                          }
+                                       }
+                                    </select>
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Delegation_Profile_ID)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-md-12">
+                              @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U) | Model.rights.Contains(UserSession.RIGHT_C))
+                              {
+                                 <button type="submit" class="btn btn-primary" name="tabAction" value="delegation">@Resource.Save</button>
+                              }
+                           </div>
+                        </div>
+                     }
+                  </div>
+               </div>
+            </section>
+         </div>
+      </div>
+   </div>
+}

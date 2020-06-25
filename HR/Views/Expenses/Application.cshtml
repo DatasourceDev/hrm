@@ -1,0 +1,1359 @@
+﻿@model  HR.Models.ExpensesViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@using SBSWorkFlowAPI.Constants;
+@using System.Text;
+@using HR.Models
+
+@{
+   ViewBag.Title = @Resource.Application;
+   var userlogin = UserSession.getUser(Request.RequestContext.HttpContext);
+
+   var isReadonly = false;
+   if (Model.Expenses_ID.HasValue && Model.Expenses_ID.Value > 0 && Model.ApprStatus != WorkflowStatus.Draft && Model.ApprStatus != WorkflowStatus.Rejected)
+      isReadonly = true;
+
+   if (Model.operation == UserSession.RIGHT_U && !Model.rights.Contains(UserSession.RIGHT_U) && Model.ApprStatus != WorkflowStatus.Draft && Model.ApprStatus != WorkflowStatus.Rejected)
+      isReadonly = true;
+   else if (!Model.rights.Contains(UserSession.RIGHT_C) && Model.ApprStatus != WorkflowStatus.Draft && Model.ApprStatus != WorkflowStatus.Rejected)
+      isReadonly = true;
+
+   var infoColsapan = "col-md-12";
+   var currentdate = StoredProcedure.GetCurrentDate();
+   var viewReadonly = false;
+   var uitem = UserUtil.GetUserItem(Request.RequestContext.HttpContext);
+}
+@{
+   var curstatus = "";
+   if (!string.IsNullOrEmpty(Model.Cancel_Status) && Model.Cancel_Status != WorkflowStatus.Cancellation_Rejected && Model.Cancel_Status != WorkflowStatus.Canceling)
+   {
+      curstatus = StatusUtil.Get_Overall_Status(Model.Cancel_Status);
+   }
+   else
+   {
+      if (Model.Overall_Status == WorkflowStatus.Pending || Model.Overall_Status == WorkflowStatus.Approved)
+      {
+         curstatus = Resource.Pending;
+      }
+      else
+      {
+         curstatus = StatusUtil.Get_Overall_Status(Model.Overall_Status);
+      }
+   }
+}
+@functions{
+   public string GenTimelineItem(string status, string approval = null, bool IsIndent = false)
+   {
+      var li = new StringBuilder();
+      li.AppendLine("<li class='color transparent-black'>");
+      if (status == WorkflowStatus.Approved | status == WorkflowStatus.Closed | status == WorkflowStatus.Cancellation_Approved | status == WorkflowStatus.Cancelled)
+         li.AppendLine("<div class='pointer green'>");
+      else if (status == WorkflowStatus.Rejected | status == WorkflowStatus.Cancellation_Rejected)
+         li.AppendLine("<div class='pointer red'>");
+      else
+         li.AppendLine("<div class='pointer slategray'>");
+
+      if (string.IsNullOrEmpty(status) | status == WorkflowStatus.Canceling | status == WorkflowStatus.Pending)
+      {
+         li.AppendLine("<i class='fa fa-spinner'></i>");
+      }
+      else if (status == WorkflowStatus.Rejected | status == WorkflowStatus.Cancellation_Rejected)
+      {
+         li.AppendLine("<i class='fa fa-times'></i>");
+      }
+      else if (status == WorkflowStatus.Approved | status == WorkflowStatus.Cancellation_Approved)
+      {
+         li.AppendLine("<i class='fa fa-check'></i>");
+      }
+      else if (status == WorkflowStatus.Cancelled | status == WorkflowStatus.Closed)
+      {
+         li.AppendLine("<i class='fa fa-power-off'></i>");
+      }
+      li.AppendLine("</div>");
+
+      li.AppendLine("<div class='el-container'>");
+      li.AppendLine("<div class='content'>");
+      li.AppendLine(" <h1>");
+      li.AppendLine("<strong>");
+
+      if (string.IsNullOrEmpty(status) | status == WorkflowStatus.Pending)
+      {
+         li.AppendLine(Resource.Expenses + " " + Resource.Message_Is_Pending);
+      }
+      else if (status == WorkflowStatus.Canceling)
+      {
+         li.AppendLine(Resource.Expenses + " " + Resource.Message_Is_Canceling);
+      }
+      else if (status == WorkflowStatus.Rejected)
+      {
+         li.AppendLine(Resource.Expenses + " " + Resource.Message_Is_Rejected);
+      }
+      else if (status == WorkflowStatus.Approved)
+      {
+         li.AppendLine(Resource.Expenses + " " + Resource.Message_Is_Approved);
+      }
+      else if (status == WorkflowStatus.Closed)
+      {
+         li.AppendLine(Resource.Expenses + " " + Resource.Message_Is_Closed);
+      }
+      else if (status == WorkflowStatus.Cancelled)
+      {
+         li.AppendLine(Resource.Expenses + " " + Resource.Message_Is_Cancelled);
+      }
+      else if (status == WorkflowStatus.Cancellation_Approved)
+      {
+         li.AppendLine(Resource.Expenses + " " + Resource.Message_Is_Cancellation_Approved);
+      }
+      else if (status == WorkflowStatus.Cancellation_Rejected)
+      {
+         li.AppendLine(Resource.Expenses + " " + Resource.Message_Is_Cancellation_Rejected);
+      }
+      li.AppendLine(" </strong>");
+      li.AppendLine(" </h1>");
+      if (!string.IsNullOrEmpty(approval))
+      {
+         li.AppendLine(" <p>" + Resource.Approver + " " + approval + "</p>");
+      }
+      if (IsIndent)
+      {
+         li.AppendLine(" <p> " + Resource.By + " " + Resource.Job_Cost + " </p>");
+      }
+      li.AppendLine(" </div>");
+      li.AppendLine(" </div>");
+      li.AppendLine(" </li>");
+      return li.ToString();
+   }
+
+}
+@if (Model.operation == UserSession.RIGHT_U && Model.ApprStatus != WorkflowStatus.Draft && Model.ApprStatus != WorkflowStatus.Rejected)
+{
+   infoColsapan = "col-md-8";
+   viewReadonly = true;
+}
+
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+   <div id="appConfig"></div>
+   <div class="pageheader">
+      @if (Model.Expenses_ID.HasValue && Model.Expenses_ID.Value > 0)
+      {
+         <h2> @Resource.Expenses_Details (@curstatus)</h2>
+      }
+      else
+      {
+         <h2>@Resource.Add_New_Expenses</h2>
+      }
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            @if (Model.ApprStatus == "Manage")
+            {
+               <li><a href="@Url.Action("ExpensesManagement", "Expenses")">@Resource.Expenses_Management</a></li>
+               <li class="active">@Resource.Expenses</li>
+            }
+            else
+            {
+               <li><a href="@Url.Action("Record", "Expenses")">@Resource.Expenses_Record</a></li>
+               <li class="active">@Resource.Expenses</li>
+            }
+         </ol>
+      </div>
+   </div>
+
+   using (Html.BeginForm("Application", "Expenses", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data" }))
+   {
+      @Html.AntiForgeryToken()
+      @Html.HiddenFor(m => m.Expenses_ID)
+      @Html.HiddenFor(m => m.Employee_Profile_ID)
+      @Html.HiddenFor(m => m.OnBehalf_Profile_ID)
+      @Html.HiddenFor(m => m.Overall_Status)
+      @Html.HiddenFor(m => m.Approval_Status_1st)
+      @Html.HiddenFor(m => m.Approval_Status_2st)
+      @Html.HiddenFor(m => m.Approval_Cancel_Status)
+      @Html.HiddenFor(m => m.ApprStatus)
+      @Html.HiddenFor(m => m.Approval_Level)
+      @Html.HiddenFor(m => m.Request_ID)
+      @Html.HiddenFor(m => m.Name)
+      @Html.HiddenFor(m => m.Email)
+      @Html.HiddenFor(m => m.Supervisor_Name)
+      @Html.HiddenFor(m => m.Supervisor)
+      @Html.HiddenFor(m => m.Request_Cancel_ID)
+      @Html.HiddenFor(m => m.tabAction)
+      @Html.HiddenFor(m => m.Default_Currency_ID)
+      @Html.HiddenFor(m => m.Default_Currency_Code)
+      @Html.HiddenFor(m => m.CkYear)
+      @Html.HiddenFor(m => m.Cancel_Status)
+      @Html.HiddenFor(m => m.Default_Date)
+
+      <input type="hidden" id="operation" name="operation" value="@Model.operation" />
+      <div class="main">
+         <div class="row">
+            <div class="col-md-12">
+               @if (Model.result != null && Model.result.Code != 0)
+               {
+                  if (Model.result.Code < 0)
+                  {
+                     <div class="alert alert-red">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                     </div>
+                  }
+                  else if (Model.result.Code > 0)
+                  {
+                     <div class="alert alert-success">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                     </div>
+                  }
+               }
+            </div>
+         </div>
+         <div class="row">
+            @if (Model.operation == UserSession.RIGHT_U && Model.ApprStatus != WorkflowStatus.Draft && Model.ApprStatus != WorkflowStatus.Rejected)
+            {
+               <div class="col-md-4">
+                  <section class="tile color transparent-black">
+                     <div class="tile-header transparent">
+                        <h1><strong>@Resource.Expenses_Approval (@curstatus)</strong></h1>
+                        <div class="controls">
+                           <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                        </div>
+                     </div>
+                     <div class="tile-body">
+                        <div class="row">
+                           <div class="col-md-12 sm-left">
+                              <h1 class="timeline-heading"><strong>@Resource.Start</strong></h1>
+                              <ol class="timeline">
+                                 @if (Model.Expenses_Request != null && Model.Expenses_Request.Count > 0)
+                                 {
+                                    foreach (var rrow in Model.Expenses_Request)
+                                    {
+                                       if (rrow.Task_Assignment != null && rrow.Task_Assignment.Count > 0)
+                                       {
+                                          foreach (var row in rrow.Task_Assignment.OrderBy(o => o.Approval_Level).ThenByDescending(o => o.Record_Status).ToList())
+                                          {
+                                             var IsIndent = false;
+                                             if (row.Is_Indent.HasValue && row.Is_Indent.Value)
+                                             {
+                                                IsIndent = row.Is_Indent.Value;
+                                             }
+                                             if (rrow.Request_Type == "Cancel")
+                                             {
+                                                if (row.Status == WorkflowStatus.Closed)
+                                                {
+                                                   @Html.Raw(GenTimelineItem(WorkflowStatus.Cancelled, row.Name, IsIndent))
+                                                }
+                                                else if (row.Status == WorkflowStatus.Approved)
+                                                {
+                                                   @Html.Raw(GenTimelineItem(WorkflowStatus.Cancellation_Approved, row.Name, IsIndent))
+                                                }
+                                                else if (row.Status == WorkflowStatus.Rejected)
+                                                {
+                                                   @Html.Raw(GenTimelineItem(WorkflowStatus.Cancellation_Rejected, row.Name, IsIndent))
+                                                }
+                                                else
+                                                {
+                                                   @Html.Raw(GenTimelineItem(WorkflowStatus.Canceling, row.Name, IsIndent))
+                                                }
+                                             }
+                                             else
+                                             {
+                                                @Html.Raw(GenTimelineItem(row.Status, row.Name, IsIndent))
+                                             }
+                                          }
+                                       }
+                                       else
+                                       {
+                                          if (rrow.Request_Type == "Cancel")
+                                          {
+                                             if (rrow.Status == WorkflowStatus.Closed)
+                                             {
+                                                @Html.Raw(GenTimelineItem(WorkflowStatus.Cancelled))
+                                             }
+                                             else if (rrow.Status == WorkflowStatus.Approved)
+                                             {
+                                                @Html.Raw(GenTimelineItem(WorkflowStatus.Cancellation_Approved))
+                                             }
+                                             else if (rrow.Status == WorkflowStatus.Rejected)
+                                             {
+                                                @Html.Raw(GenTimelineItem(WorkflowStatus.Cancellation_Rejected))
+                                             }
+                                             else
+                                             {
+                                                @Html.Raw(GenTimelineItem(WorkflowStatus.Canceling))
+                                             }
+                                          }
+                                          else
+                                          {
+                                             @Html.Raw(GenTimelineItem(rrow.Status, null))
+                                          }
+                                       }
+                                    }
+                                 }
+                                 else
+                                 {
+                                    string appname = null;
+                                    if (Model.Supervisor.HasValue)
+                                    {
+                                       appname = Model.Supervisor_Name;
+                                    }
+                                    @Html.Raw(GenTimelineItem(Model.Overall_Status, appname))
+                                 }
+
+                                 @if (!string.IsNullOrEmpty(Model.Cancel_Status))
+                                 {
+                                    string appname = null;
+                                    if (Model.Supervisor.HasValue && Model.Overall_Status == WorkflowStatus.Closed)
+                                    {
+                                       appname = Model.Supervisor_Name;
+                                    }
+                                    if (!Model.Request_Cancel_ID.HasValue)
+                                    {
+                                       @Html.Raw(GenTimelineItem(Model.Cancel_Status, appname))
+                                    }
+                                 }
+                              </ol>
+                              <h1 class="timeline-heading"><strong>@Resource.End</strong></h1>
+                           </div>
+                        </div>
+                     </div>
+                  </section>
+               </div>
+            }
+            <div class="@infoColsapan">
+               <section class="tile color transparent-black">
+                  <div class="tile-header transparent">
+                     <h1><strong>@Resource.Expenses_Info</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                     </div>
+                  </div>
+                  <div class="tile-body">
+                     <div id="divApplication">
+                        <div class="row">
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <label for="Reasons" class="control-label">@Resource.On_Behalf_Emplyoee</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    @if (Model.ApprStatus == WorkflowStatus.Draft && Model.ApprStatus != WorkflowStatus.Rejected)
+                                    {
+                                       <select class="chosen-select chosen-transparent form-control" id="Employee_Under_Me" name="Employee_Under_Me" onchange="Employee_OnChange(this)">
+                                          <option value=""> -- </option>
+                                          @if (Model.EmployeeUnderMeList != null)
+                                          {
+                                             foreach (var row in Model.EmployeeUnderMeList)
+                                             {
+                                                if (Model.OnBehalf_Profile_ID == NumUtil.ParseInteger(row.Value))
+                                                {
+                                                   <option value="@(row.Value != null ? row.Value : "0")" selected>@row.Text</option>
+                                                }
+                                                else
+                                                {
+                                                   <option value="@(row.Value != null ? row.Value : "0")">@row.Text</option>
+                                                }
+                                             }
+                                          }
+                                       </select>
+                                    }
+                                    else if (Model.operation == UserSession.RIGHT_U && Model.ApprStatus != WorkflowStatus.Draft && Model.ApprStatus != WorkflowStatus.Rejected)
+                                    {
+                                       <input type="text" class="form-control" value="@Model.Name" readonly />
+                                       <input type="hidden" id="Employee_Under_Me" name="Employee_Under_Me" value="@Model.OnBehalf_Profile_ID" />
+                                    }
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-8">
+                              <div class="form-group">
+                                 <div class="col-md-12" style="height:30px">
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <label for="Expense_Note" class="control-label">@Resource.Expense_Note</label>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <label for="Expenses_No" class="control-label">@Resource.Expenses_No_SymbolDot</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <input type="text" class="form-control" id="Expenses_No" name="Expenses_No" value="@Model.Expenses_No" readonly>
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Expenses_No)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <label for="Expenses_Title" class="control-label">@Resource.Expenses_Title</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <input type="text" class="form-control" id="Expenses_Title" name="Expenses_Title" value="@Model.Expenses_Title">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Expenses_Title)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <label for="Date_Applied" class="control-label">@Resource.Date_Applied</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-md-12">
+                                    <input type="text" class="form-control input-datepicker" id="Date_Applied" name="Date_Applied" value="@Model.Date_Applied">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Date_Applied, "", new { id = "Date_Applied_Err" })
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-12">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Detail_Rows)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-12">
+                           <section class="tile transparent">
+                              <div class="tile-body color transparent-black rounded-corners">
+                                 <div class="row">
+                                    @if (Model.ApprStatus == WorkflowStatus.Draft || Model.ApprStatus == WorkflowStatus.Rejected)
+                                    {
+                                       <div class="col-md-12 text-center">
+                                          <a class="btn btn-greensea  btn-sm add-row" onclick="AddDetail_Onclick()">@Resource.Add_An_Item</a>
+                                       </div>
+                                    }
+                                 </div>
+                                 <div class="table-responsive">
+                                    <table class="table table-datatable table-custom" id="eDetailDataTable">
+                                       <thead>
+                                          <tr>
+                                             <th id="dateHeader">@Resource.Expenses_Date</th>
+                                             <th>@Resource.Expenses_Type</th>
+                                             @if (uitem.Is_Indent)
+                                             {
+                                                <th>@Resource.Job</th>
+                                             }
+                                             <th>@Resource.Amount_Claiming</th>
+                                             <th style="width:110px" class="no-sort">@Resource.Action</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody>
+                                          @if (Model.Detail_Rows != null && Model.Detail_Rows.Count() > 0)
+                                          {
+                                             for (var i = 0; i < Model.Detail_Rows.Count(); i++)
+                                             {
+                                                var row = Model.Detail_Rows[i];
+                                                <tr class="status-info" id="erow-@i">
+                                                   @{ Html.RenderPartial("ApplicationDetailRow", new ExpensesDetailViewModel()
+                                                   {
+                                                      Index = i,
+                                                      Row_Type = row.Row_Type,
+                                                      Expenses_Application_Document_ID = row.Expenses_Application_Document_ID,
+                                                      Expenses_Config_ID = row.Expenses_Config_ID,
+                                                      Expenses_Type_Desc = row.Expenses_Type_Desc,
+                                                      Upload_Receipt_ID = row.Upload_Receipt_ID,
+                                                      Upload_Receipt_Name = row.Upload_Receipt_Name,
+                                                      Upload_Receipt = row.Upload_Receipt,
+                                                      UOM_ID = row.UOM_ID,
+                                                      UOM_Name = row.UOM_Name,
+                                                      Amount_Per_UOM = row.Amount_Per_UOM,
+                                                      Doc_No = row.Doc_No,
+
+                                                      Job_Cost_ID = row.Job_Cost_ID,
+                                                      Withholding_Tax = row.Withholding_Tax,
+                                                      Tax_Type = row.Tax_Type,
+                                                      Withholding_Tax_Amount = row.Withholding_Tax_Amount,
+                                                      Tax_Amount = row.Tax_Amount,
+                                                      Tax_Amount_Type = row.Tax_Amount_Type,
+                                                      Withholding_Tax_Type = row.Withholding_Tax_Type,
+
+                                                      Mileage = row.Mileage,
+                                                      Balance = row.Balance,
+                                                      Selected_Currency = row.Selected_Currency,
+                                                      Tax = row.Tax,
+                                                      Notes = row.Notes,
+                                                      Total_Amount = row.Total_Amount,
+                                                      Amount_Claiming = row.Amount_Claiming,
+                                                      Expenses_Type_Name = row.Expenses_Type_Name,
+                                                      Expenses_Date = row.Expenses_Date,
+                                                      Job_Cost_Name = row.Job_Cost_Name,
+                                                      View_Readonly = viewReadonly
+                                                   }
+                                                   );
+                                                   }
+                                                </tr>
+                                             }
+                                          }
+                                       </tbody>
+                                    </table>
+                                 </div>
+                              </div>
+                           </section>
+                        </div>
+                     </div>
+                  </div>
+               </section>
+            </div>
+         </div>
+         @if (Model.rights.Contains(UserSession.RIGHT_C) && Model.operation == UserSession.RIGHT_C || Model.ApprStatus == WorkflowStatus.Draft || Model.ApprStatus == WorkflowStatus.Rejected)
+         {
+            <div class="row">
+               <div class="col-md-12">
+                  <section class="tile color transparent-white">
+                     <div class="tile-body">
+                        <div class="row">
+                           <div class="col-md-12">
+                              <button type="submit" class="btn btn-primary" name="pStatus" value="@WorkflowStatus.Draft">@Resource.Save_As_Draft</button>
+                              <button type="submit" class="btn btn-primary" name="pStatus" value="Save">@Resource.Submit</button>
+                              <a href="@Url.Action("Record", "Expenses", new { })" class="btn btn-default">@Resource.Cancel</a>
+                           </div>
+                        </div>
+                     </div>
+                  </section>
+               </div>
+            </div>
+         }
+
+         @if (Model.ApprStatus != WorkflowStatus.Draft && Model.ApprStatus != WorkflowStatus.Rejected)
+         {
+            if (Model.ApprStatus == "Manage")
+            {
+               if (Model.rights.Contains(UserSession.RIGHT_U))
+               {
+                  var showApprovalBar = false;
+                  int? emploginID = null;
+                  if (userlogin.Employee_Profile != null)
+                  {
+                     emploginID = userlogin.Employee_Profile.FirstOrDefault().Employee_Profile_ID;
+                  }
+                  <div class="row">
+                     <div class="col-md-12">
+                        <section class="tile color transparent-white">
+                           <div class="tile-body">
+                              <div class="row">
+                                 <div class="col-md-12">
+                                    @if (Model.Expenses_Request != null && Model.Expenses_Request.Count > 0)
+                                    {
+                                       int? rid = null;
+                                       if (!string.IsNullOrEmpty(Model.Cancel_Status))
+                                       {
+                                          rid = Model.Request_Cancel_ID;
+                                       }
+                                       else { rid = Model.Request_ID; }
+                                       var request = Model.Expenses_Request.Where(w => w.Request_ID == rid).FirstOrDefault();
+                                       if (request != null && request.Task_Assignment != null)
+                                       {
+                                          var task = request.Task_Assignment.Where(w => w.Record_Status == WfRecordStatus.Active && w.Profile_ID == userlogin.Profile_ID).OrderBy(o => o.Approval_Level).FirstOrDefault();
+                                          if (task != null)
+                                          {
+                                             showApprovalBar = true;
+                                             if (request.Status == WorkflowStatus.Rejected)
+                                             {
+                                                showApprovalBar = false;
+                                             }
+                                          }
+                                       }
+                                    }
+                                    else
+                                    {
+                                       if (Model.Supervisor.HasValue && Model.Supervisor == emploginID)
+                                       {
+                                          if (!string.IsNullOrEmpty(Model.Cancel_Status))
+                                          {
+                                             if (Model.Cancel_Status == WorkflowStatus.Canceling) { showApprovalBar = true; }
+                                          }
+                                          else
+                                          {
+                                             if (Model.Overall_Status == WorkflowStatus.Pending | Model.Overall_Status == WorkflowStatus.Approved) { showApprovalBar = true; }
+                                          }
+                                       }
+                                    }
+                                    @if (showApprovalBar)
+                                    {
+                                       <button type="submit" class="btn btn-primary" name="pStatus" value="@WorkflowStatus.Approved">@Resource.Approve</button>
+                                       <a id="btnReject" href="#modal-reject" role="button" data-toggle="modal" class="btn btn-primary">@Resource.Reject</a>
+                                    }
+                                    <a href="@Url.Action("ExpensesManagement", "Expenses", new { tabAction = Model.tabAction })" class="btn btn-default">@Resource.Cancel</a>
+                                 </div>
+                              </div>
+                           </div>
+                        </section>
+                     </div>
+                  </div>
+
+                  <div class="modal fade" id="modal-reject" tabindex="-1" role="dialog" aria-labelledby="modalConfirmLabel" aria-hidden="true">
+                     <div class="modal-dialog">
+                        <div class="modal-content">
+                           <div class="modal-header">
+                              <h3 class="modal-title" id="modalConfirmLabel"><strong>@Resource.Reject</strong></h3>
+                           </div>
+                           <div class="modal-body">
+                              <div class="row">
+                                 <div class="col-sm-12">
+                                    <div class="form-group">
+                                       <div class="col-sm-12">
+                                          <label for="Remarks" class="control-label">@Resource.Remark</label>
+                                       </div>
+                                    </div>
+                                    <div class="form-group">
+                                       <div class="col-sm-12">
+                                          <textarea class="form-control" name="Remark_Rej" id="Remark_Rej" rows="5">@Model.Remark_Rej</textarea>
+                                          <div class="validation-error">
+                                             @Html.ValidationMessageFor(m => m.Remark_Rej)
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="modal-footer">
+                              <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+                              <button type="submit" class="btn btn-primary" name="pStatus" value="@WorkflowStatus.Rejected">@Resource.Reject</button>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="md-overlay"></div>
+               }
+            }
+            else
+            {
+               if (Model.operation == UserSession.RIGHT_U & Model.rights.Contains(UserSession.RIGHT_U))
+               {
+                  <div class="row">
+                     <div class="col-md-12">
+                        <section class="tile color transparent-white">
+                           <div class="tile-body">
+                              <div class="row">
+                                 <div class="col-md-12">
+                                    @if (string.IsNullOrEmpty(Model.Cancel_Status))
+                                    {
+                                       if (Model.Overall_Status != WorkflowStatus.Rejected)
+                                       {
+                                          <button type="submit" class="btn btn-primary" name="pStatus" value="@WorkflowStatus.Cancelled">@Resource.Expenses_Request_Cancel</button>
+                                       }
+                                    }
+                                    else if (Model.Cancel_Status == WorkflowStatus.Cancellation_Rejected)
+                                    {
+                                       if (Model.Overall_Status == WorkflowStatus.Closed)
+                                       {
+                                          <button type="submit" class="btn btn-primary" name="pStatus" value="@WorkflowStatus.Cancelled">@Resource.Expenses_Request_Cancel</button>
+                                       }
+                                    }
+                                    <a href="@Url.Action("Record", "Expenses", new { })" cl class="btn btn-default">@Resource.Cancel</a>
+                                 </div>
+                              </div>
+                           </div>
+                        </section>
+                     </div>
+                  </div>
+               }
+            }
+         }
+      </div>
+
+         { Html.RenderPartial("_ApplicationDetail", Model); }
+   }
+
+   <script type="text/javascript">
+
+      $(function () {
+
+         if ('@ViewData.ModelState.IsValid'.toLowerCase() == "false") {
+            sortdate_Onclick();
+         }
+
+         if ('@Model.isRejectPopUp' == 'true' || '@Model.isRejectPopUp' == 'True' || '@Model.isRejectPopUp' == true) {
+            $('#btnReject').get(0).click();
+         }
+
+         InitDatepicker();
+         $(document).on('change', '.btn-file :file', function () {
+            var input = $(this),
+            numFiles = input.get(0).files ? input.get(0).files.length : 1,
+            label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+            input.trigger('fileselect', [numFiles, label]);
+         });
+
+         $('.btn-file :file').on('fileselect', function (event, numFiles, label) {
+
+            var sizeIsnull = $('#uploadfile')[0].files[0];
+            if (sizeIsnull != undefined) {
+               var fsize = $('#uploadfile')[0].files[0].size;
+               if (fsize > 2097150) {
+                  alert('@Resource.Message_Please_Upload_File_Size_Is_Less_Than_2_MB');
+                  $('#uploadfile').after($('#uploadfile').clone(true)).remove();
+                  $('#uploadfile').parents('.input-group').find(':text').val('');
+                  return false;
+               }
+
+               var input = $(this).parents('.input-group').find(':text'),
+                   log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+               console.log(log);
+               if (input.length) {
+                  input.val(log);
+               } else {
+                  if (log) alert(log);
+               }
+            }
+         });
+
+         //Added by sun 07-11-2016: Fix Bug
+         $('#Withholding_Tax').keyup(function () {
+            if ($('#Withholding_Tax').val() > 100) {
+               $('#Withholding_Tax').val(100);
+            }
+         });
+
+         $('#Total_Amount').keyup(function () {
+            applicationConfig();
+         });
+
+
+         $('#Tax').keyup(function () {
+            //Added by sun 07-11-2016 : Fix Bug (type precent cannot more then 100.)
+            if ($('#Tax').val() > 100) {
+               $('#Tax').val(100);
+            }
+            applicationConfig();
+         });
+
+         $('#Withholding_Tax').keyup(function () {
+            applicationConfig();
+         });
+
+         $('#Mileage').keyup(function () {
+            Milage_Change();
+         });
+
+         $('#Tax_Type').change(function () {
+            applicationConfig();
+         });
+
+         $('#Tax_Amount_Type').change(function () {
+            applicationConfig();
+         });
+
+         $('#Withholding_Tax_Type').change(function () {
+            applicationConfig();
+         });
+
+         $('#Selected_Currency').change(function () {
+            applicationConfig();
+         });
+
+         $('#Expenses_Date').change(function () {
+            if ($('#Expenses_Date').val() != null && $('#Expenses_Date').val() != '') {
+               $('#Selected_Currency').attr("disabled", false);
+               $('#Selected_Currency').trigger("chosen:updated");
+               applicationConfig();
+            } else {
+               $('#Selected_Currency').attr("disabled", true);
+               $('#Selected_Currency').trigger("chosen:updated");
+            }
+         });
+
+         $('#Expenses_Config_ID').change(function () {
+            applicationConfig();
+         });
+
+
+         $("#btnDetailSubmit").click(function () {
+            if (!ValidateRequire('Expenses_Config_ID', '@Resource.Expenses_Type', true)) {
+               return;
+            }
+            applicationConfig(true);
+         });
+
+         if ('@isReadonly.ToString().ToLower()' == 'true') {
+            Disable('divApplication');
+            $('#Total_Amount').attr("disabled", true);
+         }
+
+         $('#Job_Cost_ID').change(function () {
+            JobCostConfig();
+         });
+      });
+
+      function SaveDetail() {
+         var valid = true;
+
+         if (!ValidateRequire('Expenses_Config_ID', '@Resource.Expenses_Type', true)) { valid = false; }
+         if (!ValidateRequire('Expenses_Date', '@Resource.Expenses_Date', true)) { valid = false; }
+         if (!ValidateDecimal('Total_Amount', '@Resource.Total_Amount', true)) { valid = false; }
+         if (!ValidateRequire('Selected_Currency', '@Resource.Currency', true)) { valid = false; }
+         if (!ValidateDecimal('Tax', '@Resource.Tax', false)) { valid = false; }
+         if (!ValidateDecimal('Amount_Claiming', '@Resource.Amount_Claiming', true)) { valid = false; }
+
+         //********  Start Smart Dev  ********//
+         if (!ValidateDecimal('Withholding_Tax', '@Resource.Withholding_Tax', false)) { valid = false; }
+         //********  End Smart Dev  ********//
+
+         if (!valid) {
+            return;
+         }
+
+         if ($('#Event_Click').val() == '@RowType.EDIT') {
+            var index = parseInt($('#Index').val());
+            if (index != null && !isNaN(index)) {
+
+               ShowMask();
+               $('#Detail_Rows_' + index + '__Expenses_Config_ID').val($('#Expenses_Config_ID').val());
+               $('#Detail_Rows_' + index + '__Expenses_Type_Desc').val($('#Expenses_Type_Desc').val());
+               $('#Detail_Rows_' + index + '__Expenses_Type_Name').val($('#Expenses_Type_Name').val());
+               $('#Detail_Rows_' + index + '__Expenses_Date').val($('#Expenses_Date').val());
+               $('#Detail_Rows_' + index + '__Total_Amount').val($('#Total_Amount').val());
+               $('#Detail_Rows_' + index + '__Amount_Claiming').val($('#Amount_Claiming').val());
+               $('#Detail_Rows_' + index + '__Balance').val($('#Balance').val());
+               $('#Detail_Rows_' + index + '__Selected_Currency').val($('#Selected_Currency').val());
+               $('#Detail_Rows_' + index + '__Tax').val($('#Tax').val());
+               $('#Detail_Rows_' + index + '__Notes').val($('#Notes').val());
+               $('#Detail_Rows_' + index + '__Doc_No').val($('#Doc_No').val());
+
+               $('#Detail_Rows_' + index + '__Expenses_Type_Name_Text').val($('#Expenses_Type_Name').val() + ' ' + $('#Notes').val());
+               $('#Detail_Rows_' + index + '__Expenses_Date_Text').val($('#Expenses_Date').val());
+               $('#Detail_Rows_' + index + '__Amount_Claiming_Text').val($('#Amount_Claiming').val());
+
+               $('#Detail_Rows_' + index + '__UOM_ID').val($('#UOM_ID').val());
+               $('#Detail_Rows_' + index + '__UOM_Name').val($('#UOM_Name').val());
+               $('#Detail_Rows_' + index + '__Mileage').val($('#Mileage').val());
+               $('#Detail_Rows_' + index + '__Amount_Per_UOM').val($('#Amount_Per_UOM').val());
+
+               $('#Detail_Rows_' + index + '__Upload_Receipt_ID').val($('#Upload_Receipt_ID').val());
+               $('#Detail_Rows_' + index + '__Upload_Receipt').val($('#Upload_Receipt').val());
+               $('#Detail_Rows_' + index + '__Upload_Receipt_Name').val($('#Upload_Receipt_Name').val());
+
+
+               //********  Start Smart Dev  ********//
+               $('#Detail_Rows_' + index + '__Withholding_Tax').val($('#Withholding_Tax').val());
+               $('#Detail_Rows_' + index + '__Job_Cost_ID').val($('#Job_Cost_ID').val());
+               $('#Detail_Rows_' + index + '__Tax_Type').val($('#Tax_Type').val());
+
+               $('#Detail_Rows_' + index + '__Withholding_Tax_Amount').val($('#Withholding_Tax_Amount').val());
+               $('#Detail_Rows_' + index + '__Tax_Amount').val($('#Tax_Amount').val());
+               $('#Detail_Rows_' + index + '__Tax_Amount_Type').val($('#Tax_Amount_Type').val());
+               $('#Detail_Rows_' + index + '__Withholding_Tax_Type').val($('#Withholding_Tax_Type').val());
+
+               $('#Detail_Rows_' + index + '__Job_Cost_Name_Text').val($('#Job_Cost_Name').val());
+               //********  End Smart Dev  ********//
+
+               //******** Start Edit Smart Dev  ********//
+               var clickevent = "EditDetail_Onclick('" + index + "','" + $('#Expenses_Application_Document_ID').val() + "','" + $('#Expenses_Config_ID').val() + "','" + $('#Row_Type').val() + "','" + $('#Expenses_Date').val() + "','" + $('#Balance').val() + "','" + $('#Total_Amount').val() + "','" + $('#Amount_Claiming').val() + "','" + $('#Selected_Currency').val() + "','" + $('#Tax').val() + "','" + $('#Notes').val() + "','" + $('#Expenses_Type_Desc').val() + "','" + $('#Expenses_Type_Name').val() + "','" + $('#UOM_ID').val() + "','" + $('#UOM_Name').val() + "','" + $('#Mileage').val() + "','" + $('#Amount_Per_UOM').val() + "','" + $('#Upload_Receipt_ID').val() + "','" + $('#Upload_Receipt_Name').val() + "','" + $('#Upload_Receipt').val() + "','" + $('#Job_Cost_ID').val() + "','" + $('#Withholding_Tax').val() + "','" + $('#Doc_No').val() + "','" + $('#Tax_Type').val() + "','" + $('#Withholding_Tax_Amount').val() + "','" + $('#Tax_Amount').val() + "','" + $('#Tax_Amount_Type').val() + "','" + $('#Withholding_Tax_Type').val() + "','" + $('#Job_Cost_Name').val() + "')";
+               //********  End Edit Smart Dev  ********//
+
+               $('#btnEditDetail-' + index).attr("onclick", clickevent);
+               $('#btnClose').get(0).click();
+
+               if ($("#uploadfile")[0].files[0] != null) {
+                  var fileToLoad = $("#uploadfile")[0].files[0];
+                  var fileReader = new FileReader();
+                  fileReader.onload = function (fileLoadedEvent) {
+                     var srcData = fileLoadedEvent.target.result; // <--- data: base64
+                     $('#Detail_Rows_' + index + '__Upload_Receipt').val(srcData);
+                     $('#Detail_Rows_' + index + '__Upload_Receipt_Name').val(fileToLoad.name);
+                  }
+                  fileReader.readAsDataURL(fileToLoad);
+               }
+               sortdate_Onclick();
+               CloseMask();
+            }
+         }
+         else {
+            var rowcount = $('#eDetailDataTable > tbody >tr').length;
+            var data = {
+               pIndex: rowcount,
+               pDocID: $('#Expenses_Application_Document_ID').val(),
+               pExpensesConfigID: $('#Expenses_Config_ID').val(),
+               pExpensesDate: $('#Expenses_Date').val(),
+               pBalance: $('#Balance').val(),
+               pTotalAmount: $('#Total_Amount').val(),
+               pAmountClaiming: $('#Amount_Claiming').val(),
+               pSelectedCurrency: $('#Selected_Currency').val(),
+               pTax: $('#Tax').val(),
+               pNotes: $('#Notes').val(),
+               pDesc: $('#Expenses_Type_Desc').val(),
+               pName: $('#Expenses_Type_Name').val(),
+               pUomID: $('#UOM_ID').val(),
+               pUomName: $('#UOM_Name').val(),
+               pMileage: $('#Mileage').val(),
+               pAmountPerUOM: $('#Amount_Per_UOM').val(),
+               pFile: "",
+               pFileName: "",
+
+               //********  Start Smart Dev  ********//
+               pJobCostID: $('#Job_Cost_ID').val(),
+               pWithholdingTax: $('#Withholding_Tax').val(),
+               pDocNo: $('#Doc_No').val(),
+               pTaxType: $('#Tax_Type').val(),
+
+               pWithholdingTaxAmount: $('#Withholding_Tax_Amount').val(),
+               pTaxAmount: $('#Tax_Amount').val(),
+               pTaxAmountType: $('#Tax_Amount_Type').val(),
+               pWithholdingTaxType: $('#Withholding_Tax_Type').val(),
+               pJobCostName: $('#Job_Cost_Name').val(),
+               //********  End Smart Dev  ********//
+            };
+
+            if ($("#uploadfile")[0].files[0] != null) {
+               var fileToLoad = $("#uploadfile")[0].files[0];
+               var fileReader = new FileReader();
+               fileReader.onload = function (fileLoadedEvent) {
+                  var srcData = fileLoadedEvent.target.result; // <--- data: base64
+                  if (srcData == "data:")
+                     srcData = "";
+                  data.pFile = srcData;
+                  data.pFileName = fileToLoad.name;
+                  ShowMask();
+                  $.ajax({
+                     url: '@Url.Action("ApplicationDetailRow", "Expenses")',
+                     data: JSON.stringify(data),
+                     type: 'POST',
+                     contentType: "application/json; charset=utf-8",
+                     success: function (data) {
+                        var str = '<tr  id="erow-' + rowcount + '">';
+                        str = str + data + '</tr>';
+                        $('#eDetailDataTable > tbody').append(str);
+                        $('#btnOpenDlgDetail').get(0).click();
+                        $('#btnClose').get(0).click();
+                        $("table tr").removeClass('selectedRow');
+                        $('#erow-' + rowcount).addClass('selectedRow');
+                        sortdate_Onclick();
+                        CloseMask();
+                     }
+                  });
+               }
+               fileReader.readAsDataURL(fileToLoad);
+            }
+            else {
+               var rowcount = $('#eDetailDataTable > tbody >tr').length;
+               ShowMask();
+               $.ajax({
+                  url: '@Url.Action("ApplicationDetailRow", "Expenses")',
+                  type: 'POST',
+                  data: JSON.stringify(data),
+                  contentType: "application/json; charset=utf-8",
+                  success: function (data) {
+                     var str = '<tr  id="erow-' + rowcount + '">';
+                     str = str + data + '</tr>';
+                     $('#eDetailDataTable > tbody').append(str);
+                     $('#btnOpenDlgDetail').get(0).click();
+                     $('#btnClose').get(0).click();
+                     $("table tr").removeClass('selectedRow');
+                     $('#erow-' + rowcount).addClass('selectedRow');
+                     sortdate_Onclick();
+                     CloseMask();
+                  }
+               });
+            }
+         }
+      }
+
+      function AddDetail_Onclick() {
+         ClearValidate('Expenses_Config_ID');
+         ClearValidate('Expenses_Date');
+         ClearValidate('Total_Amount');
+         ClearValidate('Selected_Currency');
+         ClearValidate('Tax');
+         ClearValidate('Amount_Claiming');
+
+         //debugger;
+         $('#btnOpenDlgDetail').get(0).click();
+         $('#Event_Click').val('@RowType.ADD');
+         $('#Row_Type').val('@RowType.ADD');
+         $('#Index').val('');
+
+         $('#Expenses_Application_Document_ID').val('');
+
+         $('#Upload_Receipt_ID').val('');
+         $('#Upload_Receipt').val('');
+         $('#Upload_Receipt_Name').val('');
+
+         $('#Employee_Under_Me').trigger("chosen:updated");
+         var onbehalfProfileID = $('#OnBehalf_Profile_ID').val();
+
+         $('#Expenses_Config_ID').val('');
+         if ($('#Expenses_Config_ID option').length > 0) {
+            $("#Expenses_Config_ID").get(0).selectedIndex = 0;
+            applicationConfig();
+         }
+         $('#Expenses_Config_ID').trigger("chosen:updated");
+
+         $('#Balance').val(0);
+         $('#Balance_Amount').val(0);
+
+         var empName = $('#Employee_Under_Me :selected').text()
+         //alert(empName);
+         $('#on_Behalf_Employee').val(empName);
+
+         $('#Expenses_Type_Desc').val('');
+         $('#Expenses_Type_Name').val('');
+
+         $('#Expenses_Date').val('@Model.Default_Date');
+         $('#Total_Amount').val(0);
+         $('#Tax').val(0);
+         $('#Amount_Claiming').val(0);
+         $('#Notes').val('');
+         $('#Doc_No').val('');
+
+         $('#UOM_ID').val('');
+         $('#UOM_ID').trigger("chosen:updated");
+         $('#UOM_Name').val('');
+         $('#UOM_Name2').val('');
+         $('#Mileage').val(0);
+         $('#Amount_Per_UOM').val(0);
+
+         $('#uploadfile').trigger('fileselect');
+         $('#uploadfile').after($('#uploadfile').clone(true)).remove();
+         $('#uploadfile').parents('.input-group').find(':text').val('');
+
+         $('#divExchangeRate').hide();
+         $('#divMileage').hide();
+
+         $('#Selected_Currency').val('@Model.Default_Currency_ID');
+         $('#Selected_Currency').attr("disabled", false)
+         $('#Selected_Currency').trigger("chosen:updated");
+
+         //********  Start Smart Dev  ********//
+         $('#Withholding_Tax').val(0);
+
+         $('#Job_Cost_ID').val('');
+         $('#Job_Cost_ID').trigger("chosen:updated");
+
+         $('#Tax_Type').val('@TaxType.Exclusive');
+         $('#Tax_Type').trigger("chosen:updated");
+
+         $('#Withholding_Tax_Amount').val(0);
+         $('#Tax_Amount').val(0);
+
+         $('#Tax_Amount_Type').val('%');
+         $('#Tax_Amount_Type').trigger("chosen:updated");
+
+         $('#Withholding_Tax_Type').val('%');
+         $('#Withholding_Tax_Type').trigger("chosen:updated");
+         //********  End Smart Dev  ********//
+         applicationConfig();
+         //JobCostConfig();
+         $('#Job_Cost_Balance').val(0);
+      }
+
+      function EditDetail_Onclick(index, docID, eConfigID, rowType, eDate, balance, totalAmount, amountClaiming, selectCurrency, tax, notes, eDesc, eName, uomid, uomname, mileage, amountPerUOM, uploadID, uploadname, uploadfile, jobcostID, withholdingTax, docno, taxtype, withholdingTaxAmount, taxAmount, taxAmountType, withholdingTaxType, jobCostName) {
+         //debugger;
+         ClearValidate('Expenses_Config_ID');
+         ClearValidate('Expenses_Date');
+         ClearValidate('Total_Amount');
+         ClearValidate('Selected_Currency');
+         ClearValidate('Tax');
+         ClearValidate('Amount_Claiming');
+
+         $('#btnOpenDlgDetail').get(0).click();
+         $('#Event_Click').val('@RowType.EDIT');
+         $('#Index').val(index);
+         $('#Row_Type').val(rowType);
+         $('#Expenses_Application_Document_ID').val(docID);
+
+         $('#Expenses_Config_ID').val(eConfigID);
+         $('#Expenses_Config_ID').trigger("chosen:updated");
+
+         $('#Expenses_Date').val(eDate);
+         $('#Total_Amount').val(totalAmount);
+         $('#Tax').val(tax);
+
+         $('#Tax_Type').val(taxtype);
+         $('#Tax_Type').trigger("chosen:updated");
+
+         $('#Doc_No').val(docno);
+         $('#Balance').val(balance);
+         $('#Balance_Amount').val(balance);
+         var empName = $('#Employee_Under_Me :selected').text()
+         //alert(empName);
+         $('#on_Behalf_Employee').val(empName);
+
+         $('#Expenses_Type_Name').val(eName);
+         $('#Expenses_Type_Desc').val(eDesc);
+
+         $('#Notes').val(notes);
+
+         $('#Mileage').val(mileage);
+         $('#Mileage').trigger("chosen:updated");
+
+         $('#Upload_Receipt_Name').val(uploadname);
+         $('#Upload_Receipt').val(uploadfile);
+         $('#Upload_Receipt_ID').val(uploadID);
+         if ($('#Upload_Receipt_Name').val() != null) {
+            $("#showfile").html($('#Upload_Receipt_Name').val());
+         }
+         var uploadinput = $('#uploadfile').parents('.input-group').find(':text');
+         uploadinput.val(uploadname);
+
+         var uploadinfile = $('#uploadfile').parents('.input-group').find(':file');
+         uploadinfile.html(uploadname);
+
+         $('#divExchangeRate').hide();
+         $('#divMileage').hide();
+
+         if ($('#UOM_ID').val() != null && $('#UOM_ID').val() != '') {
+            $('#divMileage').show();
+            $('#UOM_Name').val(uomname);
+            $('#UOM_Name2').val(uomname);
+            $('#Amount_Per_UOM').val(amountPerUOM);
+         }
+
+         $('#Selected_Currency').val(selectCurrency);
+         if ($('#Expenses_Date').val() != null && $('#Expenses_Date').val() != '') {
+            $('#Selected_Currency').attr("disabled", true);
+         }
+         $('#Selected_Currency').trigger("chosen:updated");
+
+         //********  Start Smart Dev  ********//
+         ClearValidate('Withholding_Tax');
+         $('#Withholding_Tax').val(withholdingTax);
+
+         $('#Job_Cost_ID').val(jobcostID);
+         $('#Job_Cost_ID').trigger("chosen:updated");
+         $('#Job_Cost_Name').val(jobCostName);
+
+
+         $('#Withholding_Tax_Amount').val(withholdingTaxAmount);
+         $('#Tax_Amount').val(taxAmount);
+
+         $('#Tax_Amount_Type').val(taxAmountType);
+         $('#Tax_Amount_Type').trigger("chosen:updated");
+
+         $('#Withholding_Tax_Type').val(withholdingTaxType);
+         $('#Withholding_Tax_Type').trigger("chosen:updated");
+         //********  End Smart Dev  ********//
+
+         if ('@Model.ApprStatus' == '@WorkflowStatus.Draft') {
+            applicationConfig();
+            JobCostConfig();
+         } else {
+            $('#Amount_Claiming').val(amountClaiming);
+         }
+      }
+
+      function DeleteDetail(rowid, index) {
+         if (confirm('@Resource.Confirm_Delete_Msg')) {
+            $('#Detail_Rows_' + index + '__Row_Type').val('@RowType.DELETE');
+            $('#' + rowid).hide();
+         }
+      }
+
+      var configloading = false;
+      function applicationConfig(dosave) {
+         if (configloading == true)
+            return;
+
+         //debugger;
+         $('#divExchangeRate').hide();
+         if (parseInt('@(Model.expensesConfigList != null ? Model.expensesConfigList.Count : 0)') > 0) {
+            if ($('#Expenses_Config_ID').val() != null && $('#Expenses_Config_ID').val() != '' && $('#Expenses_Date').val() != null && $('#Expenses_Date').val() != '') {
+               $('#Balance').val(0);
+               $('#Amount_Claiming').val(0);
+               //ShowMask();
+               configloading = true;
+               $.ajax({
+                  type: "GET",
+                  url: "ApplicationConfig",
+                  data:
+                     {
+                        pSelected_Currency: $('#Selected_Currency').val(),
+                        pExpenses_Config_ID: $('#Expenses_Config_ID').val(),
+                        pTotal_Amount: $('#Total_Amount').val(),
+                        pExpenses_Date: $('#Expenses_Date').val(),
+                        pProfile_ID: $('#OnBehalf_Profile_ID').val(),
+                        pTax_Type: $('#Tax_Type').val(),
+                        pTax: $('#Tax').val(),
+                        pTax_Amount_Type: $('#Tax_Amount_Type').val(),
+                        pWithholding_Tax: $('#Withholding_Tax').val(),
+                        pWithholding_Tax_Type: $('#Withholding_Tax_Type').val()
+                     },
+                  //dataType: "script"
+               }).done(function (msg) {
+                  //alert(msg);
+                  $('#UOM_ID').val(msg.uomid);
+                  $('#UOM_ID').trigger("chosen:updated");
+
+                  $('#appConfig').html(msg);
+
+                  if ($('#UOM_ID').val() != null && $('#UOM_ID').val() != '') {
+                     $('#divMileage').show();
+                     $('#Total_Amount').attr('readonly', true);
+                  } else {
+                     $('#divMileage').hide();
+                     $("#Total_Amount").removeAttr("readonly");
+                  }
+
+                  if ($('#Exchange_Total_Amount').val() != null && $('#Exchange_Total_Amount').val() != '') {
+                     $('#divExchangeRate').show();
+                  }
+
+                  configloading = false;
+                  //CloseMask();
+                  if (dosave != null && dosave == true) {
+                     SaveDetail();
+                  }
+               });
+            }
+         }
+      }
+
+      function Milage_Change() {
+         var mileage = $('#Mileage').val();
+         var amountperuom = $('#Amount_Per_UOM').val();
+         if (!isNaN(mileage) && !isNaN(amountperuom)) {
+            var totalamount = parseFloat(mileage) * parseFloat(amountperuom);
+            $('#Total_Amount').val(totalamount);
+            //Added by sun 07-11-2016 : Fix Bug
+            applicationConfig();
+         }
+         else {
+            $('#Mileage').val(0);
+            $('#Total_Amount').val(0);
+         }
+      }
+
+      function Employee_OnChange(opt) {
+         var proifleID = opt.options[opt.selectedIndex].value;
+         $('#OnBehalf_Profile_ID').val(proifleID);
+         applicationConfig();
+      }
+
+      //function ReloadExpensesType(paramProfileID) {
+      //   //ShowMask();
+      //   $.ajax({
+      //      type: 'POST',
+      //      url: 'ReloadExpensesType',
+      //      contentType: 'application/json; charset=utf-8',
+      //      data: JSON.stringify({ pProfileID: paramProfileID }),
+      //      dataType: 'json',
+      //      success: function (data) {
+      //         if (data != null) {
+      //            if (data.pExpensesConfigList != null && data.pExpensesConfigList.length > 0) {
+      //               var result = '';
+      //               for (var i = 0, iL = data.pExpensesConfigList.length; i < iL; i++) {
+      //                  result += '<option value="' + data.pExpensesConfigList[i].Value + '">' + data.pExpensesConfigList[i].Text + '</option>';
+      //               }
+      //               $('#Expenses_Config_ID').html(result);
+      //               $('#OnBehalf_Profile_ID').val(data.pProfileID);
+      //               if ($('#Expenses_Config_ID option').length > 0) {
+      //                  $('#Expenses_Config_ID').val($('#Expenses_Config_ID option').get(0).value);
+      //               }
+      //               applicationConfig(false, data.pProfileID);
+      //               $('#Expenses_Config_ID').trigger("chosen:updated");
+      //            }
+      //         }
+      //         CloseMask();
+      //      }
+      //   });
+      //}
+
+      function ShowFile_Onclick() {
+         if ($('#Upload_Receipt_ID').val() != null) {
+            var a = document.createElement('a');
+            var linkText = document.createTextNode($('#Upload_Receipt_Name').val());
+            a.appendChild(linkText);
+            a.href = '@Url.Action("ApplicationFile", "Expenses")' + '?pUploadID=' + $('#Upload_Receipt_ID').val();
+            a.target = "_blank"
+            a.click();
+         }
+      }
+
+      function JobCostConfig() {
+         var pJobCostID = parseInt($('#Job_Cost_ID').val());
+
+         var pJobCostName = $("#Job_Cost_ID option:selected").text();
+         if (pJobCostName != null && pJobCostName != '') {
+            $('#Job_Cost_Name').val(pJobCostName);
+         }
+
+         $('#Job_Cost_Balance').val(0.00);
+         if (pJobCostID != null && !isNaN(pJobCostID)) {
+            //ShowMask();
+            $.ajax({
+               type: 'POST',
+               url: 'JobCostConfig',
+               contentType: 'application/json; charset=utf-8',
+               data: JSON.stringify({ pJobCostID: pJobCostID }),
+               dataType: 'json',
+               success: function (data) {
+                  if (data != null) {
+                     if (data.Job_Cost_Balance != null) {
+                        $('#Job_Cost_Balance').val(data.Job_Cost_Balance)
+                     }
+                  }
+                  //CloseMask();
+               }
+            });
+         }
+      }
+
+      function sortdate_Onclick() {
+         var table = $('#eDetailDataTable').eq(0)
+         var rows = table.find('tr:gt(0)').toArray().sort(comparer2(0));
+         //this.asc;
+         //this.asc = !this.asc
+         //if (!this.asc) {
+         //    rows = rows.reverse();
+         //}
+         for (var i = 0; i < rows.length; i++) {
+            table.append(rows[i]);
+         }
+      }
+
+      function comparer2(index) {
+         return function (a, b) {
+
+            a = getCellValue(a, index);
+            b = getCellValue(b, index);
+
+            a = getDateValue(a.split('/'));
+            b = getDateValue(b.split('/'));
+
+            return a > b ? 1 : a < b ? -1 : 0;
+         }
+      }
+
+      function getCellValue(row, index) {
+         return $(row).children('td').eq(index).find("input").val();
+      }
+
+      function getDateValue(arr) {
+         var dateStr = new Date();
+         if (arr.length == 3) {
+            dateStr = new Date(arr[2], arr[1], arr[0])
+         }
+         console.log(dateStr);
+         return dateStr;
+      }
+
+   </script>
+
+}

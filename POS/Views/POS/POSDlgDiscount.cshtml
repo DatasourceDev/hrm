@@ -1,0 +1,103 @@
+﻿@using POS.Common;
+@using POS.Models;
+@using SBSModel.Common;
+@using SBSModel.Models;
+@model  POS.Models.POSViewModel
+
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnSetDiscount").click(function () {
+            var pDiscount = $('#Set_Discount').val();
+
+            var valid = true;
+            if (ValidateDecimal('Set_Discount', 'Discount', true) == false) {
+                valid = false;
+            }
+
+         
+            if (valid ==true) {
+                var discount = parseFloat(pDiscount);
+                var rowcount = $('#selProductdataTables > tbody >tr').length;
+                for (var i = 0; i < rowcount; i++) {
+                    //$('#Product_Rows_' + i + '__Price_Label').get(0).style.textDecoration = 'none;';
+                    var chk = $('input[name="chk' + i + '"]').get(0);
+                    if (chk != null) {
+                        if (chk.checked == true) {
+                            if ($('#Product_Rows_' + i + '__Row_Type').val() != '@RowType.DELETE') {
+                                var price = parseFloat($('#Product_Rows_' + i + '__Price').val());
+                                $('#Product_Rows_' + i + '__Price_Label').get(0).style.textDecoration = 'line-through';
+                                $('#Product_Rows_' + i + '__Price_Label2').show();
+                                if (discount >= price) {
+                                    discount = price;
+                                }
+                                $('#Product_Rows_' + i + '__Discount2').val(discount);
+                                $('#Product_Rows_' + i + '__Price_Label2').html(formatCurrency(price - discount));
+
+                                //$('#Product_Rows_' + i + '__Price_Label').get(0).style.color = '#FF0';
+                                //$('#Product_Rows_' + i + '__Price_Label2').get(0).style.color = '#FF0';
+                            }
+                            
+                        }
+
+                    }
+
+
+                }
+
+                $('#Set_Discount').val('');
+                $("#modal-set-discount").modal('hide');
+                
+            }
+
+        });
+
+    });
+
+</script>
+<div class="main-content" style="color:#fff;">
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div id="modal-set-discount" class="modal hide fade">
+                <div class="modal-body">
+                    <div class="control-group text-center">
+                        <label class="control-label" style="font-weight: 600; font-size: 20px; line-height: 40px">Set Discount</label>
+                    </div>
+                    <div class="control-group">
+                        <div class="span6">
+                            <div class="control-group">
+                                @Html.Label("Set_Discount_Label", "Discount", new { @class = "control-label", style = "font-size:18px;" })
+                            </div>
+                            <div class="control-group">
+                                <div class="span9">
+                                    @Html.TextBox("Set_Discount", "", new { style = "width:90%;text-align:right;", @class = "bg-white" })
+                                    <div class="validation-error">
+                                        <span id="Set_Discount_Err"></span>
+                                    </div>
+                                </div>
+                                <div class="span3">
+                                    @Html.TextBoxFor(m => m.Currency_Code, new { Readonly = true })
+                                </div>
+                               
+                            </div>
+                        </div>
+                        <div class="span6">
+                            <div class="control-group">
+                                @{
+                                    Html.RenderPartial("POSDlgNumber", new POSNumberViewModel()
+                                    {
+                                        Type = POSDlgType.Discount,
+                                        Display_Label_ID = "Set_Discount"                                        
+                                    });
+                                }
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

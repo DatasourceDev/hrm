@@ -1,0 +1,324 @@
+﻿@model Authentication.Models.AssignUserViewModel
+@using Authentication.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@{
+    ViewBag.Title = Resource.Company_Info;
+}
+<div class="pageheader">
+    <h2>@Resource.Assign_User<span></span></h2>
+    <div class="breadcrumbs">
+        <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            @if (Model.pageAction == "Company")
+            {
+                <li><a href="@Url.Action("CompanyInfo", "Company", new { pComID = EncryptUtil.Encrypt(Model.Company_ID), operation = EncryptUtil.Encrypt(Model.operation) })">@Resource.Company_Info</a></li>
+            }
+            <li class="active">@Resource.Assign_User</li>
+        </ol>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        var totalLicense = parseInt('@(Model.Total_License.HasValue ? Model.Total_License.Value : 0)');
+        var assignLicense = parseInt('@(Model.Assigned != null ? Model.Assigned.Length : 0)');
+        var unassignLicense = totalLicense - assignLicense;
+        $("#Assigned_Licenses").val(assignLicense);
+        $("#UnAssigned_Licenses").val(unassignLicense);
+
+        if ($("#SelectLeft option").length > 0) {
+            $("#SelectLeft option").get(0).setAttribute("selected", '');
+        }
+
+
+        $("#btnMoveLeft").click(function (event) {
+            var selectFrom = "#SelectRight";
+            var moveTo = "#SelectLeft";
+
+            var selectedItems = $(selectFrom + " :selected").toArray();
+            $(moveTo).append(selectedItems);
+            $(selectFrom + " :selected").remove;
+            $(moveTo + " :selected").remove;
+            if ($(selectFrom + " option").length > 0) {
+                $(selectFrom + " option").get(0).setAttribute("selected", '');
+
+            }
+
+
+
+            $("#Assigned_Licenses").val($("#SelectRight option").length);
+
+            var totalLicense = parseInt('@(Model.Total_License.HasValue ? Model.Total_License.Value : 0)');
+            var assignLicense = parseInt($("#Assigned_Licenses").val());
+            var unassignLicense = totalLicense - assignLicense;
+
+            $("#UnAssigned_Licenses").val(unassignLicense);
+        });
+
+        $("#btnMoveRight").click(function (event) {
+            var selectFrom = "#SelectLeft";
+            var moveTo = "#SelectRight";
+
+            var selectedItems = $(selectFrom + " :selected").toArray();
+
+            var licenseCnt = $(moveTo + " option").length + selectedItems.length;
+
+            if (licenseCnt > parseInt('@Model.Total_License')) {
+                alert('Maximum user');
+            }
+            else {
+                $(moveTo).append(selectedItems);
+                $(selectFrom + " :selected").remove;
+                $(moveTo + " :selected").remove;
+                if ($(selectFrom + " option").length > 0) {
+                    $(selectFrom + " option").get(0).setAttribute("selected", '');
+                }
+            }
+
+            $("#Assigned_Licenses").val($("#SelectRight option").length);
+            var totalLicense = parseInt('@(Model.Total_License.HasValue ? Model.Total_License.Value : 0)');
+            var assignLicense = parseInt($("#Assigned_Licenses").val());
+            var unassignLicense = totalLicense - assignLicense;
+            $("#UnAssigned_Licenses").val(unassignLicense);
+
+        });
+
+        $("#btnSave").click(function (event) {
+            var left = $("#SelectLeft option");
+            var right = $("#SelectRight option");
+
+            if (left != null && left.length > 0) {
+                for (var i = 0; i < left.length; i++) {
+                    $('#theForm').append('<input type="hidden" name="UnAssigned" value="' + left.get(i).value + '" />');
+                }
+            }
+            if (right != null && right.length > 0) {
+                for (var i = 0; i < right.length; i++) {
+                    $('#theForm').append('<input type="hidden" name="Assigned" value="' + right.get(i).value + '" />');
+                }
+            }
+            theForm.action = '@Url.Action("AssignUser", "Company")';
+            theForm.method = 'post';
+            theForm.submit();
+        });
+
+    });
+
+    function Module_OnChange() {
+        var sID = $('#Subscription_ID').val();
+        $('#btnAssignUser-' + sID).get(0).click();
+    }
+
+</script>
+
+@foreach (var row in Model.moduleList)
+{
+    <a id="btnAssignUser-@row.Value" style="display:none;" href="@Url.Action("AssignUser", "Company", new { pComID = EncryptUtil.Encrypt(Model.Company_ID), pSubID = EncryptUtil.Encrypt(row.Value), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U), pageAction = Model.pageAction })"></a>
+}
+
+<div class="main">
+    <div class="row">
+        <div class="col-md-12">
+            
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+
+                if (Model.result.Code < 0)
+                {
+                    <div class="alert alert-red">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                    </div>
+                }
+                else if (Model.result.Code > 0)
+                {
+                    <div class="alert alert-success">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                    </div>
+                }
+            }
+            <!-- tile widget -->
+            <section class="tile color transparent-black">
+
+                <div class="tile-body tab-content rounded-bottom-corners">
+                    @using (Html.BeginForm("AssignUser", "Company", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "theForm" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="Company_ID" value="@Model.Company_ID" />
+                        <input type="hidden" name="operation" value="@Model.operation" />
+                        <input type="hidden" name="Module_Detail_ID" value="@Model.Module_Detail_ID" />
+                        <input type="hidden" name="Subscription_ID" value="@Model.Subscription_ID" />
+                        <input type="hidden" name="pageAction" value="@Model.pageAction" />
+
+                                 
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.Assign_User</strong></h1>
+                        </div>
+                                            
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <label for="Company_Name" class="control-label">@Resource.Module</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <select class="chosen-select chosen-transparent form-control" id="Subscription_ID" name="Subscription_ID" onchange="Module_OnChange();">
+                                            @foreach (var row in Model.moduleList)
+                                            {
+                                                if (Model.Subscription_ID == NumUtil.ParseInteger(row.Value))
+                                                {
+                                                    <option value="@row.Value" selected>@row.Text</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                                }
+                                            }
+                                        </select>
+                                        <div class="validation-error">
+                                            @Html.ValidationMessageFor(m => m.Subscription_ID)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <label for="Total_License" class="control-label">@Resource.Total_Licenses</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <input type="text" class="form-control text-right" name="Total_License" id="Total_License" value="@Model.Total_License" readonly>
+                                        <div class="validation-error">
+                                            @Html.ValidationMessageFor(m => m.Total_License)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <label for="Assigned_Licenses" class="control-label">@Resource.Assigned_Licenses</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                       <input type="text" class="form-control text-right" name="Assigned_Licenses" id="Assigned_Licenses" value="0" readonly>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <label for="UnAssigned_Licenses" class="control-label">@Resource.Unassigned_Licenses</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                       <input type="text" class="form-control text-right" name="UnAssigned_Licenses" id="UnAssigned_Licenses" value="0" readonly>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                       
+                        <div class="row">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-4">
+                                <div class="tile-header transparent">
+                                    <h1><strong>@Resource.Unassigned_User</strong></h1>
+                                    </div>
+
+
+                                </div>
+                                <div class="col-md-2 text-center">
+
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="tile-header transparent">
+                                        <h1><strong>@Resource.Assigned_User</strong></h1>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-1"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-1"></div>
+                                <div class="col-md-4">
+
+                                    <div class="form-group">
+                                        <select class="chosen-transparent form-control" id="SelectLeft" multiple="multiple" style="height:300px;overflow-y:scroll">
+                                            @foreach (var user in Model.ProfileList)
+                                            {
+                                                if (Model.UnAssigned != null && Model.UnAssigned.Contains(user.Profile_ID))
+                                                {
+                                                    <option value="@user.Profile_ID">@user.User_Authentication.Email_Address</option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <div class="form-group">
+                                        <button type="button" id="btnMoveLeft" class="btn btn-default"><i class="fa fa-chevron-left"></i></button>
+                                    </div>
+                                    <div class="form-group">
+                                        <button type="button" id="btnMoveRight" class="btn btn-default"><i class="fa fa-chevron-right"></i></button>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+
+                                        <select class="chosen-transparent form-control" id="SelectRight" multiple="multiple" style="height:300px;overflow-y:scroll">
+                                            @foreach (var user in Model.ProfileList)
+                                            {
+                                                if (Model.Assigned != null && Model.Assigned.Contains(user.Profile_ID))
+                                                {
+                                                    <option value="@user.Profile_ID">@user.User_Authentication.Email_Address</option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-1"></div>
+                            </div>
+
+                    }
+
+                    <!-- / Tab panes -->
+                </div>
+                
+            </section>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <section class="tile color transparent-white">
+                <div class="tile-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button id="btnSave" type="button" class="btn btn-primary">@Resource.Save</button>
+                            <a href="@Url.Action("CompanyInfo", "Company", new { pComID = EncryptUtil.Encrypt(Model.Company_ID), operation = EncryptUtil.Encrypt(Model.operation) })" class="btn btn-default">@Resource.Back</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+

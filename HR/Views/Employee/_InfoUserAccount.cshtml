@@ -1,0 +1,346 @@
+﻿@model  HR.Models.EmployeeViewModels
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+
+@{
+   ViewBag.Title = Resource.Employee;
+
+   var admin = Model.adminRights != null ? Model.adminRights.Contains(Model.operation) : false;
+   var self = Model.Profile_ID == Model.User_Login_Profile_ID ? true : false;
+   var hr = Model.hrRights != null ? Model.hrRights.Contains(Model.operation) : false;
+}
+<script type="text/javascript">
+   $(function () {
+      $('input[name="Email"]').on('change', function () {
+         Email_OnChange();
+      });
+
+      $('input[name="User_Name"]').on('change', function () {
+         User_Name_OnChange();
+      });
+
+      $('input[name="Is_Email_Y"]').on('change', function () {
+         var radioValue = $('input[name="Is_Email_Y"]:checked').val();
+         $('#Is_Email_N').prop('checked', false);
+         $('#divUserName').hide();
+
+         $('#divEmail').show();
+         $('#Is_Email').val("true");
+         Email_OnChange();
+      });
+
+      $('input[name="Is_Email_N"]').on('change', function () {
+         var radioValue = $('input[name="Is_Email_N"]:checked').val();
+         $('#Is_Email_Y').prop('checked', false);
+         $('#divEmail').hide();
+
+         $('#divUserName').show();
+         $('#Is_Email').val("false");
+         User_Name_OnChange();
+      });
+
+      function Email_OnChange() {
+         if ($('#Email').val() != "") {
+            $('#Email_chosen').removeClass('mandatory-validation');
+            $('#Email').removeClass('mandatory-validation');
+         } else {
+            $('#Email_chosen').addClass('mandatory-validation');
+            $('#Email').addClass('mandatory-validation');
+         }
+      }
+
+      function User_Name_OnChange() {
+         if ($('#User_Name').val() != "") {
+            $('#User_Name_chosen').removeClass('mandatory-validation');
+            $('#User_Name').removeClass('mandatory-validation');
+         } else {
+            $('#User_Name_chosen').addClass('mandatory-validation');
+            $('#User_Name').addClass('mandatory-validation');
+         }
+      }
+   });
+
+
+</script>
+
+<script type="text/javascript">
+   function step1_Onclick() {
+      var fname = $("#First_Name").val();
+      var lname = $("#Last_Name").val();
+      var username = $("#User_Name").val();
+      var email = $("#Email").val();
+      var isEmail = $("#Is_Email_Y").get(0).checked;
+
+      var valid = true;
+      if (!ValidateRequire('First_Name', '@Resource.First_Name', true)) { valid = false; }
+      if (!ValidateRequire('Last_Name', '@Resource.Last_Name', true)) { valid = false; }
+      @*if (isEmail == true) {
+         if (!ValidateRequire('Email', '@Resource.Email', true)) { valid = false; }
+      } else {
+         if (!ValidateRequire('User_Name', '@Resource.User_Name', true)) { valid = false; }
+      }*@
+
+      if (!valid) {
+         return false;
+      } else {
+         if (isEmail == true) {
+            if (!ValidateEmail('Email', '@Resource.Email', true)) { valid = false; }
+            if (!valid) {
+               return false;
+            }
+         } else {
+            if (!ValidateUserName('User_Name', '@Resource.User_Name', true)) { valid = false; }
+            if (!valid) {
+               return false;
+            } else {
+               if ((username.length < 5) || (username.length > 10)) {
+                  ValidateManual('User_Name', '@Resource.Message_Verify_UserName')
+                  valid = false;
+                  return false;
+               }
+            }
+
+         }
+      }
+
+      if (isEmail == true) {
+         ShowMask();
+         $.ajax({
+            type: 'POST',
+            url: '@Url.Action("CheckDuplication", "Employee")',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ ParamEmail: email, ParamUserName: '' }),
+            dataType: 'json',
+            success: function (data) {
+               if (data.isDuplicate == true) {
+                  ValidateManual('Email', '@Resource.Message_Is_Duplicated_Email')
+               } else {
+                  Manage_Tab('role');
+               }
+               CloseMask();
+            }
+         });
+      } else {
+         ShowMask();
+         $.ajax({
+            type: 'POST',
+            url: '@Url.Action("CheckDuplication", "Employee")',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ ParamEmail: '', ParamUserName: username }),
+            dataType: 'json',
+            success: function (data) {
+               if (data.isDuplicate == true) {
+                  ValidateManual('User_Name', '@Resource.Message_Is_Duplicated_User_Name')
+               } else {
+                  Manage_Tab('role');
+               }
+               CloseMask();
+            }
+         });
+      }
+   };
+</script>
+
+<div id="account-tab" class="tab-pane fade in">
+   <input type="hidden" name="Is_Email" id="Is_Email" value="@Model.Is_Email.ToString()" />
+   <div class="row">
+      <div class="col-md-12">
+         <section class="tile transparent">
+            <div class="tile-header transparent">
+               <h1><strong>@Resource.User_Account</strong></h1>
+               <div class="controls">
+                  <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+               </div>
+            </div>
+            <div class="tile-body">
+               <div class="row">
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="First_Name" class="control-label">@Resource.First_Name</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control" name="First_Name" id="First_Name" value="@Model.First_Name">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.First_Name, "", new { @id = "First_Name_Err" })
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Middle_Name" class="control-label">@Resource.Middle_Name</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control" name="Middle_Name" id="Middle_Name" value="@Model.Middle_Name">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Middle_Name)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Last_Name" class="control-label">@Resource.Last_Name</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control" name="Last_Name" id="Last_Name" value="@Model.Last_Name">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Last_Name, "", new { @id = "Last_Name_Err" })
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Mobile_No" class="control-label">@Resource.Phone</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control" name="Mobile_No" id="Mobile_No" value="@Model.Mobile_No">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Mobile_No)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="User_Status" class="control-label">@Resource.Status</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <select class="chosen-select chosen-transparent form-control" id="User_Status" name="User_Status">
+                              @if (Model.statusList != null)
+                              {
+                                 foreach (var row in Model.statusList)
+                                 {
+                                    if (Model.User_Status == row.Value)
+                                    {
+                                       <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                    }
+                                    else
+                                    {
+                                       <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                    }
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.User_Status)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label class="control-label">@Resource.Preferred_User_Id_Method</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-4">
+                           <div class="radio radio-transparent">
+                              @if (Model.Is_Email)
+                              {
+                                 <input type="radio" name="Is_Email_Y" id="Is_Email_Y" value="true" checked>
+                              }
+                              else
+                              {
+                                 <input type="radio" name="Is_Email_Y" id="Is_Email_Y" value=" true">
+                              }
+                              <label for="Is_Email_Y">@Resource.Email</label>
+                           </div>
+                        </div>
+                        <div class="col-md-8">
+                           <div class="radio radio-transparent">
+                              @if (Model.Is_Email)
+                              {
+                                 <input type="radio" name="Is_Email_N" id="Is_Email_N" value="false">
+                              }
+                              else
+                              {
+                                 <input type="radio" name="Is_Email_N" id="Is_Email_N" value="false" checked>
+                              }
+                              <label for="Is_Email_N">@Resource.UserName <br><span style="font-size:11px">(@Resource.If_Employee_Does_Not_Have_Email)</span></label>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4" id="divEmail" @(Model.Is_Email ? "" : "hidden")>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Email" class="control-label">@Resource.Email</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control" name="Email" id="Email" value="@Model.Email">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Email, "", new { @id = "Email_Err" })
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4" id="divUserName" @(!Model.Is_Email ? "" : "hidden")>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="User_Name" class="control-label">@Resource.User_Name</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control" name="User_Name" id="User_Name" value="@Model.User_Name">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.User_Name, "", new { @id = "User_Name_Err" })
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <br />
+               @if (Model.operation == Operation.U && Model.Profile_ID.HasValue && Model.Employee_Profile_ID.HasValue)
+               {
+                  <div class="row">
+                     <div class="col-md-12">
+                        @if (Model.Activated)
+                        {
+                           if (admin && !self)
+                           {
+                              <a href="@Url.Action("SendResetPassword", "Account", new { pid = EncryptUtil.Encrypt(Model.Profile_ID) })" class="btn btn-default" data-toggle="blank" target="_blank">@Resource.Send_Email_To_Change_Password</a>
+                              <a href="@Url.Action("ResetPassword", "Account", new { uid = Model.User_Authentication_ID })" class="btn btn-default" data-toggle="blank" target="_blank">@Resource.Reset_Password</a>
+                           }
+                        }
+                        @if (!Model.Activated && admin && !self)
+                        {
+                           <a href="@Url.Action("SendNewActivation", "Account", new { pid = EncryptUtil.Encrypt(Model.Profile_ID) })" class="btn btn-default" data-toggle="blank" target="_blank">@Resource.Send_Email_To_Activation</a>
+                           <a href="@Url.Action("ActivationLink", "Account", new { pid = EncryptUtil.Encrypt(Model.Profile_ID) })" class="btn btn-default" data-toggle="blank" target="_blank">@Resource.Activate</a>
+                        }
+                     </div>
+                  </div>
+               }
+            </div>
+         </section>
+      </div>
+   </div>
+</div>
+

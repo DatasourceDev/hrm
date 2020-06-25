@@ -1,0 +1,261 @@
+﻿@model  HR.Models.EmployeeViewModels
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+
+@{
+   ViewBag.Title = Resource.Employee;
+   var admin = Model.adminRights != null ? Model.adminRights.Contains(Model.operation) : false;
+   var self = Model.Profile_ID == Model.User_Login_Profile_ID ? true : false;
+   var hr = Model.hrRights != null ? Model.hrRights.Contains(Model.operation) : false;
+}
+
+<script type="text/javascript">
+   $(function () {
+      if ('@Model.Relationship_Leaved'.toLowerCase() == 'true') {
+         Disable('divRelationship');
+      }
+   });
+
+   function Is_Maternity_OnChange() {
+      var childType = $('#Relationship_Child_Type').val();
+      var dob = $('#Relationship_DOB').val();
+      var gender = $("#Gender option:selected").text();
+      var maritalStatus = $("#Marital_Status option:selected").text();
+      if (childType != null && childType != '' && dob != null && dob != '' && gender != null && gender != '' && maritalStatus != null && maritalStatus != '') {
+         if (childType == '@ChildType.OwnChild' & gender.toUpperCase() == 'FEMALE' & maritalStatus.toUpperCase() == 'MARRIED') {
+            $('#divSharePaternity').show();
+            $('#divShareForPaternity').hide();
+            $('#divShareForMaternity').show();
+            if ($('#Relationship_Row_Type').val() == '@RowType.ADD') {
+               if ($('#Relationship_Is_Maternity_Share_FatherY').checked == false && $('#Relationship_Is_Maternity_Share_FatherN').checked == false)
+                  $('#Relationship_Is_Maternity_Share_FatherN').attr('checked', true);
+            }
+         }
+         else if (childType == '@ChildType.OwnChild' & gender.toUpperCase() == 'MALE' & maritalStatus.toUpperCase() == 'MARRIED') {
+            $('#divSharePaternity').show();
+            $('#divShareForMaternity').hide();
+            $('#divShareForPaternity').show();
+         }
+         else {
+            $('#divSharePaternity').hide();
+            $('#divShareForPaternity').hide();
+            $('#divShareForMaternity').hide();
+            $('#Relationship_Is_Maternity_Share_FatherN').get(0).checked = true;
+         }
+      }
+      else {
+         $('#divSharePaternity').hide();
+         $('#divShareForPaternity').hide();
+         $('#divShareForMaternity').hide();
+         $('#Relationship_Is_Maternity_Share_FatherN').get(0).checked = true;
+      }
+   }
+
+   function AddRelationship_Onclick() {
+
+      $('#btnAddRelationShip').get(0).click();
+      $('#Relationship_Index').val('-1');
+      $('#Relationship_ID').val('');
+      $('#Relationship_Name').val('');
+      $('#Relationship_Relationship').val('');
+      $('#Relationship_Child_Type').val('');
+      $('#Relationship_DOB').val('');
+      $('#Relationship_Gender').val('');
+      $('#Relationship_NRIC').val('');
+      $('#Relationship_Nationality_ID').val('');
+      $('#Relationship_Nationality_Name').val('');
+      $('#Relationship_Row_Type').val('@RowType.ADD');
+
+      if ($("#Relationship_Nationality_ID option").length > 0)
+         $("#Relationship_Nationality_ID").get(0).selectedIndex = 0;
+
+      $('#Relationship_Relationship').trigger("chosen:updated");
+      $('#Relationship_Child_Type').trigger("chosen:updated");
+      $('#Relationship_Nationality_ID').trigger("chosen:updated");
+      $('#Relationship_Leaved').val(false);
+      Relationship_Working_Onchange();
+      Is_Maternity_OnChange();
+
+      Enable('divRelationship');
+   }
+
+   function EditRelationship_Onclick(i, Relationship_ID, Company_Name, Company_Position, DOB, Name, Nationality_ID, NRIC, Passport, Relationship, Working, Row_Type, Child_Type, Is_Maternity, Is_Maternity_Share_Father, Is_Paternity, Leaved) {
+
+      $('#btnAddRelationShip').get(0).click();
+      $('#Relationship_Index').val(i);
+      $('#Relationship_ID').val(Relationship_ID);
+      $('#Relationship_Name').val(Name);
+      $('#Relationship_Relationship').val(Relationship);
+      $('#Relationship_Child_Type').val(Child_Type);
+      $('#Relationship_DOB').val(DOB);
+      $('#Relationship_NRIC').val(NRIC);
+      $('#Relationship_Nationality_ID').val(Nationality_ID);
+      $('#Relationship_Leaved').val(Leaved);
+      $('#Relationship_Row_Type').val(Row_Type);
+
+      $('#Relationship_Relationship').trigger("chosen:updated");
+      $('#Relationship_Child_Type').trigger("chosen:updated");
+      $('#Relationship_Nationality_ID').trigger("chosen:updated");
+
+      if (Is_Maternity_Share_Father.toLowerCase() == "true") {
+         $('#Relationship_Is_Maternity_Share_FatherY').get(0).checked = true;
+         $('#Relationship_Is_Maternity_Share_FatherN').get(0).checked = false;
+      }
+      else {
+         $('#Relationship_Is_Maternity_Share_FatherY').get(0).checked = false;
+         $('#Relationship_Is_Maternity_Share_FatherN').get(0).checked = true;
+      }
+      Relationship_Working_Onchange();
+      Is_Maternity_OnChange();
+
+      if (Leaved.toLowerCase() == 'true') {
+         Disable('divRelationship');
+      }
+      else {
+         Enable('divRelationship');
+      }
+   }
+
+   function DeleteRelationship_Onclick(rowid, index) {
+         if (confirm('@Resource.Confirm_Delete_Msg')) {
+            $('#Relationship_Rows_' + index + '__Row_Type').val('@RowType.DELETE');
+            $('#' + rowid).hide();
+         }
+   }
+
+   $(function () {
+      $('input[name="Relationship_Working"]:radio').change(function () {
+         Relationship_Working_Onchange();
+      });
+   });
+
+   function Relationship_Working_Onchange() {
+      if ($('input[name="Relationship_Working"]:radio:checked').val() == "true") {
+         $('#Relationship_Company_Name').prop('disabled', false);
+         $('#Relationship_Company_Position').prop('disabled', false);
+      } else {
+         $('#Relationship_Company_Name').prop('disabled', true);
+         $('#Relationship_Company_Position').prop('disabled', true);
+
+         $('#Relationship_Company_Name').val("");
+         $('#Relationship_Company_Position').val("");
+      }
+   }
+</script>
+<div id="family-tab" class="tab-pane fade in">
+   <div class="row">
+      <div class="col-md-12">
+         <section class="tile transparent">
+            <div class="tile-header transparent">
+               <h1><strong>@Resource.Family_Member</strong></h1>
+               <div class="controls">
+                  <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+               </div>
+            </div>
+
+            <div class="tile-body">
+               <div class="row">
+                  <div class="col-md-12 text-center">
+                     <a id="aAddRelationship" class="btn btn-greensea  btn-sm add-row" onclick="AddRelationship_Onclick()">@Resource.Add_An_Item</a>
+                     <a id="btnAddRelationShip" href="#modal-relationship" role="button" data-toggle="modal" style="display:none;"></a>
+                  </div>
+               </div>
+               <div class="table-responsive">
+                  <table class="table table-datatable table-custom" id="relationshipDataTable">
+                     <thead>
+                        <tr>
+                           <th class="sort-alpha">@Resource.Name</th>
+                           <th class="sort-alpha">@Resource.Relationship</th>
+                           <th class="sort-alpha">@Resource.DOB</th>
+                           <th class="sort-alpha">@Resource.Nationality</th>
+                           <th class="sort-alpha">@Resource.NRIC_Or_Fin_No_SymbolDot</th>
+                           <th class="no-sort" style="width: 120px;">@Resource.Action</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        @if (Model.Relationship_Rows != null)
+                        {
+                           var i = 0;
+                           foreach (var row in Model.Relationship_Rows)
+                           {
+                              <tr id="rrow-@i">
+                                 <td>
+                                    @if (Model.Relationship_Rows[i].Row_Type == RowType.DELETE)
+                                    {
+                                       <script type="text/javascript">
+                                          $(function () {
+                                             $('#' + 'rrow-@i').hide();
+                                          });
+                                       </script>
+                                    }
+                                    <input type="hidden" name="Relationship_Rows[@i].Leaved" value="@(row.Leaved.ToString())" />
+                                    <input type="hidden" name="Relationship_Rows[@i].Relationship_ID" value="@row.Relationship_ID" />
+                                    <input type="hidden" name="Relationship_Rows[@i].Company_Name" value="@row.Company_Name" />
+                                    <input type="hidden" name="Relationship_Rows[@i].Company_Position" value="@row.Company_Position" />
+                                    <input type="hidden" name="Relationship_Rows[@i].Passport" value="@row.Passport" />
+                                    <input type="hidden" name="Relationship_Rows[@i].Child_Type" value="@row.Child_Type" />
+                                    <input type="hidden" name="Relationship_Rows[@i].Is_Maternity_Share_Father" value="@(row.Is_Maternity_Share_Father.ToString())" />
+                                    <input type="hidden" name="Relationship_Rows[@i].Working" value="@(row.Working.ToString())" />
+                                    <input type="hidden" name="Relationship_Rows[@i].Row_Type" id="Relationship_Rows_@(i)__Row_Type" value="@row.Row_Type" />
+
+                                    @row.Name
+                                    <input type="hidden" name="Relationship_Rows[@i].Name" value="@row.Name" />
+                                    <div class="validation-error">
+                                       @Html.ValidationMessage("Relationship_Rows[" + i + "].Name")
+                                    </div>
+                                 </td>
+                                 <td>
+                                    @row.Relationship_Name
+                                    <input type="hidden" name="Relationship_Rows[@i].Relationship" value="@row.Relationship" />
+                                    <input type="hidden" name="Relationship_Rows[@i].Relationship_Name" value="@row.Relationship_Name" />
+                                    <div class="validation-error">
+                                       @Html.ValidationMessage("Relationship_Rows[" + i + "].Relationship")
+                                    </div>
+                                 </td>
+                                 <td>
+                                    @row.DOB
+                                    <input type="hidden" name="Relationship_Rows[@i].DOB" value="@row.DOB" />
+                                    <div class="validation-error">
+                                       @Html.ValidationMessage("Relationship_Rows[" + i + "].DOB", "", new { id = "Relationship_Rows_" + i + "__DOB_Err" })
+                                    </div>
+                                 </td>
+                                 <td>
+                                    @row.Nationality_Name
+                                    <input type="hidden" name="Relationship_Rows[@i].Nationality_ID" value="@row.Nationality_ID" />
+                                    <input type="hidden" name="Relationship_Rows[@i].Nationality_Name" value="@row.Nationality_Name" />
+                                    <div class="validation-error">
+                                       @Html.ValidationMessage("Relationship_Rows[" + i + "].Nationality_ID")
+                                    </div>
+                                 </td>
+                                 <td>
+                                    @row.NRIC
+                                    <input type="hidden" name="Relationship_Rows[@i].NRIC" value="@row.NRIC" />
+                                    <div class="validation-error">
+                                       @Html.ValidationMessage("Relationship_Rows[" + i + "].NRIC")
+                                    </div>
+                                 </td>
+                                 <td class="actions text-left">
+                                    <a href="#" id="btnEditRelationShip-@i" onclick="EditRelationship_Onclick('@i', '@row.Relationship_ID','@row.Company_Name','@row.Company_Position','@row.DOB', '@row.Name','@row.Nationality_ID', '@row.NRIC', '@row.Passport','@row.Relationship', '@row.Working.ToString()', '@row.Row_Type','@row.Child_Type', '@((row.Is_Maternity).ToString())','@((row.Is_Maternity_Share_Father).ToString())','@((row.Is_Paternity).ToString())','@(row.Leaved.ToString())')"><i class="fa fa-edit fa-2x"></i></a>
+                                    @if (!row.Leaved)
+                                    {
+                                       <a data-toggle="modal" onclick="return DeleteRelationship_Onclick('rrow-@i', @i);" href="#">
+                                          <i class="fa fa-times-circle-o fa-2x"></i>
+                                       </a>
+                                    }
+                                 </td>
+                              </tr>
+                                    i++;
+                           }
+                        }
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+         </section>
+      </div>
+   </div>
+</div>
+

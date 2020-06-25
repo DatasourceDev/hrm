@@ -1,0 +1,71 @@
+﻿@model  HR.Models.TsRowViewModel
+@using SBSModel.Models;
+@using System.Text;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Models;
+@using SBSWorkFlowAPI.ModelsAndService;
+@using SBSResourceAPI;
+@using SBSWorkFlowAPI.Constants;
+
+
+@functions{
+   public string GetName(string name)
+   {
+      return string.Empty;
+   }
+   public string GetID(string name)
+   {
+      return string.Empty;
+   }
+}
+<script>
+   $(function () {
+      $(".chosen-select").chosen({ disable_search_threshold: 10 });
+      InitDatepicker();
+      InitInputChange();
+   });
+</script>
+<td>
+   <input type="hidden" id="Dtl_ID" value="@Model.Dtl_ID" />
+   <input type="hidden" id="Time_Sheet_ID" value="@Model.Time_Sheet_ID" />
+   <input type="hidden" id="Date_Of_Date" value="@Model.Date_Of_Date" />
+   <input type="hidden" id="Customer_Name" value="@Model.Customer_Name" />
+   <input type="hidden" id="Duration" value="@Model.Duration" />
+   <input type="hidden" id="Hour_Rate" value="@Model.Hour_Rate" />
+   <input type="hidden" id="Indent_Name" value="@Model.Indent_Name" />
+   <input type="hidden" id="Indent_No" value="@Model.Indent_No" />
+   <input type="hidden" id="Launch_Duration" value="@Model.Launch_Duration" />
+   <input type="hidden" id="Total_Amount" value="@Model.Total_Amount" />
+   <input type="hidden" id="Lunch_In" value="@Model.Lunch_In" />
+   <input type="hidden" id="Lunch_Out" value="@Model.Lunch_Out" />
+
+   <select class="chosen-select chosen-transparent form-control" id="Job_Cost_ID">
+      @foreach (var row in Model.cJobCostList)
+      {
+         <option value="@row.Value" @(Model.Job_Cost_ID == NumUtil.ParseInteger(row.Value) ? "selected" : "")>@row.Text</option>
+      }
+   </select>
+   <br />
+   <br />
+   <input type="text" class="form-control" value="@Model.Note" id="Note" placeholder="@Resource.Description">
+   <div class="validation-error">
+      @Html.ValidationMessage("Ts" + Model.i + "Job_Cost_ID")
+   </div>
+   <div class="validation-error">
+      @Html.ValidationMessage("Ts" + Model.i + "Clock_In")
+   </div>
+   <div class="validation-error">
+      @Html.ValidationMessage("Ts" + Model.i + "Clock_Out")
+   </div>
+</td>
+<td>
+   <input type="text" class="form-control input-timepicker " value="@Model.Clock_In" id="Clock_In">
+</td>
+<td>
+   <input type="text" class="form-control input-timepicker " value="@Model.Clock_Out" id="Clock_Out">
+</td>
+<td >
+   <a href="#" data-toggle="modal" title="@Resource.Delete" onclick="Del_Onclick('tsr@(Model.Date_Of_Date + Model.i)')">
+      <i class="fa fa-times-circle-o fa-2x"></i>
+   </a>
+</td>

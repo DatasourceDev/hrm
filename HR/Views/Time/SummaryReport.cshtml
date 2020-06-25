@@ -1,0 +1,480 @@
+﻿@model  HR.Models.TimeTransactionViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+@{
+    ViewBag.Title = @Resource.Summary_Report;
+}
+
+@if ((Model.rights != null && Model.rights.Contains(Operation.A)))
+{
+
+    <script type="text/javascript">
+    $(function () {
+        InitCollapseHeader(false);
+        InitDatepicker();
+        var addRowLink = '<button type="submit" class="btn btn-default add-row" name="do_migrate" value="true">@Resource.Refresh_Data</button>';        
+        @{
+            if (Model.result.Code == 111)
+            {
+                <text> 
+                    addRowLink = null;
+                </text>
+            }
+        }
+        InitDatatable('tranDataTable', addRowLink, null, 0, 'desc', 1, 'asc');
+        });
+    </script>
+    <div class="pageheader">
+        <h2>@Resource.Summary_Report<span></span></h2>
+        <div class="breadcrumbs">
+            <ol class="breadcrumb">
+                <li>@Resource.You_Are_Here</li>
+                <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+                <li class="active">@Resource.Summary_Report</li>
+            </ol>
+        </div>
+    </div>
+    using (Html.BeginForm("SummaryReport", "Time", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+    {
+        <div class="main">
+            <div class="row">
+                <div class="col-md-12">
+                    @if (Model.result != null && Model.result.Code != 0 && Model.result.Code != 111)
+                    {
+                        if (Model.result.Code < 0)
+                            {
+                                <div class="alert alert-red">
+                                    @Html.Raw(AppConst.GetMsg(Model.result))
+                                </div>
+                            }
+                            else if (Model.result.Code > 0)
+                            {
+                                <div class="alert alert-success">
+                                    @Html.Raw(AppConst.GetMsg(Model.result))
+                                </div>
+                            }                            
+                    }
+                    <section class="tile color transparent-black filter" id="secfilter">
+                        <div class="tile-header transparent">
+                            <h1 onclick="CollapseHeader(null)" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize filter" id="btncollapse"><i class="fa fa-search color-white"></i></a>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="search_Device_ID" class="control-label">@Resource.Device</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <select class="chosen-select chosen-transparent form-control" id="search_Device_ID" name="search_Device_ID">
+                                                @foreach (var row in Model.cDevicelist)
+                                                {
+                                                    <option value="@row.Value" @(Model.search_Device_ID == NumUtil.ParseInteger(row.Value) ? "selected" : "")>@row.Text</option>
+                                                }
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.search_Device_ID)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="search_From" class="control-label">@Resource.From</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <input type="text" class="form-control input-datepicker" id="search_From" name="search_From" value="@Model.search_From">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.search_From)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="search_To" class="control-label">@Resource.To</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <input type="text" class="form-control input-datepicker" id="search_To" name="search_To" value="@Model.search_To">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.search_To)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @*<div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="search_Branch_ID" class="control-label">@Resource.Branch</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <select class="chosen-select chosen-transparent form-control" id="search_Branch_ID" name="search_Branch_ID">
+                                                @foreach (var row in Model.cBranchlist)
+                                                {
+                                                    <option value="@row.Value" @(Model.search_Branch_ID == NumUtil.ParseInteger(row.Value) ? "selected" : "")>@row.Text</option>
+                                                }
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.search_Branch_ID)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="search_Department_ID" class="control-label">@Resource.Department</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <select class="chosen-select chosen-transparent form-control" id="search_Department_ID" name="search_Department_ID">
+                                                @foreach (var row in Model.cDepartmentlist)
+                                                {
+                                                    <option value="@row.Value" @(Model.search_Department_ID == NumUtil.ParseInteger(row.Value) ? "selected" : "")>@row.Text</option>
+                                                }
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.search_Department_ID)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="search_Employee_Profile_ID" class="control-label">@Resource.Employee</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <select class="chosen-select chosen-transparent form-control" id="search_Employee_Profile_ID" name="search_Employee_Profile_ID">
+                                                @foreach (var row in Model.cEmplist)
+                                                {
+                                                    <option value="@row.Value" @(Model.search_Employee_Profile_ID == NumUtil.ParseInteger(row.Value) ? "selected" : "")>@row.Text</option>
+                                                }
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.search_Employee_Profile_ID)
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+                            </div>*@
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <button type="submit" class="btn btn-default">@Resource.Filter</button>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </section>
+
+                    <section class="tile color transparent-black">
+                        <div class="tile-header transparent">
+                            <h1>
+                                <strong>@Resource.Summary_Report</strong>
+                            </h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+                            @{
+                                                int? curComID = null; int? curPin = null; string curDate = ""; string curEmp = ""; int? curEmpID = null;
+                                                decimal? hRate = 0;                                                
+                                                DateTime? clockin = null; DateTime? clockout = null;
+                                                decimal? totalhours = 0;
+                                                decimal? totalmins = 0;
+                                                int? oldPin = 0;
+                                                int? newPin = 0;
+                                                var r = 0;
+                            }
+                            <div class="table-responsive">
+                                <table class="table table-datatable table-custom" id="tranDataTable">
+                                    <thead>
+                                        <tr>
+                                            <th class="sort-alpha">@Resource.Branch_Name</th>
+                                            <th class="sort-alpha">@Resource.Employee</th>
+                                            <th class="sort-alpha">@Resource.Total_Hours</th>
+                                            <th class="sort-alpha">@Resource.Rate /@Resource.Hour ($)</th>
+                                            <th class="sort-alpha">@Resource.Total_SymbolDollar</th>
+                                            <th class="sort-alpha">@Resource.Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var row in Model.transList)
+                                        {                                            
+                                            if (r == 0)
+                                            {
+                                                oldPin = row.Device_Employee_Pin;
+                                                newPin = row.Device_Employee_Pin;
+                                                clockin = row.Device_Transaction_Date;
+                                                curEmpID = row.Employee_Profile_ID != null ? row.Employee_Profile_ID : 0; 
+                                                curEmp = row.Employee_Name;
+                                                curPin = row.Device_Employee_Pin;
+                                                curDate = DateUtil.ToDisplayDate(row.Device_Transaction_Date);
+                                                clockout = null;
+                                                curComID = row.Company_ID;
+                                                hRate = GetHourlyRate(curEmpID);                                                                                               
+                                            }
+                                            else
+                                            {
+                                                newPin = row.Device_Employee_Pin;
+                                                if (oldPin == newPin)
+                                                {
+                                                    
+                                                    if (curDate != DateUtil.ToDisplayDate(row.Device_Transaction_Date))
+                                                    {                                                                                                                
+                                                        if (clockin == null)
+                                                        {
+                                                            clockin = clockout;
+                                                        }
+                                                       if(clockout == null)
+                                                       {
+                                                          clockout = clockin;
+                                                       }
+                                                        var duration = DateTime.Parse(DateUtil.ToDisplayTime(clockout)).Subtract(DateTime.Parse(DateUtil.ToDisplayTime(clockin)));
+                                                        var status = GetStatus(curComID, curEmpID, clockin);
+                                                        //if (status.Contains("Late") | status.Contains("On-Time"))
+                                                        //{
+                                                            totalhours += duration.Hours;
+                                                            totalmins += duration.Minutes;
+                                                        //}
+                                                        clockin = row.Device_Transaction_Date; 
+                                                    }                                                  
+                                                    curPin = row.Device_Employee_Pin;
+                                                    curDate = DateUtil.ToDisplayDate(row.Device_Transaction_Date);
+                                                    clockout = row.Device_Transaction_Date;
+                                                    curEmpID = row.Employee_Profile_ID != null ? row.Employee_Profile_ID : 0; 
+                                                    curEmp = row.Employee_Name;
+                                                    curComID = row.Company_ID;
+                                                    hRate = GetHourlyRate(curEmpID);                                
+                                                }
+                                                else
+                                                {
+                                                   if (clockout == null)
+                                                   {
+                                                      clockout = clockin;
+                                                   }
+                                                    var duration = DateTime.Parse(DateUtil.ToDisplayTime(clockout)).Subtract(DateTime.Parse(DateUtil.ToDisplayTime(clockin)));
+                                                    var status = GetStatus(curComID, curEmpID, clockin);
+                                                    //if (status.Contains("Late") | status.Contains("On-Time"))
+                                                    //{
+                                                        totalhours += duration.Hours;
+                                                        totalmins += duration.Minutes;
+                                                    //}
+                                                    
+                                                    if (totalmins > 60)
+                                                    {
+                                                        var hours = totalmins / 60;
+                                                        if ((totalmins % 60) >= 0)
+                                                        {
+                                                            totalmins = (totalmins % 60);
+                                                        }
+                                                        totalhours += hours;
+                                                        totalhours = Math.Round(totalhours.Value, 0);
+                                                        totalmins = Math.Round(totalmins.Value, 2);
+                                                    }
+                                                                                             
+                                                   <tr>
+                                                        <td>@Model.Branch_Name</td>
+                                                        <td>@curEmp</td>
+                                                        <td>@totalhours @Resource.Hr_S  @(totalmins > 0 ? totalmins + Resource.Min_S : "") </td>
+                                                        <td>@hRate</td>
+                                                        <td>@Math.Round(((totalhours + (totalmins / 60)) * hRate).Value,2)</td>
+                                                        <td align="center">
+                                                            <a href="@Url.Action("DetailTransactionByEmp", "Time", new { DeviceID = @row.Device_ID, EmpProfileID = curEmpID, FromDate =Model.search_From, ToDate = Model.search_To })" title="@Resource.Detail">
+                                                                <i class="fa fa-list fa-2x"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                    oldPin = newPin;
+                                                    clockin = row.Device_Transaction_Date;
+                                                    curEmpID = row.Employee_Profile_ID != null ? row.Employee_Profile_ID : 0;
+                                                    curEmp = row.Employee_Name;
+                                                    curPin = row.Device_Employee_Pin;
+                                                    curDate = DateUtil.ToDisplayDate(row.Device_Transaction_Date);
+                                                    clockout = null;                                                    
+                                                    curComID = row.Company_ID;
+                                                    totalhours = 0;
+                                                    totalmins = 0;                                                    
+                                                }
+                                                if (r == Model.transList.Count() - 1)
+                                                {
+                                                    if (curEmpID == null) { 
+                                                       curEmpID = 0;
+                                                    }
+                                                    if (clockout == null)
+                                                    {
+                                                       clockout = clockin;
+                                                    }
+                                                    var duration = DateTime.Parse(DateUtil.ToDisplayTime(clockout)).Subtract(DateTime.Parse(DateUtil.ToDisplayTime(clockin)));
+                                                    var status = GetStatus(curComID, curEmpID, clockin);
+                                                    //if (status.Contains("Late") | status.Contains("On-Time"))
+                                                    //{
+                                                        totalhours += duration.Hours;
+                                                        totalmins += duration.Minutes;
+                                                    //}
+
+                                                    if (totalmins > 60)
+                                                    {
+                                                        var hours = totalmins / 60;
+                                                        if ((totalmins % 60) >= 0)
+                                                        {
+                                                            totalmins = (totalmins % 60);
+                                                        }
+                                                        totalhours += hours;
+                                                        totalhours = Math.Round(totalhours.Value, 0);
+                                                        totalmins = Math.Round(totalmins.Value, 2);
+                                                    }
+                                                    hRate = GetHourlyRate(curEmpID);                                                                                   
+                                                    <tr>
+                                                       <td>@Model.Branch_Name</td>
+                                                       <td>@curEmp</td>
+                                                       <td>@totalhours @Resource.Hr_S @(totalmins > 0 ? totalmins + Resource.Min_S : "") </td>
+                                                       <td>@hRate</td>
+                                                       <td>@Math.Round(((totalhours + (totalmins / 60)) * hRate).Value, 2)</td>
+                                                       <td align="center">
+                                                          <a href="@Url.Action("DetailTransactionByEmp", "Time", new { DeviceID = @row.Device_ID, EmpProfileID = curEmpID, FromDate =Model.search_From, ToDate = Model.search_To })" title="@Resource.Detail">
+                                                             <i class="fa fa-list fa-2x"></i>
+                                                          </a>
+                                                       </td>
+                                                    </tr>                                                    
+                                                }                                                                              
+                                            }
+                                            r++;                                                                                                                                   
+                                        }
+                                    </tbody>                                  
+                                </table>
+                            </div>
+
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    }
+}
+@functions {
+    int? GetDepartment(int? curEmpID, DateTime? clockin)
+    {
+        var histServ = new EmploymentHistoryService();
+        var hist = histServ.GetEmploymentHistory(curEmpID, clockin);
+        if (hist != null)
+            return hist.Department_ID;
+
+        return null;
+    }
+    
+    decimal GetHourlyRate(int? curEmpID)
+    {
+        var histServ = new EmploymentHistoryService();
+        var hist = histServ.GetCurrentEmploymentHistory(curEmpID);
+        if (hist != null)
+        {
+            var basicsalary = NumUtil.ParseDecimal(EncryptUtil.Decrypt(hist.Basic_Salary));
+            if (basicsalary == 0)
+            {
+                basicsalary = NumUtil.ParseDecimal(EncryptUtil.Decrypt(EncryptUtil.Decrypt(hist.Basic_Salary)));
+            }
+            return basicsalary;
+        }
+        return 0;
+    }
+    
+    string GetStatus(int? curComID, int? curEmpID, DateTime? clockin)
+    {
+        if (!clockin.HasValue | !curComID.HasValue | !curEmpID.HasValue)
+            return "";
+
+        var tmServ = new TimeService();
+        if (curEmpID.HasValue && curComID.HasValue && clockin.HasValue)
+        {
+            var args = tmServ.LstTimeArrangement(curComID, clockin, curEmpID);
+            if (args != null && args.Count > 0)
+            {
+                TimeSpan? from = null;
+                foreach (var arg in args)
+                {
+                    if (arg.Time_From.HasValue & arg.Time_To.HasValue)
+                    {
+                        var tfrom = arg.Time_From;
+                        var tTo = arg.Time_To.Value;
+                        if (tfrom < from | from == null)
+                            from = arg.Time_From;
+                    }
+                }
+                if (from.HasValue)
+                {
+                    var clockintime = DateUtil.ToTime(DateUtil.ToDisplayTime(clockin));
+                    if (clockintime > from)
+                        return "<span class='color-red'><strong>Late</strong></span>";
+                    else
+                        return "<span class='color-green'><strong>On-Time</strong></span>";
+                }
+            }
+            else
+            {
+                /* check time from workdays*/
+                if (Model.workdays != null)
+                {
+                    var wk = Model.workdays;
+                    var dw = (int)clockin.Value.DayOfWeek;
+                    if (dw == 0)
+                        return GetStatusFromWorkdays(wk.CL_Sun, wk.ST_Sun_Time, wk.ET_Sun_Time, clockin);
+                    else if (dw == 1)
+                        return GetStatusFromWorkdays(wk.CL_Mon, wk.ST_Mon_Time, wk.ET_Mon_Time, clockin);
+                    else if (dw == 2)
+                        return GetStatusFromWorkdays(wk.CL_Tue, wk.ST_Tue_Time, wk.ET_Tue_Time, clockin);
+                    else if (dw == 3)
+                        return GetStatusFromWorkdays(wk.CL_Wed, wk.ST_Wed_Time, wk.ET_Wed_Time, clockin);
+                    else if (dw == 4)
+                        return GetStatusFromWorkdays(wk.CL_Thu, wk.ST_Thu_Time, wk.ET_Thu_Time, clockin);
+                    else if (dw == 5)
+                        return GetStatusFromWorkdays(wk.CL_Fri, wk.ST_Fri_Time, wk.ET_Fri_Time, clockin);
+                    else if (dw == 6)
+                        return GetStatusFromWorkdays(wk.CL_Sat, wk.ST_Sat_Time, wk.ET_Sat_Time, clockin);
+
+                }
+            }
+        }
+        return "<strong>" + Resource.Not_Mapped + "</strong>";
+    }
+
+    string GetStatusFromWorkdays(bool? disabled, TimeSpan? start, TimeSpan? end, DateTime? clockin)
+    {
+        if (!disabled.HasValue || !disabled.Value)
+        {
+            var clockintime = DateUtil.ToTime(DateUtil.ToDisplayTime(clockin));
+            if (clockintime > start)
+               return "<span class='color-red'><strong>" + Resource.Late + "</strong></span>";
+            else
+               return "<span class='color-green'><strong>" + Resource.On_Time + "</strong></span>";
+        }
+        return "<strong>" + Resource.Invalid_Clk_In + "</strong>";
+    }
+}

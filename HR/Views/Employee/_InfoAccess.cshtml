@@ -1,0 +1,83 @@
+﻿@model  HR.Models.EmployeeViewModels
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+
+<div id="access-tab" class="tab-pane fade in">
+   <div class="row">
+      <div class="col-md-12">
+         <section class="tile transparent">
+            <div class="tile-header transparent">
+               <h1><strong>@Resource.Access_Right</strong></h1>
+               <div class="controls">
+                  @*<a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>*@
+               </div>
+            </div>
+            <div class="tile-body">
+               <div class="table-responsive">
+                  <table class="table table-datatable table-custom" id="accessDataTable">
+                     <thead>
+                        <tr>
+                           <th class="no-sort" style="width: 40px;"></th>
+                           <th class="sort-alpha">@Resource.Module</th>
+                           <th class="sort-alpha">@Resource.Module_Desc</th>
+                           <th class="sort-alpha">@Resource.Total_License</th>
+                           <th class="sort-alpha">@Resource.Unassigned_License</th>
+                           <th class="sort-alpha">@Resource.Action</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        @if (Model.SubscriptionList != null)
+                        {
+                           for (var i = 0; i < Model.SubscriptionList.Count(); i++)
+                           {
+                              var row = Model.SubscriptionList[i];
+                              var unassignuser = row.No_Of_Users.Value;
+                              if (row.User_Assign_Module != null)
+                              {
+                                 unassignuser -= row.User_Assign_Module.Count();
+                              }
+                              <tr>
+                                 <td>
+                                    <div class="checkbox">
+                                       @if (unassignuser > 0)
+                                       {
+                                          <input type="checkbox" name="User_Assign_Module" value="@row.Subscription_ID" id="User_Assign_Module_@i" @(Model.User_Assign_Module != null && Model.User_Assign_Module.Contains(row.Subscription_ID) ? "checked" : "") />
+                                       }
+                                       else
+                                       {
+                                          <input type="checkbox" id="User_Assign_Module_@i" @(Model.User_Assign_Module != null && Model.User_Assign_Module.Contains(row.Subscription_ID) ? "checked" : "") disabled />
+                                       }
+                                       <label for="User_Assign_Module_@i"></label>
+                                    </div>
+                                    @if (unassignuser == 0)
+                                    {
+                                       <input type="hidden" name="User_Assign_Module" value="@row.Subscription_ID" />
+                                    }
+                                 </td>
+                                 <td>@row.SBS_Module_Detail.Module_Detail_Name</td>
+                                 <td>@row.SBS_Module_Detail.Module_Detail_Description</td>
+                                 <td class="text-right">@NumUtil.FormatCurrency(row.No_Of_Users)</td>
+                                 <td class="text-right">@unassignuser</td>
+                                 <td class="actions">
+                                    @if (unassignuser == 0)
+                                    {
+                                       <a href="@Url.Action("ModuleSignUp", "AuthenSBS2/Subscription", new { pComID = EncryptUtil.Encrypt(Model.Company_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_C) })"><i class="fa fa-user-plus fa-2x"></i></a>
+                                    }
+                                 </td>
+                              </tr>
+                           }
+                        }
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+         </section>
+      </div>
+   </div>
+</div>
+
+
+

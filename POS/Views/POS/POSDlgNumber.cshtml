@@ -1,0 +1,93 @@
+﻿@using POS.Common;
+@using POS.Models;
+@using SBSModel.Common;
+@using SBSModel.Models;
+@model  POS.Models.POSNumberViewModel
+
+<script type="text/javascript">
+
+    function Number_Onclick(num, id) {
+        if (id.indexOf("#") < 0) { id = "#" + id; }
+        var amount = $(id).val();
+
+        if (num == "C") {
+            $(id).val('');
+        }
+        else if (num == ".") {
+            if (amount.indexOf(".") < 0) {
+                amount = amount + num;
+                $(id).val(amount);
+            }
+            if ((amount + 1).length >= 14)
+                return;
+        }
+        else {
+           var afloat = parseFloat(amount);
+           if (afloat == 0){ amount = ''; }
+           if (isNaN( afloat)) { amount = ''; }
+
+            if (amount.indexOf(".") >= 0) {
+                // have point
+                var digit = amount.substring(amount.indexOf("."));
+                if (digit.length > 2) {
+                    return;
+                }
+            }
+            if ((amount + num).length >= 14)
+                return;
+
+            amount = amount + num;
+            $(id).val(amount);
+
+
+
+        }
+
+        if (typeof AfterNumber_Onclick == 'function') {
+                AfterNumber_Onclick();
+        }
+    }
+</script>
+
+<ul class="nav nav-pills nav-pills-black" style="width:350px">
+    <li><a onclick="Number_Onclick('1', '@Model.Display_Label_ID')" data-toggle="modal" class="btn btn-white btn-small"><p>1</p></a></li>
+    <li><a onclick="Number_Onclick('2', '@Model.Display_Label_ID')" data-toggle="modal" class="btn btn-white btn-small"><p>2</p></a></li>
+    <li><a onclick="Number_Onclick('3', '@Model.Display_Label_ID')" data-toggle="modal" class="btn btn-white btn-small"><p>3</p></a></li>
+    <li><a onclick="Number_Onclick('0', '@Model.Display_Label_ID')" data-toggle="modal" class="btn btn-white btn-small"><p>0</p></a></li>
+    <li><a onclick="Number_Onclick('4', '@Model.Display_Label_ID')" data-toggle="modal" class="btn btn-white btn-small"><p>4</p></a></li>
+    <li><a onclick="Number_Onclick('5', '@Model.Display_Label_ID')" data-toggle="modal" class="btn btn-white btn-small"><p>5</p></a></li>
+    <li><a onclick="Number_Onclick('6', '@Model.Display_Label_ID')" data-toggle="modal" class="btn btn-white btn-small"><p>6</p></a></li>
+    <li id="btn00"><a onclick="Number_Onclick('00', '@Model.Display_Label_ID')" data-toggle="modal" class="btn btn-white btn-small"><p>00</p></a></li>
+    <li><a onclick="Number_Onclick('7', '@Model.Display_Label_ID')" data-toggle="modal" class="btn btn-white btn-small"><p>7</p></a></li>
+    <li><a onclick="Number_Onclick('8', '@Model.Display_Label_ID')" data-toggle="modal" class="btn btn-white btn-small"><p>8</p></a></li>
+    <li><a onclick="Number_Onclick('9', '@Model.Display_Label_ID')" data-toggle="modal" class="btn btn-white btn-small"><p>9</p></a></li>
+    <li id="btn000"><a onclick="Number_Onclick('000', '@Model.Display_Label_ID')" data-toggle="modal" class="btn btn-white btn-small"><p>000</p></a></li>
+    <li><a onclick="Number_Onclick('C', '@Model.Display_Label_ID')" data-toggle="modal" class="btn btn-white btn-small"><p>C</p></a></li>
+    <li><a onclick="Number_Onclick('.', '@Model.Display_Label_ID')" data-toggle="modal" class="btn btn-white btn-small"><p>.</p></a></li>
+    <li style="width:150px;">
+        @if (Model.Type == POSDlgType.Qty)
+        {
+            <a id="btnSetQty" href="#" class="btn btn-lightblue btn-small">
+                <p>Set</p>
+            </a>
+        }
+        else if (Model.Type == POSDlgType.Discount)
+        {
+            <a id="btnSetDiscount" href="#" class="btn btn-lightblue btn-small">
+                <p style="font-size:18px;">Set Discount</p>
+            </a>
+        }
+        else if (Model.Type == POSDlgType.Topup)
+        {
+            <a id="btnSaveTopup" href="#" class="btn btn-lightblue btn-small">
+                <p style="font-size:18px;">Top Up</p>
+            </a>
+        }
+        else if (Model.Type == POSDlgType.OpenBill)
+        {
+            <a id="btnOpenBillSelectProduct" href="#" class="btn btn-lightblue btn-small">
+                <p style="font-size:18px;">Select Product</p>
+            </a>
+        }
+    </li>
+</ul>

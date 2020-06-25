@@ -1,0 +1,48 @@
+﻿@model Authentication.Models.JobCostExBudgetViewModel
+@using Authentication.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSModel.Common;
+@using Authentication.Models;
+@using SBSResourceAPI;
+@{
+   var i = Model.Index;
+}
+
+<td>
+   <script type="text/javascript">
+   $(function () {
+      $("#JobCostExBudget_Rows_" + @i + "__Expenses_Config_ID").trigger("chosen:updated");
+      $("#JobCostExBudget_Rows_" + @i + "__Expenses_Config_ID").chosen({ disable_search_threshold: 10 });
+   });
+   </script>
+
+   @Html.Hidden("JobCostExBudget_Rows[" + i + "].Row_Type", Model.Row_Type)
+   @Html.Hidden("JobCostExBudget_Rows[" + i + "].Budget_ID", Model.Budget_ID)
+   <select class="chosen-select chosen-transparent form-control" id="JobCostExBudget_Rows_@(i)__Expenses_Config_ID" name="JobCostExBudget_Rows[@i].Expenses_Config_ID">
+      @if (Model.cExpensesTypelist != null)
+      {
+         foreach (var prow in Model.cExpensesTypelist)
+         {
+            <option value="@(prow.Value)" @(Model.Expenses_Config_ID == NumUtil.ParseInteger(prow.Value) ? "selected" : "")>@prow.Text</option>
+         }
+      }
+   </select>
+   <div class="validation-error">
+      @Html.ValidationMessage("JobCostExBudget_Rows[" + i + "].Expenses_Config_ID")
+   </div>
+</td>
+<td class="text-right">
+   <input type="text" class="form-control text-right" id="JobCostExBudget_Rows_@(i)__Budget" name="JobCostExBudget_Rows[@i].Budget" value="@Model.Budget" onblur="ValidateDecimal('JobCostExBudget_Rows_@(i)__Budget', '@Resource.Budget', false)">
+   <div class="validation-error">
+      @Html.ValidationMessage("JobCostExBudget_Rows[" + i + "].Budget")
+   </div>
+</td>
+<td class="actions text-center" style="cursor:pointer">
+   <a data-toggle="modal" onclick="return DeleteBudget_Onclick('bgrow-@i', @i);" title="@Resource.Delete">
+      <i class="fa fa-times-circle-o fa-2x"></i>
+   </a>
+</td>
+
+
+

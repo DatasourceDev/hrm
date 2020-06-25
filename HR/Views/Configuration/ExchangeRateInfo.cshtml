@@ -1,0 +1,820 @@
+﻿@model  HR.Models.ExchangeViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+    ViewBag.Title = Resource.Exchange_Rate_Details;
+    var ck = Model.operation;
+
+}
+
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+    <script type="text/javascript">
+
+    $(function () {
+        //InitDatepicker();
+        var tabcnt = $("#listTop ul li").length;
+        if (tabcnt < 1) {
+            $("#Detail").hide();
+        } else {
+            $("#Detail").show();
+        }
+
+        var module = '@Model.tabAction';
+        if ('@string.IsNullOrEmpty(Model.tabAction)' == "True") {
+            $('.nav-tabs a:first').tab('show');
+        } else {
+            for (var i = 0; i < tabcnt; i++) {
+                var hasclass = $("#" + i + "-tab").hasClass("active");
+                if (hasclass != null && hasclass == true)
+                    $("#" + i + "-tab").removeClass("active");
+            }
+            $("#" + module).addClass("active");
+            $("#" + module.substr(3) + "-tab").addClass("active");
+        }
+
+        if ('@ck' != '@UserSession.RIGHT_C') {
+            $("#Fiscal_Year").prop('readonly', true);
+            $("#Fiscal_Year").trigger("chosen:updated");
+        }
+
+        $('#Fiscal_Year').change(function () {
+
+            ClearValidate('#Fiscal_Year');
+            var currYear = $("#Fiscal_Year").val();
+            var valid = true;
+
+            if (ValidateNumber('Fiscal_Year', 'Fiscal Year', true, true) == false) {
+                valid = false;
+            }
+            if (!valid) {
+                return;
+            }
+
+            if (currYear != 0 && currYear != "") {
+                if (currYear.length > 4) {
+                    alert("@Resource.Message_Year_Is_Not_Proper");
+                    $('#Fiscal_Year').val('');
+                    return false;
+                }
+
+                if (currYear > 2500 || currYear < 1900) {
+                    alert('@Resource.Message_Number_2500_1900');
+                    $('#Fiscal_Year').val('');
+                    return false;
+                }
+                CheckDuplicate();
+            }
+        });
+    });
+
+    function Exchange_Period_Onchange(ExPeriod, index) {
+
+        var MonthID = $('#Month_ID_' + index).val();
+        var CurrencyID = $('#ExchangeCurrency_Rows_' + index + '__Currency_ID').val();
+        var Year = $("#Fiscal_Year").val();
+        var ch_Type = $('#ExchangeCurrency_Rows_' + index + '__Row_Type').val();
+
+        var tapactive = $("ul#listTop li.active").attr("id");
+
+        if (MonthID == null)
+            MonthID = '';
+
+        if (CurrencyID != null) {
+
+            if (ExPeriod == '@ExchangePeriod.ByDate') {
+                $('#ExchangeCurrency_Rows_' + index + '__Exchange_Period').val('@ExchangePeriod.ByDate');
+                $("#Exchange_PeriodY_" + index).trigger("chosen:updated");
+            } else {
+                $('#ExchangeCurrency_Rows_' + index + '__Exchange_Period').val('@ExchangePeriod.ByMonth');
+                $("#Exchange_PeriodN_" + index).trigger("chosen:updated");
+            }
+
+            if (ch_Type == '@RowType.EDIT') {
+                theForm.action = '@Url.Action("ExchangeRateInfo", "Configuration")' + '?pageAction=edit' + "&pExPeriod=" + ExPeriod + "&pCurrencyID=" + CurrencyID + "&pMonth=" + MonthID + "&pTapActive=" + tapactive;
+                theForm.method = 'post';
+                theForm.submit();
+            } else if (ch_Type == '@RowType.ADD') {
+                var data = { pCurrencyID: CurrencyID, pBrowID: index, pExPeriod: ExPeriod, pMonthID: MonthID, pYear: Year };
+                $.ajax({
+                    url: '@Url.Action("AddExchangeRate", "Configuration")',
+                    data: data,
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        if (data != undefined) {
+                            $('#' + index + '-tab').children().remove();
+                            $('#' + index + '-tab').append(data);
+
+                            var currcode = $('#ExchangeCurrency_Rows_' + index + '__Currency_Code').val();
+                            var topLocalCode = $('#Company_Currency_Code').val();
+
+                            var tabname = currcode + " " + '@Resource.Message_To_Lower' + " " + topLocalCode;
+                            $('a[href$="' + index + '-tab"]').text(tabname);
+                            $('#ExchangeCurrency_Rows_' + index + '__Top_Name').val(tabname);
+
+                            var ExPeriod = $("input[name='ExchangeCurrency_Rows[" + index + "].Exchange_Period']:radio:checked").val();
+                            $('#ExchangeCurrency_Rows_' + index + '__Exchange_Period').val(ExPeriod);
+                            $("#Detail").show();
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    function SetRate_Onclick(index) {
+
+        var Default = $("#Default_Exchange_Rate_" + index).val();
+        var setDis = $("input[name='Date_Sel_[" + index + "]']");
+
+        for (var i = 0; i < setDis.length; i++) {
+            if (Default != "" && Default > 0) {
+                $('#ExchangeRate_Rows_' + index + "" + i + '__Rate').val(Default);
+                $('#ExchangeRate_Rows_' + index + "" + i + '__Rate').trigger("chosen:updated");
+            }
+        }
+    }
+
+    function Currency_OnChange(gIndex) {
+
+        var data = $('#ExchangeCurrency_Rows_' + gIndex + '__Currency_ID').val();
+        ReloadCurrency(data, gIndex);
+        Month_OnChange(gIndex);
+
+    }
+
+    function Month_OnChange(index) {
+
+        var MonthID = $('#Month_ID_' + index).val();
+        var CurrencyID = $('#ExchangeCurrency_Rows_' + index + '__Currency_ID').val();
+        var ExPeriod = $("input[name='ExchangeCurrency_Rows[" + index + "].Exchange_Period']:radio:checked").val();
+        var Year = $("#Fiscal_Year").val();
+        $('#ExchangeCurrency_Rows_' + index + '__Exchange_Period').val(ExPeriod);
+
+        var tapactive = $("ul#listTop li.active").attr("id");
+
+        var ch_Type = $('#ExchangeCurrency_Rows_' + index + '__Row_Type').val()
+        if (CurrencyID != null) {
+            if (ch_Type == '@RowType.EDIT') {
+                theForm.action = '@Url.Action("ExchangeRateInfo", "Configuration")' + '?pageAction=edit' + "&pExPeriod=" + ExPeriod + "&pCurrencyID=" + CurrencyID + "&pMonth=" + MonthID + "&pTapActive=" + tapactive;
+                theForm.method = 'post';
+                theForm.submit();
+            } else if (ch_Type == '@RowType.ADD') {
+                var data = { pCurrencyID: CurrencyID, pBrowID: index, pExPeriod: ExPeriod, pMonthID: MonthID, pYear: Year };
+                $.ajax({
+                    url: '@Url.Action("AddExchangeRate", "Configuration")',
+                    data: data,
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        $('#' + index + '-tab').children().remove();
+                        $('#' + index + '-tab').append(data);
+
+                        var currcode = $('#ExchangeCurrency_Rows_' + index + '__Currency_Code').val();
+                        var topLocalCode = $('#Company_Currency_Code').val();
+                        var tabname = currcode + " " + '@Resource.Message_To_Lower' + " " + topLocalCode;
+                        $('a[href$="' + index + '-tab"]').text(tabname);
+                        $('#ExchangeCurrency_Rows_' + index + '__Top_Name').val(tabname);
+
+                        var ExPeriod = $("input[name='ExchangeCurrency_Rows[" + index + "].Exchange_Period']:radio:checked").val();
+                        $('#ExchangeCurrency_Rows_' + index + '__Exchange_Period').val(ExPeriod);
+                        $("#Detail").show();
+
+                    }
+                });
+            }
+        }
+    }
+
+
+    function addNewCurrency_Onclick() {
+
+        ClearValidate('#Fiscal_Year');
+        var valid = true;
+        if (ValidateNumber('Fiscal_Year', 'Fiscal Year', true, true) == false) {
+            valid = false;
+        }
+        if (!valid) {
+            return;
+        }
+
+        var currYear = $("#Fiscal_Year").val();
+        if (currYear != null && currYear != 0) {
+            var rowcount = $('#CurrencyDataTable > tbody >tr').length;
+            var index = rowcount;
+            var data = { pIndex: rowcount };
+            ShowMask();
+            $.ajax({
+                url: '@Url.Action("AddNewCurrency", "Configuration")',
+                data: data,
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    var str = '<tr  id="brow-' + rowcount + '">';
+                    str = str + data + '</tr>';
+                    $('#CurrencyDataTable > tbody').append(str);
+                    $('#ExchangeCurrency_Rows_' + index + '__Currency_ID').trigger("chosen:updated");
+                    AddNewExchangeRate(index);
+                    CloseMask();
+                }
+            });
+        }
+    }
+
+    function AddNewExchangeRate(index) {
+
+        var Year = $("#Fiscal_Year").val();
+        var CurrencyID = $('#ExchangeCurrency_Rows_' + index + '__Currency_ID').val();
+        var data = { pCurrencyID: CurrencyID, pBrowID: index, pYear: Year };
+        $.ajax({
+            url: '@Url.Action("AddExchangeRate", "Configuration")',
+            data: data,
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                if (data != undefined) {
+
+                    $("#divTabRate").append(data);
+
+                    $("li.active").removeClass("active");
+                    var li = document.createElement("li");
+                    li.id = "li-" + index;
+                    li.setAttribute('class', 'active');
+
+                    var a = document.createElement("a");
+                    a.href = '#' + index + '-tab';
+                    a.setAttribute('data-toggle', 'tab');
+
+                    li.appendChild(a);
+
+                    if ($("#listTop ul") != null)
+                        $("#listTop ul").append(li);
+
+                    var tabcnt = $("#listTop ul li").length;
+                    for (var i = 0; i < tabcnt; i++) {
+                        var hasclass = $("#" + i + "-tab").hasClass("active");
+                        if (hasclass != null && hasclass == true)
+                            $("#" + i + "-tab").removeClass("active");
+                    }
+
+                    $("#" + index + "-tab").addClass("active");
+
+                    var currcode = $('#ExchangeCurrency_Rows_' + index + '__Currency_Code').val();
+                    var topLocalCode = $('#Company_Currency_Code').val();
+
+                    var tabname = currcode + " " +'@Resource.Message_To_Lower' +" " + topLocalCode;
+                    $('a[href$="' + index + '-tab"]').text(tabname);
+                    $('#ExchangeCurrency_Rows_' + index + '__Top_Name').val(tabname);
+
+                    var ExPeriod = $("input[name='ExchangeCurrency_Rows[" + index + "].Exchange_Period']:radio:checked").val();
+                    $('#ExchangeCurrency_Rows_' + index + '__Exchange_Period').val(ExPeriod);
+                    $("#Detail").show();
+
+                    if ($('#CurrencyDataTable > tbody >tr').length > 0)
+                        $("#Fiscal_Year").prop('readonly', true);
+                }
+            }
+        });
+    }
+
+    function CheckDuplicate() {
+
+        var year = $('#Fiscal_Year').val();
+        var operation = $('#operation').val();
+        var exchangeId = $('#Exchange_ID').val();
+        if (year != null && operation != null) {
+            $.ajax({
+                type: 'POST',
+                url: 'GetDuplicate',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ pYear: year, pOperation: operation, pexchange: exchangeId }),
+                dataType: 'json',
+                success: function (data) {
+                    if (data.checkduplicate != true) {
+                        alert('@Resource.Fiscal_Year @Resource.Field @Resource.Is_Duplicated_Lower');
+                        $('#Fiscal_Year').val('');
+                    }
+                }
+            });
+        }
+    }
+
+    function ReloadCurrency(currencyId, index) {
+
+        var topLocalCode = $('#Company_Currency_Code').val();
+        $.ajax({
+            type: 'POST',
+            url: 'GetCurrencyCode',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ pCurrencyId: currencyId }),
+            dataType: 'json',
+            success: function (data) {
+                if (data.currencycode != null && topLocalCode != null) {
+                    var currcode = data.currencycode;
+
+                    var tabname = currcode + " to " + topLocalCode;
+                    $('a[href$="' + index + '-tab"]').text(tabname);
+                    $('#ExchangeCurrency_Rows_' + index + '__Top_Name').val(tabname);
+
+                    var ExPeriod = $("input[name='ExchangeCurrency_Rows[" + index + "].Exchange_Period']:radio:checked").val();
+                    $('#ExchangeCurrency_Rows_' + index + '__Exchange_Period').val(ExPeriod);
+                    $("#Detail").show();
+
+                }
+            }
+        });
+    }
+
+    function DeleteCurrencyInfo_Onclick(rowid, index) {
+
+        if (confirm('@Resource.Confirm_Delete_Msg')) {
+            $('#ExchangeCurrency_Rows_' + index + '__Row_Type').val('@RowType.DELETE');
+            $('#' + rowid).hide();
+
+            //remove tap
+            $('a[href$="' + index + '-tab"]').parent().remove();
+            //remove detail row
+            $('#' + index + '-tab').remove();
+
+            var tabcnt = $("#listTop ul li").length;
+            if (tabcnt < 1) {
+                $("#Detail").hide();
+                $("#Fiscal_Year").prop('readonly', false);
+                $("#Fiscal_Year").trigger("chosen:updated");
+            }
+            $('.nav-tabs a:first').tab('show');
+        }
+    }
+
+</script>
+
+    <div class="pageheader">
+        <h2>@Resource.Exchange_Rate_Details<span></span></h2>
+        <div class="breadcrumbs">
+            <ol class="breadcrumb">
+                <li>@Resource.You_Are_Here</li>
+                <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+                <li><a href="@Url.Action("Configuration", "Configuration")">@Resource.General_Configuration</a></li>
+                <li class="active">@Resource.Exchange_Rate_Details</li>
+            </ol>
+        </div>
+    </div>
+
+    using (Html.BeginForm("ExchangeRateInfo", "Configuration", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "theForm", enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="main">
+            <div class="row">
+                <div class="col-md-12">
+                    @if (Model.result != null && Model.result.Code != 0)
+                    {
+                        if (Model.result.Code < 0)
+                        {
+                            <div class="alert alert-red">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                        else if (Model.result.Code > 0)
+                        {
+                            <div class="alert alert-success">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                    }
+
+                    <input type="hidden" id="Company_Currency_Code" name="Company_Currency_Code" value="@Model.Company_Currency_Code" />
+                    <input type="hidden" name="Company_ID" value="@Model.Company_ID" />
+                    <input type="hidden" id="operation" name="operation" value="@Model.operation" />
+                    <input type="hidden" id="Exchange_ID" name="Exchange_ID" value="@Model.Exchange_ID" />
+
+                    <section class="tile color transparent-black filter" id="secfilter">
+                        <div class="tile-header transparent">
+                            <h1> <strong>@Resource.Exchange_Rate_Details</strong></h1>
+                        </div>
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Fiscal_Year" class="control-label">@Resource.Year</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control input-datepicker" id="Fiscal_Year" name="Fiscal_Year" value="@Model.Fiscal_Year" />
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Fiscal_Year)
+                                                <span id="Fiscal_Year_Err"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="main">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <section class="tile color transparent-black">
+                                    
+                                    <div class="tile-header transparent">
+                                        <h1><strong>@Resource.Currency</strong></h1>
+                                        <div class="controls">
+                                            <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                        </div>
+                                    </div>
+                                    <div class="tile-body ">
+                                        <div class="validation-error">
+                                            @Html.ValidationMessageFor(m => m.ExchangeCurrency_Rows)
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12 text-center">
+                                                <a class="btn btn-greensea btn-sm add-row" id="AddNewCurrency" onclick="addNewCurrency_Onclick()">@Resource.Add_An_Item</a>
+                                            </div>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-datatable table-custom" id="CurrencyDataTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="sort-alpha">@Resource.Foreign_Currency</th>
+                                                        <th class="no-sort">@Resource.Local_Currency</th>
+                                                        <th class="no-sort">@Resource.Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @if (Model.LstExchangeCurrency != null)
+                                                    {
+                                                        var i = 0;
+                                                        foreach (var row in Model.LstExchangeCurrency)
+                                                        {
+                                                            <tr id="brow-@i">
+
+                                                                <td>
+                                                                    @if (Model.LstExchangeCurrency[i].Row_Type == RowType.DELETE)
+                                                                    {
+                                                                        <script type="text/javascript">
+                                                                            $(function () {
+                                                                                $('#' + 'brow-@i').hide();
+                                                                            });
+                                                                        </script>
+                                                                    }
+                                                                    @if (Model.LstExchangeCurrency[i].Row_Type == null)
+                                                                    {
+                                                                        @Html.Hidden("ExchangeCurrency_Rows[" + i + "].Row_Type", RowType.EDIT)
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        @Html.Hidden("ExchangeCurrency_Rows[" + i + "].Row_Type", Model.LstExchangeCurrency[i].Row_Type)
+
+                                                                    }
+
+                                                                    @Html.Hidden("ExchangeCurrency_Rows[" + i + "].Exchange_Currency_ID", Model.LstExchangeCurrency[i].Exchange_Currency_ID)
+                                                                    @Html.Hidden("ExchangeCurrency_Rows[" + i + "].Top_Name")
+                                                                    @Html.Hidden("ExchangeCurrency_Rows[" + i + "].Exchange_ID", Model.LstExchangeCurrency[i].Exchange_ID)
+                                                                    <input type="hidden" name="ExchangeCurrency_Rows[@i].Exchange_Period" id="ExchangeCurrency_Rows_@(i)__Exchange_Period" value="@Model.LstExchangeCurrency[i].Exchange_Period.ToString()">
+
+                                                                    <select class="chosen-select chosen-transparent form-control" id="ExchangeCurrency_Rows_@(i)__Currency_ID" name="ExchangeCurrency_Rows[@i].Currency_ID" onchange="Currency_OnChange(@i)">
+                                                                        @if (Model.Currency_List != null)
+                                                                        {
+                                                                            foreach (var prow in Model.Currency_List)
+                                                                            {
+                                                                                if (Model.LstExchangeCurrency[i].Currency_ID == NumUtil.ParseInteger(prow.Value))
+                                                                                {
+                                                                                    <option value="@prow.Value" selected>@prow.Text</option>
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <option value="@(prow.Value != null ? prow.Value : "0")">@prow.Text</option>
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    </select>
+                                                                    <div class="validation-error">
+                                                                        @Html.ValidationMessage("ExchangeCurrency_Rows[" + i + "].Currency_ID")
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="hidden" class="form-control input-table-transparent" id="ExchangeCurrency_Rows_@(i)__Company_Currency_Name_Text" value="@Model.LstExchangeCurrency[i].Company_Currency_Name">
+                                                                    <input type="text" class="form-control" name="ExchangeCurrency_Rows[@i].Company_Currency_Name" id="ExchangeCurrency_Rows_@(i)__Company_Currency_Name" value="@Model.LstExchangeCurrency[i].Company_Currency_Name" readonly>
+                                                                    <div class="validation-error">
+                                                                        @Html.ValidationMessage("ExchangeCurrency_Rows[" + i + "].Company_Currency_Name")
+                                                                    </div>
+                                                                </td>
+                                                                <td class="actions text-center" style="cursor:pointer">
+                                                                    @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_D))
+                                                                    {
+                                                                        <a data-toggle="modal" onclick="return DeleteCurrencyInfo_Onclick('brow-@i', @i);">
+                                                                            <i class="fa fa-times-circle-o fa-2x"></i>
+                                                                        </a>
+                                                                    }
+                                                                </td>
+
+                                                            </tr>
+                                                                    i++;
+                                                        }
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+
+                        <div class="row" id="Detail">
+                            <div class="col-md-12">
+                                <section class="tile color transparent-black">
+                                    <div class="tile-widget nopadding color transparent-white rounded-top-corners" id="listTop">
+                                        <!-- Nav tabs -->
+                                        <ul class="nav nav-tabs tabdrop" id="listTop">
+                                            @if (Model.LstExchangeCurrency != null)
+                                            {
+                                                var i = 0;
+                                                foreach (var toprow in Model.LstExchangeCurrency)
+                                                {
+                                                    if (toprow.Row_Type != RowType.DELETE)
+                                                    {
+                                                        <li id="li-@i"><a href="#@i-tab" data-toggle="tab">@toprow.Top_Name</a></li>
+                                                    }
+                                                    i++;
+                                                }
+                                            }
+                                        </ul>
+                                    </div>
+                                    <div class="tile-body tab-content" id="divTabRate">
+                                        @if (Model.LstExchangeCurrency != null)
+                                        {
+
+                                            var j = 0;
+                                            foreach (var Currencyrow in Model.LstExchangeCurrency)
+                                            {
+                                                <div id="@j-tab" class="tab-pane fade in">
+                                                    <section class="tile transparent">
+                                                        <div class="tile-body">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <div class="form-group">
+                                                                        <div class="col-md-12">
+                                                                            <input type="hidden" name="ExchangeCurrency_Rows[@j].Top_Name" id="Exchange_Top_Name_@(j)" value="@Currencyrow.Top_Name">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <div class="form-group" id="raForm">
+                                                                        <div class="col-md-6">
+                                                                            <div class="radio radio-transparent">
+                                                                                @if (Currencyrow.Exchange_Period == ExchangePeriod.ByDate)
+                                                                                {
+                                                                                    <input type="radio" name="ExchangeCurrency_Rows[@j].Exchange_Period" id="Exchange_PeriodY_@(j)" value="@ExchangePeriod.ByDate" checked onchange="Exchange_Period_Onchange('@ExchangePeriod.ByDate',@j)">
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <input type="radio" name="ExchangeCurrency_Rows[@j].Exchange_Period" id="Exchange_PeriodY_@(j)" value="@ExchangePeriod.ByDate" onchange="Exchange_Period_Onchange('@ExchangePeriod.ByDate',@j)">
+                                                                                }
+                                                                                <label for="Exchange_PeriodY_@(j)">@Resource.By_Date</label>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="radio radio-transparent">
+                                                                                @if (Currencyrow.Exchange_Period == ExchangePeriod.ByDate)
+                                                                                {
+                                                                                    <input type="radio" name="ExchangeCurrency_Rows[@j].Exchange_Period" id="Exchange_PeriodN_@(j)" value="@ExchangePeriod.ByMonth" onchange="Exchange_Period_Onchange('@ExchangePeriod.ByMonth',@j)">
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <input type="radio" name="ExchangeCurrency_Rows[@j].Exchange_Period" id="Exchange_PeriodN_@(j)" value="@ExchangePeriod.ByMonth" onclick="Exchange_Period_Onclick(@j)" checked onchange="Exchange_Period_Onchange('@ExchangePeriod.ByMonth',@j)">
+                                                                                }
+                                                                                <label for="Exchange_PeriodN_@(j)">@Resource.By_Month</label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        @if (Currencyrow.Exchange_Period == ExchangePeriod.ByDate) //By Date
+                                                        {
+                                                            <div class="tile-body">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">
+                                                                        <div class="form-group">
+                                                                            <div class="col-md-12">
+                                                                                <label for="Month" class="control-label">@Resource.Month</label>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <div class="col-md-12">
+                                                                                <select class="chosen-select chosen-transparent form-control" id="Month_ID_@(j)" name="Month_ID" onchange="Month_OnChange(@j)">
+                                                                                    @if (Model.Month_List != null)
+                                                                                    {
+                                                                                        foreach (var arow in Model.Month_List)
+                                                                                        {
+                                                                                            if (Currencyrow.Month_ID == NumUtil.ParseInteger(arow.Value))
+                                                                                            {
+                                                                                                <option value="@(arow.Value != null ? arow.Value : "0")" selected>@arow.Text</option>
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                                <option value="@(arow.Value != null ? arow.Value : "0")">@arow.Text</option>
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                </select>
+                                                                                <div class="validation-error">
+                                                                                    @Html.ValidationMessage("Month_ID")
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <div class="form-group">
+                                                                            <div class="col-md-12">
+                                                                                <label for="Default_Exchange_Rate" class="control-label">@Resource.Default_Exchange_Rate</label>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <div class="col-md-12">
+                                                                                <input type="text" class="form-control text-right" name="Default_Exchange_Rate_[@j]" id="Default_Exchange_Rate_@(j)">
+                                                                                <div class="validation-error">
+                                                                                    @Html.ValidationMessage("Default Exchange Rate")
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <div class="form-group">
+                                                                            <div class="col-sm-12" style="height :28px;">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <div class="col-sm-12">
+                                                                                <button type="button" class="btn btn-default" onclick="return SetRate_Onclick(@j);">@Resource.Apply</button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="tile-body">
+                                                                <div class="table-responsive">
+                                                                    <table class="table table-datatable table-custom" id="@j-ExchangeRateDataTable">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th class="no-sort">@Resource.Date</th>
+                                                                                <th class="no-sort">@Resource.Exchange_Rate</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            @if (Currencyrow.ExchangeRate_Rows != null)
+                                                                            {
+                                                                                var k = 0;
+                                                                                foreach (var row in Currencyrow.ExchangeRate_Rows)
+                                                                                {
+                                                                                    if (row.Row_Type != RowType.DELETE)
+                                                                                    {
+                                                                                        <tr id="lrow-@j-@k">
+                                                                                            <td>
+                                                                                                <input type="hidden" value="@row.Exchange_Date" name="Date_Sel_[@j]" id="Date_Sel_@(j)">
+                                                                                                @if (row.Row_Type == RowType.DELETE)
+                                                                                                {
+                                                                                                    <script type="text/javascript">
+                                                                                                        $(function () {
+                                                                                                            $('#' + 'lrow-@j-@k').hide();
+                                                                                                        });
+                                                                                                    </script>
+                                                                                                }
+                                                                                                @if (row.Row_Type == null)
+                                                                                                {
+                                                                                                    @Html.Hidden("ExchangeCurrency_Rows[" + j + "].ExchangeRate_Rows[" + k + "].Row_Type", RowType.EDIT)
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    @Html.Hidden("ExchangeCurrency_Rows[" + j + "].ExchangeRate_Rows[" + k + "].Row_Type", row.Row_Type)
+                                                                                                }
+
+                                                                                                @Html.Hidden("ExchangeCurrency_Rows[" + j + "].ExchangeRate_Rows[" + k + "].Exchange_Currency_ID", row.Exchange_Currency_ID)
+
+                                                                                                <input type="hidden" name="ExchangeCurrency_Rows[@j].ExchangeRate_Rows[@k].Exchange_Period" id="ExchangeRate_Rows_@(j)@(k)__Exchange_Period" value="@ExchangePeriod.ByDate">
+                                                                                                <input type="hidden" name="ExchangeCurrency_Rows[@j].ExchangeRate_Rows[@k].Exchange_Rate_ID" id="ExchangeRate_Rows_@(j)@(k)__Exchange_Rate_ID" value="@row.Exchange_Rate_ID">
+                                                                                                <input type="hidden" name="ExchangeCurrency_Rows[@j].ExchangeRate_Rows[@k].Exchange_Month" id="ExchangeRate_Rows_@(j)@(k)__Exchange_Month" value="@row.Exchange_Month">
+
+                                                                                                <input type="text" class="form-control" name="ExchangeCurrency_Rows[@j].ExchangeRate_Rows[@k].Exchange_Date" id="ExchangeRate_Rows_@(j)@(k)__Exchange_Date" value="@row.Exchange_Date" readonly>
+                                                                                                <div class="validation-error">
+                                                                                                    @Html.ValidationMessage("ExchangeCurrency_Rows[" + j + "].ExchangeRate_Rows[" + k + "].Exchange_Date")
+                                                                                                </div>
+                                                                                            </td>
+                                                                                            <td>
+                                                                                                <input type="text" class="form-control text-right" name="ExchangeCurrency_Rows[@j].ExchangeRate_Rows[@k].Rate" id="ExchangeRate_Rows_@(j)@(k)__Rate" value="@row.Rate">
+                                                                                                <div class="validation-error">
+                                                                                                    @Html.ValidationMessage("ExchangeCurrency_Rows[" + j + "].ExchangeRate_Rows[" + k + "].Rate")
+                                                                                                </div>
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                                k++;
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                        else // By Month
+                                                        {
+                                                            <div class="tile-body">
+                                                                <input type="hidden" name="Month_ID" id="Month_ID_@(j)" value="@Currencyrow.Month_ID.Value">
+                                                                <div class="table-responsive">
+                                                                    <table class="table table-datatable table-custom" id="@j-ExchangeRateDataTable">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th class="no-sort">@Resource.Month</th>
+                                                                                <th class="no-sort">@Resource.Exchange_Rate</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            @if (Currencyrow.ExchangeRate_Rows != null)
+                                                                            {
+                                                                                var k = 0;
+                                                                                foreach (var row in Currencyrow.ExchangeRate_Rows)
+                                                                                {
+                                                                                    if (row.Row_Type != RowType.DELETE)
+                                                                                    {
+                                                                                        <tr id="lrow-@j-@k">
+                                                                                            <td>
+                                                                                                <input type="hidden" value="@row.Exchange_Date" name="Date_Sel_[@j]" id="Date_Sel_@(j)">
+                                                                                                @if (row.Row_Type == RowType.DELETE)
+                                                                                                {
+                                                                                                    <script type="text/javascript">
+                                                                                                        $(function () {
+                                                                                                            $('#' + 'lrow-@j-@k').hide();
+                                                                                                        });
+                                                                                                    </script>
+                                                                                                }
+                                                                                                @if (row.Row_Type == null)
+                                                                                                {
+                                                                                                    @Html.Hidden("ExchangeCurrency_Rows[" + j + "].ExchangeRate_Rows[" + k + "].Row_Type", RowType.EDIT)
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    @Html.Hidden("ExchangeCurrency_Rows[" + j + "].ExchangeRate_Rows[" + k + "].Row_Type", row.Row_Type)
+                                                                                                }
+
+                                                                                                @Html.Hidden("ExchangeCurrency_Rows[" + j + "].ExchangeRate_Rows[" + k + "].Exchange_Currency_ID", row.Exchange_Currency_ID)
+
+                                                                                                <input type="hidden" name="ExchangeCurrency_Rows[@j].ExchangeRate_Rows[@k].Exchange_Period" id="ExchangeRate_Rows_@(j)@(k)__Exchange_Period" value="@ExchangePeriod.ByMonth">
+                                                                                                <input type="hidden" name="ExchangeCurrency_Rows[@j].ExchangeRate_Rows[@k].Exchange_Rate_ID" id="ExchangeRate_Rows_@(j)@(k)__Exchange_Rate_ID" value="@row.Exchange_Rate_ID">
+                                                                                                <input type="hidden" name="ExchangeCurrency_Rows[@j].ExchangeRate_Rows[@k].Exchange_Month" id="ExchangeRate_Rows_@(j)@(k)__Exchange_Month" value="@row.Exchange_Month">
+
+                                                                                                <input type="text" class="form-control" name="ExchangeCurrency_Rows[@j].ExchangeRate_Rows[@k].Exchange_Month_Text" id="ExchangeRate_Rows_@(j)@(k)__Exchange_Month_Text" value="@row.Exchange_Month_Text" readonly>
+                                                                                                <div class="validation-error">
+                                                                                                    @Html.ValidationMessage("ExchangeCurrency_Rows[" + j + "].ExchangeRate_Rows[" + k + "].Exchange_Month")
+                                                                                                </div>
+                                                                                            </td>
+                                                                                            <td>
+                                                                                                <input type="text" class="form-control text-right" name="ExchangeCurrency_Rows[@j].ExchangeRate_Rows[@k].Rate" id="ExchangeRate_Rows_@(j)@(k)__Rate" value="@row.Rate">
+                                                                                                <div class="validation-error">
+                                                                                                    @Html.ValidationMessage("ExchangeCurrency_Rows[" + j + "].ExchangeRate_Rows[" + k + "].Rate")
+                                                                                                </div>
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                                k++;
+
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    </section>
+                                                </div>
+                                                        j++;
+                                            }
+                                        }
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <section class="tile color transparent-white">
+                                    <div class="tile-body">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <button type="submit" class="btn btn-primary" name="pageAction" value="save">@Resource.Save</button>
+                                                <a href="@Url.Action("Configuration", "Configuration", new { tabAction = "exchange" })" class="btn btn-default">@Resource.Back</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    }
+}

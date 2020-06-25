@@ -1,0 +1,198 @@
+﻿<error errorId="93f54d20-0ad0-485c-96e8-c3b391df4f3d" application="/LM/W3SVC/44/ROOT" host="LAPTOP-64514UIV" type="System.Web.HttpException" message="The controller for path '/Shared/ExpensesDocPrint' was not found or does not implement IController." source="System.Web.Mvc" detail="System.Web.HttpException (0x80004005): The controller for path '/Shared/ExpensesDocPrint' was not found or does not implement IController.&#xD;&#xA;   at System.Web.Mvc.DefaultControllerFactory.GetControllerInstance(RequestContext requestContext, Type controllerType)&#xD;&#xA;   at System.Web.Mvc.DefaultControllerFactory.CreateController(RequestContext requestContext, String controllerName)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.ProcessRequestInit(HttpContextBase httpContext, IController&amp; controller, IControllerFactory&amp; factory)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContextBase httpContext, AsyncCallback callback, Object state)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.BeginProcessRequest(HttpContext httpContext, AsyncCallback callback, Object state)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.System.Web.IHttpAsyncHandler.BeginProcessRequest(HttpContext context, AsyncCallback cb, Object extraData)&#xD;&#xA;   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()&#xD;&#xA;   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean&amp; completedSynchronously)" user="thidarat.s@smartdevsolution.com" time="2017-07-26T09:06:21.2018626Z" statusCode="404">
+  <serverVariables>
+    <item name="ALL_HTTP">
+      <value string="HTTP_CONNECTION:keep-alive&#xD;&#xA;HTTP_ACCEPT:text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8&#xD;&#xA;HTTP_ACCEPT_ENCODING:gzip, deflate, br&#xD;&#xA;HTTP_ACCEPT_LANGUAGE:th,en;q=0.8&#xD;&#xA;HTTP_COOKIE:ASP.NET_SessionId=fuokueh2q55glhg5kxzxqwva; __RequestVerificationToken=1xRmNByQmcqZ5Q5QIau7NxS-1QpGR-8d78uzk5utgOLqpcaK7_gl9S_p3BliFZaMQAgOba07bSzGmEoDhFhi6JyCc1s1; __appVersion=undefined; __master_refresh=True; __company=8WFssSYO50HfMTo1mPRejw==; __terminal=ft78soZlzL7uR33tazKs+w==; __branch=BBcR8chrZPqnRRj57z3nIg==; __cashier_refresh=True; __cashier=wL6vCUsYzD9M4984RlqMew==; __is_subscribed=true; __fcm_token=ejmExJNmUms:APA91bEDALuoaHlgv7cZLgWr9ZrauQMZqe_-e-5y2L_fyUY-gEBKe-pCOKJoPpXjYSmVhFJIcLBJKWmtpTJtrRRx9_9YJHcOQTqTeE3nuslT-wSdTEDOG86by5BsPzxpeeDrCW8l0hPR; .AspNet.ApplicationCookie=9-li99d9MgRwVg_rIbe_xt_-JydR5iusrAw91LiSF6BZWMrCjgYfaBlzif1bXHEQ6TtFXvoN1ookjazWJVXHCt--QqYF2CHYIdyeDkxolvGLtzq88nhXUlZJS49r9fPcmBh7SU7ptX9mqKYCQ4cHKXx5JIJtPd2ipF0oZDj_9Fqk2qCCwycPzRKsPDdACGwnrMst2ajGT_RsFoHOhKlDBB-H1WU0vBDpqFq4_enwqlO8e_z3O2H31rS5JhhPhnBed6ZftXqRVv-7FKnWShmdVPc0wxviQR28Pp57-YcTCh_gB5V1EwyiTZdWXVuXWx2qsxAYVXqou3K_ahPEG3OU5h4w6x-FDbGcgS9mF_b3-6TEBGsZKPLxrZAMHlKVfmvZR8NsW-vDM-Q9DNm2iPcLN5wrQ8rnZ0QJfNPANkldC5MsdHn5; culture=en&#xD;&#xA;HTTP_HOST:localhost:59485&#xD;&#xA;HTTP_USER_AGENT:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36&#xD;&#xA;HTTP_UPGRADE_INSECURE_REQUESTS:1&#xD;&#xA;" />
+    </item>
+    <item name="ALL_RAW">
+      <value string="Connection: keep-alive&#xD;&#xA;Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8&#xD;&#xA;Accept-Encoding: gzip, deflate, br&#xD;&#xA;Accept-Language: th,en;q=0.8&#xD;&#xA;Cookie: ASP.NET_SessionId=fuokueh2q55glhg5kxzxqwva; __RequestVerificationToken=1xRmNByQmcqZ5Q5QIau7NxS-1QpGR-8d78uzk5utgOLqpcaK7_gl9S_p3BliFZaMQAgOba07bSzGmEoDhFhi6JyCc1s1; __appVersion=undefined; __master_refresh=True; __company=8WFssSYO50HfMTo1mPRejw==; __terminal=ft78soZlzL7uR33tazKs+w==; __branch=BBcR8chrZPqnRRj57z3nIg==; __cashier_refresh=True; __cashier=wL6vCUsYzD9M4984RlqMew==; __is_subscribed=true; __fcm_token=ejmExJNmUms:APA91bEDALuoaHlgv7cZLgWr9ZrauQMZqe_-e-5y2L_fyUY-gEBKe-pCOKJoPpXjYSmVhFJIcLBJKWmtpTJtrRRx9_9YJHcOQTqTeE3nuslT-wSdTEDOG86by5BsPzxpeeDrCW8l0hPR; .AspNet.ApplicationCookie=9-li99d9MgRwVg_rIbe_xt_-JydR5iusrAw91LiSF6BZWMrCjgYfaBlzif1bXHEQ6TtFXvoN1ookjazWJVXHCt--QqYF2CHYIdyeDkxolvGLtzq88nhXUlZJS49r9fPcmBh7SU7ptX9mqKYCQ4cHKXx5JIJtPd2ipF0oZDj_9Fqk2qCCwycPzRKsPDdACGwnrMst2ajGT_RsFoHOhKlDBB-H1WU0vBDpqFq4_enwqlO8e_z3O2H31rS5JhhPhnBed6ZftXqRVv-7FKnWShmdVPc0wxviQR28Pp57-YcTCh_gB5V1EwyiTZdWXVuXWx2qsxAYVXqou3K_ahPEG3OU5h4w6x-FDbGcgS9mF_b3-6TEBGsZKPLxrZAMHlKVfmvZR8NsW-vDM-Q9DNm2iPcLN5wrQ8rnZ0QJfNPANkldC5MsdHn5; culture=en&#xD;&#xA;Host: localhost:59485&#xD;&#xA;User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36&#xD;&#xA;Upgrade-Insecure-Requests: 1&#xD;&#xA;" />
+    </item>
+    <item name="APPL_MD_PATH">
+      <value string="/LM/W3SVC/44/ROOT" />
+    </item>
+    <item name="APPL_PHYSICAL_PATH">
+      <value string="E:\Work2\SBSolutions\HRSBS2 (Dev)\HR\" />
+    </item>
+    <item name="AUTH_TYPE">
+      <value string="ApplicationCookie" />
+    </item>
+    <item name="AUTH_USER">
+      <value string="thidarat.s@smartdevsolution.com" />
+    </item>
+    <item name="AUTH_PASSWORD">
+      <value string="*****" />
+    </item>
+    <item name="LOGON_USER">
+      <value string="" />
+    </item>
+    <item name="REMOTE_USER">
+      <value string="thidarat.s@smartdevsolution.com" />
+    </item>
+    <item name="CERT_COOKIE">
+      <value string="" />
+    </item>
+    <item name="CERT_FLAGS">
+      <value string="" />
+    </item>
+    <item name="CERT_ISSUER">
+      <value string="" />
+    </item>
+    <item name="CERT_KEYSIZE">
+      <value string="" />
+    </item>
+    <item name="CERT_SECRETKEYSIZE">
+      <value string="" />
+    </item>
+    <item name="CERT_SERIALNUMBER">
+      <value string="" />
+    </item>
+    <item name="CERT_SERVER_ISSUER">
+      <value string="" />
+    </item>
+    <item name="CERT_SERVER_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="CERT_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="CONTENT_LENGTH">
+      <value string="0" />
+    </item>
+    <item name="CONTENT_TYPE">
+      <value string="" />
+    </item>
+    <item name="GATEWAY_INTERFACE">
+      <value string="CGI/1.1" />
+    </item>
+    <item name="HTTPS">
+      <value string="off" />
+    </item>
+    <item name="HTTPS_KEYSIZE">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SECRETKEYSIZE">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SERVER_ISSUER">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SERVER_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="INSTANCE_ID">
+      <value string="44" />
+    </item>
+    <item name="INSTANCE_META_PATH">
+      <value string="/LM/W3SVC/44" />
+    </item>
+    <item name="LOCAL_ADDR">
+      <value string="::1" />
+    </item>
+    <item name="PATH_INFO">
+      <value string="/Shared/ExpensesDocPrint" />
+    </item>
+    <item name="PATH_TRANSLATED">
+      <value string="E:\Work2\SBSolutions\HRSBS2 (Dev)\HR\Shared\ExpensesDocPrint" />
+    </item>
+    <item name="QUERY_STRING">
+      <value string="" />
+    </item>
+    <item name="REMOTE_ADDR">
+      <value string="::1" />
+    </item>
+    <item name="REMOTE_HOST">
+      <value string="::1" />
+    </item>
+    <item name="REMOTE_PORT">
+      <value string="16215" />
+    </item>
+    <item name="REQUEST_METHOD">
+      <value string="GET" />
+    </item>
+    <item name="SCRIPT_NAME">
+      <value string="/Shared/ExpensesDocPrint" />
+    </item>
+    <item name="SERVER_NAME">
+      <value string="localhost" />
+    </item>
+    <item name="SERVER_PORT">
+      <value string="59485" />
+    </item>
+    <item name="SERVER_PORT_SECURE">
+      <value string="0" />
+    </item>
+    <item name="SERVER_PROTOCOL">
+      <value string="HTTP/1.1" />
+    </item>
+    <item name="SERVER_SOFTWARE">
+      <value string="Microsoft-IIS/10.0" />
+    </item>
+    <item name="URL">
+      <value string="/Shared/ExpensesDocPrint" />
+    </item>
+    <item name="HTTP_CONNECTION">
+      <value string="keep-alive" />
+    </item>
+    <item name="HTTP_ACCEPT">
+      <value string="text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8" />
+    </item>
+    <item name="HTTP_ACCEPT_ENCODING">
+      <value string="gzip, deflate, br" />
+    </item>
+    <item name="HTTP_ACCEPT_LANGUAGE">
+      <value string="th,en;q=0.8" />
+    </item>
+    <item name="HTTP_COOKIE">
+      <value string="ASP.NET_SessionId=fuokueh2q55glhg5kxzxqwva; __RequestVerificationToken=1xRmNByQmcqZ5Q5QIau7NxS-1QpGR-8d78uzk5utgOLqpcaK7_gl9S_p3BliFZaMQAgOba07bSzGmEoDhFhi6JyCc1s1; __appVersion=undefined; __master_refresh=True; __company=8WFssSYO50HfMTo1mPRejw==; __terminal=ft78soZlzL7uR33tazKs+w==; __branch=BBcR8chrZPqnRRj57z3nIg==; __cashier_refresh=True; __cashier=wL6vCUsYzD9M4984RlqMew==; __is_subscribed=true; __fcm_token=ejmExJNmUms:APA91bEDALuoaHlgv7cZLgWr9ZrauQMZqe_-e-5y2L_fyUY-gEBKe-pCOKJoPpXjYSmVhFJIcLBJKWmtpTJtrRRx9_9YJHcOQTqTeE3nuslT-wSdTEDOG86by5BsPzxpeeDrCW8l0hPR; .AspNet.ApplicationCookie=9-li99d9MgRwVg_rIbe_xt_-JydR5iusrAw91LiSF6BZWMrCjgYfaBlzif1bXHEQ6TtFXvoN1ookjazWJVXHCt--QqYF2CHYIdyeDkxolvGLtzq88nhXUlZJS49r9fPcmBh7SU7ptX9mqKYCQ4cHKXx5JIJtPd2ipF0oZDj_9Fqk2qCCwycPzRKsPDdACGwnrMst2ajGT_RsFoHOhKlDBB-H1WU0vBDpqFq4_enwqlO8e_z3O2H31rS5JhhPhnBed6ZftXqRVv-7FKnWShmdVPc0wxviQR28Pp57-YcTCh_gB5V1EwyiTZdWXVuXWx2qsxAYVXqou3K_ahPEG3OU5h4w6x-FDbGcgS9mF_b3-6TEBGsZKPLxrZAMHlKVfmvZR8NsW-vDM-Q9DNm2iPcLN5wrQ8rnZ0QJfNPANkldC5MsdHn5; culture=en" />
+    </item>
+    <item name="HTTP_HOST">
+      <value string="localhost:59485" />
+    </item>
+    <item name="HTTP_USER_AGENT">
+      <value string="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36" />
+    </item>
+    <item name="HTTP_UPGRADE_INSECURE_REQUESTS">
+      <value string="1" />
+    </item>
+  </serverVariables>
+  <cookies>
+    <item name="ASP.NET_SessionId">
+      <value string="fuokueh2q55glhg5kxzxqwva" />
+    </item>
+    <item name="__RequestVerificationToken">
+      <value string="1xRmNByQmcqZ5Q5QIau7NxS-1QpGR-8d78uzk5utgOLqpcaK7_gl9S_p3BliFZaMQAgOba07bSzGmEoDhFhi6JyCc1s1" />
+    </item>
+    <item name="__appVersion">
+      <value string="undefined" />
+    </item>
+    <item name="__master_refresh">
+      <value string="True" />
+    </item>
+    <item name="__company">
+      <value string="8WFssSYO50HfMTo1mPRejw==" />
+    </item>
+    <item name="__terminal">
+      <value string="ft78soZlzL7uR33tazKs+w==" />
+    </item>
+    <item name="__branch">
+      <value string="BBcR8chrZPqnRRj57z3nIg==" />
+    </item>
+    <item name="__cashier_refresh">
+      <value string="True" />
+    </item>
+    <item name="__cashier">
+      <value string="wL6vCUsYzD9M4984RlqMew==" />
+    </item>
+    <item name="__is_subscribed">
+      <value string="true" />
+    </item>
+    <item name="__fcm_token">
+      <value string="ejmExJNmUms:APA91bEDALuoaHlgv7cZLgWr9ZrauQMZqe_-e-5y2L_fyUY-gEBKe-pCOKJoPpXjYSmVhFJIcLBJKWmtpTJtrRRx9_9YJHcOQTqTeE3nuslT-wSdTEDOG86by5BsPzxpeeDrCW8l0hPR" />
+    </item>
+    <item name=".AspNet.ApplicationCookie">
+      <value string="9-li99d9MgRwVg_rIbe_xt_-JydR5iusrAw91LiSF6BZWMrCjgYfaBlzif1bXHEQ6TtFXvoN1ookjazWJVXHCt--QqYF2CHYIdyeDkxolvGLtzq88nhXUlZJS49r9fPcmBh7SU7ptX9mqKYCQ4cHKXx5JIJtPd2ipF0oZDj_9Fqk2qCCwycPzRKsPDdACGwnrMst2ajGT_RsFoHOhKlDBB-H1WU0vBDpqFq4_enwqlO8e_z3O2H31rS5JhhPhnBed6ZftXqRVv-7FKnWShmdVPc0wxviQR28Pp57-YcTCh_gB5V1EwyiTZdWXVuXWx2qsxAYVXqou3K_ahPEG3OU5h4w6x-FDbGcgS9mF_b3-6TEBGsZKPLxrZAMHlKVfmvZR8NsW-vDM-Q9DNm2iPcLN5wrQ8rnZ0QJfNPANkldC5MsdHn5" />
+    </item>
+    <item name="culture">
+      <value string="en" />
+    </item>
+  </cookies>
+</error>

@@ -1,0 +1,362 @@
+﻿@using POS.Common;
+@using POS.Models;
+@using SBSModel.Common;
+@using SBSModel.Models;
+@model  POS.Models.POSViewModel
+@{
+    ViewBag.Title = @Resources.ResourcePOS.POS;
+}
+<script type="text/javascript">
+    $(function () {
+        $('#divTopMenu').hide();
+
+    });
+
+    function selectRow(index) {
+        if ($('#chk' + index).is(':checked')) {
+            $('#chk' + index).prop('checked', false);
+        } else {
+            $('#chk' + index).prop('checked', true);
+        }
+
+        TopMenu();
+    }
+
+    function TopMenu() {
+        $('#divTopMenu').hide();
+        $('#divTopBar').show();
+
+        var havecheck = false;
+        var rowcount = $('#selProductdataTables > tbody >tr').length;
+        for (var i = 0; i < rowcount; i++) {
+            var chk = $('input[name="chk' + i + '"]').get(0);
+            if (chk != null && chk.checked == true) {
+                if ($('#Product_Rows_' + i + '__Row_Type').val() != '@RowType.DELETE') {
+                    if ($('#divTopMenu').is(':visible') == false) {
+                        $('#divTopMenu').show();
+                        $('#divTopBar').hide();
+                    }
+                    havecheck = true;
+                    break;
+                }
+
+            }
+        }
+        if (!havecheck) {
+            CancelTopMenu();
+        }
+    }
+
+
+
+    function ChkAll_Onchange() {
+        if ('@Model.Status' != '@ReceiptStatus.Paid' && '@Model.Status' != '@ReceiptStatus.BackOrder' && '@Model.Status' != '@ReceiptStatus.Void') {
+            var rowcount = $('#selProductdataTables > tbody >tr').length;
+            for (var i = 0; i < rowcount; i++) {
+                var chk = $('input[name="chk' + i + '"]').get(0);
+                if (chk != null) {
+                    if ($('#Product_Rows_' + i + '__Row_Type').val() != '@RowType.DELETE') {
+                        chk.checked = true;
+                    }
+                }
+            }
+        }
+        TopMenu();
+    }
+
+    function TopMenu_DeleteAll_Onclick() {
+        if ('@Model.Status' != '@ReceiptStatus.Paid' && '@Model.Status' != '@ReceiptStatus.BackOrder' && '@Model.Status' != '@ReceiptStatus.Void') {
+            var rowcount = $('#selProductdataTables > tbody >tr').length;
+            for (var i = 0; i < rowcount; i++) {
+                var chk = $('input[name="chk' + i + '"]').get(0);
+                if (chk != null) {
+                    if (chk.checked == true) {
+                        $('#Product_Rows_' + i + '__Row_Type').val('@RowType.DELETE');
+                        $('#productRow-' + i).hide();
+                    }
+
+                }
+            }
+
+            TopMenu();
+            SumAll();
+        }
+
+    }
+
+    function DeleteProduct(i) {
+        $('#Product_Rows_' + i + '__Row_Type').val('@RowType.DELETE');
+        $('#productRow-' + i).hide();
+        TopMenu();
+        SumAll();
+    }
+
+    function AddQty(i) {
+        var qty = parseFloat($('#Product_Rows_' + i + '__Qty').val());
+        if (!isNaN(qty)) {
+            $('#Product_Rows_' + i + '__Qty').val(qty + 1);
+        }
+        SumAll();
+    }
+
+    function MinusQty(i) {
+        var qty = parseFloat($('#Product_Rows_' + i + '__Qty').val());
+        if (!isNaN(qty) && qty > 1) {
+            $('#Product_Rows_' + i + '__Qty').val(qty - 1);
+        }
+        SumAll();
+    }
+
+    function Qty_Onchange(i) {
+        var qty = parseFloat($('#Product_Rows_' + i + '__Qty').val());
+        if (isNaN(qty) || qty <= 0) {
+            $('#Product_Rows_' + i + '__Qty').val(1);
+        }
+        SumAll();
+    }
+
+    function TopMenu_Qty_Onclick() {
+        $('#Set_Qty_Index').val(-1);
+        $('#Set_Qty').val('');
+    }
+    function TopMenu_Discount_Onclick() {
+
+    }
+    function TopMenu_Submit_Onclick() {
+        $('#divTopBar').show();
+        $('#divTopMenu').hide();
+        var rowcount = $('#selProductdataTables > tbody >tr').length;
+        for (var i = 0; i < rowcount; i++) {
+            var chk = $('input[name="chk' + i + '"]').get(0);
+            if (chk != null) {
+                if (chk.checked == true) {
+                    if ($('#Product_Rows_' + i + '__Row_Type').val() != '@RowType.DELETE') {
+                        $('#Product_Rows_' + i + '__Qty').val($('#Product_Rows_' + i + '__Qty2').val());
+                        $('#Product_Rows_' + i + '__Qty_Label').get(0).style.textDecoration = 'none';
+                        $('#Product_Rows_' + i + '__Qty_Label').val(formatNumber($('#Product_Rows_' + i + '__Qty2').val()));
+                        $('#Product_Rows_' + i + '__Qty_Label2').hide();
+
+                        $('#Product_Rows_' + i + '__Discount').val($('#Product_Rows_' + i + '__Discount2').val());
+                        //$('#Product_Rows_' + i + '__Qty_Label').get(0).style.color = '#666 !important';
+                        //$('#Product_Rows_' + i + '__Qty_Label2').get(0).style.color = '#666 !important';
+                        //$('#Product_Rows_' + i + '__Price_Label').get(0).style.color = '#FFF';
+                        //$('#Product_Rows_' + i + '__Price_Label2').get(0).style.color = '#FFF';
+                    }
+
+                }
+
+            }
+            $('#chk' + i).prop('checked', false);
+
+        }
+
+        SumAll();
+    }
+
+    function CancelTopMenu() {
+        var rowcount = $('#selProductdataTables > tbody >tr').length;
+        for (var i = 0; i < rowcount; i++) {
+            if ($('#Product_Rows_' + i + '__Row_Type').val() != '@RowType.DELETE') {
+                $('#Product_Rows_' + i + '__Qty_Label').get(0).style.textDecoration = 'none';
+                $('#Product_Rows_' + i + '__Qty_Label2').hide();
+
+                if (parseFloat($('#Product_Rows_' + i + '__Discount').val()) > 0) {
+                    if (parseFloat($('#Product_Rows_' + i + '__Discount').val()) != parseFloat($('#Product_Rows_' + i + '__Discount2').val())) {
+                        var price = parseFloat($('#Product_Rows_' + i + '__Price').val());
+                        var discount = parseFloat($('#Product_Rows_' + i + '__Discount').val());
+                        $('#Product_Rows_' + i + '__Price_Label2').html(formatCurrency(price - discount));
+
+                    }
+                    $('#Product_Rows_' + i + '__Price_Label').get(0).style.textDecoration = 'line-through';
+                }
+                else {
+                    $('#Product_Rows_' + i + '__Price_Label').get(0).style.textDecoration = 'none';
+                    $('#Product_Rows_' + i + '__Price_Label2').hide();
+                }
+
+            }
+
+        }
+    }
+
+    function SelectAttr(obj) {
+        for (var i = 0; i < obj.valcnt; i++) {
+            $('#btn-' + obj.attrName + '-' + i).attr('class', 'btn btn-white btn-large');
+        }
+        $('#' + obj.id).attr('class', 'btn btn-lightblue btn-large');
+
+        $('input[name="Product_Rows[' + obj.productIndex + '].Attr' + obj.attrIndex + '_2"]').val(obj.valID);
+        $('input[name="Product_Rows[' + obj.productIndex + '].Attr' + obj.attrIndex + '_Name"]').val(obj.attrValue);
+    }
+
+
+    function AttrbuteAdd_Onclick(productIndex) {
+        var productName = $('input[name="Product_Rows[' + productIndex + '].Product_Name"]').val();
+        var name = productName;
+        if ($('input[name="Product_Rows[' + productIndex + '].Attr1_2"]').get(0) != null) {
+            if ($('input[name="Product_Rows[' + productIndex + '].Attr1_2"]').val() != null && $('input[name="Product_Rows[' + productIndex + '].Attr1_2"]').val() != '') {
+                $('input[name="Product_Rows[' + productIndex + '].Attr1"]').val($('input[name="Product_Rows[' + productIndex + '].Attr1_2"]').val());
+                name += " " + $('input[name="Product_Rows[' + productIndex + '].Attr1_Name"]').val();
+            }
+        }
+        if ($('input[name="Product_Rows[' + productIndex + '].Attr2_2"]').get(0) != null) {
+            if ($('input[name="Product_Rows[' + productIndex + '].Attr2_2"]').val() != null && $('input[name="Product_Rows[' + productIndex + '].Attr2_2"]').val() != '') {
+                $('input[name="Product_Rows[' + productIndex + '].Attr2"]').val($('input[name="Product_Rows[' + productIndex + '].Attr2_2"]').val());
+                name += " " + $('input[name="Product_Rows[' + productIndex + '].Attr2_Name"]').val();
+            }
+
+        }
+        if ($('input[name="Product_Rows[' + productIndex + '].Attr3_2"]').get(0) != null) {
+            if ($('input[name="Product_Rows[' + productIndex + '].Attr3_2"]').val() != null && $('input[name="Product_Rows[' + productIndex + '].Attr3_2"]').val() != '') {
+                $('input[name="Product_Rows[' + productIndex + '].Attr3"]').val($('input[name="Product_Rows[' + productIndex + '].Attr3_2"]').val());
+                name += " " + $('input[name="Product_Rows[' + productIndex + '].Attr3_Name"]').val();
+            }
+
+        }
+        if ($('input[name="Product_Rows[' + productIndex + '].Attr4_2"]').get(0) != null) {
+            if ($('input[name="Product_Rows[' + productIndex + '].Attr4_2"]').val() != null && $('input[name="Product_Rows[' + productIndex + '].Attr4_2"]').val() != '') {
+                $('input[name="Product_Rows[' + productIndex + '].Attr4"]').val($('input[name="Product_Rows[' + productIndex + '].Attr4_2"]').val());
+                name += " " + $('input[name="Product_Rows[' + productIndex + '].Attr4_Name"]').val();
+            }
+
+        }
+        if ($('input[name="Product_Rows[' + productIndex + '].Attr5_2"]').get(0) != null) {
+            if ($('input[name="Product_Rows[' + productIndex + '].Attr5_2"]').val() != null && $('input[name="Product_Rows[' + productIndex + '].Attr5_2"]').val() != '') {
+                $('input[name="Product_Rows[' + productIndex + '].Attr5"]').val($('input[name="Product_Rows[' + productIndex + '].Attr5_2"]').val());
+                name += " " + $('input[name="Product_Rows[' + productIndex + '].Attr5_Name"]').val();
+            }
+
+        }
+        $('#productName-' + productIndex).html(name);
+        $('input[name="Product_Rows[' + productIndex + '].Name"]').val(name);
+        $('input[name="Product_Rows[' + productIndex + '].Attr1_2"]').val('');
+        $('input[name="Product_Rows[' + productIndex + '].Attr1_Name"]').val('');
+        $('input[name="Product_Rows[' + productIndex + '].Attr2_2"]').val('');
+        $('input[name="Product_Rows[' + productIndex + '].Attr2_Name"]').val('');
+        $('input[name="Product_Rows[' + productIndex + '].Attr3_2"]').val('');
+        $('input[name="Product_Rows[' + productIndex + '].Attr3_Name"]').val('');
+        $('input[name="Product_Rows[' + productIndex + '].Attr4_2"]').val('');
+        $('input[name="Product_Rows[' + productIndex + '].Attr4_Name"]').val('');
+        $('input[name="Product_Rows[' + productIndex + '].Attr5_2"]').val('');
+        $('input[name="Product_Rows[' + productIndex + '].Attr5_Name"]').val('');
+    }
+
+
+</script>
+
+
+<div class="control-group" id="divTopBar">
+    <table style="width:100%" class="table-button">
+        <tr>
+            <td>
+                <a data-toggle="modal" onclick="ChkAll_Onchange()">
+                    <div class="btn btn-white btn-large">
+                        <p>Select All</p>
+                    </div>
+                </a>
+            </td>
+            <td align="right">
+                @Html.Hidden("Total_Qty", Model.Total_Qty)
+                <span class="display-text-medium">Qty</span> : @Html.TextBox("Total_Qty_Label", (Model.Total_Qty).ToString("n0"), new { @class = "display-text display-text-medium", Readonly = true, style = "text-align:right; width:20%;" })
+            </td>
+
+        </tr>
+    </table>
+</div>
+<div class="control-group" id="divTopMenu" style="overflow-x:auto">
+    <table style="width:99%" class="table-button">
+        <tr>
+            <td>
+                <a data-toggle="modal" href="#modal-set-qty">
+                    <div class="btn btn-white btn-large" onclick="TopMenu_Qty_Onclick();">
+                        <p>Qty</p>
+                    </div>
+                </a>
+            </td>
+            <td>
+                <a data-toggle="modal" href="#modal-set-discount">
+                    <div class="btn btn-white btn-large" onclick="TopMenu_Discount_Onclick();">
+                        <p>Discount</p>
+                    </div>
+                </a>
+            </td>
+            <td>
+                <a data-toggle="modal">
+                    <div class="btn btn-white btn-large" onclick="TopMenu_DeleteAll_Onclick();">
+                        <p>Delete</p>
+                    </div>
+                </a>
+            </td>
+            <td>
+                <a data-toggle="modal" onclick="TopMenu_Submit_Onclick();">
+                    <div class="btn btn-lightblue btn-large">
+                        <p>Submit</p>
+                    </div>
+                </a>
+            </td>
+
+        </tr>
+    </table>
+</div>
+<div class="control-group">
+    <div id="pnlSelProduct">
+        <div id="dataTables">
+            <table cellpadding="1" cellspacing="1" class="table table-normal responsive table-product" style="border:none;" id="selProductdataTables">
+                <tbody>
+                    @if (Model.Product_Rows != null)
+                    {
+                        var iService = new InventoryService();
+
+                        var newi = 0;
+                        for (var i = 0; i < Model.Product_Rows.Length; i++)
+                        {
+
+                            var row = Model.Product_Rows[i];
+                            var rowHideDel = "display:normal;cursor:pointer";
+                            if (row.Row_Type == RowType.DELETE)
+                            {
+                                rowHideDel = "display:none;";
+                            }
+
+                            <tr id="productRow-@newi" class="row-product" style="@rowHideDel">
+                                @{
+                            Html.RenderPartial("POSSelectProductRow", new POSProductViewModel()
+                            {
+                                Code = row.Code,
+                                Discount = row.Discount,
+                                Discount_Type = row.Discount_Type,
+                                GST = row.GST,
+                                ID = row.ID,
+                                Index = newi,
+                                Name = row.Name,
+                                Price = row.Price,
+                                Product_ID = row.Product_ID,
+                                Qty = row.Qty,
+                                Receipt_ID = row.Receipt_ID,
+                                Product_Name = row.Product_Name,
+                                Attr1 = row.Attr1,
+                                Attr2 = row.Attr2,
+                                Attr3 = row.Attr3,
+                                Attr4 = row.Attr4,
+                                Attr5 = row.Attr5,
+                                Image = row.Image,
+                                Map_ID = row.Map_ID,
+                                Row_Type = row.Row_Type,
+                                Receipt_Local_ID = row.Receipt_Local_ID,
+                                Receipt_Product_Local_ID = row.Receipt_Product_Local_ID
+                            });
+                                }
+
+                            </tr>
+                            newi++;
+                        }
+
+                    }
+
+
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+</div>

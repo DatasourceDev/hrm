@@ -1,0 +1,1137 @@
+﻿@model  HR.Models.LeaveConfigurationViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+@using SBSWorkFlowAPI.Constants;
+@{
+   ViewBag.Title = @Resource.Leave_Config;
+}
+@{
+   var showHolidayErr = true;
+   var err = ViewData.ModelState.SelectMany(m => m.Value.Errors, (m, error) => (m.Key)).ToArray();
+   if (err.Length == 1)
+   {
+      if (err[0] == "search_Holiday_Year")
+      {
+         showHolidayErr = false;
+      }
+   }
+}
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+   <div class="pageheader">
+      <h2>@Resource.Leave_Config<span></span></h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action(" index", "Home" )">@Resource.DashBoard</a></li>
+            <li class="active">@Resource.Leave_Config</li>
+         </ol>
+      </div>
+   </div>
+
+   <script type="text/javascript">
+      $(function () {
+         var module = '@Model.tabAction';
+         if ('@string.IsNullOrEmpty(Model.tabAction)' == "True") {
+            module = "holiday";
+         }
+         if ('@(Request.QueryString["tabAction"])' != null && '@(Request.QueryString["tabAction"])' != '') {
+            module = '@(Request.QueryString["tabAction"])';
+         }
+
+         var liID = "li-" + module;
+         var tabID = module + "-tab";
+         $("#" + liID).addClass("active");
+         $("#" + tabID).addClass("active");
+
+         //check all checkboxes
+         $('table thead input[type="checkbox"]').change(function () {
+            $(this).parents('table').find('tbody input[type="checkbox"]').prop('checked', $(this).prop('checked'));
+         });
+
+         InitDatepicker();
+
+         if ('@ViewData.ModelState.IsValid' == "False") {
+            if ('@Model.tabAction' == "holiday" && '@showHolidayErr'.toLowerCase() == 'true') {
+
+               $('#btnAddHoliday').get(0).click();
+            }
+         }
+
+         var addRowLink = '<a href="#" class="btn btn-greensea  btn-sm add-row" onclick="AddHoliday_Onclick()">@Resource.Add_An_Item</a>'
+         InitDatatable('holidayDataTable', addRowLink, InitDatatableApplyLink({
+            name: "apply",
+            tabAction: "holiday",
+            hasDel: true,
+            confirmAlert: true
+         }), 2, 'asc');
+
+         var addRow02Link = '<a href="@Url.Action("LeaveType", "Leave", new { operation =  EncryptUtil.Encrypt( UserSession.RIGHT_C) })" id="addRow2" class="btn btn-greensea  btn-sm add-row">@Resource.Add_An_Item</a>'
+         InitDatatable('leaveTypeDataTable', addRow02Link, InitDatatableApplyLink({
+            name: "apply",
+            tabAction: "leaveType",
+            hasDel: true,
+            confirmAlert: true
+         }), 1, 'asc');
+
+         var addRow03Link = '<a href="@Url.Action("LeaveAdjustment", "Leave", new { operation =  EncryptUtil.Encrypt( UserSession.RIGHT_C) })" id="addRow3" class="btn btn-greensea  btn-sm add-row">@Resource.Add_An_Item</a>';
+         InitDatatable('adjustDataTable', addRow03Link, InitDatatableApplyLink({
+            name: "apply",
+            tabAction: "adjust",
+            hasDel: true,
+            confirmAlert: true
+         }), 1, 'asc', 2, 'asc');
+
+         var addRow04Link = '<a href="@Url.Action("Approval", "Approval", new { operation = EncryptUtil.Encrypt(UserSession.RIGHT_C), atype = EncryptUtil.Encrypt(ApprovalType.Leave) })" id="addRow4" class="btn btn-greensea  btn-sm add-row">@Resource.Add_An_Item</a>';
+         InitDatatable('approvalDataTable', addRow04Link, InitDatatableApplyLink({
+            name: "apply",
+            tabAction: "approval",
+            hasDel: true,
+            confirmAlert: true
+         }));
+
+         InitDatatable('leaveTypeDefaultDataTable', null, null, 0, 'asc');
+      });
+
+      function AddHoliday_Onclick() {
+         $('#btnAddHoliday').get(0).click();
+         $('#Holiday_ID').val('');
+
+         $('#Holiday_Name').val('');
+         $('#Holiday_Start_Date').val('');
+         $('#Holiday_End_Date').val('');
+      }
+
+      function EditHoliday_Onclick(holiday_id, name, start_date, end_date) {
+         $('#btnAddHoliday').get(0).click();
+         $('#Holiday_ID').val(holiday_id);
+
+         $('#Holiday_Name').val(name);
+         $('#Holiday_Start_Date').val(start_date);
+         $('#Holiday_End_Date').val(end_date);
+      }
+
+      function StartTour() {
+         var strtitle = "Leave Configuration";
+         var configTour = new Tour({
+            storage: false,
+            steps: [
+            {
+               element: "#li-holiday",
+               title: strtitle,
+               content: "You can create the holidays and Events here.",
+               onNext: function () {
+                  Manage_Tab("holiday");
+               }
+            },
+            {
+               element: "#li-leaveType",
+               title: strtitle,
+               content: "You can modify the existing leave type and add new customized leavea type here.",
+               onNext: function () {
+                  Manage_Tab("leaveType");
+               }
+            },
+            {
+               element: "#li-adjust",
+               title: strtitle,
+               content: "You can do the leave adjustment here.",
+               onNext: function () {
+                  Manage_Tab("adjust");
+               }
+            },
+            {
+               element: "#li-approval",
+               title: strtitle,
+               content: "You can setup the leave approval workflow here.",
+               onNext: function () {
+                  Manage_Tab("approval");
+               }
+            }
+            ],
+            onEnd: function () {
+
+            }
+         });
+         configTour.init();
+         configTour.start();
+      }
+
+      function Manage_Tab(tName) {
+         switch (tName) {
+            case "holiday":
+               $("#holiday-tab").removeClass("active");
+               $("#li-holiday").removeClass("active");
+               $("#leaveType-tab").addClass("active in");
+               $("#li-leaveType").addClass("active");
+               break;
+            case "leaveType":
+               $("#leaveType-tab").removeClass("active");
+               $("#li-leaveType").removeClass("active");
+               $("#adjust-tab").addClass("active in");
+               $("#li-adjust").addClass("active");
+               break;
+            case "adjust":
+               $("#adjust-tab").removeClass("active");
+               $("#li-adjust").removeClass("active");
+               $("#approval-tab").addClass("active in");
+               $("#li-approval").addClass("active");
+               break;
+            case "approval":
+               $("#approval-tab").removeClass("active");
+               $("#li-approval").removeClass("active");
+               $("#holiday-tab").addClass("active in");
+               $("#li-holiday").addClass("active");
+         }
+      }
+
+      function Manage_Tour(tName) {
+
+         if (tName == "Type") {
+            triggerLeaveTypeTour();
+         } else if (tName == "Adjust") {
+            triggerLeaveAdjustTour();
+         } else if (tName == "Approval") {
+            triggerLeaveApprovalTour();
+         }
+      }
+
+      function triggerLeaveTypeTour() {
+         //Leave type configuration
+         var strtitle = "Leave Type Set up";
+         var LTypeTour = new Tour({
+            autoscroll: true,
+            storage: false,
+            steps: [
+            {
+               element: "#hDefaultLeaveType",
+               title: strtitle,
+               content: "You can see the list of default leave type here.",
+               onNext: function () {
+               }
+            },
+            {
+               element: "#thDefaultAction",
+               title: strtitle,
+               content: "If you want to modify default leave up, click here.",
+               onNext: function () {
+               }
+            },
+            {
+               element: "#hCustLeaveType",
+               title: strtitle,
+               content: "If you have more leave types, you can create under Customized Leave Type.",
+               onNext: function () {
+               }
+            },
+            {
+               element: "#addRow2",
+               title: strtitle,
+               content: "Click here to create new leave type.",
+               onNext: function () {
+               }
+            }
+            ],
+            onEnd: function () {
+            }
+         });
+         LTypeTour.init();
+         LTypeTour.start();
+      }
+
+      function triggerLeaveAdjustTour() {
+         var strtitle = "Leave Adjustment Set up";
+         var LAdjListTour = new Tour({
+            autoscroll: true,
+            storage: false,
+            steps: [
+            {
+               element: "#hLeaveAdjust",
+               title: strtitle,
+               content: "You can see the list of leave adjustment here.",
+               onNext: function () {
+               }
+            },
+            {
+               element: "#addRow3",
+               title: strtitle,
+               content: "If you want to add new leave adjustment, click here.",
+               onNext: function () {
+               }
+            },
+            {
+               element: "#thLeaveAdjustAction",
+               title: strtitle,
+               content: "If you want to modify the leave adjust, click here.",
+               onNext: function () {
+               }
+            }
+            ],
+            onEnd: function () {
+            }
+         });
+         LAdjListTour.init();
+         LAdjListTour.start();
+      }
+
+      function triggerLeaveApprovalTour() {
+         var strtitle = "Leave Approval Workflow Set up";
+         var LAppListTour = new Tour({
+            autoscroll: true,
+            storage: false,
+            steps: [
+            {
+               element: "#hLeaveApproval",
+               title: strtitle,
+               content: "You can see the list of approval workflow here.",
+               onNext: function () {
+               }
+            },
+            {
+               element: "#addRow4",
+               title: strtitle,
+               content: "If you want to add new leave approval workflow, click here.",
+               onNext: function () {
+               }
+            },
+            {
+               element: "#thLeaveApprovalAction",
+               title: strtitle,
+               content: "If you want to modify the existing approval workflow, click here.",
+               onNext: function () {
+               }
+            }
+            ],
+            onEnd: function () {
+            }
+         });
+         LAppListTour.init();
+         LAppListTour.start();
+      }
+   </script>
+
+   using (Html.BeginForm("Configuration", "Leave", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+   {
+      @Html.AntiForgeryToken()
+      @Html.HiddenFor(m => m.Holiday_ID)
+
+      <div class="modal fade" id="modal-holiday" tabindex="-1" role="dialog" aria-labelledby="modalConfirmLabel" aria-hidden="true">
+         <div class="modal-dialog">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h3 class="modal-title" id="modalConfirmLabel"><strong>@Resource.Holiday_And_Event</strong></h3>
+               </div>
+               <div class="modal-body">
+                  <div class="row">
+                     <div class="col-sm-12">
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <label for="Holiday_Name" class="control-label">@Resource.Holiday_And_Event_Name</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <input type="text" class="form-control" name="Holiday_Name" id="Holiday_Name" value="@Model.Holiday_Name">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Holiday_Name)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="row">
+                     <div class="col-md-6">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="Holiday_Start_Date" class="control-label">@Resource.Start_Date</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input type="text" class="form-control input-datepicker2" id="Holiday_Start_Date" name="Holiday_Start_Date" value="@Model.Holiday_Start_Date">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Holiday_Start_Date, "", new { id = "Holiday_Start_Date_Err" })
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-6">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="Holiday_End_Date" class="control-label">@Resource.End_Date</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input type="text" class="form-control input-datepicker2" id="Holiday_End_Date" name="Holiday_End_Date" value="@Model.Holiday_End_Date">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Holiday_End_Date, "", new { id = "Holiday_End_Date_Err" })
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+                  @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U) | Model.rights.Contains(UserSession.RIGHT_C))
+                  {
+                  <button type="submit" class="btn btn-primary" name="tabAction" value="holiday" onclick="return Confirm_Alert($('#Holiday_ID').val());">@Resource.Save_Change</button>
+                  }
+               </div>
+            </div>
+         </div>
+      </div>
+   }
+
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+
+            <!-- tile widget -->
+            <section class="tile color transparent-black">
+               <div class="tile-widget nopadding color transparent-white rounded-top-corners">
+                  <!-- Nav tabs -->
+                  <ul class="nav nav-tabs tabdrop">
+                     <li id="li-holiday"><a href="#holiday-tab" data-toggle="tab">@Resource.Holiday_And_Event</a></li>
+                     <li id="li-leaveType"><a href="#leaveType-tab" data-toggle="tab">@Resource.Leave_Type</a></li>
+                     <li id="li-adjust"><a href="#adjust-tab" data-toggle="tab">@Resource.Leave_Adjustment</a></li>
+                     <li id="li-approval"><a href="#approval-tab" data-toggle="tab">@Resource.Leave_Approval</a></li>
+                  </ul>
+                  <!-- / Nav tabs -->
+               </div>
+               <!-- /tile widget -->
+
+               <div class="tile-body tab-content ">
+                  <div id="holiday-tab" class="tab-pane fade in ">
+                     @using (Html.BeginForm("Configuration", "Leave", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                     {
+                        @Html.AntiForgeryToken()
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile color transparent filter" id="secfilter1">
+                                 <div class="tile-header transparent">
+                                    <h1 onclick="CollapseHeader(null, 'btncollapse1', 'secfilter1')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                                    <div class="controls">
+                                       <span class="label label-success tour-guide" onclick="StartTour();" style="cursor:pointer;">@Resource.Guide</span>
+                                       <a href="#" class="minimize filter" id="btncollapse1"><i class="fa fa-search  color-white"></i></a>
+                                    </div>
+                                 </div>
+                                 <div class="tile-body">
+                                    <div class="row">
+                                       <div class="col-md-6">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="search_Holiday_Year" class="control-label">@Resource.Year</label>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+
+                                    <div class="row">
+                                       <div class="col-md-6">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <input type="text" class="form-control" name="search_Holiday_Year" id="search_Holiday_Year" value="@Model.search_Holiday_Year">
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.search_Holiday_Year)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-6">
+                                       </div>
+                                    </div>
+                                    <div class="row">
+                                       <div class="col-md-6">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <button type="submit" class="btn btn-default" name="tabAction" value="holiday">@Resource.Filter</button>
+                                                <a id="btnAddHoliday" href="#modal-holiday" role="button" data-toggle="modal" style="display:none;"></a>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile transparent">
+                                 <div class="tile-header transparent">
+                                    <h1><strong>@Resource.Holiday_And_Event</strong></h1>
+                                    <div class="controls">
+                                       <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                    </div>
+                                 </div>
+                                 <div class="tile-body">
+                                    <div class="table-responsive">
+                                       <table class="table table-datatable table-custom" id="holidayDataTable">
+                                          <thead>
+                                             <tr>
+                                                <th class="no-sort" style="width: 40px;">
+                                                   <div class="checkbox check-transparent">
+                                                      <input type="checkbox" value="1" id="chkall">
+                                                      <label for="chkall"></label>
+                                                   </div>
+                                                </th>
+                                                <th class="sort-alpha">@Resource.Holiday_Name</th>
+                                                <th class="sort-alpha">@Resource.Start_Date</th>
+                                                <th class="sort-alpha">@Resource.End_Date</th>
+                                                <th class="sort-numeric">@Resource.Days</th>
+                                                <th class="no-sort" width="110px">@Resource.Action</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             @{var i = 0;}
+                                             @foreach (var row in Model.HolidayList)
+                                             {
+
+                                                <tr>
+                                                   <td>
+                                                      <div class="checkbox check-transparent">
+                                                         <input type="checkbox" value="@row.Holiday_ID" name="holiday" id="holiday[@i]">
+                                                         <label for="holiday[@i]"></label>
+                                                      </div>
+                                                   </td>
+                                                   <td>@row.Name</td>
+                                                   <td>@DateUtil.ToDisplayDate(row.Start_Date)</td>
+                                                   <td>@DateUtil.ToDisplayDate(row.End_Date)</td>
+                                                   <td>
+                                                      @if (row.Start_Date.HasValue && row.End_Date.HasValue)
+                                                      {
+                                                         @((row.End_Date.Value - row.Start_Date.Value).TotalDays + 1)
+                                                      }
+                                                   </td>
+                                                   <td class="actions text-left">
+                                                      @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                      {
+                                                         <a href="#" onclick="EditHoliday_Onclick('@row.Holiday_ID','@StrUtil.HtmlReplaceSymbol(row.Name)', '@(DateUtil.ToDisplayDate(row.Start_Date)) ' , '@(DateUtil.ToDisplayDate(row.End_Date))')" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                                      }
+                                                      @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_D))
+                                                      {
+                                                         <a href="@Url.Action("Configuration", "Leave" , new { holiday_id=row.Holiday_ID, apply=UserSession.RIGHT_D, tabaction="holiday" })" onclick="return confirm('@Resource.Confirm_Delete_Msg');" title="@Resource.Delete">
+                                                            <i class="fa fa-times-circle-o fa-2x"></i>
+                                                         </a>
+                                                      }
+                                                   </td>
+                                                </tr>
+                                                      i++;
+                                             }
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                     }
+                  </div>
+
+                  <div id="leaveType-tab" class="tab-pane fade in">
+                     @using (Html.BeginForm("Configuration", "Leave", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                     {
+                        @Html.AntiForgeryToken()
+                        @*<div class="row">
+                              <div class="col-md-12">
+                                 <section class="tile color transparent filter" id="secfilter2">
+                                    <div class="tile-header transparent">
+                                       <h1 onclick="CollapseHeader(null, 'btncollapse2', 'secfilter2')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                                       <div class="controls">
+                                          <a href="#" class="minimize filter" id="btncollapse2"><i class="fa fa-search  color-white"></i></a>
+                                       </div>
+                                    </div>
+                                    <div class="tile-body">
+                                       <div class="row">
+                                          <div class="col-md-6">
+                                             <div class="form-group">
+                                                <div class="col-sm-12">
+                                                   <label for="search_Leave_Leave_Config" class="control-label">@Resource.Leave_Type</label>
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="row">
+                                          <div class="col-md-6">
+                                             <div class="form-group">
+                                                <div class="col-sm-12">
+                                                   <select class="chosen-select chosen-transparent form-control" id="search_Leave_Leave_Config" name="search_Leave_Leave_Config">
+                                                      @foreach (var row in Model.lTypelist)
+                                                      {
+                                                      if (Model.search_Leave_Leave_Config == NumUtil.ParseInteger(row.Value))
+                                                      {
+                                                      <option value="@(row.Value != null ? row.Value : " ")" selected>@row.Text</option>
+                                                      }
+                                                      else
+                                                      {
+                                                      <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                                      }
+                                                      }
+                                                   </select>
+                                                </div>
+                                             </div>
+                                          </div>
+                                          <div class="col-md-6">
+                                          </div>
+                                       </div>
+                                       <div class="row">
+                                          <div class="col-md-6">
+                                             <div class="form-group">
+                                                <div class="col-sm-12">
+                                                   <button type="submit" class="btn btn-default" name="tabAction" value="leaveType">@Resource.Filter</button>
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </section>
+                              </div>
+                           </div>*@
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile transparent">
+                                 <div class="tile-header transparent">
+                                    <h1 id="hDefaultLeaveType"><strong>@Resource.Default_Leave_Type</strong></h1>
+                                    <div class="controls">
+                                       <span class="label label-success tour-guide" onclick="Manage_Tour('Type');" style="cursor:pointer">@Resource.Guide</span>
+                                       <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                    </div>
+                                 </div>
+                                 <div class="tile-body">
+                                    <div class="table-responsive">
+                                       <table class="table table-datatable table-custom" id="leaveTypeDefaultDataTable">
+                                          <thead>
+                                             <tr>
+                                                <th class="sort-alpha">@Resource.Leave_Name</th>
+                                                <th class="sort-alpha">@Resource.Leave_Description</th>
+                                                <th class="sort-alpha">@Resource.Bring_Forward</th>
+                                                <th class="sort-alpha">@Resource.Eligible_For</th>
+                                                <th class="sort-amount">@Resource.Default_Leave_Amount</th>
+                                                <th class="no-sort" width="110px" id="thDefaultAction">@Resource.Action</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             @foreach (var row in Model.LeaveTypeList)
+                                             {
+                                                if (row.Is_Default.HasValue && row.Is_Default.Value)
+                                                {
+                                                   string Bring_Forward_ = "";
+                                                   if (row.Bring_Forward.HasValue && row.Bring_Forward.Value)
+                                                   {
+                                                      if (row.Is_Bring_Forward_Days.HasValue && row.Is_Bring_Forward_Days.Value)
+                                                      {
+                                                         Bring_Forward_ = row.Bring_Forward_Days != null ? (row.Bring_Forward_Days.Value >= 0 ? row.Bring_Forward_Days + Resource.Days : "") : "";
+                                                      }
+                                                      else
+                                                      {
+                                                         Bring_Forward_ = row.Bring_Forward_Percent != null ? (row.Bring_Forward_Percent.Value >= 0 ? row.Bring_Forward_Percent + " %" : "") : "";
+                                                      }
+                                                   }
+
+                                                   <tr>
+                                                      <td>@row.Leave_Name</td>
+                                                      <td>@row.Leave_Description</td>
+                                                      <td>@Bring_Forward_</td>
+                                                      <td>
+                                                         @if (row.Leave_Config_Condition != null)
+                                                         {
+                                                            foreach (var con in row.Leave_Config_Condition)
+                                                            {
+                                                               @con.Global_Lookup_Data.Name <br />
+                                                            }
+                                                         }
+                                                      </td>
+                                                      <td>
+                                                         @if (row.Type == LeaveConfigType.Child)
+                                                         {
+                                                            if (row.Leave_Config_Child_Detail != null)
+                                                            {
+                                                               foreach (var detail in row.Leave_Config_Child_Detail)
+                                                               {
+                                                                  if (detail.Default_Leave_Amount.HasValue && detail.Default_Leave_Amount.Value > 0)
+                                                                  {
+                                                                     var textcitizen = Resource.Citizen;
+                                                                     if (detail.Residential_Status != ResidentialStatus.Local)
+                                                                     {
+                                                                        textcitizen = Resource.Non_Citizen;
+                                                                     }
+                                                                     @textcitizen @(" - ") @detail.Default_Leave_Amount  @(" ") @detail.Period<br />
+                                                                  }
+
+                                                               }
+                                                            }
+                                                         }
+                                                         else
+                                                         {
+                                                            if (row.Leave_Config_Detail != null)
+                                                            {
+                                                               foreach (var detail in row.Leave_Config_Detail)
+                                                               {
+                                                                  @Resource.Year @detail.Year_Service @(" - ") @detail.Default_Leave_Amount @(" ") @Resource.Days<br />
+                                                               }
+                                                            }
+                                                         }
+                                                      </td>
+                                                      <td class="actions text-left">
+                                                         @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                         {
+                                                            if (row.Type == LeaveConfigType.Child)
+                                                            {
+                                                               <a href="@Url.Action("Leavetypechild", "Leave" , new { lid=EncryptUtil.Encrypt(row.Leave_Config_ID), operation=EncryptUtil.Encrypt(UserSession.RIGHT_U) })" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                                            }
+                                                            else
+                                                            {
+                                                               <a href="@Url.Action("Leavetype", "Leave" , new { lid=EncryptUtil.Encrypt(row.Leave_Config_ID), operation=EncryptUtil.Encrypt(UserSession.RIGHT_U) })" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                                            }
+                                                         }
+                                                      </td>
+                                                   </tr>
+                                                }
+                                             }
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile transparent">
+                                 <div class="tile-header transparent">
+                                    <h1 id="hCustLeaveType"><strong>@Resource.Customized_Leave_Type</strong></h1>
+                                    <div class="controls">
+                                       <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                    </div>
+                                 </div>
+                                 <div class="tile-body">
+                                    <div class="table-responsive">
+                                       <table class="table table-datatable table-custom" id="leaveTypeDataTable">
+                                          <thead>
+                                             <tr>
+                                                <th class="no-sort" style="width: 40px;">
+                                                   <div class="checkbox check-transparent">
+                                                      <input type="checkbox" value="1" id="chkallLevType">
+                                                      <label for="chkallLevType"></label>
+                                                   </div>
+                                                </th>
+                                                <th class="sort-alpha">@Resource.Leave_Name</th>
+                                                <th class="sort-alpha">@Resource.Leave_Description</th>
+                                                <th class="sort-alpha">@Resource.Bring_Forward</th>
+                                                <th class="sort-amount">@Resource.Bring_Forward_Percent</th>
+                                                <th class="sort-alpha">@Resource.Upload_Document</th>
+                                                <th class="no-sort" width="110px">@Resource.Action</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             @{var lcnt = 0;}
+                                             @foreach (var row in Model.LeaveTypeList)
+                                             {
+                                                if (!row.Is_Default.HasValue || !row.Is_Default.Value)
+                                                {
+                                                   string Bring_Forward = row.Bring_Forward.Value ? Resource.Yes : Resource.No;
+                                                   string Bring_Forward_ = "";
+                                                   if (row.Bring_Forward.HasValue && row.Bring_Forward.Value)
+                                                   {
+                                                      if (row.Is_Bring_Forward_Days.HasValue && row.Is_Bring_Forward_Days.Value)
+                                                      {
+                                                         Bring_Forward_ = row.Bring_Forward_Days != null ? (row.Bring_Forward_Days.Value >= 0 ? row.Bring_Forward_Days + " " + Resource.Days : "") : "";
+                                                      }
+                                                      else
+                                                      {
+                                                         Bring_Forward_ = row.Bring_Forward_Percent != null ? (row.Bring_Forward_Percent.Value >= 0 ? row.Bring_Forward_Percent + " %" : "") : "";
+                                                      }
+                                                   }
+
+                                                   string Upload_Document = row.Upload_Document.Value ? Resource.Yes : Resource.No;
+                                                   <tr>
+                                                      <td>
+                                                         <div class="checkbox check-transparent">
+                                                            <input type="checkbox" value="@row.Leave_Config_ID" name="levType" id="levType[@lcnt]">
+                                                            <label for="levType[@lcnt]"></label>
+                                                         </div>
+                                                      </td>
+                                                      <td>@row.Leave_Name</td>
+                                                      <td>@row.Leave_Description</td>
+                                                      <td>@Bring_Forward</td>
+                                                      <td class="text-right">@Bring_Forward_</td>
+                                                      <td>@Upload_Document </td>
+                                                      <td class="actions text-left">
+                                                         @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                         {
+                                                            <a href="@Url.Action("LeaveType", "Leave" , new { lid=EncryptUtil.Encrypt(row.Leave_Config_ID), operation=EncryptUtil.Encrypt(UserSession.RIGHT_U) })" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                                         }
+
+                                                         @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_D))
+                                                         {
+                                                            <a href="@Url.Action("LeaveType", "Leave", new { lid = EncryptUtil.Encrypt(row.Leave_Config_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_D) })" onclick="return confirm('@Resource.Confirm_Delete_Msg);" title="@Resource.Delete">
+                                                               <i class="fa fa-times-circle-o fa-2x"></i>
+                                                            </a>
+                                                         }
+
+                                                      </td>
+                                                   </tr>
+                                                         lcnt++;
+                                                }
+                                             }
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                     }
+                  </div>
+
+                  <div id="adjust-tab" class="tab-pane fade in">
+                     @using (Html.BeginForm("Configuration", "Leave", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                     {
+                        @Html.AntiForgeryToken()
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile color transparent filter" id="secfilter3">
+                                 <div class="tile-header transparent">
+                                    <h1 onclick="CollapseHeader(null, 'btncollapse3', 'secfilter3')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                                    <div class="controls">
+                                       <span class="label label-success tour-guide" onclick="Manage_Tour('Adjust');" style="cursor:pointer">@Resource.Guide</span>
+                                       <a href="#" class="minimize filter" id="btncollapse3"><i class="fa fa-search  color-white"></i></a>
+                                    </div>
+                                 </div>
+                                 <div class="tile-body">
+                                    <div class="row">
+                                       <div class="col-md-6">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="search_Adjust_Leave_Type" class="control-label">@Resource.Leave_Type</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <select class="chosen-select chosen-transparent form-control" id="search_Adjust_Leave_Type" name="search_Adjust_Leave_Type">
+                                                   @foreach (var row in Model.lTypelist)
+                                                   {
+                                                      if (Model.search_Adjust_Leave_Type == NumUtil.ParseInteger(row.Value))
+                                                      {
+                                                         <option value="@(row.Value != null ? row.Value : " ")" selected>@row.Text</option>
+                                                      }
+                                                      else
+                                                      {
+                                                         <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                                      }
+                                                   }
+                                                </select>
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.search_Adjust_Leave_Type)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+
+                                       <div class="col-md-6">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="search_Adjust_Year" class="control-label">@Resource.Year</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <input type="text" class="form-control" name="search_Adjust_Year" id="search_Adjust_Year" value="@Model.search_Adjust_Year">
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.search_Adjust_Year)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+
+                                    <div class="row">
+                                       <div class="col-md-6">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <button type="submit" class="btn btn-default" name="tabAction" value="adjust">@Resource.Filter</button>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile transparent">
+
+                                 <div class="tile-header transparent">
+                                    <h1 id="hLeaveAdjust"><strong>@Resource.Leave_Adjustment</strong></h1>
+                                    <div class="controls">
+                                       <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                    </div>
+                                 </div>
+                                 <div class="tile-body">
+                                    <div class="table-responsive">
+                                       <table class="table table-datatable table-custom" id="adjustDataTable">
+                                          <thead>
+                                             <tr>
+                                                <th class="no-sort" style="width: 40px;">
+                                                   <div class="checkbox check-transparent">
+                                                      <input type="checkbox" value="1" id="chkallLevAdjust">
+                                                      <label for="chkallLevAdjust"></label>
+                                                   </div>
+                                                </th>
+                                                <th class="sort-alpha">@Resource.Employee</th>
+                                                <th class="sort-alpha">@Resource.Leave_Type</th>
+                                                <th class="sort-amount">@Resource.Adjustment_Amount</th>
+                                                <th class="sort-alpha">@Resource.Reason</th>
+                                                <th class="sort-numeric">@Resource.Year</th>
+                                                <th id="thLeaveAdjustAction" class="no-sort" width="110px">@Resource.Action</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             @{var k = 0;}
+                                             @foreach (var row in Model.LeaveAdjustList)
+                                             {
+                                                string emp = row.Employee_Profile != null ? (row.Employee_Profile.User_Profile != null ? row.Employee_Profile.User_Profile.First_Name : "ALL") : "ALL";
+                                                <tr>
+                                                   <td>
+                                                      <div class="checkbox check-transparent">
+                                                         <input type="checkbox" value="@row.Adjustment_ID" name="levAdjust" id="levAdjust[@k]">
+                                                         <label for="levAdjust[@k]"></label>
+                                                      </div>
+                                                   </td>
+                                                   <td>@emp</td>
+                                                   <td>
+                                                      @if (row.Leave_Config != null)
+                                                      {
+                                                         @row.Leave_Config.Leave_Name
+                                                      }
+                                                   </td>
+                                                   <td class="text-right">@((row.Adjustment_Amount.HasValue ? row.Adjustment_Amount.Value : 0).ToString("n2"))</td>
+                                                   <td>@row.Reason</td>
+                                                   <td>@row.Year_2 </td>
+                                                   <td class="actions text-left">
+                                                      @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                      {
+                                                         <a href="@Url.Action("LeaveAdjustment", "Leave", new { aid = EncryptUtil.Encrypt(row.Adjustment_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                                      }
+                                                      @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_D))
+                                                      {
+                                                         <a href="@Url.Action("LeaveAdjustment", "Leave", new { aid = EncryptUtil.Encrypt(row.Adjustment_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_D) })" onclick="return confirm('@Resource.Confirm_Delete_Msg');" title="@Resource.Delete">
+                                                            <i class="fa fa-times-circle-o fa-2x"></i>
+                                                         </a>
+                                                      }
+                                                   </td>
+                                                </tr>
+                                                      k++;
+                                             }
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                     }
+                  </div>
+
+                  <div id="approval-tab" class="tab-pane fade in">
+                     @using (Html.BeginForm("Configuration", "Leave", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                     {
+                        @Html.AntiForgeryToken()
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile color transparent filter" id="secfilter4">
+                                 <div class="tile-header transparent">
+                                    <h1 onclick="CollapseHeader(null, 'btncollapse4', 'secfilter4')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                                    <div class="controls">
+                                       <span class="label label-success tour-guide" onclick="Manage_Tour('Approval');" style="cursor:pointer">@Resource.Guide</span>
+                                       <a href="#" class="minimize filter" id="btncollapse4"><i class="fa fa-search  color-white"></i></a>
+                                    </div>
+                                 </div>
+                                 <div class="tile-body">
+                                    <div class="row">
+                                       <div class="col-md-6">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="search_Adjust_Leave_Type" class="control-label">@Resource.Department</label>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-6">
+                                       </div>
+                                    </div>
+                                    <div class="row">
+                                       <div class="col-md-6">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <select class="chosen-select chosen-transparent form-control" id="search_Approval_Department" name="search_Approval_Department">
+                                                   @foreach (var row in Model.departmentList)
+                                                   {
+                                                      if (Model.search_Approval_Department == NumUtil.ParseInteger(row.Value))
+                                                      {
+                                                         <option value="@(row.Value != null ? row.Value : " ")" selected>@row.Text</option>
+                                                      }
+                                                      else
+                                                      {
+                                                         <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                                      }
+                                                   }
+                                                </select>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-6">
+                                       </div>
+                                    </div>
+                                    <div class="row">
+                                       <div class="col-md-6">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <button type="submit" class="btn btn-default" name="tabAction" value="approval">@Resource.Filter</button>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile transparent">
+                                 <div class="tile-header transparent">
+                                    <h1 id="hLeaveApproval"><strong>@Resource.Leave_Approval</strong></h1>
+                                    <div class="controls">
+                                       <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                    </div>
+                                    <div>
+                                       @Resource.Leave_Note
+                                    </div>
+                                 </div>
+                                 <div class="tile-body">
+                                    <div class="table-responsive">
+                                       <table class="table table-datatable table-custom" id="approvalDataTable">
+                                          <thead>
+                                             <tr>
+                                                <th class="no-sort" style="width: 40px;">
+                                                   <div class="checkbox check-transparent">
+                                                      <input type="checkbox" value="1" id="chkallLevApproval">
+                                                      <label for="chkallLevApproval"></label>
+                                                   </div>
+                                                </th>
+                                                <th class="sort-alpha">@Resource.Department</th>
+                                                <th class="sort-alpha">@Resource.Employee</th>
+                                                <th class="sort-alpha">@Resource.Approver</th>
+                                                <th id="thLeaveApprovalAction" class="no-sort" width="110px">@Resource.Action</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             @if (Model.ApprovalList != null)
+                                             {
+                                                var l = 0;
+                                                foreach (var row in Model.ApprovalList)
+                                                {
+                                                   if (row.Departments != null && Model.search_Approval_Department.HasValue)
+                                                   {
+                                                      if (!row.Departments.Select(s => s.User_Department_ID).Contains(Model.search_Approval_Department.Value))
+                                                      {
+                                                         continue;
+                                                      }
+                                                   }
+                                                   <tr>
+                                                      <td>
+                                                         <div class="checkbox check-transparent">
+                                                            <input type="checkbox" value="@row.Approval_Flow_ID" name="levAppr" id="levAppr[@l]">
+                                                            <label for="levAppr[@l]"></label>
+                                                         </div>
+                                                      </td>
+                                                      <td>
+                                                         @if (row.Departments != null)
+                                                         {
+                                                            var dService = new DepartmentService();
+                                                            foreach (var drow in row.Departments)
+                                                            {
+
+                                                               @drow.Name
+                                                               <br />
+
+                                                            }
+                                                         }
+                                                      </td>
+                                                      <td>
+                                                         @if (row.Applicable_Employee != null)
+                                                         {
+                                                            var eService = new EmployeeService();
+                                                            foreach (var erow in row.Applicable_Employee)
+                                                            {
+                                                               if (erow.Is_Applicable.HasValue && erow.Is_Applicable.Value)
+                                                               {
+                                                                  @erow.Name
+                                                                  <br />
+                                                               }
+                                                            }
+                                                         }
+                                                      </td>
+                                                      <td>
+                                                         @if (row.Approvers != null)
+                                                         {
+                                                            var uService = new UserService();
+                                                            foreach (var arow in row.Approvers)
+                                                            {
+                                                               @arow.Name
+                                                               <br />
+                                                            }
+                                                         }
+                                                      </td>
+                                                      <td class="actions text-left">
+                                                         @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                                         {
+                                                            <a href="@Url.Action("Approval", "Approval" , new { paid=EncryptUtil.Encrypt(row.Approval_Flow_ID), operation=EncryptUtil.Encrypt(UserSession.RIGHT_U), atype=EncryptUtil.Encrypt("Leave") })" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                                         }
+                                                         @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_D))
+                                                         {
+                                                            <a href="@Url.Action("Approval", "Approval" , new { paid=EncryptUtil.Encrypt(row.Approval_Flow_ID), operation=EncryptUtil.Encrypt(UserSession.RIGHT_D), atype=EncryptUtil.Encrypt("Leave") })" onclick="return confirm('@Resource.Confirm_Delete_Msg');" title="@Resource.Delete">
+                                                               <i class="fa fa-times-circle-o fa-2x"></i>
+                                                            </a>
+                                                         }
+                                                      </td>
+                                                   </tr>
+                                                         l++;
+                                                }
+                                             }
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                     }
+                  </div>
+                  <!-- / Tab panes -->
+               </div>
+            </section>
+         </div>
+      </div>
+   </div>
+}
+

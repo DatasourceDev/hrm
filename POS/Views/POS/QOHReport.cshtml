@@ -1,0 +1,142 @@
+﻿@using POS.Common;
+@using POS.Models;
+@using SBSModel.Common;
+@using SBSModel.Models;
+@model  POS.Models.POSQoHReportViewModel
+
+@{
+    ViewBag.Title = @Resources.ResourcePOS.StockBalanceReport;
+}
+
+<div class="main-content">
+
+    <script type="text/javascript">
+
+        function Print_Onclick(receipt_id) {
+
+            var data = { pReceiptID: receipt_id, pUrl: "/POS/QoHReport" };
+            $.ajax({
+                url: '@Url.Action("PrintReport", "POS")',
+                //Passes the content of an input up
+                data: data,
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    if (data != null) {
+                        alert(data.Msg);
+                    }
+                    CloseProgress();
+                }
+            });
+
+        }
+
+        $(function () {
+            $("#btnExport").click(function () {
+                theForm.action = '@Url.Action("QoHExportExcel", "POS")';
+                theForm.method = 'get';
+                theForm.submit();
+
+
+                theForm.action = '@Url.Action("QoHReport", "POS")';
+                CloseProgress();
+            });
+        });
+    </script>
+
+    <div class="container-fluid padded">
+        <div class="row-fluid">
+            <div class="span12">
+                <div class="box" style='margin-bottom:0;'>
+                    <div class="box-header">
+                        <span class="title">@Resources.ResourcePOS.StockBalanceReport </span>
+                    </div>
+                    <div class="box-content">
+                        <div class="padded">
+                            @using (Html.BeginForm("QoHReport", "POS", FormMethod.Get, new { @class = "form-horizontal validatable", role = "form", id = "theForm" })) {
+                                @Html.AntiForgeryToken()
+                                <div class="control-group ">
+                                    <div class="span3">
+                                        <div class="control-group ">
+                                            @Html.Label("Search by Category", new { @class = "control-label" })
+                                            <div class="controls">
+                                                @Html.DropDownListFor(m => m.CategoryID, new SelectList(Model.CategoryList, "Product_Category_ID", "Category_Name"), new { })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="control-group ">
+                                    <div class="span3">
+                                        <div class="control-group ">
+                                            @Html.LabelFor(m => m.TextSearch, new { @class = "control-label" })
+                                            <div class="controls">
+                                                @Html.TextBoxFor(model => model.TextSearch, "{0:dd/mm/yyyy}", new { style = "width:100%" })
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(model => model.TextSearch)
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="span3">
+                                        <div class="control-group ">
+                                            <button type="submit" class="btn btn-white">@Resources.ResourceMain.Search</button>
+                                        </div>
+                                    </div>
+                                    <div class="span3" style="text-align:right;">
+                                        <div class="control-group ">
+                                            <a class="btn btn-white" href="#" target="_blank" id="btnExport" data-toggle="modal">@Resources.ResourceMain.ExporttoExcel</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            }
+                            <div id="dataTables">
+                                <table cellpadding="0" cellspacing="0" border="0" class="table table-normal responsive ">
+                                    <thead>
+                                        <tr>
+                                            <th style="display:none;"></th>
+                                            <th>SN.</th>
+                                            <th>@Resources.ResourcePOS.Category</th>
+                                            <th>@Resources.ResourcePOS.ProductCode</th>
+                                            <th>@Resources.ResourcePOS.ProductName</th>
+                                            <th>@Resources.ResourcePOS.TotalReceived</th>
+                                            <th>@Resources.ResourcePOS.TotalSold</th>
+                                            <th>@Resources.ResourcePOS.QoH</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model != null && Model.inventory_qoh != null && Model.inventory_qoh.Count > 0) {
+                                            int recordcount = 0;
+
+                                            foreach (var row in Model.inventory_qoh) {
+                                                recordcount += 1;
+                                                var color = "#fff";
+
+                                                <tr class="status-info" style="color:@color">
+                                                    <td align="center">@recordcount</td>
+
+                                                    <td>@row.Category_Name</td>
+                                                    <td align="center">@row.Product_Code</td>
+                                                    <td>@row.Product_Name</td>
+                                                    <td align="right">@row.InvIN</td>
+                                                    <td align="right">@row.POSOUT</td>
+                                                    <td align="right">@row.QoH</td>
+                                                </tr>
+                                            }
+
+                                        }
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>

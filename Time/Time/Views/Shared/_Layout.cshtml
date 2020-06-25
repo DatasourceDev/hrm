@@ -1,0 +1,828 @@
+﻿@using System.Web.Configuration
+@using Time.Models;
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Constants;
+<!DOCTYPE html>
+<html>
+<head>
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta charset="UTF-8" />
+   <link rel="icon" type="image/ico" href="@AppSetting.SERVER_NAME/SBSTmpAPI/assets/images/favicon.ico" />
+
+   <title>@ViewBag.Title</title>
+   @HtmlUtil.InitJS()
+   @HtmlUtil.InitCSS()
+   <script>
+      // this is important for IEs
+      var polyfilter_scriptpath = '@AppSetting.SERVER_NAME/SBSTmpAPI/assets/js/vendor/modals/';
+   </script>
+   @{
+      var controllername = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+      var actionname = HttpContext.Current.Request.RequestContext.RouteData.Values["action"].ToString();
+      var uitem = UserUtil.GetUserItem(Request.RequestContext.HttpContext);
+      if (uitem.aMode == AuthenMode.IncorrectUser)
+      {
+         Request.RequestContext.HttpContext.Session.Clear();
+         uitem = UserUtil.GetUserItem(Request.RequestContext.HttpContext);
+      }
+
+      if (uitem.aMode == AuthenMode.UserNoFound)
+      {
+         Response.Redirect("~/Account/Logout");
+      }
+
+      var appcnt = 0;
+      var approvers = new List<Notification>();
+      var requests = new List<Request>();
+      var requestIDs = new List<int>();
+      var erequests = new List<Request>();
+      var erequestIDs = new List<int>();
+      var err = ViewData.ModelState.SelectMany(m => m.Value.Errors, (m, error) => (m.Key)).Distinct().ToList();
+      var version = AppSetting.Version_Control;
+   }
+
+</head>
+
+<body class="@uitem.bg">
+   <div id="divjavaAddin"></div>
+   <div class="warning-timeout-dlg" align="center" style="z-index:9999">
+      <div>
+         <div class="notification ">
+            <h4><strong>@Resource.Message_Connection_Timeout </strong>@Resource.Message_Do_you_want_To_Continue_Using_This_System</h4>
+            <p>
+               <button type="button" class="btn btn-primary" onclick="ContinousLogin();">@Resource.Continue</button>
+               <button type="button" class="btn btn-danger" onclick="logout();">@Resource.Logout</button>
+            </p>
+         </div>
+      </div>
+   </div>
+   <div class="loading" align="center" style="z-index:9999">
+      <img src="@AppSetting.SERVER_NAME/SBSTmpAPI/assets/images/loader.gif">
+   </div>
+   <div id="wrap">
+      <div class="row">
+         @if (uitem.aMode == AuthenMode.Authenticated)
+         {
+            <div class="navbar navbar-default navbar-fixed-top navbar-transparent-black mm-fixed-top collapsed" role="navigation" id="navbar">
+               <div class="navbar-header col-md-2">
+                  <a href="@UrlUtil.Action(Url,"Index", "Home")" class="navbar-brand" @(uitem.companyname.Length > 30 ? "style=font-size:12px" : "")>
+                     @uitem.companyname
+                  </a>
+                  <div class="sidebar-collapse">
+                     <a href="#">
+                        <i class="fa fa-bars"></i>
+                     </a>
+                  </div>
+               </div>
+               <div class="navbar-collapse">
+                  <ul class="nav navbar-nav refresh">
+                     <li class="divided">
+                        <a href="#" class="page-refresh"><i class="fa fa-refresh"></i></a>
+                     </li>
+                  </ul>
+                  <div class="search" id="main-search">
+                     <i class="fa fa-search"></i> <input id="Quick_Search" type="text" placeholder="@Resource.Search_Press_Enter_to_search" style="width:300px;">
+                  </div>
+                  @*<ul class="nav navbar-nav search-actions" style="float:left;margin-top:24px;">
+                         <li class="dropdown divided" id="liSearchOpen">
+                      <a id="btnQuickSearch" href="#" class="dropdown-toggle" data-toggle="dropdown">
+                      </a>
+                             <ul class="dropdown-menu wide arrow nopadding bordered" style="min-width:300px" id="QuickSearchlist"></ul>
+                         </li>
+                     </ul>*@
+                  <ul class="nav navbar-nav quick-actions">
+                     <li class="dropdown divided">
+
+                        <a class="dropdown-toggle button" data-toggle="dropdown" href="#">
+                           <i class="fa fa-envelope"></i>
+                           <span class="label label-transparent-black"><input id="appcnt" class="input-transparent" value="0" readonly style="width:15px;text-align:center" /></span>
+                        </a>
+                        <ul class="dropdown-menu wider arrow nopadding messages">
+                           @if (approvers != null)
+                           {
+                              <li><h1>@Resource.You_Have_Msg<strong><input id="appcnt2" class="input-transparent" value="0" readonly style="width: 15px; text-align: center" /></strong>@Resource.New_Approval</h1></li>
+                              var i = 0;
+                              foreach (var row in approvers)
+                              {
+                                 if (row.Leave_Application_Document_ID > 0)
+                                 {
+                                    if (requestIDs.Contains(row.Request_ID.HasValue ? row.Request_ID.Value : 0))
+                                    {
+                                       var request = requests.Where(w => w.Request_ID == row.Request_ID).FirstOrDefault();
+                                       if (request != null && request.Task_Assignment != null)
+                                       {
+
+                                          if (request.Status == WorkflowStatus.Pending || request.Status == WorkflowStatus.Approved)
+                                          {
+                                             var task = request.Task_Assignment.Where(w => w.Record_Status == WfRecordStatus.Active).OrderBy(o => o.Approval_Level).FirstOrDefault();
+                                             if (task != null && task.Profile_ID == uitem.userlogin.Profile_ID)
+                                             {
+                                                <li id="liLApprove-@appcnt">
+                                                   <script type="text/javascript">
+                                                      function LeaveApprove_Onclick(index, id, requestID, empID) {
+                                                         $("#L_Leave_Application_Document_ID").val(id);
+                                                         $("#L_Request_ID").val(requestID);
+                                                         $("#L_Employee_Profile_ID").val(empID);
+
+                                                         $("#L_Expenses_Application_ID").val('');
+                                                         $("#L_Index").val(index);
+                                                      }
+                                                   </script>
+                                                   <a class="cyan" href="#modal-approve" role="button" data-toggle="modal" onclick="LeaveApprove_Onclick( '@appcnt','@row.Leave_Application_Document_ID','@request.Request_ID','@row.Employee_Profile_ID')">
+                                                      <div class="profile-photo">
+                                                         <img src="@AppSetting.SERVER_NAME/SBSTmpAPI/assets/images/ici-avatar.jpg" />
+                                                      </div>
+                                                      <div class="message-info">
+                                                         <span class="sender">@request.Requestor_Name</span>
+                                                         <span class="time">@DateUtil.ToDisplayDate(row.Date_Applied)</span>
+                                                         <div class="message-content"> <span class="color-red">@row.Days_Taken @Resource.Days_ToLower</span> @row.Leave_Name @Resource.Form_ToLower @DateUtil.ToDisplayDateRange(row.Start_Date, row.Start_Date_Period, row.End_Date, row.End_Date_Period) @Resource.Is_pending_At_your_Approval_Lower</div>
+                                                      </div>
+                                                   </a>
+                                                </li>
+                                                appcnt++;
+                                             }
+                                          }
+                                       }
+                                    }
+                                 }
+                                 else
+                                 {
+                                    if (erequestIDs.Contains(row.Request_ID.HasValue ? row.Request_ID.Value : 0))
+                                    {
+                                       var erequest = erequests.Where(w => w.Request_ID == row.Request_ID).FirstOrDefault();
+                                       if (erequest != null && erequest.Task_Assignment != null)
+                                       {
+
+                                          if (erequest.Status == WorkflowStatus.Pending || erequest.Status == WorkflowStatus.Approved)
+                                          {
+                                             var task = erequest.Task_Assignment.Where(w => w.Record_Status == WfRecordStatus.Active).OrderBy(o => o.Approval_Level).FirstOrDefault();
+                                             if (task != null && task.Profile_ID == uitem.userlogin.Profile_ID)
+                                             {
+                                                var totalAmount = 0M;
+                                                var claimAmount = 0M;
+                                                if (row.Expenses_Application_Document != null)
+                                                {
+                                                   totalAmount = row.Expenses_Application_Document.Sum(s => s.Total_Amount.HasValue ? s.Total_Amount.Value : 0);
+                                                   claimAmount = row.Expenses_Application_Document.Sum(s => s.Amount_Claiming.HasValue ? s.Amount_Claiming.Value : 0);
+
+                                                }
+                                                <li id="liLApprove-@appcnt">
+                                                   <script type="text/javascript">
+                                                      function ExpensesApprove_Onclick(index, id, requestID, empID) {
+                                                         $("#L_Leave_Application_Document_ID").val('');
+                                                         $("#L_Request_ID").val(requestID);
+                                                         $("#L_Employee_Profile_ID").val(empID);
+
+                                                         $("#L_Expenses_Application_ID").val(id);
+                                                         $("#L_Index").val(index);
+                                                      }
+                                                   </script>
+                                                   <a class="cyan" href="#modal-approve" role="button" data-toggle="modal" onclick="ExpensesApprove_Onclick('@appcnt','@row.Expenses_Application_ID','@erequest.Request_ID','@row.Employee_Profile_ID')">
+                                                      <div class="profile-photo">
+                                                         <img src="@AppSetting.SERVER_NAME/SBSTmpAPI/assets/images/ici-avatar.jpg" />
+                                                      </div>
+                                                      <div class="message-info">
+                                                         <span class="sender">@erequest.Requestor_Name</span>
+                                                         <span class="time">@DateUtil.ToDisplayDate(row.Date_Applied)</span>
+                                                         <div class="message-content">@row.Expenses_Title @row.Expenses_No <span class="color-red">$@(claimAmount.ToString("n2")) </span> @Resource.Is_pending_Approve_Lower</div>
+                                                      </div>
+                                                   </a>
+                                                </li>
+                                                appcnt++;
+                                             }
+                                          }
+                                       }
+                                    }
+                                 }
+                                 i++;
+                              }
+                           }
+                           <li class="topborder"></li>
+                        </ul>
+                        <script type="text/javascript">
+                           $(function () {
+                              $("#appcnt").val('@appcnt');
+                              $("#appcnt2").val('@appcnt');
+                           });
+                        </script>
+                     </li>
+                     <li class="dropdown divided">
+                        <a class="dropdown-toggle button" data-toggle="dropdown" href="#">
+                           <i class="fa fa-cog"></i>
+                        </a>
+                        <ul class="dropdown-menu wide arrow nopadding bordered">
+                           <li><h1>@Resource.Configuration<strong></strong></h1></li>
+                           @if (uitem.menu != null && uitem.menu.topRights != null)
+                           {
+                              foreach (var menu in uitem.menu.topRights)
+                              {
+                                 <li>
+                                    <a href="@UrlUtil.Action(Url,menu.Action, menu.Controller)">
+                                       <span class="label label-green"><i class="fa fa-cog"></i></span>
+                                       @menu.Page_Name
+                                       <span class="small"></span>
+                                    </a>
+                                 </li>
+                              }
+                           }
+                           <li><a href="#"></a></li>
+                        </ul>
+                     </li>
+                     <li class="dropdown divided user" id="current-user">
+                        <div class="profile-photo">
+                           <img src="@uitem.userphoto" style="max-height:45px" />
+                        </div>
+                        <a class="dropdown-toggle options" data-toggle="dropdown" href="#">
+                           @uitem.username<i class="fa fa-caret-down"></i>
+                        </a>
+                        <ul class="dropdown-menu arrow settings">
+
+                           <li>
+                              <h3>@Resource.Backgrounds :</h3>
+                              <ul id="color-schemes">
+                                 <li><a href="#" class="bg-1" onclick="SaveBg('bg-1')"></a></li>
+                                 <li><a href="#" class="bg-2" onclick="SaveBg('bg-2')"></a></li>
+                                 <li><a href="#" class="bg-3" onclick="SaveBg('bg-3')"></a></li>
+                                 <li><a href="#" class="bg-4" onclick="SaveBg('bg-4')"></a></li>
+                                 <li><a href="#" class="bg-5" onclick="SaveBg('bg-5')"></a></li>
+                                 <li><a href="#" class="bg-6" onclick="SaveBg('bg-6')"></a></li>
+                              </ul>
+                           </li>
+                           <li />
+                           <li class="divider"></li>
+                           <li><h3>@Resource.Languages :</h3></li>
+                           @if (SBSResourceAPI.SiteLanguages.AvailableLanguages != null)
+                           {
+                              var sel_lang = "";
+                              HttpCookie langCookie = Request.Cookies["culture"];
+                              if (langCookie != null)
+                              {
+                                 sel_lang = langCookie.Value;
+                              }
+                              foreach (var i in SBSResourceAPI.SiteLanguages.AvailableLanguages)
+                              {
+                                 <li style="padding-left:10px">
+                                    <a href="@UrlUtil.Action(Url,"ChangeLanguage", "Home", new { lang = i.LangCultureName })">
+                                       <i class="fa fa-language">
+                                       </i>  @i.LangFullName
+                                       @if (sel_lang == i.LangCultureName)
+                                       {
+                                          <i class=" fa fa-check"></i>
+                                       }
+                                    </a>
+                                 </li>
+                              }
+                           }
+                           <li class="divider"></li>
+                           <li><h3>@uitem.email</h3></li>
+                           <li>
+                              <a href="@UrlUtil.Action(Url,"EmployeeInfo", "Employee", new { pProfileID = EncryptUtil.Encrypt(uitem.userlogin.Profile_ID), operation = EncryptUtil.Encrypt(Operation.U) })"><i class="fa fa-user"></i> @Resource.My_Profile</a>
+                           </li>
+                           <li>
+                              <a href="@UrlUtil.Action(Url,"ResetPassword", "Account")"><i class="fa fa-refresh"></i> @Resource.Reset_Password</a>
+                           </li>
+                           <li>
+                              <a href="#modal-sc" data-toggle="modal"><i class="fa fa-warning"></i> @Resource.Report_A_Problem</a>
+                           </li>
+                           <li class="divider"></li>
+                           <li>
+                              <a href="@UrlUtil.Action(Url,"Logout", "Account")"><i class="fa fa-power-off"></i> @Resource.Logout</a>
+                           </li>
+                        </ul>
+                     </li>
+                     <li>
+                        <a></a>
+                     </li>
+                  </ul>
+                  <ul class="nav navbar-nav side-nav" id="sidebar">
+                     <li class="collapsed-content">
+                        <ul>
+                           <li class="search"></li>
+                        </ul>
+                     </li>
+                     <li class="navigation" id="navigation">
+                        <a href="#" class="sidebar-toggle" data-toggle="#navigation">@Resource.Navigation (Version @version)<i class="fa fa-angle-up"></i></a>
+
+                        <ul class="menu">
+                           @if (uitem.menu != null && uitem.menu.lefts != null)
+                           {
+                              foreach (var menu in uitem.menu.lefts)
+                              {
+                                 if (menu.submenu != null)
+                                 {
+                                    if (menu.submenu.Count() == 1)
+                                    {
+                                       var left = menu.submenu[0];
+                                       <li class="dropdown">
+                                          <a href="@UrlUtil.Action(Url, left.Action, left.Controller )">
+                                             <img src="@AppSetting.SERVER_NAME/SBSTmpAPI/images/@(menu.Menu_Name.ToLower()).png" style="height:30px">
+                                             @Page_Name.Get_Manu_Name(menu.Menu_Name.Trim())
+                                          </a>
+                                       </li>
+                                    }
+                                    else if (menu.submenu.Count() > 0)
+                                    {
+                                       var menuactive = "";
+                                       if (menu.submenu.Where(w => w.Controller == controllername).FirstOrDefault() != null)
+                                       {
+                                          menuactive = "open active";
+                                       }
+                                       <li class="dropdown @menuactive">
+                                          <a class="dropdown-toggle" data-toggle="dropdown">
+                                             <img src="@AppSetting.SERVER_NAME/SBSTmpAPI/images/@(menu.Menu_Name.ToLower()).png" style="height:30px"> @Page_Name.Get_Manu_Name(menu.Menu_Name.Trim())<b class="fa fa-plus dropdown-plus color-white"></b>
+                                          </a>
+                                          @foreach (var sub in menu.submenu)
+                                          {
+                                             <ul class="dropdown-menu">
+                                                <li>
+                                                   <a href="@UrlUtil.Action(Url, sub.Action, sub.Controller)" title="@sub.Page_Name">
+                                                      <i class="fa fa-caret-right"></i> @sub.Page_Name
+                                                   </a>
+                                                </li>
+                                             </ul>
+                                          }
+                                       </li>
+                                    }
+                                 }
+                              }
+                           }
+                        </ul>
+                     </li>
+                  </ul>
+               </div>
+            </div>
+         }
+         @if (uitem.aMode == AuthenMode.Authenticated)
+         {
+            <div id="content" class="col-md-12">
+               @RenderBody()
+            </div>
+         }
+         else
+         {
+            @RenderBody()
+         }
+      </div>
+   </div>
+
+   <script type="text/javascript">
+      $(function () {
+         InitCollapseHeader(false);
+         @foreach (var ctl in ViewData.ModelMetadata.Properties)
+            {
+                if(ctl.ModelType.IsArray)
+                {
+                    if (ctl.ModelType.BaseType.BaseType != null && ctl.ModelType.BaseType.BaseType.ToString() == "System.Object")
+                    {
+
+                    }
+                }
+                else
+                {
+                    if (ctl.IsRequired)
+                    {
+                        var ctlname = ctl.PropertyName;
+                        ctlname = ctlname.Replace("[", "_");
+                        ctlname = ctlname.Replace("]", "_");
+                        ctlname = ctlname.Replace(".", "_");
+
+                        @:if ($("#@ctlname").get(0) != null) { $("#@ctlname").get(0).setAttribute('onblur', "Input_Onblur('@ctlname','@ctl.DisplayName',@ctl.IsRequired.ToString().ToLower())"); }
+
+                        if (ctl.Model == null || ctl.Model == "")
+                        {
+                            @:MandatoryColor('@ctlname');
+                                                                                                                                                                                                                                                                                                                                                                                                                     }
+                                            }
+                }
+
+                if (ctl.ModelType.IsValueType && ctl.ModelType.FullName.Contains("System.Decimal"))
+                {
+                    var ctlname =  ctl.PropertyName;
+                    ctlname = ctlname.Replace("[", "_");
+                    ctlname = ctlname.Replace("]", "_");
+                    ctlname = ctlname.Replace(".", "_");
+                    @:InitAmountControl('@ctlname');
+                                                                                                                                                                                                                                                                                                                                                                                 @:if ($("#@ctlname").get(0) != null) { $("#@ctlname").get(0).setAttribute('onblur', "ValidateDecimal('@ctlname','@ctl.DisplayName',@ctl.IsRequired.ToString().ToLower())"); }
+                                                                                                                                                                                                                                                                                                                                                                                                                                     }
+                else if (ctl.ModelType.IsValueType && ctl.ModelType.FullName.Contains("System.Int32"))
+                {
+                    var ctlname =  ctl.PropertyName;
+                    ctlname = ctlname.Replace("[", "_");
+                    ctlname = ctlname.Replace("]", "_");
+                    ctlname = ctlname.Replace(".", "_");
+                    @:InitAmountControl('@ctlname');
+                                                                                                                                                                                                                                                                                                                                                                         @:if ($("#@ctlname").get(0) != null) { $("#@ctlname").get(0).setAttribute('onblur', "ValidateNumber('@ctlname','@ctl.DisplayName',@ctl.IsRequired.ToString().ToLower(), true)"); }
+                                                                                                                                                                                                                                                                                                                                             }
+                else if (ctl.ModelType.FullName.Contains("System.String"))
+                {
+                    if (ctl.DataTypeName == "EmailAddress")
+                    {
+                        var ctlname = ctl.PropertyName;
+                        ctlname = ctlname.Replace("[", "_");
+                        ctlname = ctlname.Replace("]", "_");
+                        ctlname = ctlname.Replace(".", "_");
+
+                        @:if ($("#@ctlname").get(0) != null) { $("#@ctlname").get(0).setAttribute('onblur', "ValidateEmail('@ctlname','@ctl.DisplayName',@ctl.IsRequired.ToString().ToLower())"); }
+                                                                                                                                                                                                                                                                                                                                                                 } else if (ctl.DataTypeName == "Date")
+                    {
+                        var ctlname = ctl.PropertyName;
+                        ctlname = ctlname.Replace("[", "_");
+                        ctlname = ctlname.Replace("]", "_");
+                        ctlname = ctlname.Replace(".", "_");
+
+                        @:if ($("#@ctlname").get(0) != null) { $("#@ctlname").get(0).setAttribute('onblur', "ValidateDate('@ctlname','@ctl.DisplayName',@ctl.IsRequired.ToString().ToLower(),true)"); }
+                                                                                                                                                                                                                                                                                                                                             }
+                }
+            }
+         @if (err != null && err.Count > 0)
+            {
+                foreach (var ctl in err)
+                {
+                    var ctlname = ctl;
+                    ctlname = ctlname.Replace("[", "_");
+                    ctlname = ctlname.Replace("]", "_");
+                    ctlname = ctlname.Replace(".", "_");
+                    @:ErrorColor('@ctlname');
+                                                                                                                                                                                                                                                                                                                                                                                                                                     }
+            }
+
+         @*$("#Quick_Search").keyup(function (event) {
+            if (event.keyCode == 13) {
+               var key = $("#Quick_Search").val();
+               if (key != '') {
+                  ShowMask();
+                  $.ajax({
+                     type: 'POST',
+                     url: '@UrlUtil.Action(Url,"QuickSearch", "Account")',
+                     contentType: 'application/json; charset=utf-8',
+                     data: JSON.stringify({ pSearch: key }),
+                     dataType: 'json',
+                     success: function (data) {
+                        if (data != null) {
+                           var result = '<li><h1>Quick Search</h1></li>';
+                           for (var i = 0; i < data.Menu_Page_Name.length; i++) {
+                              result = result + '<li><a href="' + data.Page_Url[i] + '">' + data.Menu_Page_Name[i] + '</a></li>';
+                           }
+                           $('#QuickSearchlist').html(result);
+
+                        }
+                        if ($('#liSearchOpen').hasClass("open") == false) {
+                           $('#btnQuickSearch').get(0).click();
+                        }
+
+
+                        $("#Quick_Search").focus();
+                        CloseMask();
+                     }
+                  });
+               }
+            }
+         });*@
+
+         if ('@uitem.aMode' == '@AuthenMode.Authenticated') {
+            setTimeout(doStuff, 180000); //every three mins
+         }
+      });
+
+      function Confirm_Alert(ID) {
+         if ((parseInt(ID) > 0) || (ID == true)) {
+            return confirm('@Resource.Message_Confirm_Saving_Change');
+         }
+      }
+   </script>
+
+
+   @using (Html.BeginForm("Approve", "Approval", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+   {
+      <script type="text/javascript">
+         $(function () {
+            $("#L_btnApprove").click(function () {
+               ShowMask();
+               $.ajax({
+                  type: 'POST',
+                  url: '@UrlUtil.Action(Url,"Approve", "Approval")',
+                  contentType: 'application/json; charset=utf-8',
+                  data: JSON.stringify({
+                     Leave_Application_Document_ID: $("#L_Leave_Application_Document_ID").val(),
+                     Expenses_Application_ID: $("#L_Expenses_Application_ID").val(),
+                     Employee_Profile_ID: $("#L_Employee_Profile_ID").val(),
+                     Request_ID: $("#L_Request_ID").val(),
+                     Status: '@WorkflowStatus.Approved',
+                     Remark: $("#L_Remark").val(),
+                     Index: $("#L_Index").val()
+                  }),
+                  dataType: 'json',
+                  success: function (data) {
+                     if (data != null && data.Index != null) {
+                        $("#liLApprove-" + data.Index).hide();
+                        var cnt = parseInt($("#appcnt").val()) - 1;
+                        $("#appcnt").val(cnt);
+                        $("#appcnt2").val(cnt);
+                        $('#L_btnClose').get(0).click();
+                     }
+                     CloseMask();
+                  }
+               });
+
+            });
+
+            $("#L_btnReject").click(function () {
+               ShowMask();
+               $.ajax({
+                  type: 'POST',
+                  url: '@UrlUtil.Action(Url,"Approve", "Approval")',
+                  contentType: 'application/json; charset=utf-8',
+                  data: JSON.stringify({
+                     Leave_Application_Document_ID: $("#L_Leave_Application_Document_ID").val(),
+                     Expenses_Application_ID: $("#L_Expenses_Application_ID").val(),
+                     Employee_Profile_ID: $("#L_Employee_Profile_ID").val(),
+                     Request_ID: $("#L_Request_ID").val(),
+                     Status: '@WorkflowStatus.Rejected',
+                     Remark: $("#L_Remark").val(),
+                     Index: $("#L_Index").val()
+                  }),
+                  dataType: 'json',
+                  success: function (data) {
+                     if (data != null && data.Index != null) {
+                        $("#liLApprove-" + data.Index).hide();
+                        var cnt = parseInt($("#appcnt").val()) - 1;
+                        $("#appcnt").val(cnt);
+                        $("#appcnt2").val(cnt);
+                        $('#L_btnClose').get(0).click();
+
+                     }
+                     else {
+                        $("#L_Error").val('@Resource.The @Resource.Remark @Resource.Field @Resource.Is_Rrequired_Lower');
+                     }
+
+                     CloseMask();
+                  }
+               });
+            });
+         });
+      </script>
+
+      <div class="modal fade" id="modal-approve" tabindex="-1" role="dialog" aria-labelledby="modalConfirmLabel" aria-hidden="true">
+         <input type="hidden" id="L_Leave_Application_Document_ID" name="L_Leave_Application_Document_ID">
+         <input type="hidden" id="L_Expenses_Application_ID" name="L_Expenses_Application_ID">
+         <input type="hidden" id="L_Employee_Profile_ID" name="L_Employee_Profile_ID">
+         <input type="hidden" id="L_Request_ID" name="L_Request_ID">
+         <input type="hidden" id="L_Index" name="L_Index">
+         <div class="modal-dialog">
+            <div class="modal-content">
+               <div class="modal-body">
+                  <div class="row">
+                     <div class="col-md-12">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="Expenses_Date" class="control-label">@Resource.Remarks</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <textarea class="form-control" id="L_Remark" name="L_Remark" rows="6"></textarea>
+                              <input class="form-control input-transparent color-red" id="L_Error" readonly />
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="modal-footer">
+                  <button id="L_btnClose" type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+                  <button id="L_btnApprove" type="button" class="btn btn-primary">@Resource.Approve</button>
+                  <button id="L_btnReject" type="button" class="btn btn-primary">@Resource.Reject</button>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <script type="text/javascript">
+         var scfilecount = 0;
+         $(function () {
+            $("#L_btnSCCancel").click(function () {
+               SC_Clear();
+            });
+
+            $("#L_btnSCSend").click(function () {
+               var desc = $('#L_SC_Description').val();
+               var images = document.getElementsByName('scUploadImage');
+               var cand = document.getElementsByTagName('canvas');
+               var canvasData = "";
+               if (cand != null && cand.length > 0) {
+                  canvasData = cand[0].toDataURL("image/png");
+               }
+
+               if (images != null && images.length > 0) {
+                  var files = [];
+                  var filecnt = 0;
+                  for (var i = 0; i < images.length; i++) {
+                     var img = images[i];
+                     var fileToLoad = images[i].files[0];
+
+                     if (fileToLoad == null) {
+                        alert('@Resource.Message_The_File_Is_Required');
+                        return;
+                     }
+                     var fileReader = new FileReader();
+
+                     fileReader.onload = function (fileLoadedEvent) {
+                        var srcData = fileLoadedEvent.target.result; // <--- data: base64
+                        files[filecnt] = srcData;
+                        filecnt++;
+                        if (filecnt == images.length) {
+                           // last file
+                           var data = { pScreenImage: canvasData, pUploadfile: files, pDesc: desc };
+                           ShowMask();
+                           $.ajax({
+                              type: "POST",
+                              url: '@UrlUtil.Action(Url,"SaveScreenShot", "Account")',
+                              data: data,
+                              success: function (data) {
+                                 SC_Clear();
+
+                                 alert('@Resource.Message_Your_Problem_Has_Been_Sent_Successfully');
+                              }
+                           }).done(function () {
+                              $('#L_btnSCCancel').get(0).click();
+                              CloseMask();
+                           });
+                        }
+                     }
+                     fileReader.readAsDataURL(fileToLoad);
+                  }
+               }
+               else {
+                  var data = { pScreenImage: canvasData, pDesc: desc };
+                  ShowMask();
+                  $.ajax({
+                     type: "POST",
+                     url: '@UrlUtil.Action(Url,"SaveScreenShot", "Account")',
+                     data: data,
+                     success: function (data) {
+                        SC_Clear();
+                        alert('@Resource.Message_Your_Problem_Has_Been_Sent_Successfully');
+                     }
+                  }).done(function () {
+                     $('#L_btnSCCancel').get(0).click();
+                     CloseMask();
+                  });
+               }
+            });
+
+
+            $("#L_btnSCNewFile").click(function () {
+               var index = scfilecount;
+               var html = "";
+               html += '<div class="form-group" id="divSCFileUpload-' + index + '">';
+               html += '<div class="col-md-12" >';
+               html += '<div class="input-group">';
+               html += '<span class="input-group-btn">';
+               html += '<span class="btn btn-primary btn-file">';
+               html += '<i class="fa fa-upload"></i>';
+               html += '<input  type="file" name="scUploadImage" accept="image/jpeg, image/jpg, image/png, image/gif" onchange="SC_File_Onchange( $(this))">';
+               html += '</span>';
+               html += '</span>';
+               html += '<input  type="text" class="form-control" readonly>';
+               html += '<span class="input-group-btn">';
+               html += '<a  class="btn btn-red btn-file" onclick="RemoveSC_Onclick(' + index + ')">';
+               html += '<i class="fa fa-times"></i>';
+               html += ' </a>';
+               html += '</span>';
+               html += '</div>';
+               html += '</div>';
+               html += '</div>';
+
+               $('#divSCUpload').append(html);
+               scfilecount++;
+            });
+         });
+
+         function SC_Clear() {
+            $('#divSCUpload').html('');
+            $("#imgScreenShot").get(0).src = '';
+            $("#divScreenShot").hide();
+            $('#L_Include_Screen_Shot').get(0).checked = false;
+            $('#L_SC_Description').val('');
+
+            if (document.getElementsByTagName('canvas')[0] != null) {
+               document.getElementsByTagName('canvas')[0].remove();
+            }
+         }
+
+         function SC_File_Onchange(opt) {
+            var input = opt,
+                numFiles = input.get(0).files ? input.get(0).files.length : 1,
+                label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+
+            input.trigger('fileselect', [numFiles, label]);
+
+            var input = opt.parents('.input-group').find(':text'),
+                   log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+            if (input.length) {
+               input.val(log);
+            } else {
+               if (log) alert(log);
+            }
+         }
+
+         function RemoveSC_Onclick(index) {
+            $('#divSCFileUpload-' + index).remove();
+         }
+
+         function ScreenShot_Include_Onchange(opt) {
+            if (opt.checked) {
+               takeScreenShot();
+            }
+            else {
+               document.getElementsByTagName('canvas')[0].remove();
+               $("#imgScreenShot").get(0).src = '';
+               $("#divScreenShot").hide();
+            }
+         }
+
+         function takeScreenShot() {
+            document.getElementsByClassName('modal-backdrop')[0].setAttribute('data-html2canvas-ignore', '')
+            ShowMask();
+            var body = window.parent.document.body;
+            html2canvas(body, {
+               onrendered: function (canvas) {
+                  var cand = document.getElementsByTagName('canvas');
+                  if (cand[0] === undefined || cand[0] === null) {
+
+                  } else {
+                     //cand[0].remove();
+                     document.body.removeChild(cand[0]);
+                  }
+                  document.body.appendChild(canvas);
+                  var canvasData = canvas.toDataURL("image/png");
+                  $("#imgScreenShot").get(0).src = canvasData;
+                  $("#divScreenShot").show();
+                  CloseMask();
+               }
+            });
+         }
+      </script>
+
+      <form class="form-horizontal" role="form">
+         <div class="modal fade" id="modal-sc" data-html2canvas-ignore tabindex="-1" role="dialog" aria-labelledby="modalSC" aria-hidden="true">
+            <div class="modal-dialog">
+               <div class="modal-content">
+                  <div class="modal-header">
+                     <h3 class="modal-title"><strong>@Resource.Report_A_Problem</strong></h3>
+                  </div>
+                  <div class="modal-body">
+                     <div class="row">
+                        <div class="col-md-12">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="L_SC_Description" class="control-label">@Resource.What_Happened_Msg</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <textarea class="form-control" id="L_SC_Description" name="L_SC_Description" rows="6"></textarea>
+                                 @*<input class="form-control input-transparent color-red" id="L_SC_Description_Error" readonly />*@
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <div class="checkbox" style="padding-top:0px;">
+                                    <input type="checkbox" value="true" id="L_Include_Screen_Shot" onchange="ScreenShot_Include_Onchange(this)">
+                                    <label for="L_Include_Screen_Shot">@Resource.Include_A_Screenshot_With_My_Report</label>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="form-group" id="divScreenShot" style="display:none;">
+                              <div class="col-md-12">
+                                 <img id="imgScreenShot" style="width:100%" />
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <button id="L_btnSCNewFile" type="button" class="btn btn-default"><i class="fa fa-paperclip"></i> @Resource.Upload_File</button>
+                              </div>
+                           </div>
+                           <div id="divSCUpload">
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="modal-footer">
+                     <button id="L_btnSCCancel" type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Cancel</button>
+                     <button id="L_btnSCSend" type="button" class="btn btn-primary">@Resource.Send</button>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </form>
+
+   }
+
+</body>
+
+</html>

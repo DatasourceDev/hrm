@@ -1,0 +1,186 @@
+﻿<error errorId="bf2cd76e-3e1a-4d52-a588-4a9e49da1669" application="/LM/W3SVC/4/ROOT" host="LAPTOP-64514UIV" type="System.Web.HttpException" message="A public action method 'ExpenseSmartDevReport' was not found on controller 'HR.Controllers.ExpensesController'." source="System.Web.Mvc" detail="System.Web.HttpException (0x80004005): A public action method 'ExpenseSmartDevReport' was not found on controller 'HR.Controllers.ExpensesController'.&#xD;&#xA;   at System.Web.Mvc.Controller.HandleUnknownAction(String actionName)&#xD;&#xA;   at System.Web.Mvc.Controller.&lt;BeginExecuteCore&gt;b__1d(IAsyncResult asyncResult, ExecuteCoreState innerState)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncVoid`1.CallEndDelegate(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncResultBase`1.End()&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.End[TResult](IAsyncResult asyncResult, Object tag)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.End(IAsyncResult asyncResult, Object tag)&#xD;&#xA;   at System.Web.Mvc.Controller.EndExecuteCore(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.Controller.&lt;BeginExecute&gt;b__15(IAsyncResult asyncResult, Controller controller)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncVoid`1.CallEndDelegate(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncResultBase`1.End()&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.End[TResult](IAsyncResult asyncResult, Object tag)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.End(IAsyncResult asyncResult, Object tag)&#xD;&#xA;   at System.Web.Mvc.Controller.EndExecute(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.Controller.System.Web.Mvc.Async.IAsyncController.EndExecute(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.&lt;BeginProcessRequest&gt;b__5(IAsyncResult asyncResult, ProcessRequestState innerState)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncVoid`1.CallEndDelegate(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncResultBase`1.End()&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.End[TResult](IAsyncResult asyncResult, Object tag)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.End(IAsyncResult asyncResult, Object tag)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.EndProcessRequest(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.System.Web.IHttpAsyncHandler.EndProcessRequest(IAsyncResult result)&#xD;&#xA;   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()&#xD;&#xA;   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean&amp; completedSynchronously)" user="nt.proj@smartdevsolution.com" time="2016-07-13T09:40:23.3532422Z" statusCode="404">
+  <serverVariables>
+    <item name="ALL_HTTP">
+      <value string="HTTP_CONNECTION:keep-alive&#xD;&#xA;HTTP_ACCEPT:text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8&#xD;&#xA;HTTP_ACCEPT_ENCODING:gzip, deflate, sdch&#xD;&#xA;HTTP_ACCEPT_LANGUAGE:th,en;q=0.8&#xD;&#xA;HTTP_COOKIE:_ga=GA1.1.1354168062.1464781061; __RequestVerificationToken=7nvLqEc5zWLohKAxo8mopNJD0ScWKCb4HN4DdNDsBu3RiGnwxhxpiDu2O_HLN-9wxk4HNohCJlMaP5iyMqXHPw3GC3I1; ASP.NET_SessionId=gg10lllh0rxed1sdj1shrfn2; .AspNet.ApplicationCookie=nQ2_pQwEHY7ZnO7KgKQxwlG0Ii0k73sJ9CiswNVgZ58s5yaNd07MQCWyg2PpDgvqqwHrzEY7Epm2N1eIg4j1XmbnfD9cJxhCDBt1CiArcW3UzU_SeUU-WFTDT1rXqjO4um71lS-65HLi6kWJaIpHmMqVaqxjaS4SK538EpT_DQ_rsk7RwVoKxrtBOcC7PRbUgr5j1SXq_TuOIO7Mce8KsTY-4k2m-WWcgIt1vYfLx1wJk4T4m-FHKeqKHYl5IZP8bU_MmdmAL9bP4vbosqtne9_guB3kHRGmGKHyN36eYxB6--j9ld9_HrfcnvPOaVinDBPoMNg16lOv2SPyb_k59l-dQ6vNY0M_69qxwvwMvTu_cMNbi7flm6uMdsQIHtZpC3X33FGqCnbKoD9TyGeCSYhJFMWWkr-PmtZIZpSQ-nsiQO4a; culture=en&#xD;&#xA;HTTP_HOST:localhost:49485&#xD;&#xA;HTTP_REFERER:http://localhost:49485/Expenses/Record&#xD;&#xA;HTTP_USER_AGENT:Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36&#xD;&#xA;HTTP_UPGRADE_INSECURE_REQUESTS:1&#xD;&#xA;" />
+    </item>
+    <item name="ALL_RAW">
+      <value string="Connection: keep-alive&#xD;&#xA;Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8&#xD;&#xA;Accept-Encoding: gzip, deflate, sdch&#xD;&#xA;Accept-Language: th,en;q=0.8&#xD;&#xA;Cookie: _ga=GA1.1.1354168062.1464781061; __RequestVerificationToken=7nvLqEc5zWLohKAxo8mopNJD0ScWKCb4HN4DdNDsBu3RiGnwxhxpiDu2O_HLN-9wxk4HNohCJlMaP5iyMqXHPw3GC3I1; ASP.NET_SessionId=gg10lllh0rxed1sdj1shrfn2; .AspNet.ApplicationCookie=nQ2_pQwEHY7ZnO7KgKQxwlG0Ii0k73sJ9CiswNVgZ58s5yaNd07MQCWyg2PpDgvqqwHrzEY7Epm2N1eIg4j1XmbnfD9cJxhCDBt1CiArcW3UzU_SeUU-WFTDT1rXqjO4um71lS-65HLi6kWJaIpHmMqVaqxjaS4SK538EpT_DQ_rsk7RwVoKxrtBOcC7PRbUgr5j1SXq_TuOIO7Mce8KsTY-4k2m-WWcgIt1vYfLx1wJk4T4m-FHKeqKHYl5IZP8bU_MmdmAL9bP4vbosqtne9_guB3kHRGmGKHyN36eYxB6--j9ld9_HrfcnvPOaVinDBPoMNg16lOv2SPyb_k59l-dQ6vNY0M_69qxwvwMvTu_cMNbi7flm6uMdsQIHtZpC3X33FGqCnbKoD9TyGeCSYhJFMWWkr-PmtZIZpSQ-nsiQO4a; culture=en&#xD;&#xA;Host: localhost:49485&#xD;&#xA;Referer: http://localhost:49485/Expenses/Record&#xD;&#xA;User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36&#xD;&#xA;Upgrade-Insecure-Requests: 1&#xD;&#xA;" />
+    </item>
+    <item name="APPL_MD_PATH">
+      <value string="/LM/W3SVC/4/ROOT" />
+    </item>
+    <item name="APPL_PHYSICAL_PATH">
+      <value string="E:\Work\SBS\HRSBS2 (Dev)\HR\" />
+    </item>
+    <item name="AUTH_TYPE">
+      <value string="ApplicationCookie" />
+    </item>
+    <item name="AUTH_USER">
+      <value string="nt.proj@smartdevsolution.com" />
+    </item>
+    <item name="AUTH_PASSWORD">
+      <value string="*****" />
+    </item>
+    <item name="LOGON_USER">
+      <value string="nt.proj@smartdevsolution.com" />
+    </item>
+    <item name="REMOTE_USER">
+      <value string="nt.proj@smartdevsolution.com" />
+    </item>
+    <item name="CERT_COOKIE">
+      <value string="" />
+    </item>
+    <item name="CERT_FLAGS">
+      <value string="" />
+    </item>
+    <item name="CERT_ISSUER">
+      <value string="" />
+    </item>
+    <item name="CERT_KEYSIZE">
+      <value string="" />
+    </item>
+    <item name="CERT_SECRETKEYSIZE">
+      <value string="" />
+    </item>
+    <item name="CERT_SERIALNUMBER">
+      <value string="" />
+    </item>
+    <item name="CERT_SERVER_ISSUER">
+      <value string="" />
+    </item>
+    <item name="CERT_SERVER_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="CERT_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="CONTENT_LENGTH">
+      <value string="0" />
+    </item>
+    <item name="CONTENT_TYPE">
+      <value string="" />
+    </item>
+    <item name="GATEWAY_INTERFACE">
+      <value string="CGI/1.1" />
+    </item>
+    <item name="HTTPS">
+      <value string="off" />
+    </item>
+    <item name="HTTPS_KEYSIZE">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SECRETKEYSIZE">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SERVER_ISSUER">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SERVER_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="INSTANCE_ID">
+      <value string="4" />
+    </item>
+    <item name="INSTANCE_META_PATH">
+      <value string="/LM/W3SVC/4" />
+    </item>
+    <item name="LOCAL_ADDR">
+      <value string="::1" />
+    </item>
+    <item name="PATH_INFO">
+      <value string="/Expenses/ExpenseSmartDevReport" />
+    </item>
+    <item name="PATH_TRANSLATED">
+      <value string="E:\Work\SBS\HRSBS2 (Dev)\HR\Expenses\ExpenseSmartDevReport" />
+    </item>
+    <item name="QUERY_STRING">
+      <value string="eID=tDVA8alPqjpiVub8w%2BaVWg%3D%3D&amp;operation=nc0ia%2BZfRLLByYNbh8smQw%3D%3D" />
+    </item>
+    <item name="REMOTE_ADDR">
+      <value string="::1" />
+    </item>
+    <item name="REMOTE_HOST">
+      <value string="::1" />
+    </item>
+    <item name="REMOTE_PORT">
+      <value string="60727" />
+    </item>
+    <item name="REQUEST_METHOD">
+      <value string="GET" />
+    </item>
+    <item name="SCRIPT_NAME">
+      <value string="/Expenses/ExpenseSmartDevReport" />
+    </item>
+    <item name="SERVER_NAME">
+      <value string="localhost" />
+    </item>
+    <item name="SERVER_PORT">
+      <value string="49485" />
+    </item>
+    <item name="SERVER_PORT_SECURE">
+      <value string="0" />
+    </item>
+    <item name="SERVER_PROTOCOL">
+      <value string="HTTP/1.1" />
+    </item>
+    <item name="SERVER_SOFTWARE">
+      <value string="Microsoft-IIS/10.0" />
+    </item>
+    <item name="URL">
+      <value string="/Expenses/ExpenseSmartDevReport" />
+    </item>
+    <item name="HTTP_CONNECTION">
+      <value string="keep-alive" />
+    </item>
+    <item name="HTTP_ACCEPT">
+      <value string="text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8" />
+    </item>
+    <item name="HTTP_ACCEPT_ENCODING">
+      <value string="gzip, deflate, sdch" />
+    </item>
+    <item name="HTTP_ACCEPT_LANGUAGE">
+      <value string="th,en;q=0.8" />
+    </item>
+    <item name="HTTP_COOKIE">
+      <value string="_ga=GA1.1.1354168062.1464781061; __RequestVerificationToken=7nvLqEc5zWLohKAxo8mopNJD0ScWKCb4HN4DdNDsBu3RiGnwxhxpiDu2O_HLN-9wxk4HNohCJlMaP5iyMqXHPw3GC3I1; ASP.NET_SessionId=gg10lllh0rxed1sdj1shrfn2; .AspNet.ApplicationCookie=nQ2_pQwEHY7ZnO7KgKQxwlG0Ii0k73sJ9CiswNVgZ58s5yaNd07MQCWyg2PpDgvqqwHrzEY7Epm2N1eIg4j1XmbnfD9cJxhCDBt1CiArcW3UzU_SeUU-WFTDT1rXqjO4um71lS-65HLi6kWJaIpHmMqVaqxjaS4SK538EpT_DQ_rsk7RwVoKxrtBOcC7PRbUgr5j1SXq_TuOIO7Mce8KsTY-4k2m-WWcgIt1vYfLx1wJk4T4m-FHKeqKHYl5IZP8bU_MmdmAL9bP4vbosqtne9_guB3kHRGmGKHyN36eYxB6--j9ld9_HrfcnvPOaVinDBPoMNg16lOv2SPyb_k59l-dQ6vNY0M_69qxwvwMvTu_cMNbi7flm6uMdsQIHtZpC3X33FGqCnbKoD9TyGeCSYhJFMWWkr-PmtZIZpSQ-nsiQO4a; culture=en" />
+    </item>
+    <item name="HTTP_HOST">
+      <value string="localhost:49485" />
+    </item>
+    <item name="HTTP_REFERER">
+      <value string="http://localhost:49485/Expenses/Record" />
+    </item>
+    <item name="HTTP_USER_AGENT">
+      <value string="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36" />
+    </item>
+    <item name="HTTP_UPGRADE_INSECURE_REQUESTS">
+      <value string="1" />
+    </item>
+  </serverVariables>
+  <queryString>
+    <item name="eID">
+      <value string="tDVA8alPqjpiVub8w+aVWg==" />
+    </item>
+    <item name="operation">
+      <value string="nc0ia+ZfRLLByYNbh8smQw==" />
+    </item>
+  </queryString>
+  <cookies>
+    <item name="_ga">
+      <value string="GA1.1.1354168062.1464781061" />
+    </item>
+    <item name="__RequestVerificationToken">
+      <value string="7nvLqEc5zWLohKAxo8mopNJD0ScWKCb4HN4DdNDsBu3RiGnwxhxpiDu2O_HLN-9wxk4HNohCJlMaP5iyMqXHPw3GC3I1" />
+    </item>
+    <item name="ASP.NET_SessionId">
+      <value string="gg10lllh0rxed1sdj1shrfn2" />
+    </item>
+    <item name=".AspNet.ApplicationCookie">
+      <value string="nQ2_pQwEHY7ZnO7KgKQxwlG0Ii0k73sJ9CiswNVgZ58s5yaNd07MQCWyg2PpDgvqqwHrzEY7Epm2N1eIg4j1XmbnfD9cJxhCDBt1CiArcW3UzU_SeUU-WFTDT1rXqjO4um71lS-65HLi6kWJaIpHmMqVaqxjaS4SK538EpT_DQ_rsk7RwVoKxrtBOcC7PRbUgr5j1SXq_TuOIO7Mce8KsTY-4k2m-WWcgIt1vYfLx1wJk4T4m-FHKeqKHYl5IZP8bU_MmdmAL9bP4vbosqtne9_guB3kHRGmGKHyN36eYxB6--j9ld9_HrfcnvPOaVinDBPoMNg16lOv2SPyb_k59l-dQ6vNY0M_69qxwvwMvTu_cMNbi7flm6uMdsQIHtZpC3X33FGqCnbKoD9TyGeCSYhJFMWWkr-PmtZIZpSQ-nsiQO4a" />
+    </item>
+    <item name="culture">
+      <value string="en" />
+      <value string="en" />
+    </item>
+  </cookies>
+</error>

@@ -1,0 +1,69 @@
+﻿@model  HR.Models.LeaveConfigExtraViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using HR.Common;
+@{
+
+    var userlogin = UserSession.getUser(Request.RequestContext.HttpContext);
+    var i = Model.Index;
+
+}
+
+<script type="text/javascript">
+    $(function () {
+        $(".chosen-select").chosen({ disable_search_threshold: 10 });
+    });
+</script>
+
+<td>
+    @Html.Hidden("Extra_Rows[" + i + "].Leave_Config_ID", Model.Leave_Config_ID)
+    @Html.Hidden("Extra_Rows[" + i + "].Row_Type", RowType.ADD)
+    <select class="chosen-select chosen-transparent form-control" id="Extra_Rows_@(i)__Employee_Profile_ID" name="Extra_Rows[@i].Employee_Profile_ID">
+        @foreach (var erow in Model.empList)
+        {
+            if (Model.Employee_Profile_ID == NumUtil.ParseInteger(erow.Value))
+            {
+                <option value="@(erow.Value != null ? erow.Value : "0")" selected>@erow.Text</option>
+            }
+            else
+            {
+                <option value="@(erow.Value != null ? erow.Value : "0")">@erow.Text</option>
+            }
+        }
+    </select>
+    <div class="validation-error">
+        @Html.ValidationMessage("Extra_Rows[" + i + "].Employee_Profile_ID")
+    </div>
+</td>
+<td>
+    <select class="chosen-select chosen-transparent form-control" id="Extra_Rows_@(i)__Adjustment_Type" name="Extra_Rows[@i].Adjustment_Type">
+        @foreach (var arow in Model.adjustmentTypeList)
+        {
+            if (Model.Adjustment_Type == arow.Value)
+            {
+                <option value="@(arow.Value != null ? arow.Value : "0")" selected>@arow.Text</option>
+            }
+            else
+            {
+                <option value="@(arow.Value != null ? arow.Value : "0")">@arow.Text</option>
+            }
+        }
+    </select>
+    <div class="validation-error">
+        @Html.ValidationMessage("Extra_Rows[" + i + "].Adjustment_Type")
+    </div>
+</td>
+<td class="text-right">
+    <input type="text" class="form-control text-right" id="Extra_Rows_@(i)__No_Of_Days" name="Extra_Rows[@i].No_Of_Days" value="@Model.No_Of_Days">
+    <div class="validation-error">
+        @Html.ValidationMessage("Extra_Rows[" + i + "].No_Of_Days")
+    </div>
+</td>
+<td class="actions text-left" style="cursor:pointer">
+    <a data-toggle="modal" onclick="return DeleteExtra('exrow-@i', @i);">
+        <i class="fa fa-times-circle-o fa-2x"></i>
+    </a>
+</td>
+
+

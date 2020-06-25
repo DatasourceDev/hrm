@@ -1,0 +1,246 @@
+﻿@model HR.Models.PayslipViewModels
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+
+@{
+    ViewBag.Title = Resource.Payslip;
+}
+
+
+<div class="pageheader">
+    <h2>@Resource.Payslip<span></span></h2>
+    <div class="breadcrumbs">
+        <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li class="active">@Resource.Payslip</li>
+        </ol>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        InitDatepicker();
+        InitDatatable('moduleDataTable', null, null);
+
+        var addRowLink = '<div class="apply-row">';
+        addRowLink += '<button class="btn btn-default" type="button" id="btnSubmitExportAll" style="padding-top:8px;padding-bottom:7px;" >@Resource.Print_All</button>';
+        addRowLink += '&nbsp';
+        addRowLink += '<button class="btn btn-default" type="submit" id="btnSubmitDownload" name="tabAction" value="zip" style="padding-top:8px;padding-bottom:7px;" >@Resource.Download</button>';
+        addRowLink += '</div>';
+        $('#moduleDataTable_wrapper').append(addRowLink);
+        $(".chosen-select").chosen({ disable_search_threshold: 10 });
+
+        $("#btnSubmitDownload").click(function () {
+
+            var checked = $('input[name^="PRM_Ids"]').is(':checked');
+            if (checked == 'True' || checked == 'true' || checked == true) {
+                theForm.action = '@Url.Action("PayrollPrintSlip", "Payroll")';
+                theForm.method = 'get';
+                theForm.target = '_blank';
+                theForm.submit();
+            } else {
+                return false;
+            }
+
+        });
+
+
+        $("#btnSubmitExportAll").click(function () {
+
+            var checked = $('input[name^="PRM_Ids"]').is(':checked');
+            if (checked == 'True' || checked == 'true' || checked == true) {
+                theForm.action = '@Url.Action("PayrollPrintSlip", "Payroll")';
+                theForm.method = 'get';
+                theForm.target = '_blank';
+                theForm.submit();
+            }
+        });
+
+
+        $("#btnFillter").click(function () {
+            theForm.action = '@Url.Action("Payslip", "Payroll")';
+            theForm.method = 'get';
+            theForm.target = '';
+            theForm.submit();
+        });
+
+    });
+
+
+
+</script>
+
+<div class="main">
+    <div class="row">
+        <div class="col-md-12">
+            
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+
+                if (Model.result.Code < 0)
+                {
+                    <div class="alert alert-red">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                    </div>
+                }
+                else if (Model.result.Code > 0)
+                {
+                    <div class="alert alert-success">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                    </div>
+                }
+            }
+
+            @using (Html.BeginForm("Payslip", "Payroll", FormMethod.Get,
+                new { @class = "form-horizontal", role = "form", id = "theForm", enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <section class="tile color transparent-black filter" id="secfilter">
+                    <div class="tile-header transparent">
+                        <h1 onclick="CollapseHeader(null)" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                        <div class="controls">
+                            <a href="#" class="minimize filter" id="btncollapse"><i class="fa fa-search  color-white"></i></a>
+                        </div>
+                    </div>
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <label for="sDepartment" class="control-label">@Resource.Process_Month</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <select class="chosen-select chosen-transparent form-control" id="Search_Month" name="Search_Month">
+                                            @if (Model.processDateList != null)
+                                            {
+                                                foreach (var row in Model.processDateList)
+                                                {
+                                                    if (Model.Search_Month == NumUtil.ParseInteger(row.Value))
+                                                    {
+                                                        <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                        <div class="validation-error">
+                                            @Html.ValidationMessageFor(m => m.Search_Month)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <label for="sYear" class="control-label">@Resource.Process_Year</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-4">
+                                        <select class="chosen-select chosen-transparent form-control" id="Search_Year" name="Search_Year">
+                                            @if (Model.YearList != null)
+                                            {
+                                                foreach (var row in Model.YearList)
+                                                {
+                                                    if (Model.Search_Year == row)
+                                                    {
+                                                        <option value="@row" selected>@row</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@row">@row</option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                        <div class="validation-error">
+                                            @Html.ValidationMessageFor(m => m.Search_Year)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <button type="button" id="btnFillter" class="btn btn-default ">@Resource.Filter</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="tile color transparent-black">
+                    
+                    <div class="tile-header transparent">
+                        <h1><strong>@Resource.Payslip</strong></h1>
+                        <div class="controls">
+                            <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="tile-body ">
+                        <div class="table-responsive">
+                            <table class="table table-datatable table-custom" id="moduleDataTable">
+                                <thead>
+                                    <tr>
+                                        <th class="no-sort" style="width: 40px;">
+                                            <div class="checkbox check-transparent">
+                                                <input type="checkbox" value="1" id="chkall">
+                                                <label for="chkall"></label>
+                                            </div>
+                                        </th>
+                                        <th class="sort-numeric">@Resource.Process_Year</th>
+                                        <th class="sort-alpha">@Resource.Process_Month</th>
+                                        <th class="sort-alpha">@Resource.Process_Date</th>
+                                        <th class="no-sort" width="110px">@Resource.Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{var i = 0;}
+
+                                    @foreach (var row in Model.prmlist)
+                                    {
+                                        if (row.Process_Status == PayrollStatus.Comfirm)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="checkbox check-transparent">
+                                                        <input type="checkbox" value="@row.PRM_ID" name="PRM_Ids" id="PRM_Ids[@i]">
+                                                        <label for="PRM_Ids[@i]"></label>
+                                                    </div>
+                                                </td>
+                                                <td>@row.Process_Year</td>
+                                                <td>@DateUtil.GetFullMonth(row.Process_Month)</td>
+                                                <td>@DateUtil.ToDisplayDate(row.Process_Date_From) - @DateUtil.ToDisplayDate(row.Process_Date_To)</td>
+                                                <td>
+                                                    @if (row.PRM_ID != null)
+                                                    {
+                                                        <a target="_blank" href="@Url.Action("PayrollPrintSlip", "Payroll", new { prm_id = EncryptUtil.Encrypt(row.PRM_ID) })"><i class="fa fa-print  fa-2x"></i></a>
+                                                    }
+                                                </td>
+                                            </tr>
+                                                    i++;
+                                        }
+
+
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                   
+                </section>
+            }
+        </div>
+    </div>
+</div>

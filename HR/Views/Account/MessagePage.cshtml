@@ -1,0 +1,32 @@
+﻿@model HR.Models.MessagePageViewModel
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+    ViewBag.Title = Resource.Message;
+}
+
+<div class="main">
+    <div class="row">
+        <div class="col-md-12">        
+            <section class="tile transparent">
+                <div class="jumbotron bg-transparent-black-3">
+                    <div class="container text-center">
+                        @if (Model.Code > 0)
+                        {
+                            <p><i class="fa fa-check-circle color-green"></i> @Model.Field @Model.Msg</p>
+                        }
+                        else
+                        {
+                            <p><i class="fa fa-times-circle color-red"></i> @Model.Field @Model.Msg</p>
+                        }
+                        <p>
+                            <a class="btn btn-greensea btn-large" href="@Url.Action("Index", "Home")" style="width:180px"><i class="fa fa-home"></i> @Resource.Return_To_Home</a>
+                            <a class="btn btn-red btn-large" href="@Url.Action("Logout", "Account")" style="width:180px"><i class="fa fa-user-times "></i> @Resource.Log_Out</a>
+                        </p>
+                    </div>
+                </div>
+            </section>    
+        </div>
+    </div>
+</div>
+

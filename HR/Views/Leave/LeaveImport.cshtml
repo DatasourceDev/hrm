@@ -1,0 +1,249 @@
+﻿@model  HR.Models.ImportLeaveViewModels
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+
+@{
+    ViewBag.Title = @Resource.Import_Leave;
+}
+
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+    <script type="text/javascript">
+        //initialize file upload button function
+        $(document)
+          .on('change', '.btn-file :file', function () {
+              var input = $(this),
+              numFiles = input.get(0).files ? input.get(0).files.length : 1,
+              label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+              input.trigger('fileselect', [numFiles, label]);
+          });
+
+        $(function () {
+            InitDatatable('leavedocDataTable', null, null, 1, 'asc');
+            //initialize file upload button
+            $('.btn-file :file').on('fileselect', function (event, numFiles, label) {
+
+                var sizeIsnull = $('#uploadfile')[0].files[0];
+                if (sizeIsnull != undefined) {
+                    var fsize = $('#uploadfile')[0].files[0].size;
+                    if (fsize > 6097150) {
+                        alert('@Resource.Message_Please_Upload_File_Size_Is_Less_Than_5_MB');
+                        $('#uploadfile').after($('#uploadfile').clone(true)).remove();
+                        $('#uploadfile').parents('.input-group').find(':text').val('');
+                        return false;
+                    }
+
+                    var input = $(this).parents('.input-group').find(':text'),
+                        log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+                    console.log(log);
+
+                    if (input.length) {
+                        input.val(log);
+                    } else {
+                        if (log) alert(log);
+                    }
+                }
+            });
+
+
+            $("#btnUpload").click(function () {
+                var filename = $('#uploadfile').val();
+                var ext = '';
+                if (filename != null) {
+                    var k = filename.lastIndexOf('.');
+                    if (k >= 0) {
+                        ext = filename.substring(k + 1).toLowerCase();
+                    }
+                }
+                if (ext != 'xls' && ext != 'xlsx') {
+                    alert('@Resource.Message_Please_Please_Upload_File_xls');
+                    return;
+                }
+                theForm.action = '@Url.Action("LeaveImport", "Leave")';
+                theForm.method = 'post';
+                theForm.submit();
+            });
+        })
+</script>
+
+    <div class="pageheader">
+        <h2>@Resource.Import_Leave</h2>
+        <div class="breadcrumbs">
+            <ol class="breadcrumb">
+                <li>@Resource.You_Are_Here</li>
+                <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+                <li><a href="@Url.Action("Record", "Leave")">@Resource.Leave_Record</a></li>
+                <li class="active">@Resource.Import_Leave</li>
+            </ol>
+        </div>
+    </div>
+    using (Html.BeginForm("LeaveImport", "Leave", FormMethod.Post, new { @class = "form-horizontal validatable", role = "form", id = "theForm", enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="main">
+            <div class="row">
+
+                <div class="col-md-12">
+                    @if (Model.result != null && Model.result.Code != 0)
+                    {
+                        if (Model.result.Code < 0)
+                        {
+                            <div class="alert alert-red">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                        else if (Model.result.Code > 0)
+                        {
+                            <div class="alert alert-success">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                    }
+
+                    <section class="tile color transparent-black filter" id="secfilter">
+                        <div class="tile-header transparent">
+                            <h1 onclick="CollapseHeader(null)" style="cursor:pointer"><strong>@Resource.Import_Leave</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="uploadfile" class="control-label">@Resource.Upload_File</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <div class="input-group">
+                                                <span class="input-group-btn">
+                                                    <span class="btn btn-primary btn-file">
+                                                        <i class="fa fa-upload"></i><input id="uploadfile" type="file" name="file">
+                                                    </span>
+                                                </span>
+                                                <input type="text" class="form-control" ="" readonly>
+                                            </div>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessage("Import_Leave")
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12" style="height :28px;">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <button type="button" class="btn btn-default" id="btnUpload">@Resource.Validate_File</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="tile color transparent-black">
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.Leave_Info</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+                            <div class="validation-error">
+                                @Html.ValidationMessageFor(m => m.leaveAppDoc)
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-datatable table-custom" id="leavedocDataTable">
+                                    <thead>
+                                        <tr>
+                                            <th class="no-sort" style="width: 20px;"></th>
+                                            <th class="sort-numeric">@Resource.SN</th>
+                                            <th class="sort-alpha">@Resource.Employee_No</th>
+                                            <th class="sort-alpha">@Resource.Leave_Type</th>
+                                            <th class="sort-alpha">@Resource.Start_Date</th>
+                                            <th class="sort-alpha">@Resource.End_Date</th>
+                                            <th class="sort-alpha">@Resource.Days_Taken</th>
+                                            <th class="sort-alpha">@Resource.Note</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.leaveAppDoc != null)
+                                        {
+                                            for (int i = 0; i < Model.leaveAppDoc.Length; i++)
+                                            {
+                                                var row = Model.leaveAppDoc[i];
+                                                var colour = "color:#FFFFFF;";
+                                                if (!row.Validate)
+                                                {
+                                                    colour = "color:red;";
+                                                }
+                                                <tr title="@row.ErrMsg" style="@colour">
+                                                    <td>
+                                                        @if (!row.Validate)
+                                                        {
+                                                            <a><i class="fa fa-ban fa-2x color-white"></i></a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <a><i class="fa fa-check fa-2x color-green"></i></a>
+                                                        }
+                                                        <input type="hidden" name="leaveAppDoc[@i].Company_ID" value="@row.Company_ID">
+                                                        <input type="hidden" name="leaveAppDoc[@i].Validate" value="@row.Validate.ToString()">
+                                                        <input type="hidden" name="leaveAppDoc[@i].ErrMsg" value="@row.ErrMsg">
+                                                        <input type="hidden" name="leaveAppDoc[@i].Employee_Profile_ID" value="@row.Employee_Profile_ID">
+                                                        <input type="hidden" name="leaveAppDoc[@i].Employee_No" value="@row.Employee_No">
+                                                        <input type="hidden" name="leaveAppDoc[@i].Leave_Config_ID" value="@row.Leave_Config_ID">
+                                                        <input type="hidden" name="leaveAppDoc[@i].Leave_Config_Name" value="@row.Leave_Config_Name">
+                                                        <input type="hidden" name="leaveAppDoc[@i].Start_Date" value="@row.Start_Date">
+                                                        <input type="hidden" name="leaveAppDoc[@i].End_Date" value="@row.End_Date">
+                                                        <input type="hidden" name="leaveAppDoc[@i].Days_Taken" value="@row.Days_Taken">
+                                                        <input type="hidden" name="leaveAppDoc[@i].Remark" value="@row.Remark">
+                                                    </td>
+                                                    <td style="width:20px">@(i + 1)</td>
+                                                    <td>@row.Employee_No</td>
+                                                    <td>@row.Leave_Config_Name</td>
+                                                    <td>@row.Start_Date</td>
+                                                    <td>@row.End_Date</td>
+                                                    <td>@row.Days_Taken.ToString("n2")</td>
+                                                    <td>@row.Remark</td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- tile widget -->
+                            <!-- /tile widget -->
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <section class="tile color transparent-white">
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <input type="hidden" name="validated_Main" value="@Model.validated_Main.ToString()">
+                                    @if (Model.validated_Main && Model.leaveAppDoc != null && Model.leaveAppDoc.Length > 0)
+                                    {
+                                        <button class="btn btn-primary" type="submit" name="pageAction" value="import">@Resource.Import</button>
+                                    }
+                                    <a href="@Url.Action("Record", "Leave")" class="btn btn-default">@Resource.Back</a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    }
+}

@@ -1,0 +1,427 @@
+﻿@model Authentication.Models.JobCostInfoViewModel
+@using Authentication.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSModel.Common;
+@using Authentication.Models;
+@using SBSResourceAPI;
+
+@{
+   ViewBag.Title = Resource.Job_Cost_Info;
+}
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+   <script type="text/javascript">
+      $(function () {
+         InitDatepicker();
+         Show_Hide_Add_Btn();
+      });
+   </script>
+   <div class="pageheader">
+      <h2>@Resource.Job_Cost_Info<span></span></h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li><a href="@Url.Action("JobCost", "JobCost")">@Resource.Job_Cost</a></li>
+            <li class="active">@Resource.Job_Cost_Info</li>
+         </ol>
+      </div>
+   </div>
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+            @using (Html.BeginForm("JobCostInfo", "JobCost", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+            {
+               @Html.AntiForgeryToken()
+               <section class="tile color transparent-black">
+
+                  <div class="tile-header transparent">
+                     <h1><strong>@Resource.Job_Cost_Info</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                     </div>
+                  </div>
+                  <div class="tile-body">
+                     <input type="hidden" name="Company_ID" value="@Model.Company_ID" />
+                     <input type="hidden" name="operation" value="@Model.operation" />
+                     <input type="hidden" name="Job_Cost_ID" value="@Model.Job_Cost_ID" />
+                     <input type="hidden" name="Record_Status" value="@Model.Record_Status" />
+
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Indent_No" class="control-label">@Resource.Indent_No</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Indent_No" id="Indent_No" value="@Model.Indent_No">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Indent_No)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Indent_Name" class="control-label">@Resource.Indent_Name</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Indent_Name" id="Indent_Name" value="@Model.Indent_Name">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Indent_Name)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Customer_ID" class="control-label">@Resource.Customer</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Customer_ID" name="Customer_ID">
+                                    @if (Model.cCustomerlst != null)
+                                    {
+                                       foreach (var row in Model.cCustomerlst)
+                                       {
+                                          <option value="@row.Value" @(Model.Customer_ID == NumUtil.ParseInteger(row.Value) ? "selected" : "")>@row.Text</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Customer_ID)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Date_Of_Date" class="control-label">@Resource.Date_Of_Date</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control input-datepicker" id="Date_Of_Date" name="Date_Of_Date" value="@Model.Date_Of_Date">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Date_Of_Date, "", new { id = "Date_Of_Date_Err" })
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Sell_Price" class="control-label">@Resource.Sell_Price</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Sell_Price" id="Sell_Price" value="@Model.Sell_Price" onblur="ValidateDecimal('Sell_Price', '@Resource.Sell_Price', false)">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Sell_Price, "", new { id = "Sell_Price_Err" })
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Delivery_Date" class="control-label">@Resource.Delivery_Date</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control input-datepicker" id="Delivery_Date" name="Delivery_Date" value="@Model.Delivery_Date">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Delivery_Date, "", new { id = "Delivery_Date_Err" })
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Term_Of_Deliver" class="control-label">@Resource.Term_Of_Deliver</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Term_Of_Deliver" id="Term_Of_Deliver" value="@Model.Term_Of_Deliver">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Term_Of_Deliver, "", new { id = "Term_Of_Deliver_Err" })
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Warranty_Term" class="control-label">@Resource.Warranty_Term (@Resource.Month)</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Warranty_Term" id="Warranty_Term" value="@Model.Warranty_Term">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Warranty_Term, "", new { id = "Warranty_Term_Err" })
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Costing" class="control-label">@Resource.Costing</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control" name="Costing" id="Costing" value="@Model.Costing" readonly />
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Costing, "", new { id = "Costing_Err" })
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Supervisor" class="control-label">@Resource.Supervisor</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Supervisor" name="Supervisor">
+                                    @if (Model.cSupervisorlst != null)
+                                    {
+                                       foreach (var row in Model.cSupervisorlst)
+                                       {
+                                          <option value="@row.Value" @(Model.Supervisor == NumUtil.ParseInteger(row.Value) ? "selected" : "")>@row.Text</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Supervisor)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </section>
+
+               <script type="text/javascript">
+                  function AddPayment_Onclick() {
+                     var ckrowcount = $('#ptDataTable > tbody >tr:visible').length;
+                     var rowcount = $('#ptDataTable > tbody >tr').length;
+                     var index = rowcount;
+                    
+                        var data = { pIndex: rowcount };
+                        ShowMask();
+                        $.ajax({
+                           url: '@Url.Action("AddNewPaymentTerm", "JobCost")',
+                           data: data,
+                           contentType: "application/json; charset=utf-8",
+                           success: function (data) {
+                              var str = '<tr  id="lrow-' + rowcount + '">';
+                              str = str + data + '</tr>';
+                              $('#ptDataTable > tbody').append(str);
+                              CloseMask();
+                           }
+                        });
+                     
+                  }
+
+                  function DeletePaymentTerm_Onclick(rowid, index) {
+                     if (confirm('@Resource.Confirm_Delete_Msg')) {
+                        $('#JobCostPaymentTerm_Rows_' + index + '__Row_Type').val('@RowType.DELETE');
+                        $('#' + rowid).hide();
+
+                        Show_Hide_Add_Btn();
+                     }
+                  }
+
+                  function Show_Hide_Add_Btn() {
+
+                  }
+               </script>
+               <section class="tile color transparent-black">
+                  <div class="tile-header transparent">
+                     <h1><strong>@Resource.Payment_Term</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                     </div>
+                  </div>
+                  <div class="tile-body ">
+                     <div class="row">
+                        <div class="col-md-12 text-center" id="AddPayment">
+                           <a class="btn btn-greensea  btn-sm add-row" onclick="AddPayment_Onclick()">@Resource.Add_An_Item</a>
+                        </div>
+                     </div>
+                     <div class="table-responsive">
+                        <table class="table table-datatable table-custom" id="ptDataTable">
+                           <thead>
+                              <tr>
+                                 <th class="sort-alpha">@Resource.Payment</th>
+                                 <th class="sort-alpha">@Resource.Payment_Type</th>
+                                 <th class="sort-alpha">@Resource.Invoice_No</th>
+                                 <th class="sort-alpha">@Resource.Invoice_Date</th>
+                                 <th class="sort-alpha">@Resource.Note</th>
+                                 <th class="sort-amount">@Resource.Actual_Price</th>
+                                 <th class="no-sort" style="width:110px;">@Resource.Action</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              @if (Model.JobCostPaymentTerm_Rows != null)
+                              {
+                                 var i = 0;
+                                 foreach (var row in Model.JobCostPaymentTerm_Rows)
+                                 {
+                                    if (row.Row_Type != RowType.DELETE)
+                                    {
+                                       row.Index = i;
+                                       row.cPaymentPeriodlst = Model.cPaymentPeriodlst;
+                                       <tr id="lrow-@i">
+                                          @{ Html.RenderPartial("_JobCostInfoRow", row);}
+                                       </tr>
+                                           i++;
+                                    }
+
+                                 }
+                              }
+                           </tbody>
+                        </table>
+                     </div>
+                  </div>
+               </section>
+               <script type="text/javascript">
+                  function AddBudget_Onclick() {
+                     var ckrowcount = $('#bdDataTable > tbody >tr:visible').length;
+                     var rowcount = $('#bdDataTable > tbody >tr').length;
+                     var index = rowcount;
+                     
+                        var data = { pIndex: rowcount };
+                        ShowMask();
+                        $.ajax({
+                           url: '@Url.Action("AddNewBudget", "JobCost")',
+                           data: data,
+                           contentType: "application/json; charset=utf-8",
+                           success: function (data) {
+                              var str = '<tr  id="bgrow-' + rowcount + '">';
+                              str = str + data + '</tr>';
+                              $('#bdDataTable > tbody').append(str);
+                              CloseMask();
+                           }
+                        });
+                     
+                  }
+
+                  function DeleteBudget_Onclick(rowid, index) {
+                     if (confirm('@Resource.Confirm_Delete_Msg')) {
+                        $('#JobCostExBudget_Rows_' + index + '__Row_Type').val('@RowType.DELETE');
+                        $('#' + rowid).hide();
+                     }
+                  }
+
+               </script>
+               <section class="tile color transparent-black">
+                  <div class="tile-header transparent">
+                     <h1><strong>@Resource.Budget</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                     </div>
+                  </div>
+                  <div class="tile-body ">
+                     <div class="row">
+                        <div class="col-md-12 text-center" id="AddPayment">
+                           <a class="btn btn-greensea  btn-sm add-row" onclick="AddBudget_Onclick()">@Resource.Add_An_Item</a>
+                        </div>
+                     </div>
+                     <div class="table-responsive">
+                        <table class="table table-datatable table-custom" id="bdDataTable">
+                           <thead>
+                              <tr>
+                                 <th class="sort-alpha">@Resource.Expenses_Type</th>
+                                 <th class="sort-alpha">@Resource.Budget</th>
+                                 <th class="no-sort" style="width:110px;">@Resource.Action</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              @if (Model.JobCostExBudget_Rows != null)
+                              {
+                                 var i = 0;
+                                 foreach (var row in Model.JobCostExBudget_Rows)
+                                 {
+                                    if (row.Row_Type != RowType.DELETE)
+                                    {
+                                       row.Index = i;
+                                       row.cExpensesTypelist = Model.cExpensesTypelist;
+                                       <tr id="bgrow-@i">
+                                          @{ Html.RenderPartial("_JobCostBudgetRow", row);}
+                                       </tr>
+                                           i++;
+                                    }
+
+                                 }
+                              }
+                           </tbody>
+                        </table>
+                     </div>
+                  </div>
+               </section>
+
+               <div class="row">
+                  <div class="col-md-12">
+                     <section class="tile color transparent-white" style="padding-left:15px;">
+                        <div class="tile-body">
+                           <div class="row">
+                              <div class="col-md-12 text-left">
+                                 @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U) | Model.rights.Contains(UserSession.RIGHT_C))
+                                 {
+                                    <button type="submit" class="btn btn-primary">@Resource.Save</button>
+                                 }
+                                 <a href="@Url.Action("JobCost", "JobCost")" class="btn btn-default">@Resource.Back</a>
+                              </div>
+                           </div>
+                        </div>
+                     </section>
+                  </div>
+               </div>
+            }
+         </div>
+      </div>
+   </div>
+}

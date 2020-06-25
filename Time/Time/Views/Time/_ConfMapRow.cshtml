@@ -1,0 +1,54 @@
+﻿@model  Time.Models.TimeConfMapViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using Time.Models;
+@using SBSResourceAPI;
+@{
+    int i = Model.Index;
+}
+<td>
+    <script type="text/javascript">
+        $(function () {
+            $(".chosen-select").chosen({ disable_search_threshold: 10 });
+        });
+    </script>
+    @Html.Hidden("Map_Rows[" + i + "].Device_ID", Model.Device_ID)
+    @Html.Hidden("Map_Rows[" + i + "].Index", Model.Index)
+    @Html.Hidden("Map_Rows[" + i + "].Employee_Map_ID", Model.Employee_Map_ID)
+    @Html.Hidden("Map_Rows[" + i + "].Row_Type", Model.Row_Type)
+    <input type="hidden" id="Map_Rows_@(i)__Device_Employee_Pin" name="Map_Rows[@i].Device_Employee_Pin" value="@Model.Device_Employee_Pin">
+    <input type="text" class="form-control" id="Map_Rows_@(i)__Device_Employee_Name" name="Map_Rows[@i].Device_Employee_Name" value="@Model.Device_Employee_Name" readonly>
+    <div class="validation-error">
+        @Html.ValidationMessage("Map_Rows[" + i + "].Device_Employee_Pin")
+    </div>
+</td>
+<td>
+    <select class="chosen-select chosen-transparent form-control" id="Map_Rows_@(i)__Employee_Profile_ID" name="Map_Rows[@i].Employee_Profile_ID" onchange="Employee_Onchange('@i')">
+        @if (Model.cEmplist != null)
+        {
+            foreach (var arow in Model.cEmplist)
+            {
+                <option value="@arow.Value" @(Model.Employee_Profile_ID == NumUtil.ParseInteger(arow.Value) ? "selected" : "")>@arow.Text</option>
+                if (Model.Employee_Profile_ID == NumUtil.ParseInteger(arow.Value))
+                {
+                    Model.Employee_Email = arow.Desc;
+                }
+            }
+        }
+    </select>
+    <div class="validation-error">
+        @Html.ValidationMessage("Map_Rows[" + i + "].Employee_Profile_ID")
+    </div>
+</td>
+<td>
+    <input type="text" class="form-control" id="Map_Rows_@(i)__Employee_Email" name="Map_Rows[@i].Employee_Email" value="@Model.Employee_Email" readonly>
+    <div class="validation-error">
+        @Html.ValidationMessage("Map_Rows[" + i + "].Employee_Email")
+    </div>
+</td>
+@*<td class="actions">
+    <a href="#" onclick="return DeleteMap('itemRow-@i', @i);">
+        <i class="fa fa-times-circle-o fa-2x"></i>
+    </a>
+</td>*@
+

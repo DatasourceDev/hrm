@@ -1,0 +1,372 @@
+﻿@model HR.Models.SignUpViewModel
+@using HR.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@{
+   ViewBag.Title = Resource.Sign_Up;
+   Layout = "~/Views/Shared/_Layout_Front.cshtml";
+   List<int> extenID = new List<int>();
+}
+
+<script type="text/javascript">
+   $(function () {
+      //initialize range sliderrangeSlider
+      $('#').noUiSlider({
+         range: [0, 200],
+         start: 0,
+         handles: 1,
+         connect: "lower",
+         serialization: {
+            resolution: 1
+         }, slide: function () {
+
+         }
+      });
+   });
+
+   function ModuleDelete_Onclick(index) {
+      $('#module-' + index).hide();
+      $('#modulesum-' + index).hide();
+      $('#Subscription_Module_Detail_ID-' + index).val(0);
+      SumTotal();
+   }
+</script>
+
+<div id="breadcrumbs" class="breadcrumbs bg-breadcrumb">
+   <div class="container">
+      <ol class="breadcrumb">
+         @if (Model.Company_ID.HasValue)
+         {
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li><a href="@Url.Action("CompanyInfo", "Company", new { pComID = EncryptUtil.Encrypt(Model.Company_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })">@Resource.Company_Info</a></li>
+            <li class="active">@Resource.Select_Subscription_Plan</li>
+         }
+         else
+         {
+            <li><a href="@Url.Action("Front", "Front", new { })">@Resource.Home</a></li>
+            <li>@Resource.Subscription</li>
+            <li class="active">@Resource.Select_Modules</li>
+            <li class="active">@Resource.Select_Subscription_Plan</li>
+         }
+      </ol>
+      <h2><strong>@Model.Company_Name</strong></h2>
+   </div>
+</div>
+<section class="section">
+   <div class="container">
+      <div class="row">
+         <div class="col-md-12">
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+            <!-- tile widget -->
+         </div>
+      </div>
+
+      @using (Html.BeginForm("DetailSignUp", "Subscription", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+      {
+         @Html.AntiForgeryToken()
+         <input type="hidden" name="Company_ID" value="@Model.Company_ID" />
+         <input type="hidden" name="First_Name" value="@Model.First_Name" />
+         <input type="hidden" name="Middle_Name" value="@Model.Middle_Name" />
+         <input type="hidden" name="Last_Name" value="@Model.Last_Name" />
+         <input type="hidden" name="Phone" value="@Model.Phone" />
+         <input type="hidden" name="Email" value="@Model.Email" />
+         <input type="hidden" name="Company_Name" value="@Model.Company_Name" />
+         <input type="hidden" name="Address" value="@Model.Address" />
+         <input type="hidden" name="Country_ID" value="@Model.Country_ID" />
+         <input type="hidden" name="State_ID" value="@Model.State_ID" />
+         <input type="hidden" name="ZipCode" value="@Model.Zip_Code" />
+         <input type="hidden" name="A7_Group_ID" value="@Model.A7_Group_ID" />
+         <input type="hidden" name="A7_User_ID" value="@Model.A7_User_ID" />
+         <div class="row">
+            <div class="col-md-12">
+               <section class="tile transparent" id="colorbox-gallery">
+                  <div class="tile-body color transparent-black colorbox ">
+                     <div class="row">
+                        <div class="col-md-9">
+                           @if (Model.Details != null)
+                           {
+                              var i = 0;
+                              foreach (var row in Model.Details)
+                              {
+                                 Subscription sub = null;
+                                 if (Model.SubscriptionList != null)
+                                 {
+                                    sub = Model.SubscriptionList.Where(w => w.Module_Detail_ID == row.Module_Detail_ID).FirstOrDefault();
+
+                                 }
+                                 if (sub != null)
+                                 {
+                                    extenID.Add(sub.Module_Detail_ID.Value);
+                                    //continue;
+                                 }
+                                 <div id="module-@i">
+                                    <script type="text/javascript">
+                                       $(function () {
+                                          SumTotal();
+                                          //initialize range slider
+
+                                          $('#userSlider-' + '@i').noUiSlider({
+                                             range: [1, 100],
+                                             start: 1,
+                                             handles: 1,
+                                             connect: "lower",
+                                             serialization: {
+                                                resolution: 1
+                                             }, slide: function () {
+                                                var data = $('#userSlider-' + '@i').val();
+                                                $('#user-' + '@i').val(data);
+                                                $('#sumuser-' + '@i').val(data);
+
+
+                                                var period = $('#period-' + '@i').val();
+                                                var users = $('#user-' + '@i').val();
+                                                var price = $('#price-' + '@i').val();
+                                                var total = parseFloat(period) * parseFloat(users) * parseFloat(price);
+                                                $('#sumprice-' + '@i').val('$' + formatCurrency(total));
+                                                SumTotal();
+                                             }
+                                          });
+
+                                          $('#periodSlider-' + '@i').noUiSlider({
+                                             range: [1, 24],
+                                             start: 1,
+                                             handles: 1,
+                                             connect: "lower",
+                                             serialization: {
+                                                resolution: 1
+                                             }, slide: function () {
+                                                var data = $('#periodSlider-' + '@i').val();
+                                                $('#period-' + '@i').val(data);
+                                                $('#summonth-' + '@i').val(data);
+
+                                                var period = $('#period-' + '@i').val();
+                                                var users = $('#user-' + '@i').val();
+                                                var price = $('#price-' + '@i').val();
+                                                var total = parseFloat(period) * parseFloat(users) * parseFloat(price);
+                                                $('#sumprice-' + '@i').val('$' + formatCurrency(total));
+                                                SumTotal();
+                                             }
+                                          });
+                                       });
+
+                                       function SumTotal() {
+                                          var sum = 0;
+                                          var selcnt = parseInt('@(Model.Details != null ? Model.Details.Count() : 0)');
+                                          var users = $('#user-0').val();
+                                          var pCnt = parseInt('@(Model.Details[i] != null ? Model.Details[i].Prices.Count() : 0)');
+                                          var price = 0;
+                                          if(pCnt > 0)
+                                          {
+                                             var FromQty = @Model.Details[0].Prices[0].Qty_From ;
+                                             var ToQty = @Model.Details[0].Prices[0].Qty_To ;
+                                             if(users >= FromQty && users <= ToQty)
+                                             {
+                                                price  = @Model.Details[0].Prices[0].Price ;
+                                             }
+                                          }
+                                          for (var i = 0; i < selcnt; i++) {
+                                             if ($('#period-' + i).val() != null) {
+                                                if ($('#Subscription_Module_Detail_ID-' + i).val() > 0) {
+                                                   if ($('#Subscription_Module_Detail_Name-' + i).val() == '@ModuleCode.Employee' && selcnt > 1) {
+                                                      $('#sumprice-' + i).attr('style', 'text-decoration:line-through');
+                                                      continue;
+                                                   }
+                                                   var period = $('#period-' + i).val();
+                                                   var users = $('#user-' + i).val();
+                                                   //var price = $('#price-' + i).val();
+
+                                                   var total = parseFloat(period) * parseFloat(users) * parseFloat(price);
+                                                   sum += total;
+                                                   $('#Subscription_Price-' + i).val(sum);
+                                                   $('#price-' + i).val(price);
+                                                   $('#sumprice-' + '@i').val('$' + formatCurrency(total));
+                                                }
+                                             }
+                                          }
+                                          $('#sumAll').val('$' + formatCurrency(sum));
+                                       }
+                                    </script>
+                                    <input type="hidden" name="Subscription[@i].Company_ID" value="@Model.Company_ID" />
+                                    <input type="hidden" id="Subscription_Module_Detail_ID-@i" name="Subscription[@i].Module_Detail_ID" value="@row.Module_Detail_ID" />
+                                    <input type="hidden" id="Subscription_Module_Detail_Name-@i" value="@row.Module_Detail_Name" />
+                                    <input type="hidden" id="Subscription_Price-@i" value="@row.Price" />
+                                    <div class="row">
+                                       <div class="col-sm-2">
+                                          @*<div class="form-group">
+                                                <div class="col-sm-12 text-center">
+                                                   <img src="@Url.Content("~/Images/" + row.Module_Detail_Name.ToLower() + ".png")" style="height:60px;display:inline" />
+                                                </div>
+                                             </div>*@
+                                          <div class="form-group">
+                                             <div class="col-sm-12 text-center">
+                                                <label class="control-label" style="font-weight:700"> @row.Module_Detail_Name</label>
+                                             </div>
+                                          </div>
+                                          @*<div class="form-group">
+                                                <div class="col-sm-12 text-center">
+                                                   <a href="#" onclick="ModuleDelete_Onclick('@i')"><i class="fa fa-trash-o fa-2x"></i></a>
+                                                </div>
+                                             </div>*@
+                                       </div>
+                                       <div class="col-sm-10">
+                                          @if (sub != null)
+                                          {
+                                             <div class="form-group">
+                                                <div class="col-sm-12">
+                                                   <label class="control-label panel-blue"><strong>@Resource.Contract_Info</strong> @Resource.Start_Date : @DateUtil.GetFullMonth(sub.Start_Date.Value.Month) @sub.Start_Date.Value.Day.ToString("00") @sub.Start_Date.Value.Year</label>
+                                                   @*,   @((sub.No_Of_Users.HasValue ? sub.No_Of_Users.Value : 0))/@Resource.Per_User  @((sub.Period_Month.HasValue ? sub.Period_Month.Value : 0))/@Resource.Per_Month*@
+                                                </div>
+                                             </div>
+                                          }
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label class="control-label">$@((row.Price_Per_Person.HasValue ? row.Price_Per_Person.Value : 0).ToString("n2"))/@Resource.Per_User/@Resource.Per_Month</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label class="control-label">@Resource.No_Of_User</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-10" style="padding:8px">
+                                                <div class="noUiSlider rangeSlider connect-greensea" id="userSlider-@i"></div>
+                                             </div>
+                                             <div class="col-sm-2">
+                                                <input type="text" class="input-transparent" id="user-@i" value="1" name="Subscription[@i].No_Of_Users" readonly />
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label class="control-label">@Resource.Subscription_Period</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-10" style="padding:8px">
+                                                <div class="noUiSlider rangeSlider connect-greensea" id="periodSlider-@i"></div>
+                                             </div>
+                                             <div class="col-sm-1">
+                                                <input type="text" class="input-transparent" id="period-@i" value="1" name="Subscription[@i].Period_Month" readonly />
+                                             </div>
+                                             <div class="col-sm-1">
+                                                <input type="text" class="input-transparent" value="@Resource.Month" readonly />
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                    <hr class="blog-divider">
+                                 </div>
+                                          i++;
+                              }
+                           }
+                        </div>
+                        <div class="col-md-3">
+                           <div class="row">
+                              <div class="col-md-12">
+                                 <div class="pricing-tables">
+                                    <div class="plan">
+                                       <!-- plan type -->
+                                       <div class="plan-type">
+                                          <h4 class="uppercase"><strong>@Resource.Summary</strong></h4>
+                                       </div>
+                                       <!-- end plan type -->
+                                       <!-- plan pricing -->
+                                       <div class="plan-pricing">
+                                          <span class="price"><input type="text" class="input-transparent" id="sumAll" readonly style="font-weight:700;font-size:24px;text-align:center" /></span> <span></span>
+                                       </div>
+                                       <!-- end plan pricing -->
+                                       <!-- plan features -->
+                                       <div class="plan-features">
+                                          <ul id="ulSelModule" style="padding-top: 0px; ">
+                                             @if (Model.Details != null)
+                                             {
+                                                var i = 0;
+                                                foreach (var row in Model.Details)
+                                                {
+                                                   Subscription sub = null;
+                                                   if (Model.SubscriptionList != null)
+                                                   {
+                                                      sub = Model.SubscriptionList.Where(w => w.Module_Detail_ID == row.Module_Detail_ID).FirstOrDefault();
+                                                   }
+                                                   //if (sub != null)
+                                                   //{
+                                                   //    continue;
+                                                   //}
+                                                   <li id="modulesum-@i">
+                                                      <div class="row">
+                                                         <div class="col-md-7">
+                                                            <input type="text" class="input-transparent" value="@row.Module_Detail_Name" readonly style="font-weight: 700;" />
+                                                         </div>
+                                                         <div class="col-md-5">
+                                                            <input type="hidden" id="price-@i" value="@(row.Price_Per_Person.HasValue ? row.Price_Per_Person.Value : 0)" />
+                                                            <input type="text" class="input-transparent" id="sumprice-@i" value="@("$" + (row.Price_Per_Person.HasValue ? row.Price_Per_Person.Value : 0).ToString())" readonly />
+                                                         </div>
+                                                      </div>
+                                                      <div class="row">
+                                                         <div class="col-md-1">
+                                                         </div>
+                                                         <div class="col-md-2">
+                                                            <input type="text" class="input-transparent" id="sumuser-@i" value="1" readonly />
+                                                         </div>
+                                                         <div class="col-md-5">
+                                                            <input type="text" class="input-transparent" value="@Resource.Users" readonly />
+                                                         </div>
+                                                      </div>
+                                                      <div class="row">
+                                                         <div class="col-md-1">
+                                                         </div>
+                                                         <div class="col-md-2">
+                                                            <input type="text" class="input-transparent" id="summonth-@i" value="1" readonly />
+                                                         </div>
+                                                         <div class="col-md-5">
+                                                            <input type="text" class="input-transparent" value="@Resource.Months" readonly />
+                                                         </div>
+                                                      </div>
+                                                   </li>
+                                                   i++;
+                                                }
+                                             }
+                                          </ul>
+                                       </div>
+                                       <!-- end plan-features -->
+                                       <div class="order-btn"><button type="submit" class="btn btn-primary" style="width:200px;height:40px">@Resource.Confirm_And_Pay</button></div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </section>
+            </div>
+         </div>
+         @*<div class="row">
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-default" style="width:200px;height:40px">Add New Module</button>
+                </div>
+                <div class="col-md-2">
+                    <label class="control-label">Promotion Code</label>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" />
+                </div>
+            </div>*@
+      }
+   </div>
+</section>

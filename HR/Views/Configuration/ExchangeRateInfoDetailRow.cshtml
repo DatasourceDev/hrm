@@ -1,0 +1,224 @@
+﻿@model  HR.Models.ExchangeRateViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+    var j = Model.Index;
+
+}
+
+<div id="@j-tab" class="tab-pane fade in">
+    <section class="tile transparent">
+        <div class="tile-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <input type="hidden" name="ExchangeCurrency_Rows[@j].Top_Name" id="Exchange_Top_Name_@(j)">
+                            <input type="hidden" name="ExchangeCurrency_Rows[@j].Currency_Code" id="ExchangeCurrency_Rows_@(j)__Currency_Code" value="@Model.Currency_Code">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group" id="raForm">
+                        <div class="col-md-6">
+                            <div class="radio radio-transparent">
+                                @if (Model.Exchange_Period == ExchangePeriod.ByDate)
+                                {
+                                    <input type="radio" name="ExchangeCurrency_Rows[@j].Exchange_Period" id="Exchange_PeriodY_@(j)" value="@ExchangePeriod.ByDate" checked onchange="Exchange_Period_Onchange('@ExchangePeriod.ByDate',@j)">
+                                }
+                                else
+                                {
+                                    <input type="radio" name="ExchangeCurrency_Rows[@j].Exchange_Period" id="Exchange_PeriodY_@(j)" value="@ExchangePeriod.ByDate" onchange="Exchange_Period_Onchange('@ExchangePeriod.ByDate',@j)">
+                                }
+                                <label for="Exchange_PeriodY_@(j)">@Resource.By_Date</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="radio radio-transparent">
+                                @if (Model.Exchange_Period == ExchangePeriod.ByDate)
+                                {
+                                    <input type="radio" name="ExchangeCurrency_Rows[@j].Exchange_Period" id="Exchange_PeriodN_@(j)" value="@ExchangePeriod.ByMonth" onchange="Exchange_Period_Onchange('@ExchangePeriod.ByMonth',@j)">
+                                }
+                                else
+                                {
+                                    <input type="radio" name="ExchangeCurrency_Rows[@j].Exchange_Period" id="Exchange_PeriodN_@(j)" value="@ExchangePeriod.ByMonth" checked onchange="Exchange_Period_Onchange('@ExchangePeriod.ByMonth',@j)">
+                                }
+                                <label for="Exchange_PeriodN_@(j)">@Resource.By_Month</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.Exchange_Period == ExchangePeriod.ByDate)
+        {
+            <script type="text/javascript">
+                $(function () {
+                    $("#Month_ID_" + @j).chosen({ disable_search_threshold: 10 });
+                });
+
+            </script>
+
+            <div class="tile-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <label for="Month" class="control-label">@Resource.Month</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <select class="chosen-select chosen-transparent form-control" id="Month_ID_@(j)" name="Month_ID" onchange="Month_OnChange(@j)">
+
+                                    @if (Model.Month_List != null)
+                                    {
+                                        foreach (var arow in Model.Month_List)
+                                        {
+                                            if (Model.Month_ID == NumUtil.ParseInteger(arow.Value))
+                                            {
+                                                <option value="@(arow.Value != null ? arow.Value : "0")" selected>@arow.Text</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@(arow.Value != null ? arow.Value : "0")">@arow.Text</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+
+                                <div class="validation-error">
+                                    @Html.ValidationMessage("Month_ID")
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <label for="Default_Exchange_Rate" class="control-label">@Resource.Default_Exchange_Rate</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <input type="text" class="form-control text-right" name="Default_Exchange_Rate_[@j]" id="Default_Exchange_Rate_@(j)">
+                                <div class="validation-error">
+                                    @Html.ValidationMessage("Default Exchange Rate")
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <div class="col-sm-12" style="height :28px;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-12">
+                                <button type="button" class="btn btn-default" onclick="return SetRate_Onclick(@j);">@Resource.Apply</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tile-body">
+                <div class="table-responsive">
+                    <table class="table table-datatable table-custom" id="@j-ExchangeRateDataTable">
+                        <thead>
+                            <tr>
+                                <th class="no-sort">@Resource.Date</th>
+                                <th class="no-sort">@Resource.Exchange_Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Date_List != null)
+                            {
+                                var k = 0;
+                                foreach (var row in Model.Date_List)
+                                {
+                                    <tr id="lrow-@j">
+                                        <td>
+                                            <input type="hidden" value="@row.Date" name="Date_Sel_[@j]" id="Date_Sel_@(j)">
+
+                                            @Html.Hidden("ExchangeCurrency_Rows[" + j + "].ExchangeRate_Rows[" + k + "].Exchange_Currency_ID", Model.Currency_ID)
+                                            @Html.Hidden("ExchangeCurrency_Rows[" + j + "].ExchangeRate_Rows[" + k + "].Exchange_Period", ExchangePeriod.ByDate)
+                                            @Html.Hidden("ExchangeCurrency_Rows[" + j + "].Top_Name")
+                                            @Html.Hidden("ExchangeCurrency_Rows[" + j + "].ExchangeRate_Rows[" + k + "].Row_Type", RowType.ADD)
+
+                                            <input type="hidden" name="ExchangeCurrency_Rows[@j].ExchangeRate_Rows[@k].Exchange_Month" id="ExchangeRate_Rows_@(j)@(k)__Exchange_Month" value="@Model.Exchange_Month">
+                                            <input type="text" class="form-control" name="ExchangeCurrency_Rows[@j].ExchangeRate_Rows[@k].Exchange_Date" id="ExchangeRate_Rows_@(j)@(k)__Exchange_Date" value="@DateUtil.ToDisplayDate(row.Date)" readonly>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessage("ExchangeCurrency_Rows[" + j + "].ExchangeRate_Rows[" + k + "].Exchange_Date")
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control text-right" name="ExchangeCurrency_Rows[@j].ExchangeRate_Rows[@k].Rate" id="ExchangeRate_Rows_@(j)@(k)__Rate">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessage("ExchangeCurrency_Rows[" + j + "].ExchangeRate_Rows[" + k + "].Rate")
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    k++;
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="tile-body">
+                <input type="hidden" name="Month_ID" id="Month_ID_@(j)" value="1">
+                <div class="table-responsive">
+                    <table class="table table-datatable table-custom" id="@j-ExchangeRateDataTable">
+                        <thead>
+                            <tr>
+                                <th class="no-sort">@Resource.Month</th>
+                                <th class="no-sort">@Resource.Exchange_Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Month_List != null)
+                            {
+                                var k = 0;
+                                foreach (var row in Model.Month_List)
+                                {
+                                    <tr id="lrow-@j">
+                                        <td>
+                                            @*<input type="hidden" value="@row.Value" name="Date_Sel_[@j]" id="Date_Sel_@(j)">*@
+
+                                            @Html.Hidden("ExchangeCurrency_Rows[" + j + "].ExchangeRate_Rows[" + k + "].Exchange_Currency_ID", Model.Currency_ID)
+                                            @Html.Hidden("ExchangeCurrency_Rows[" + j + "].ExchangeRate_Rows[" + k + "].Exchange_Period", ExchangePeriod.ByMonth)
+                                            @Html.Hidden("ExchangeCurrency_Rows[" + j + "].Top_Name")
+                                            @Html.Hidden("ExchangeCurrency_Rows[" + j + "].ExchangeRate_Rows[" + k + "].Row_Type", RowType.ADD)
+
+                                            <input type="text" class="form-control" name="ExchangeCurrency_Rows[@j].ExchangeRate_Rows[@k].Exchange_Month_Text" id="ExchangeRate_Rows_@(j)@(k)__Exchange_Month_Text" value="@row.Text" readonly>
+                                            <input type="hidden" name="ExchangeCurrency_Rows[@j].ExchangeRate_Rows[@k].Exchange_Month" id="ExchangeRate_Rows_@(j)@(k)__Exchange_Month" value="@row.Value">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessage("ExchangeCurrency_Rows[" + j + "].ExchangeRate_Rows[" + k + "].Exchange_Month")
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control text-right" name="ExchangeCurrency_Rows[@j].ExchangeRate_Rows[@k].Rate" id="ExchangeRate_Rows_@(j)@(k)__Rate">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessage("ExchangeCurrency_Rows[" + j + "].ExchangeRate_Rows[" + k + "].Rate")
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    k++;
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+    </section>
+</div>

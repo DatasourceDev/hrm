@@ -1,0 +1,186 @@
+﻿<error errorId="d520ed2a-5f29-47df-9d5f-f54439e7bbed" application="/LM/W3SVC/5/ROOT" host="LAPTOP-64514UIV" type="System.ObjectDisposedException" message="The ObjectContext instance has been disposed and can no longer be used for operations that require a connection." source="EntityFramework" detail="System.ObjectDisposedException: The ObjectContext instance has been disposed and can no longer be used for operations that require a connection.&#xD;&#xA;   at System.Data.Entity.Core.Objects.ObjectContext.get_Connection()&#xD;&#xA;   at System.Data.Entity.Core.Objects.ObjectQuery`1.GetResults(Nullable`1 forMergeOption)&#xD;&#xA;   at System.Data.Entity.Core.Objects.ObjectQuery`1.Execute(MergeOption mergeOption)&#xD;&#xA;   at System.Data.Entity.Core.Objects.DataClasses.EntityReference`1.Load(MergeOption mergeOption)&#xD;&#xA;   at System.Data.Entity.Core.Objects.DataClasses.RelatedEnd.Load()&#xD;&#xA;   at System.Data.Entity.Core.Objects.DataClasses.RelatedEnd.DeferredLoad()&#xD;&#xA;   at System.Data.Entity.Core.Objects.Internal.LazyLoadBehavior.LoadProperty[TItem](TItem propertyValue, String relationshipName, String targetRoleName, Boolean mustBeNull, Object wrapperObject)&#xD;&#xA;   at System.Data.Entity.Core.Objects.Internal.LazyLoadBehavior.&lt;&gt;c__DisplayClass7`2.&lt;GetInterceptorDelegate&gt;b__2(TProxy proxy, TItem item)&#xD;&#xA;   at System.Data.Entity.DynamicProxies.Expenses_Config_Budg_722AC32B8AFD388C785C2236DFFB299B0FF155371C0E1FFDF6EBF4BA32D74462.get_Expenses_Config()&#xD;&#xA;   at Authentication.Controllers.JobCostController.&lt;&gt;c__DisplayClass1c.&lt;JobCostInfoExport&gt;b__11(Expenses_Config_Budget w) in e:\Work\SBS\HRSBS2 (Dev)\Authentication\Controllers\JobCostController.cs:line 886&#xD;&#xA;   at System.Linq.Enumerable.WhereListIterator`1.MoveNext()&#xD;&#xA;   at System.Linq.Enumerable.Count[TSource](IEnumerable`1 source)&#xD;&#xA;   at Authentication.Controllers.JobCostController.JobCostInfoExport(String pJobCostID, String operation) in e:\Work\SBS\HRSBS2 (Dev)\Authentication\Controllers\JobCostController.cs:line 887&#xD;&#xA;   at lambda_method(Closure , ControllerBase , Object[] )&#xD;&#xA;   at System.Web.Mvc.ActionMethodDispatcher.&lt;&gt;c__DisplayClass1.&lt;WrapVoidAction&gt;b__0(ControllerBase controller, Object[] parameters)&#xD;&#xA;   at System.Web.Mvc.ActionMethodDispatcher.Execute(ControllerBase controller, Object[] parameters)&#xD;&#xA;   at System.Web.Mvc.ReflectedActionDescriptor.Execute(ControllerContext controllerContext, IDictionary`2 parameters)&#xD;&#xA;   at System.Web.Mvc.ControllerActionInvoker.InvokeActionMethod(ControllerContext controllerContext, ActionDescriptor actionDescriptor, IDictionary`2 parameters)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncControllerActionInvoker.ActionInvocation.InvokeSynchronousActionMethod()&#xD;&#xA;   at System.Web.Mvc.Async.AsyncControllerActionInvoker.&lt;BeginInvokeSynchronousActionMethod&gt;b__39(IAsyncResult asyncResult, ActionInvocation innerInvokeState)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncResult`2.CallEndDelegate(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncResultBase`1.End()&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.End[TResult](IAsyncResult asyncResult, Object tag)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncControllerActionInvoker.EndInvokeActionMethod(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncControllerActionInvoker.AsyncInvocationWithFilters.&lt;InvokeActionMethodFilterAsynchronouslyRecursive&gt;b__3d()&#xD;&#xA;   at System.Web.Mvc.Async.AsyncControllerActionInvoker.AsyncInvocationWithFilters.&lt;&gt;c__DisplayClass46.&lt;InvokeActionMethodFilterAsynchronouslyRecursive&gt;b__3f()&#xD;&#xA;   at System.Web.Mvc.Async.AsyncControllerActionInvoker.&lt;&gt;c__DisplayClass33.&lt;BeginInvokeActionMethodWithFilters&gt;b__32(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncResult`1.CallEndDelegate(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncResultBase`1.End()&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.End[TResult](IAsyncResult asyncResult, Object tag)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncControllerActionInvoker.EndInvokeActionMethodWithFilters(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncControllerActionInvoker.&lt;&gt;c__DisplayClass21.&lt;&gt;c__DisplayClass2b.&lt;BeginInvokeAction&gt;b__1c()&#xD;&#xA;   at System.Web.Mvc.Async.AsyncControllerActionInvoker.&lt;&gt;c__DisplayClass21.&lt;BeginInvokeAction&gt;b__1e(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncResult`1.CallEndDelegate(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncResultBase`1.End()&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.End[TResult](IAsyncResult asyncResult, Object tag)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncControllerActionInvoker.EndInvokeAction(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.Controller.&lt;BeginExecuteCore&gt;b__1d(IAsyncResult asyncResult, ExecuteCoreState innerState)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncVoid`1.CallEndDelegate(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncResultBase`1.End()&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.End[TResult](IAsyncResult asyncResult, Object tag)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.End(IAsyncResult asyncResult, Object tag)&#xD;&#xA;   at System.Web.Mvc.Controller.EndExecuteCore(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.Controller.&lt;BeginExecute&gt;b__15(IAsyncResult asyncResult, Controller controller)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncVoid`1.CallEndDelegate(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncResultBase`1.End()&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.End[TResult](IAsyncResult asyncResult, Object tag)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.End(IAsyncResult asyncResult, Object tag)&#xD;&#xA;   at System.Web.Mvc.Controller.EndExecute(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.Controller.System.Web.Mvc.Async.IAsyncController.EndExecute(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.&lt;BeginProcessRequest&gt;b__5(IAsyncResult asyncResult, ProcessRequestState innerState)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncVoid`1.CallEndDelegate(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncResultBase`1.End()&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.End[TResult](IAsyncResult asyncResult, Object tag)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.End(IAsyncResult asyncResult, Object tag)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.EndProcessRequest(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.System.Web.IHttpAsyncHandler.EndProcessRequest(IAsyncResult result)&#xD;&#xA;   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()&#xD;&#xA;   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean&amp; completedSynchronously)" user="admin@smartdevsolution.com" time="2016-07-15T08:44:50.0666162Z">
+  <serverVariables>
+    <item name="ALL_HTTP">
+      <value string="HTTP_CONNECTION:keep-alive&#xD;&#xA;HTTP_ACCEPT:text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8&#xD;&#xA;HTTP_ACCEPT_ENCODING:gzip, deflate, sdch&#xD;&#xA;HTTP_ACCEPT_LANGUAGE:th,en;q=0.8&#xD;&#xA;HTTP_COOKIE:_ga=GA1.1.1354168062.1464781061; __RequestVerificationToken=avBHTWjBTxNkTlKkzVSiWUaMxJIHYXCznEeYDBiiXIR-CJ408HpvgTI3DT5dOVXV-Zpys8nsQhfpU4zwk52Sx_kOGXE1; ASP.NET_SessionId=qelkdyiohewggdvgscihxfrx; .AspNet.ApplicationCookie=HXGPDIN4bueoJtnLhlksQ2ulo01H7NKNrS8awPxPexOK0YDuHufUqH4_OvZmSSa5nHFJzykhG-EZctQ1PF1VyWe5RjM0EJ-CNeOTj3xvMb7mRAclvgGcYg3vTzJGT56YgDP6cSG4INkAhb9ayn-nblmlEe8uuq0o0impuWKgbOZpTNF88aBHz_fnPqUbm30x3Lgh6taUv3uDd3lP5Hm9dmduw9XByZYyatPmT1ip9Mlp3yvs0-aVXvQ6Rtwv4UBz0korwiUbEtJrsL37stioGjtXaM3N_fkdjOjdm49qYZYgk01uhyrx6DfLHjZVhZnNXnMGXrBfSavHtZMdn_7gtLAssjWyvoLpxfajliA8FDmDpJFgrjgWTgd91yBIuOONYDwH1v7own0adnr0HwGDDyjcTOIyZkdsaNjssc7ZjlLP-kRA; culture=th&#xD;&#xA;HTTP_HOST:localhost:55581&#xD;&#xA;HTTP_REFERER:http://localhost:55581/JobCost/JobCost&#xD;&#xA;HTTP_USER_AGENT:Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36&#xD;&#xA;HTTP_UPGRADE_INSECURE_REQUESTS:1&#xD;&#xA;" />
+    </item>
+    <item name="ALL_RAW">
+      <value string="Connection: keep-alive&#xD;&#xA;Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8&#xD;&#xA;Accept-Encoding: gzip, deflate, sdch&#xD;&#xA;Accept-Language: th,en;q=0.8&#xD;&#xA;Cookie: _ga=GA1.1.1354168062.1464781061; __RequestVerificationToken=avBHTWjBTxNkTlKkzVSiWUaMxJIHYXCznEeYDBiiXIR-CJ408HpvgTI3DT5dOVXV-Zpys8nsQhfpU4zwk52Sx_kOGXE1; ASP.NET_SessionId=qelkdyiohewggdvgscihxfrx; .AspNet.ApplicationCookie=HXGPDIN4bueoJtnLhlksQ2ulo01H7NKNrS8awPxPexOK0YDuHufUqH4_OvZmSSa5nHFJzykhG-EZctQ1PF1VyWe5RjM0EJ-CNeOTj3xvMb7mRAclvgGcYg3vTzJGT56YgDP6cSG4INkAhb9ayn-nblmlEe8uuq0o0impuWKgbOZpTNF88aBHz_fnPqUbm30x3Lgh6taUv3uDd3lP5Hm9dmduw9XByZYyatPmT1ip9Mlp3yvs0-aVXvQ6Rtwv4UBz0korwiUbEtJrsL37stioGjtXaM3N_fkdjOjdm49qYZYgk01uhyrx6DfLHjZVhZnNXnMGXrBfSavHtZMdn_7gtLAssjWyvoLpxfajliA8FDmDpJFgrjgWTgd91yBIuOONYDwH1v7own0adnr0HwGDDyjcTOIyZkdsaNjssc7ZjlLP-kRA; culture=th&#xD;&#xA;Host: localhost:55581&#xD;&#xA;Referer: http://localhost:55581/JobCost/JobCost&#xD;&#xA;User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36&#xD;&#xA;Upgrade-Insecure-Requests: 1&#xD;&#xA;" />
+    </item>
+    <item name="APPL_MD_PATH">
+      <value string="/LM/W3SVC/5/ROOT" />
+    </item>
+    <item name="APPL_PHYSICAL_PATH">
+      <value string="E:\Work\SBS\HRSBS2 (Dev)\Authentication\" />
+    </item>
+    <item name="AUTH_TYPE">
+      <value string="ApplicationCookie" />
+    </item>
+    <item name="AUTH_USER">
+      <value string="admin@smartdevsolution.com" />
+    </item>
+    <item name="AUTH_PASSWORD">
+      <value string="*****" />
+    </item>
+    <item name="LOGON_USER">
+      <value string="admin@smartdevsolution.com" />
+    </item>
+    <item name="REMOTE_USER">
+      <value string="admin@smartdevsolution.com" />
+    </item>
+    <item name="CERT_COOKIE">
+      <value string="" />
+    </item>
+    <item name="CERT_FLAGS">
+      <value string="" />
+    </item>
+    <item name="CERT_ISSUER">
+      <value string="" />
+    </item>
+    <item name="CERT_KEYSIZE">
+      <value string="" />
+    </item>
+    <item name="CERT_SECRETKEYSIZE">
+      <value string="" />
+    </item>
+    <item name="CERT_SERIALNUMBER">
+      <value string="" />
+    </item>
+    <item name="CERT_SERVER_ISSUER">
+      <value string="" />
+    </item>
+    <item name="CERT_SERVER_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="CERT_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="CONTENT_LENGTH">
+      <value string="0" />
+    </item>
+    <item name="CONTENT_TYPE">
+      <value string="" />
+    </item>
+    <item name="GATEWAY_INTERFACE">
+      <value string="CGI/1.1" />
+    </item>
+    <item name="HTTPS">
+      <value string="off" />
+    </item>
+    <item name="HTTPS_KEYSIZE">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SECRETKEYSIZE">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SERVER_ISSUER">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SERVER_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="INSTANCE_ID">
+      <value string="5" />
+    </item>
+    <item name="INSTANCE_META_PATH">
+      <value string="/LM/W3SVC/5" />
+    </item>
+    <item name="LOCAL_ADDR">
+      <value string="::1" />
+    </item>
+    <item name="PATH_INFO">
+      <value string="/JobCost/JobCostInfoExport" />
+    </item>
+    <item name="PATH_TRANSLATED">
+      <value string="E:\Work\SBS\HRSBS2 (Dev)\Authentication\JobCost\JobCostInfoExport" />
+    </item>
+    <item name="QUERY_STRING">
+      <value string="pJobCostID=VkKWJcF%2F0CqKUn4pf4BRkA%3D%3D&amp;operation=bmSPQ74lHb6K5u6y%2F7k6GA%3D%3D" />
+    </item>
+    <item name="REMOTE_ADDR">
+      <value string="::1" />
+    </item>
+    <item name="REMOTE_HOST">
+      <value string="::1" />
+    </item>
+    <item name="REMOTE_PORT">
+      <value string="54596" />
+    </item>
+    <item name="REQUEST_METHOD">
+      <value string="GET" />
+    </item>
+    <item name="SCRIPT_NAME">
+      <value string="/JobCost/JobCostInfoExport" />
+    </item>
+    <item name="SERVER_NAME">
+      <value string="localhost" />
+    </item>
+    <item name="SERVER_PORT">
+      <value string="55581" />
+    </item>
+    <item name="SERVER_PORT_SECURE">
+      <value string="0" />
+    </item>
+    <item name="SERVER_PROTOCOL">
+      <value string="HTTP/1.1" />
+    </item>
+    <item name="SERVER_SOFTWARE">
+      <value string="Microsoft-IIS/10.0" />
+    </item>
+    <item name="URL">
+      <value string="/JobCost/JobCostInfoExport" />
+    </item>
+    <item name="HTTP_CONNECTION">
+      <value string="keep-alive" />
+    </item>
+    <item name="HTTP_ACCEPT">
+      <value string="text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8" />
+    </item>
+    <item name="HTTP_ACCEPT_ENCODING">
+      <value string="gzip, deflate, sdch" />
+    </item>
+    <item name="HTTP_ACCEPT_LANGUAGE">
+      <value string="th,en;q=0.8" />
+    </item>
+    <item name="HTTP_COOKIE">
+      <value string="_ga=GA1.1.1354168062.1464781061; __RequestVerificationToken=avBHTWjBTxNkTlKkzVSiWUaMxJIHYXCznEeYDBiiXIR-CJ408HpvgTI3DT5dOVXV-Zpys8nsQhfpU4zwk52Sx_kOGXE1; ASP.NET_SessionId=qelkdyiohewggdvgscihxfrx; .AspNet.ApplicationCookie=HXGPDIN4bueoJtnLhlksQ2ulo01H7NKNrS8awPxPexOK0YDuHufUqH4_OvZmSSa5nHFJzykhG-EZctQ1PF1VyWe5RjM0EJ-CNeOTj3xvMb7mRAclvgGcYg3vTzJGT56YgDP6cSG4INkAhb9ayn-nblmlEe8uuq0o0impuWKgbOZpTNF88aBHz_fnPqUbm30x3Lgh6taUv3uDd3lP5Hm9dmduw9XByZYyatPmT1ip9Mlp3yvs0-aVXvQ6Rtwv4UBz0korwiUbEtJrsL37stioGjtXaM3N_fkdjOjdm49qYZYgk01uhyrx6DfLHjZVhZnNXnMGXrBfSavHtZMdn_7gtLAssjWyvoLpxfajliA8FDmDpJFgrjgWTgd91yBIuOONYDwH1v7own0adnr0HwGDDyjcTOIyZkdsaNjssc7ZjlLP-kRA; culture=th" />
+    </item>
+    <item name="HTTP_HOST">
+      <value string="localhost:55581" />
+    </item>
+    <item name="HTTP_REFERER">
+      <value string="http://localhost:55581/JobCost/JobCost" />
+    </item>
+    <item name="HTTP_USER_AGENT">
+      <value string="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36" />
+    </item>
+    <item name="HTTP_UPGRADE_INSECURE_REQUESTS">
+      <value string="1" />
+    </item>
+  </serverVariables>
+  <queryString>
+    <item name="pJobCostID">
+      <value string="VkKWJcF/0CqKUn4pf4BRkA==" />
+    </item>
+    <item name="operation">
+      <value string="bmSPQ74lHb6K5u6y/7k6GA==" />
+    </item>
+  </queryString>
+  <cookies>
+    <item name="_ga">
+      <value string="GA1.1.1354168062.1464781061" />
+    </item>
+    <item name="__RequestVerificationToken">
+      <value string="avBHTWjBTxNkTlKkzVSiWUaMxJIHYXCznEeYDBiiXIR-CJ408HpvgTI3DT5dOVXV-Zpys8nsQhfpU4zwk52Sx_kOGXE1" />
+    </item>
+    <item name="ASP.NET_SessionId">
+      <value string="qelkdyiohewggdvgscihxfrx" />
+    </item>
+    <item name=".AspNet.ApplicationCookie">
+      <value string="HXGPDIN4bueoJtnLhlksQ2ulo01H7NKNrS8awPxPexOK0YDuHufUqH4_OvZmSSa5nHFJzykhG-EZctQ1PF1VyWe5RjM0EJ-CNeOTj3xvMb7mRAclvgGcYg3vTzJGT56YgDP6cSG4INkAhb9ayn-nblmlEe8uuq0o0impuWKgbOZpTNF88aBHz_fnPqUbm30x3Lgh6taUv3uDd3lP5Hm9dmduw9XByZYyatPmT1ip9Mlp3yvs0-aVXvQ6Rtwv4UBz0korwiUbEtJrsL37stioGjtXaM3N_fkdjOjdm49qYZYgk01uhyrx6DfLHjZVhZnNXnMGXrBfSavHtZMdn_7gtLAssjWyvoLpxfajliA8FDmDpJFgrjgWTgd91yBIuOONYDwH1v7own0adnr0HwGDDyjcTOIyZkdsaNjssc7ZjlLP-kRA" />
+    </item>
+    <item name="culture">
+      <value string="th" />
+      <value string="th" />
+    </item>
+  </cookies>
+</error>

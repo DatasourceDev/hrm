@@ -1,0 +1,1058 @@
+﻿@model  HR.Models.PayrollViewModels
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using HR.Common;
+@using SBSResourceAPI;
+
+@{
+   ViewBag.Title = @Resource.Payroll;
+   var cbService = new ComboService();
+   var userlogin = UserSession.getUser(Request.RequestContext.HttpContext);
+}
+
+<script type="text/javascript">
+   var wds = [];
+   var holidays = [];
+
+   $(function () {
+      InitDatepicker();
+      var module = '@Model.tabAction';
+      if ('@string.IsNullOrEmpty(Model.tabAction)' == "True") {
+         module = "leave";
+      }
+      var liID = "li-" + module;
+      var tabID = module + "-tab";
+      $("#" + liID).addClass("active");
+      $("#" + tabID).addClass("active");
+      triggerPayInfoProcessTour()
+   });
+
+   //Added by Moet
+   function showHideButtons(tName) {
+      //var bFlagMainSaveBtn = false;
+      //if (pAction == "UpdateTour")
+      //    bFlagMainSaveBtn = true;
+
+      switch (tName) {
+         case "leave":
+            $("#leave-tab").removeClass("active");
+            $("#li-leave").removeClass("active");
+            $("#expenses-tab").addClass("active");
+            $("#li-expenses").addClass("active");
+            break;
+         case "expenses":
+            $("#expenses-tab").removeClass("active");
+            $("#li-expenses").removeClass("active");
+            $("#overtime-tab").addClass("active");
+            break;
+         case "overtime":
+            $("#overtime-tab").removeClass("active");
+            $("#allowance-tab").addClass("active");
+            break;
+         case "allowance":
+            $("#allowance-tab").removeClass("active");
+            $("#extradonation-tab").addClass("active");
+      }
+   }
+
+   function triggerPayInfoProcessTour() {
+      var strtitle = '@Tour_Resource.Payroll_Info_Title';
+      var val = readCookie("payProcessTour");
+      if (val == "End")
+         return;
+      var payProcessTour = new Tour({
+         autoscroll: true,
+         storage: false,
+         steps: [
+         {
+            element: "#Process_Date_From",
+            title: strtitle,
+            content: '@Tour_Resource.Info_Process_Date_From'
+         },
+         {
+            element: "#Process_Date_To",
+            title: strtitle,
+            content: '@Tour_Resource.Info_Process_Date_To'
+         },
+         {
+            element: "#li-leave",
+            title: strtitle,
+            content: '@Tour_Resource.Info_li_leave',
+            onNext: function () {
+               showHideButtons("leave");
+            }
+         },
+         {
+            element: "#sLeave_Period_From",
+            title: strtitle,
+            content: '@Tour_Resource.Info_sLeave_Period_From'
+         },
+         {
+            element: "#sLeave_Period_To",
+            title: strtitle,
+            content: '@Tour_Resource.Info_sLeave_Period_To'
+         },
+         {
+            element: "#btnRetrieveLeave",
+            title: strtitle,
+            content: '@Tour_Resource.Info_btnRetrieveLeave'
+         },
+         {
+            element: "#leaveDataTable",
+            title: strtitle,
+            content: '@Tour_Resource.Info_leaveDataTable'
+         },
+         {
+            element: "#li-expenses",
+            title: strtitle,
+            content: '@Tour_Resource.Info_li_expenses',
+            onNext: function () {
+               showHideButtons("expenses");
+            }
+         },
+         {
+            element: "#sExpenses_Period_From",
+            title: strtitle,
+            content: '@Tour_Resource.Info_sExpenses_Period_From'
+         },
+         {
+            element: "#sExpenses_Period_To",
+            title: strtitle,
+            content: '@Tour_Resource.Info_sExpenses_Period_To'
+         },
+         {
+            element: "#btnRetrieveExpenses",
+            title: strtitle,
+            content: '@Tour_Resource.Info_btnRetrieveExpenses'
+         },
+         {
+            element: "#expensesDataTable",
+            title: strtitle,
+            content: '@Tour_Resource.Info_expensesDataTable'
+         },
+         {
+            element: "#overtime-tab",
+            title: strtitle,
+            content: '@Tour_Resource.Info_overtime_tab',
+            onNext: function () {
+               showHideButtons("overtime");
+            }
+         },
+         {
+            element: "#btnAddOT",
+            title: strtitle,
+            content: '@Tour_Resource.Info_btnAddOT'
+         },
+         {
+            element: "#thOTPayment",
+            title: strtitle,
+            content: '@Tour_Resource.Info_thOTPayment'
+         },
+         {
+            element: "#thOTHours",
+            title: strtitle,
+            content: '@Tour_Resource.Info_thOTHours'
+         },
+         {
+            element: "#thOTAmt",
+            title: strtitle,
+            content: '@Tour_Resource.Info_thOTAmt'
+         },
+         {
+            element: "#allowance-tab",
+            title: strtitle,
+            content: '@Tour_Resource.Info_allowance_tab',
+            onNext: function () {
+               showHideButtons("allowance");
+            }
+         },
+         {
+            element: "#addAllowanceRow",
+            title: strtitle,
+            content: '@Tour_Resource.Info_addAllowanceRow'
+         },
+         {
+            element: "#thAllowType",
+            title: strtitle,
+            content: '@Tour_Resource.Info_thAllowType'
+         },{
+            element: "#thAllowName",
+            title: strtitle,
+            content: '@Tour_Resource.Info_thAllowName'
+         },
+         {
+            element: "#thAllowAmt",
+            title: strtitle,
+            content: '@Tour_Resource.Info_thAllowAmt'
+         },
+         {
+            element: "#extradonation-tab",
+            title: strtitle,
+            content: '@Tour_Resource.Info_extradonation_tab'
+         },
+         {
+            element: "#btnAddNewDonation",
+            title: strtitle,
+            content: '@Tour_Resource.Info_btnAddNewDonation'
+         },
+         {
+            element: "#Leave_Amount",
+            title: strtitle,
+            content: '@Tour_Resource.Info_Leave_Amount'
+         },
+         {
+            element: "#Expenses_Amount",
+            title: strtitle,
+            content: '@Tour_Resource.Info_Expenses_Amount'
+         },
+         {
+            element: "#Overtime",
+            title: strtitle,
+            content: '@Tour_Resource.Info_Overtime'
+         },
+         {
+            element: "#Allowance",
+            title: strtitle,
+            content: '@Tour_Resource.Info_Allowance'
+         },
+         {
+            element: "#Deductions",
+            title: strtitle,
+            content: '@Tour_Resource.Info_Deductions',
+            onNext: function () {
+               showHideButtons("allowance");
+            }
+         },
+         {
+            element: "#Extra_Donation",
+            title: strtitle,
+            content: '@Tour_Resource.Info_Extra_Donation'
+         },
+         {
+            element: "#Employee_Contribution",
+            title: strtitle,
+            content: '@Tour_Resource.Info_Employee_Contribution'
+         },{
+            element: "#Employer_Contribution",
+            title: strtitle,
+            content: '@Tour_Resource.Info_Employer_Contribution'
+         },
+         {
+            element: "#Donation",
+            title: strtitle,
+            content: '@Tour_Resource.Info_Donation'
+         },
+         {
+            element: "#btnSave",
+            title: strtitle,
+            content: '@Tour_Resource.Info_btnSave'
+         },
+         {
+            element: "#btnSaveView",
+            title: strtitle,
+            content: '@Tour_Resource.Info_btnSaveView'
+         }
+         ],
+         onEnd: function () {
+            createCookie("payProcessTour", "End");
+         }
+      });
+      payProcessTour.init();
+      payProcessTour.start();
+   }
+</script>
+
+<script type="text/javascript">
+   $(function () {
+      @{
+            if (Model.Working_Day != null)
+            {
+                for (var i = 0; i < Model.Working_Day.Count(); i++)
+                {
+                    @:wds[@i] = parseInt('@Model.Working_Day[i]');
+                                                                                                                }
+            }
+            if (Model.holidays != null)
+            {
+                for (var i = 0; i < Model.holidays.Count(); i++)
+                {
+                    @:holidays[@i]  ='@(DateUtil.ToDisplayDate(Model.holidays[i]))';
+                                                                                                                }
+            }
+        }
+   });
+
+   $(function () {
+      Process_Date_OnChange();
+      Salary_Onchange(true);
+      SumLeave(true); SumExpenses(true);
+      SumAllowance(true); SumExtraDonation(true); SumOvertime(true);
+      SumAll();
+      PaymentType_OnChange();
+   });
+
+   function Salary_Onchange(donotsum) {
+      if ('@Model.Basic_Salary_Unit' == '@Term.Hourly') {
+         var workhours = getFloat($('#No_Of_Hours').val());
+         var hourrate = getFloat($('#Hourly_Rate').val());
+
+         $('#Basic_Salary').val(workhours * hourrate);
+         $('#Basic_Salary_Label').val(formatCurrency(workhours * hourrate));
+         SumAll(donotsum);
+      }
+      else {
+         $('#Basic_Salary_Label').val(formatCurrency($('#Basic_Salary').val()));
+         SumAll(donotsum);
+      }
+   }
+
+   function SumAll(donotsum) {
+      if (donotsum == true)
+         return false;
+
+      $('#divDonationType').hide();
+      var leaveamount = getFloat($('#Leave_Amount').val());
+      var expensesamount = getFloat($('#Expenses_Amount').val());
+      var allowance = getFloat($('#Allowance').val());
+      var deduction = getFloat($('#Deductions').val());
+      var overtime = getFloat($('#Overtime').val());
+      var commission = getFloat($('#Commission').val());
+      var basicsalary = getFloat($('#Basic_Salary').val());
+      var deductionadhoc = getFloat($('#Deduction_Adhoc').val());
+      var deductiondonation = getFloat($('#Deduction_Donation').val());
+      var allowanceadhoc = getFloat($('#Allowance_Adhoc').val());
+      var adjustaddition = getFloat($('#Adjustment_Addition').val());
+      var adjustdeduction = getFloat($('#Adjustment_Deduction').val());
+      var bonus = getFloat($('#Bonus').val());
+
+
+      var cpf_allowance = getFloat( $('#CPF_Allowance').val());
+      var cpf_deduction = getFloat(  $('#CPF_Deductions').val());
+      var cpf_deductionadhoc = getFloat(  $('#CPF_Deduction_Adhoc').val());
+      var cpf_deductiondonation = getFloat(  $('#CPF_Deduction_Donation').val());
+      var cpf_allowanceadhoc = getFloat(  $('#CPF_Allowance_Adhoc').val());
+      var cpf_adjustaddition = getFloat(  $('#CPF_Adjustment_Addition').val());
+      var cpf_adjustdeduction = getFloat(  $('#CPF_Adjustment_Deduction').val());
+      var cpf_bonus = getFloat(  $('#CPF_Bonus').val());
+
+      var donation = 0.0, employeecon = 0.0, employercon = 0.0,basicsalaryAndaddon=0.0;
+
+      //Added by sun 09-02-2017
+      var allowanceaddtosalary = getFloat($('#Allowance_Add_On_To_Basic_Salary').val());
+      basicsalaryAndaddon = basicsalary+ allowanceaddtosalary;
+
+      ShowMask();
+      $.ajax({
+         type: 'POST',
+         url: 'PayrollProcessFormula',
+         contentType: 'application/json; charset=utf-8',
+         data: JSON.stringify({
+            basicsalary: basicsalaryAndaddon,
+            leaveamount: leaveamount, 
+            expensesamount: expensesamount,
+            allowance: cpf_allowance, 
+            deduction: cpf_deduction, 
+            deductiondonation: cpf_deductiondonation,
+            deductionadhoc: cpf_deductionadhoc,
+            allowanceadhoc: cpf_allowanceadhoc,
+            adjustaddition: cpf_adjustaddition, 
+            adjustdeduction: cpf_adjustdeduction,
+            overtime: overtime, 
+            commission: commission,
+            bonus: cpf_bonus,
+            empid: '@Model.Employee_Profile_ID',
+            select_cpf_id: '@Model.Selected_CPF_Formula_ID', select_ot_id: '@Model.Selected_OT_Formula_ID',
+            pmonth: '@Model.Process_Month', pyear: '@Model.Process_Year'
+         }),
+         dataType: 'json',
+         success: function (data) {
+            if (data != null) {
+               employeecon = parseFloat(data.employeecon);
+               employercon = parseFloat(data.employercon);
+
+               if (data.donation_type != "") {
+                  donation = parseFloat(data.donation);
+                  if ('@(Model.Opt_Out.HasValue ? Model.Opt_Out.Value : false)' == 'True') {
+                     donation = 0;
+                     $('#Donation').val(donation);
+                     $('#Donation_Type').text('');
+                     $('#Selected_Donation_Formula_ID').val('');
+                  }
+                  else {
+                     $('#divDonationType').show();
+                     $('#Donation').val(formatCurrency(donation));
+                     $('#Donation_Type').text(data.donation_type);
+                     $('#Selected_Donation_Formula_ID').val(data.select_donation_id);
+                  }
+               }
+
+               if (leaveamount < 0) leaveamount = leaveamount * -1;
+
+               var nett = formatCurrency((basicsalary + commission + overtime + allowance + adjustaddition + bonus + expensesamount) - (adjustdeduction + leaveamount + employeecon + deduction + deductiondonation + donation));
+               var gross = formatCurrency((basicsalary + commission + overtime + allowance + adjustaddition + bonus) - (adjustdeduction + leaveamount + deduction + donation));
+
+               $('#Employee_Contribution').val(formatNumber(employeecon));
+               $('#Employer_Contribution').val(formatNumber(employercon));
+               $('#Net_Salary').val(nett);
+               $('#Gross_Salary').val(gross);
+               $('#Selected_CPF_Formula_ID').val(data.select_cpf_id);
+
+               if (leaveamount < 0)
+                  leaveamount = -1 * leaveamount;
+
+               var totalallowance = formatCurrency(expensesamount + allowance + overtime + commission);
+               var totaldeduction = formatCurrency(leaveamount + deduction + deductiondonation + donation);
+
+               $('#Total_Allowance').val(totalallowance);
+               $('#Total_Deduction').val(totaldeduction);
+
+               //Added by sun 09-02-2017
+               $('#Total_Allowance_Basic_Salary').val(allowanceaddtosalary);
+
+            }
+            CloseMask();
+         }
+      });
+   }
+
+   function PaymentType_OnChange() {
+      var opt = $("#Payment_Type").get(0);
+      var text = opt.options[opt.selectedIndex].text;
+      if (text != null && text.toLowerCase() == "cheque") {
+         $("#divCheque1").show();
+         $("#divCheque2").show();
+      }
+      else {
+         $("#divCheque1").hide();
+         $("#divCheque2").hide();
+      }
+   }
+   function getFloat(val) {
+      var f = val;
+      if (f == null) return 0;
+      f = parseFloat(f.replace(/,/gi, ""));
+      if (isNaN(f)) return 0;
+      return f;
+   }
+
+   function Process_Date_OnChange() {
+      var sparts = $('#Process_Date_From').val().split('/');
+      var eparts = $('#Process_Date_To').val().split('/');
+      var firstDay,lastDay;
+      if(sparts.length != 3)
+      {
+         alert('@Resource.The @Resource.Process_Date_From @Resource.Field @Resource.Is_Invalid_Lower !');
+         return ;
+      }
+      if(eparts.length != 3)
+      {
+         alert('@Resource.The @Resource.Process_Date_To @Resource.Field @Resource.Is_Invalid_Lower !');
+         return ;
+      }
+      try
+      {
+         firstDay = new Date(sparts[2], sparts[1] - 1, sparts[0]);
+         lastDay = new Date(eparts[2], eparts[1] - 1, eparts[0]);
+      }
+      catch(err){
+         alert('@Resource.The @Resource.Process_Date @Resource.Field @Resource.Is_Invalid_Lower !');
+         return ;
+      }
+
+      if(lastDay < firstDay)
+      {
+         alert('@Resource.The @Resource.Process_Date_To @Resource.Field @Resource.Cannot_Be_Less_Than_Lower @Resource.Process_Date_From  @Resource.Field !');
+         return ;
+      }
+
+      if(parseInt(sparts[1]) !=  parseInt( '@Model.Process_Month'))
+      {
+         alert('@Resource.The @Resource.Process_Date_From @Resource.Field @Resource.Is_Invalid_Month_Lower !');
+         return ;
+      }
+      if(parseInt(sparts[2]) !=  parseInt( '@Model.Process_Year'))
+      {
+         alert('@Resource.The @Resource.Process_Date_From @Resource.Field @Resource.Is_Invalid_Year_Lower !');
+         return ;
+      }
+      if(parseInt(eparts[1]) !=  parseInt( '@Model.Process_Month'))
+      {
+         alert('@Resource.The @Resource.Process_Date_To @Resource.Field @Resource.Is_Invalid_Month_Lower !');
+         return ;
+      }
+      if(parseInt(eparts[2]) !=  parseInt( '@Model.Process_Year'))
+      {
+         alert('@Resource.The @Resource.Process_Date_To @Resource.Field @Resource.Is_Invalid_Year_Lower !');
+         return ;
+      }
+      if('@Model.Basic_Salary_Unit' == '@Term.Hourly')
+      {
+         ShowMask();
+         $.ajax({
+            type: 'POST',
+            url: 'PayrollCalWorkHour',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({
+               pComID: '@Model.Company_ID',  pEmpID: '@Model.Employee_Profile_ID',
+               pFromDate:  $('#Process_Date_From').val(), pToDate :  $('#Process_Date_To').val()
+            }),
+            dataType: 'json',
+            success: function (data) {
+               if (data != null && data.No_Of_Hours != null) {
+                  //$('#No_Of_Hours').val(data.No_Of_Hours.toFixed(2));
+                  Salary_Onchange(true);
+               }
+               CloseMask();
+            }
+         });
+      }
+      else{
+         var wkdays = WorkDays(firstDay,lastDay);
+         $("#Total_Work_Days").val(wkdays);
+         $('#Basic_Salary').val((wkdays * parseFloat('@Model.Basic_Salary_Per_Day')).toFixed(2));
+         $('#Basic_Salary_Label').val(formatCurrency( $('#Basic_Salary').val()));
+         SumAll();
+      }
+   }
+
+   function WorkDays(firstDay,lastDay) {
+      var returnDays =0;
+      var i =0;
+      while (firstDay <= lastDay) {
+         if(i >= 100)
+            break;
+
+         var firstDayOfWeek = firstDay.getDay();
+         if (wds.indexOf(firstDayOfWeek) >= 0)
+         {
+            if (holidays != null)
+            {
+               var d = firstDay.getDate();
+               var m = firstDay.getMonth() +1;
+               var y = firstDay.getFullYear();
+               if(d.toString().length  == 1) {d = "0" + d;}
+               if(m.toString().length  == 1) {m = "0" + m;}
+
+               var todate = d + "/" +  m + "/"  + y;
+               if (holidays.indexOf(todate) < 0)
+                  returnDays++;
+            }
+            else
+               returnDays++;
+         }
+
+         firstDay.setDate(firstDay.getDate() + 1);
+         i++;
+      }
+      return returnDays;
+   }
+
+</script>
+<div class="pageheader">
+   <h2>@Resource.Payroll<span></span></h2>
+   <div class="breadcrumbs">
+      <ol class="breadcrumb">
+         <li>@Resource.You_Are_Here</li>
+         <li><a href="@Url.Action("Index", "Home" )">@Resource.DashBoard</a></li>
+         <li><a href="@Url.Action("Payroll", "Payroll")">@Resource.Payroll</a></li>
+         <li class="active">@(DateUtil.GetFullMonth(Model.Process_Month) + " " + Model.Process_Year)</li>
+      </ol>
+   </div>
+</div>
+
+@using (Html.BeginForm("PayrollInfo", "Payroll", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "theForm" }))
+{
+   @Html.AntiForgeryToken()
+   @Html.HiddenFor(m => m.PRM_ID)
+   @Html.HiddenFor(m => m.Employee_Profile_ID)
+   @Html.HiddenFor(m => m.Company_Currency_ID)
+   @Html.HiddenFor(m => m.Employee_No)
+   @Html.HiddenFor(m => m.Name)
+   @Html.HiddenFor(m => m.Company_Currency_ID)
+   @Html.HiddenFor(m => m.Company_Currency_Code)
+   @Html.HiddenFor(m => m.Process_Month)
+   @Html.HiddenFor(m => m.Process_Year)
+   @Html.HiddenFor(m => m.Selected_CPF_Formula_ID)
+   @Html.HiddenFor(m => m.Selected_OT_Formula_ID)
+   @Html.HiddenFor(m => m.Selected_Donation_Formula_ID)
+   @Html.HiddenFor(m => m.Opt_Out)
+   @Html.HiddenFor(m => m.Raw_Basic_Salary)
+   @Html.HiddenFor(m => m.Basic_Salary_Per_Day)
+   @Html.HiddenFor(m => m.Revision_No)
+
+   @*Added by sun 09-02-2017*@
+   <input type="hidden" name="Total_Allowance_Basic_Salary" id="Total_Allowance_Basic_Salary" value="">
+   <input type="hidden" id="CPF_Allowance">
+   <input type="hidden" id="CPF_Deductions">
+   <input type="hidden" id="CPF_Deduction_Adhoc">
+   <input type="hidden" id="CPF_Deduction_Donation">
+   <input type="hidden" id="CPF_Allowance_Adhoc">
+   <input type="hidden" id="CPF_Adjustment_Addition">
+   <input type="hidden" id="CPF_Adjustment_Deduction">
+   <input type="hidden" id="CPF_Bonus">
+
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+            <section class="tile color transparent-black">
+               <div class="tile-header transparent">
+                  <h1><strong>@Resource.Payroll</strong> @(DateUtil.GetFullMonth(Model.Process_Month) + " " + Model.Process_Year)</h1>
+                  <div class="controls">
+                     <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body">
+                  <div class="row">
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="Employee_No" class="control-label">@Resource.Employee_No_SymbolDot</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input type="text" class="form-control" name="Employee_No" id="Employee_No" value="@Model.Employee_No" readonly>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Employee_No)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="Name" class="control-label">@Resource.Employee_Name</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input type="text" class="form-control" name="Name" id="Name" value="@Model.Name" readonly>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Name)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="Department" class="control-label">@Resource.Department</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input type="text" class="form-control" name="Department" id="Department" value="@Model.Department" readonly>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Department)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="row">
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="Process_Date_From" class="control-label">@Resource.Process_Date_From</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input type="text" class="form-control input-datepicker" name="Process_Date_From" id="Process_Date_From" value="@Model.Process_Date_From" onchange="Process_Date_OnChange()">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Process_Date_From)
+                              </div>
+                           </div>
+
+                        </div>
+                     </div>
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="Process_Date_To" class="control-label">@Resource.Process_Date_To</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input type="text" class="form-control input-datepicker" name="Process_Date_To" id="Process_Date_To" value="@Model.Process_Date_To" onchange="Process_Date_OnChange()">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Process_Date_To)
+                              </div>
+                           </div>
+
+                        </div>
+                     </div>
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="Run_Date" class="control-label">@Resource.Run_Date</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input type="text" class="form-control" name="Run_Date" id="Run_Date" value="@Model.Run_Date" readonly>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Run_Date)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="row">
+                     @if (Model.Basic_Salary_Unit == Term.Hourly)
+                     {
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Hourly_Rate" class="control-label">@Resource.Hourly_Rate</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-9">
+                                 <input type="hidden" id="Basic_Salary" name="Basic_Salary" value="@Model.Basic_Salary">
+                                 <input type="text" class="form-control text-right" id="Hourly_Rate" name="Hourly_Rate" value="@Model.Hourly_Rate" onchange="Salary_Onchange()">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Hourly_Rate)
+                                 </div>
+                              </div>
+                              <div class="col-md-2">
+                                 <label class="control-label">@Model.Company_Currency_Code</label>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="No_Of_Hours" class="control-label">@Resource.Hours_Worked</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-9">
+                                 <input type="text" class="form-control text-right" name="No_Of_Hours" id="No_Of_Hours" value="@Model.No_Of_Hours" onchange="Salary_Onchange()">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.No_Of_Hours)
+                                 </div>
+                              </div>
+                              <div class="col-md-2">
+                                 <label class="control-label">Hours</label>
+                              </div>
+                           </div>
+                        </div>
+                     }
+                     else
+                     {
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Basic_Salary" class="control-label">@Resource.Basic_Salary</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-9">
+                                 <input type="text" class="form-control text-right" id="Basic_Salary" name="Basic_Salary" value="@Model.Basic_Salary" onchange="Salary_Onchange()">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Basic_Salary)
+                                 </div>
+                              </div>
+                              <div class="col-md-2">
+                                 <label class="control-label">@Model.Company_Currency_Code</label>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-md-12">
+                                 <label for="Total_Work_Days" class="control-label">@Resource.Total_Work_Days</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-md-9">
+                                 <input type="text" class="form-control" name="Total_Work_Days" id="Total_Work_Days" value="@Model.Total_Work_Days" readonly>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Total_Work_Days, "", new { id = "Total_Work_Days_Err" })
+                                 </div>
+                              </div>
+                              <div class="col-md-2">
+                                 <label class="control-label">@Resource.Days</label>
+                              </div>
+                           </div>
+                        </div>
+                     }
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-md-7">
+                              <label class="control-label">@Resource.Mode_Of_Payment</label>
+                           </div>
+                           <div class="col-md-5" id="divCheque1">
+                              <label class="control-label">@Resource.Cheque_No</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-7">
+                              <select class="chosen-select chosen-transparent form-control" name="Payment_Type" id="Payment_Type" onchange="PaymentType_OnChange()">
+                                 @foreach (var h in Model.paymentTypeList)
+                                 {
+                                    <option value="@h.Value" @(Model.Payment_Type == NumUtil.ParseInteger(h.Value) ? "selected" : "")>@h.Text</option>
+                                 }
+                              </select>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Payment_Type)
+                              </div>
+                           </div>
+                           <div class="col-md-5" id="divCheque2">
+                              <input type="text" class="form-control" name="Cheque_No" id="Cheque_No" value="@Model.Cheque_No">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Cheque_No)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+
+               </div>
+            </section>
+         </div>
+      </div>
+      <div class="row">
+         <div class="col-md-12">
+            <section class="tile color transparent-black">
+               <div class="tile-widget nopadding color transparent-white rounded-top-corners">
+                  <ul class="nav nav-tabs tabdrop">
+                     <li id="li-leave"><a href="#leave-tab" data-toggle="tab">@Resource.Leave_Record</a></li>
+                     <li id="li-expenses"><a href="#expenses-tab" data-toggle="tab">@Resource.Expenses_Record</a></li>
+                     <li><a href="#overtime-tab" data-toggle="tab">@Resource.Overtime</a></li>
+                     <li><a href="#allowance-tab" data-toggle="tab">@Resource.Other_Allowances_Or_Deductions</a></li>
+                     <li><a href="#extradonation-tab" data-toggle="tab">@Resource.Donation</a></li>
+                  </ul>
+               </div>
+               <div class="tile-body tab-content rounded-bottom-corners">
+                  @{Html.RenderPartial("_PayrollLeave", Model);}
+                  @{Html.RenderPartial("_PayrollExpenses", Model);}
+                  @{Html.RenderPartial("_PayrollOvertime", Model);}
+                  @{Html.RenderPartial("_PayrollAllowance", Model);}
+                  @{Html.RenderPartial("_PayrollDonation", Model);}
+               </div>
+            </section>
+         </div>
+      </div>
+      <div class="row">
+         <div class="col-md-6">
+            <section class="tile color transparent-black">
+               <div class="tile-header transparent">
+                  <h1><strong>@Resource.Summary</strong></h1>
+                  <div class="controls">
+                     <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Leave_Amount" class="control-label">@Resource.Leave_Amount </label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-10">
+                        <input type="text" class="form-control" name="Leave_Amount" id="Leave_Amount" value="@NumUtil.FormatCurrency(Model.Leave_Amount, 2)" readonly style="text-align:right">
+                     </div>
+                     <label class="col-md-2 control-label">@Model.Company_Currency_Code </label>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Expenses_Amount" class="control-label">@Resource.Expenses_Amount</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-10">
+                        <input type="text" class="form-control" name="Expenses_Amount" id="Expenses_Amount" value="@NumUtil.FormatCurrency(Model.Expenses_Amount,2)" readonly style="text-align:right">
+                     </div>
+                     <label class="col-md-2 control-label">@Model.Company_Currency_Code </label>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Overtime" class="control-label">@Resource.Overtime</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-10">
+                        <input type="text" class="form-control" name="Overtime" id="Overtime" value="@NumUtil.FormatCurrency(Model.Overtime,2)" readonly style="text-align:right">
+
+                     </div>
+                     <label class="col-md-2 control-label">@Model.Company_Currency_Code </label>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Allowance" class="control-label">@Resource.Allowance_Amount</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-10">
+                        <input type="text" class="form-control" name="Allowance" id="Allowance" value="@NumUtil.FormatCurrency(Model.Allowance,2)" readonly style="text-align:right">
+                        <input type="text" class="form-control" name="Allowance_Adhoc" id="Allowance_Adhoc" value="@NumUtil.FormatCurrency(Model.Allowance_Adhoc,2)" readonly style="display:none;">
+                        <input type="text" class="form-control" name="Adjustment_Addition" id="Adjustment_Addition" value="@NumUtil.FormatCurrency(Model.Adjustment_Addition,2)" readonly style="display:none;">
+                     </div>
+                     <label class="col-md-2 control-label">@Model.Company_Currency_Code</label>
+                  </div>
+                  <div class="form-group" style="display:none;">
+                     <label for="Commission" class="control-label">@Resource.Commission</label>
+                     <label class="col-md-2 control-label">@Model.Company_Currency_Code </label>
+                     <div class="col-md-12">
+                        <input type="text" class="form-control" name="Commission" id="Commission" value="@NumUtil.FormatCurrency(Model.Commission,2)" readonly style="text-align:right">
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Deductions" class="control-label">@Resource.Deductions_Amount</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-10">
+                        <input type="text" class="form-control" name="Deductions" id="Deductions" value="@NumUtil.FormatCurrency(Model.Deductions,2)" readonly style="text-align:right">
+                        <input type="text" class="form-control" name="Deduction_Adhoc" id="Deduction_Adhoc" value="@NumUtil.FormatCurrency(Model.Deduction_Adhoc,2)" readonly style="display:none;">
+                        <input type="text" class="form-control" name="Deduction_Donation" id="Deduction_Donation" value="@NumUtil.FormatCurrency(Model.Deduction_Donation,2)" readonly style="display:none;">
+                        <input type="text" class="form-control" name="Adjustment_Deduction" id="Adjustment_Deduction" value="@NumUtil.FormatCurrency(Model.Adjustment_Deduction,2)" readonly style="display:none;">
+                     </div>
+                     <label class="col-md-2 control-label">@Model.Company_Currency_Code </label>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Extra_Donation" class="control-label">@Resource.Donation</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-10">
+                        <input type="text" class="form-control" name="Extra_Donation" id="Extra_Donation" value="@NumUtil.FormatCurrency(Model.Extra_Donation,2)" readonly style="text-align:right">
+                     </div>
+                     <label class="col-md-2 control-label">@Model.Company_Currency_Code </label>
+                  </div>
+               </div>
+            </section>
+         </div>
+         <div class="col-md-6">
+            <section class="tile color transparent-black">
+               <div class="tile-header transparent">
+                  <h1><strong>@Resource.Calculation</strong></h1>
+                  <div class="controls">
+                     <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Basic_Salary" class="control-label">@Resource.Basic_Salary</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-10">
+                        <input type="text" class="form-control" id="Basic_Salary_Label" value="@NumUtil.FormatCurrency(Model.Basic_Salary,2)" readonly style="text-align:right">
+                     </div>
+                     <label class="col-md-2 control-label">@Model.Company_Currency_Code</label>
+                  </div>
+                  <div class="form-group" style="display:none;">
+                     <label for="Total_Allowance" class="control-label">@Resource.Total_Allowance</label>
+                     <label class="col-md-2 control-label">@Model.Company_Currency_Code </label>
+                     <div class="col-md-12">
+                        <input type="text" class="form-control" name="Total_Allowance" id="Total_Allowance" value="@NumUtil.FormatCurrency(Model.Total_Allowance,2)" readonly style="text-align:right">
+                     </div>
+                  </div>
+                  <div class="form-group" style="display:none;">
+                     <label for="Total_Deduction" class="control-label">@Resource.Total_Deduction</label>
+                     <label class="col-md-2 control-label">@Model.Company_Currency_Code </label>
+                     <div class="col-md-12">
+                        <input type="text" class="form-control" name="Total_Deduction" id="Total_Deduction" value="@NumUtil.FormatCurrency(Model.Total_Deduction, 2)" readonly style="text-align:right">
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Gross_Salary" class="control-label">@Resource.Gross_Salary</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-10">
+                        <input type="text" class="form-control" name="Gross_Salary" id="Gross_Salary" value="@NumUtil.FormatCurrency(Model.Gross_Salary, 2)" readonly style="text-align:right">
+                     </div>
+                     <label class="col-md-2 control-label">@Model.Company_Currency_Code </label>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Net_Salary" class="control-label">@Resource.Net_Salary</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-10">
+                        <input type="text" class="form-control" name="Net_Salary" id="Net_Salary" value="@NumUtil.FormatCurrency(Model.Net_Salary, 2)" readonly style="text-align:right">
+                     </div>
+                     <label class="col-md-2 control-label">@Model.Company_Currency_Code </label>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Employee_Contribution" class="control-label">@Resource.Employee_Contribution</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-10">
+                        <input type="text" class="form-control" name="Employee_Contribution" id="Employee_Contribution" value="@NumUtil.FormatCurrency(Model.Employee_Contribution, 2)" readonly style="text-align:right">
+                     </div>
+                     <label class="col-md-2 control-label">@Model.Company_Currency_Code </label>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Employer_Contribution" class="control-label">@Resource.Employer_Contribution</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-10">
+                        <input type="text" class="form-control" name="Employer_Contribution" id="Employer_Contribution" value="@NumUtil.FormatCurrency(Model.Employer_Contribution, 2)" readonly style="text-align:right">
+                     </div>
+                     <label class="col-md-2 control-label">@Model.Company_Currency_Code </label>
+                  </div>
+                  <div id="divDonationType">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label id="Donation_Type" for="Donation" class="control-label">@Resource.Donation</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-10">
+                           <input type="text" class="form-control" name="Donation" id="Donation" value="@NumUtil.FormatCurrency(Model.Donation, 2)" readonly style="text-align:right">
+                        </div>
+                        <label class="col-md-2 control-label">@Model.Company_Currency_Code </label>
+                     </div>
+                  </div>
+               </div>
+            </section>
+         </div>
+      </div>
+      <div class="row">
+         <div class="col-md-12">
+            <section class="tile color transparent-white">
+               <div class="tile-body">
+                  <div class="row">
+                     <div class="col-md-12">
+                        <button id="btnSave" type="submit" class="btn btn-primary">@Resource.Save</button>
+                        <button id="btnSaveView" type="submit" name="export" value="export" class="btn btn-default" data-toggle="export" data-modal="modal">@Resource.Save & @Resource.Preview_Payslip</button>
+                        <a href="@Url.Action("Payroll", "Payroll", new { })" class="btn btn-default">@Resource.Back</a>
+                     </div>
+                  </div>
+               </div>
+            </section>
+         </div>
+      </div>
+   </div>
+}

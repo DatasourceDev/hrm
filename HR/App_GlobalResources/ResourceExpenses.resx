@@ -1,0 +1,396 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AddNewExpensesType" xml:space="preserve">
+    <value>Add New Expenses Type</value>
+  </data>
+  <data name="AllowedProbation" xml:space="preserve">
+    <value>Allowed for Probation</value>
+  </data>
+  <data name="Amount" xml:space="preserve">
+    <value>Amount</value>
+  </data>
+  <data name="AmountClaiming" xml:space="preserve">
+    <value>Claimable Amount</value>
+  </data>
+  <data name="AmountPercentage" xml:space="preserve">
+    <value>Amount / Percentage</value>
+  </data>
+  <data name="AmountPerYear" xml:space="preserve">
+    <value>Total Amount per Year</value>
+  </data>
+  <data name="ApprovalWorkflow" xml:space="preserve">
+    <value>Expenses Approval Workflow</value>
+  </data>
+  <data name="ClaimableType" xml:space="preserve">
+    <value>Claim Type</value>
+  </data>
+  <data name="CurrencySetup" xml:space="preserve">
+    <value>Currency Setup</value>
+  </data>
+  <data name="Default" xml:space="preserve">
+    <value>Default (31 Dec)</value>
+  </data>
+  <data name="Department" xml:space="preserve">
+    <value>Department</value>
+  </data>
+  <data name="Expenses" xml:space="preserve">
+    <value>Expenses</value>
+  </data>
+  <data name="ExpensesApproval" xml:space="preserve">
+    <value>Expenses Approval</value>
+  </data>
+  <data name="ExpensesConfig" xml:space="preserve">
+    <value>Expenses Configuration</value>
+  </data>
+  <data name="ExpensesManagement" xml:space="preserve">
+    <value>Expenses Management</value>
+  </data>
+  <data name="ExpensesRecord" xml:space="preserve">
+    <value>My Record</value>
+  </data>
+  <data name="ExpensesDescription" xml:space="preserve">
+    <value>Expenses Description</value>
+  </data>
+  <data name="ExpensesType" xml:space="preserve">
+    <value>Expenses Type</value>
+  </data>
+  <data name="FiscalYear" xml:space="preserve">
+    <value>Fiscal Year</value>
+  </data>
+  <data name="NewApplication" xml:space="preserve">
+    <value>New Expenses</value>
+  </data>
+  <data name="PercentageTotalAmount" xml:space="preserve">
+    <value>Percentage * Total Amount</value>
+  </data>
+  <data name="SelectAmountPercentage" xml:space="preserve">
+    <value>Default Maximum per Expenses Claims</value>
+  </data>
+  <data name="AddApprovalWorkflow" xml:space="preserve">
+    <value>Add Approval Workflow</value>
+  </data>
+  <data name="FinalApprover" xml:space="preserve">
+    <value>Final Approver</value>
+  </data>
+  <data name="FirstApprover" xml:space="preserve">
+    <value>First Approver</value>
+  </data>
+  <data name="RangeAmount" xml:space="preserve">
+    <value>Range Below</value>
+  </data>
+  <data name="Application" xml:space="preserve">
+    <value>Application</value>
+  </data>
+  <data name="ApprovalStatus1st" xml:space="preserve">
+    <value>1-Approval</value>
+  </data>
+  <data name="ApprovalStatus2st" xml:space="preserve">
+    <value>2-Approval</value>
+  </data>
+  <data name="Balance" xml:space="preserve">
+    <value>Balance</value>
+  </data>
+  <data name="ExpensesDate" xml:space="preserve">
+    <value>Date of Expenses</value>
+  </data>
+  <data name="FirstApproval" xml:space="preserve">
+    <value>First Approval</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No.</value>
+  </data>
+  <data name="Reasons" xml:space="preserve">
+    <value>Reasons</value>
+  </data>
+  <data name="Remarks" xml:space="preserve">
+    <value>Remarks</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="TotalAmount" xml:space="preserve">
+    <value>Total Amount</value>
+  </data>
+  <data name="UploadReceipt" xml:space="preserve">
+    <value>Receipt Upload</value>
+  </data>
+  <data name="FinalApproval" xml:space="preserve">
+    <value>Final Approval</value>
+  </data>
+  <data name="DateApplied" xml:space="preserve">
+    <value>Date Applied</value>
+  </data>
+  <data name="ApprovedExpensesList" xml:space="preserve">
+    <value>Approved Expenses List</value>
+  </data>
+  <data name="Employee" xml:space="preserve">
+    <value>Employee</value>
+  </data>
+  <data name="PendingExpensesApplications" xml:space="preserve">
+    <value>Pending Expenses Applications</value>
+  </data>
+  <data name="RejectedExpensesList" xml:space="preserve">
+    <value>Rejected Expenses List</value>
+  </data>
+  <data name="EmployeeName" xml:space="preserve">
+    <value>Employee Name</value>
+  </data>
+  <data name="AddCurrencySetup" xml:space="preserve">
+    <value>Add Currency Setup</value>
+  </data>
+  <data name="ByFixedRate" xml:space="preserve">
+    <value>By Fixed Rate</value>
+  </data>
+  <data name="ByOnline" xml:space="preserve">
+    <value>By Online</value>
+  </data>
+  <data name="CompareMethod" xml:space="preserve">
+    <value>Compare Method</value>
+  </data>
+  <data name="ConversionAmount" xml:space="preserve">
+    <value>Amount / Per Default Currency</value>
+  </data>
+  <data name="ConversionCurrency" xml:space="preserve">
+    <value>Conversion Currency</value>
+  </data>
+  <data name="Currency" xml:space="preserve">
+    <value>Currency</value>
+  </data>
+  <data name="DefaultCurrency" xml:space="preserve">
+    <value>Default Currency</value>
+  </data>
+  <data name="EmployeeNo" xml:space="preserve">
+    <value>Employee No</value>
+  </data>
+  <data name="ExpensesReport" xml:space="preserve">
+    <value>Expenses Report</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>From</value>
+  </data>
+  <data name="To" xml:space="preserve">
+    <value>To</value>
+  </data>
+  <data name="ApprovalWorkflowInfo" xml:space="preserve">
+    <value>Expenses Approval Workflow Information</value>
+  </data>
+  <data name="CurrencySetupInfo" xml:space="preserve">
+    <value>Currency Setup Information</value>
+  </data>
+  <data name="AllowedOverAmountPerYear" xml:space="preserve">
+    <value>Allow over Amount per Year</value>
+  </data>
+  <data name="Pecentage" xml:space="preserve">
+    <value>Pecentage</value>
+  </data>
+  <data name="Designation" xml:space="preserve">
+    <value>Designation</value>
+  </data>
+  <data name="MaxAmountPerClaim" xml:space="preserve">
+    <value>Max. Amount per Claim</value>
+  </data>
+  <data name="YearService" xml:space="preserve">
+    <value>Years of Services</value>
+  </data>
+  <data name="AmountSpent" xml:space="preserve">
+    <value>Amount Spent</value>
+  </data>
+  <data name="ExpensesInfo" xml:space="preserve">
+    <value>Expenses Information</value>
+  </data>
+  <data name="ExpensesNo" xml:space="preserve">
+    <value>Expenses No.</value>
+  </data>
+  <data name="ExpensesTitle" xml:space="preserve">
+    <value>Expenses Title</value>
+  </data>
+  <data name="ItemDetails" xml:space="preserve">
+    <value>Item Details</value>
+  </data>
+  <data name="ExpensesTypeDesc" xml:space="preserve">
+    <value>Expenses Type Description</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="Tax" xml:space="preserve">
+    <value>Tax</value>
+  </data>
+  <data name="Approval" xml:space="preserve">
+    <value>Approval</value>
+  </data>
+  <data name="Approved" xml:space="preserve">
+    <value>Approved</value>
+  </data>
+  <data name="Pending" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="Rejected" xml:space="preserve">
+    <value>Rejected</value>
+  </data>
+  <data name="RequestForm" xml:space="preserve">
+    <value>Request Form</value>
+  </data>
+  <data name="TeamCalendar" xml:space="preserve">
+    <value>Team Calendar</value>
+  </data>
+  <data name="ExpensesName" xml:space="preserve">
+    <value>Expenses Name</value>
+  </data>
+  <data name="AmountPerUOM" xml:space="preserve">
+    <value>Amount Per UOM</value>
+  </data>
+  <data name="Mileage" xml:space="preserve">
+    <value>Mileage</value>
+  </data>
+  <data name="UnitOfMeasurement" xml:space="preserve">
+    <value>Unit Of Measurement</value>
+  </data>
+  <data name="Category_Description" xml:space="preserve">
+    <value>Category Description</value>
+  </data>
+  <data name="Category_Name" xml:space="preserve">
+    <value>Category Name</value>
+  </data>
+  <data name="ExpensesCategory" xml:space="preserve">
+    <value>Expenses Category</value>
+  </data>
+  <data name="PerMonth" xml:space="preserve">
+    <value>Per Month</value>
+  </data>
+  <data name="AmountPerMonth" xml:space="preserve">
+    <value>Amount Per Month</value>
+  </data>
+  <data name="PerYear" xml:space="preserve">
+    <value>Per Year</value>
+  </data>
+  <data name="Approver" xml:space="preserve">
+    <value>Approver</value>
+  </data>
+  <data name="Cancelled" xml:space="preserve">
+    <value>Cancelled</value>
+  </data>
+  <data name="Accumulative" xml:space="preserve">
+    <value>Accumulative</value>
+  </data>
+  <data name="Import_Expenses" xml:space="preserve">
+    <value>Import Expenses</value>
+  </data>
+</root>

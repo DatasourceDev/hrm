@@ -1,0 +1,73 @@
+﻿@model  HR.Models.BankInfoViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+   var i = Model.Index;
+}
+<script type="text/javascript">
+   $(function () {
+      $("#Bank_Info_Rows_" + @i + "__Payment_Type").chosen({ disable_search_threshold: 10 });
+      InitDatepicker();
+   });
+</script>
+
+<td class="text-center">
+   <div class="radio">
+      @if ((Model.Selected.HasValue && Model.Selected.Value) | i == 0)
+      {
+         <input type="radio" name="Bank_Info_Selected" id="Bank_Info_Rows_@(i)__Selected" value="@i" checked>
+      }
+      else
+      {
+         <input type="radio" name="Bank_Info_Selected" id="Bank_Info_Rows_@(i)__Selected" value="@i">
+      }
+      <label for="Bank_Info_Rows_@(i)__Selected" style="margin-right:0px"></label>
+   </div>
+   <div class="validation-error">
+      @Html.ValidationMessage("Bank_Info_Rows[" + i + "].Selected")
+   </div>
+</td>
+<td>
+   @Html.Hidden("Bank_Info_Rows[" + i + "].Row_Type", RowType.ADD)
+   <input type="text" class="form-control" id="Bank_Info_Rows_@(i)__Bank_Name" name="Bank_Info_Rows[@i].Bank_Name" value="@Model.Bank_Name" onblur="ValidateRequire('Bank_Info_Rows_@(i)__Bank_Name', '@Resource.Bank_Name', true)">
+   <div class="validation-error">
+      @Html.ValidationMessage("Bank_Info_Rows[" + i + "].Bank_Name", "", new { @id = "Bank_Info_Rows_" + i + "__Bank_Name_Err" })
+   </div>
+</td>
+<td>
+   <input type="text" class="form-control" id="Bank_Info_Rows_@(i)__Bank_Account" name="Bank_Info_Rows[@i].Bank_Account" value="@Model.Bank_Account" onblur="ValidateRequire('Bank_Info_Rows_@(i)__Bank_Account', '@Resource.Bank_Account', true)">
+   <div class="validation-error">
+      @Html.ValidationMessage("Bank_Info_Rows[" + i + "].Bank_Account", "", new { @id = "Bank_Info_Rows_" + i + "__Bank_Account_Err" })
+   </div>
+</td>
+<td>
+   <select class="chosen-select chosen-transparent form-control" id="Bank_Info_Rows_@(i)__Payment_Type" name="Bank_Info_Rows[@i].Payment_Type">
+      @if (Model.paymentTypeList != null)
+      {
+         foreach (var prow in Model.paymentTypeList)
+         {
+            if (Model.Payment_Type == NumUtil.ParseInteger(prow.Value))
+            {
+               <option value="@prow.Value" selected>@prow.Text</option>
+            }
+            else
+            {
+               <option value="@(prow.Value != null ? prow.Value : "0")">@prow.Text</option>
+            }
+         }
+      }
+   </select>
+</td>
+<td>
+   <input type="text" class="form-control input-datepicker" id="Bank_Info_Rows_@(i)__Effective_Date" name="Bank_Info_Rows[@i].Effective_Date" value="@Model.Effective_Date" onblur="ValidateRequire('Bank_Info_Rows_@(i)__Effective_Date', '@Resource.Effective_Date', true)">
+   <div class="validation-error">
+      @Html.ValidationMessage("Bank_Info_Rows[" + i + "].Effective_Date", "", new { @id = "Bank_Info_Rows_" + i + "__Effective_Date_Err" })
+   </div>
+</td>
+<td class="actions text-center" style="cursor:pointer">
+   <a data-toggle="modal" onclick="return DeleteBankInfo_Onclick('brow-@i', @i);">
+      <i class="fa fa-times-circle-o fa-2x"></i>
+   </a>
+</td>

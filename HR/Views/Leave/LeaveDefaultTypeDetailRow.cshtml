@@ -1,0 +1,42 @@
+﻿@model  HR.Models.LeaveDefaultDetailViewModel
+@using HR.Models
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@{
+    var userlogin = UserSession.getUser(Request.RequestContext.HttpContext);
+    var i = Model.Index;
+}
+
+<td id="td-@i">
+    @Html.Hidden("Detail_Rows[" + i + "].Row_Type", RowType.ADD)
+    @Html.Hidden("Detail_Rows[" + i + "].Default_ID", Model.Default_ID)
+    @Html.Hidden("Detail_Rows[" + i + "].Default_Detail_ID", Model.Default_Detail_ID)
+
+    <input type="text" class="form-control input-table-transparent" id="Detail_Rows_@(i)__Designations_Text" value="All" >
+    <input type="hidden" id="Detail_Rows_@(i)__Designations" name="Detail_Rows[@i].Designations" value="All">
+    <div class="validation-error">
+        @Html.ValidationMessage("Detail_Rows[" + i + "].Designations")
+    </div>
+</td>
+<td>
+    <input type="text" class="form-control input-table-transparent" id="Detail_Rows_@(i)__Year_Service_Text" value="@Model.Year_Service" >
+    <input type="hidden" id="Detail_Rows_@(i)__Year_Service" name="Detail_Rows[@i].Year_Service" value="@Model.Year_Service">
+    <div class="validation-error">
+        @Html.ValidationMessage("Detail_Rows[" + i + "].Year_Service")
+    </div>
+</td>
+<td>
+    <input type="text" class="form-control input-table-transparent" id="Detail_Rows_@(i)__Default_Leave_Amount_Text" value="@Model.Default_Leave_Amount" >
+    <input type="hidden" id="Detail_Rows_@(i)__Default_Leave_Amount" name="Detail_Rows[@i].Default_Leave_Amount" value="@Model.Default_Leave_Amount">
+    <div class="validation-error">
+        @Html.ValidationMessage("Detail_Rows[" + i + "].Default_Leave_Amount", "", new { id = "Detail_Rows_" + i + "__Default_Leave_Amount" })
+    </div>
+</td>
+<td class="actions text-left" style="cursor:pointer">
+    <a href="#" id="btnEditDetail-@i" onclick="EditDetail_Onclick('@i', '@Model.Default_ID'@(i + 1)','@Model.Row_Type', '@Model.Year_Service','@Model.Default_Leave_Amount')"><i class="fa fa-edit fa-2x"></i></a>
+    <a data-toggle="modal" onclick="return DeleteDetail('erow-@i', @i);">
+        <i class="fa fa-times-circle-o fa-2x"></i>
+    </a>
+</td>
+

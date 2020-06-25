@@ -1,0 +1,81 @@
+﻿@model  HR.Models.BankDetailViewModel
+@using SBSResourceAPI;
+
+<script type="text/javascript">
+    var form = $("#bank-detail-form").removeData("validator").removeData("unobtrusiveValidation");
+    $.validator.unobtrusive.parse(form);
+
+    $(function () {
+        form.validate({});
+        $("#btnSave").click(function () {
+            if (form.valid()) {
+                var data = form.serialize();
+                $.ajax({
+                    url: '@Url.Action("SaveBankDetail", "Company")',
+                    //Passes the content of an input up
+                    data: {},
+                    datatype: 'html',
+                    data: data,
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        $("#editModalContainerID").modal('hide');
+                        $('#bankDetailList').html(data);
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+<form id="bank-detail-form" class="form-horizontal validatable">
+    @Html.HiddenFor(m => m.Company_ID)
+    @Html.HiddenFor(m => m.Bank_Detail_ID)
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h6 id="modal-formLabel">@Resource.Bank_Detail</h6>
+    </div>
+    <div class="modal-body">
+        <div class="row-fluid">
+            <div class="span12">
+                <div class="control-group">
+                    @Html.LabelFor(m => m.Bank_Account_Number, new { @class = "control-label" })
+                    <div class="controls">
+                        @Html.TextBoxFor(m => m.Bank_Account_Number, new { @class = "", style = "width: 90%;" })
+                        <div class="validation-error">
+                            @Html.ValidationMessageFor(m => m.Bank_Account_Number)
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    @Html.LabelFor(m => m.Bank_Name, new { @class = "control-label" })
+                    <div class="controls">
+                        @Html.TextBoxFor(m => m.Bank_Name, new { @class = "", style = "width: 90%;" })
+                        <div class="validation-error">
+                            @Html.ValidationMessageFor(m => m.Bank_Name)
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    @Html.LabelFor(m => m.Bank_Account_Owner, new { @class = "control-label" })
+                    <div class="controls">
+                        @Html.TextBoxFor(m => m.Bank_Account_Owner, new { @class = "", style = "width: 90%;" })
+                        <div class="validation-error">
+                            @Html.ValidationMessageFor(m => m.Bank_Account_Owner)
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    @Html.LabelFor(m => m.Display_On_Reports, new { @class = "control-label" })
+                    <div class="controls">
+                        @Html.CheckBoxFor(m => m.Display_On_Reports)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-blue" id="btnSave" type="button">@Resource.Save_Changes</button>
+        <button class="btn btn-default" data-dismiss="modal">@Resource.Close</button>
+    </div>
+</form>
+

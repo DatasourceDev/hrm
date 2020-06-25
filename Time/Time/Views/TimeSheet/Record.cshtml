@@ -1,0 +1,280 @@
+﻿@model  Time.Models.TimeSheetViewModel
+@using SBSModel.Models;
+@using System.Text;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Models;
+@using SBSWorkFlowAPI.ModelsAndService;
+@using SBSResourceAPI;
+@using SBSWorkFlowAPI.Constants;
+
+@{
+   ViewBag.Title = Resource.My_Time_Sheet;
+   var userlogin = UserUtil.getUser(Request.RequestContext.HttpContext);
+   var requests = new List<Request>();
+   var requestIDs = new List<int>();
+
+   var hist = new EmploymentHistoryService().GetCurrentEmploymentHistoryByProfile(userlogin.Profile_ID);
+   if (hist != null)
+   {
+      var aService = new SBSWorkFlowAPI.Service();
+      var r = aService.GetMyRequests(userlogin.Company_ID.Value, hist.Department_ID.Value, userlogin.Profile_ID, ModuleCode.Time, ApprovalType.TimeSheet);
+      if (r.Item2.IsSuccess && r.Item1 != null)
+      {
+         requests = r.Item1.ToList();
+         requestIDs = r.Item1.Select(s => s.Request_ID).ToList();
+      }
+
+   }
+}
+
+@if (Model.rights != null && Model.rights.Contains(Operation.A))
+{
+   <script type="text/javascript">
+      $(function () {
+         InitDatepicker();
+         InitDatatable("#TSDataTable", null, null);
+      })
+   </script>
+
+   <div class="pageheader">
+      <h2>@Resource.My_Time_Sheet<span></span></h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li class="active">@Resource.My_Time_Sheet</li>
+         </ol>
+      </div>
+   </div>
+
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+
+            @using (Html.BeginForm("Record", "TimeSheet", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+            {
+               @Html.AntiForgeryToken()
+
+               <section class="tile color transparent-black filter" id="secfilter">
+                  <div class="tile-header transparent">
+                     <h1 onclick="CollapseHeader(null, 'btncollapse', 'secfilter')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize filter" id="btncollapse"><i class="fa fa-search  color-white"></i></a>
+                     </div>
+                  </div>
+                  <div class="tile-body">
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Date_From" class="control-label">@Resource.Date_From</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control input-datepicker" id="Date_From" name="Date_From" value="@Model.Date_From">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Date_From)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Date_To" class="control-label">@Resource.To</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <input type="text" class="form-control input-datepicker" id="Date_To" name="Date_To" value="@Model.Date_To">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Date_To)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Search_Time_Sheet_Status" class="control-label">@Resource.Status</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Search_Time_Sheet_Status" name="Search_Time_Sheet_Status">
+                                    @if (Model.WFStatuslst != null)
+                                    {
+                                       foreach (var row in Model.WFStatuslst)
+                                       {
+                                          if (Model.Search_Time_Sheet_Status == row.Value)
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                          }
+                                          else
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                          }
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Search_Time_Sheet_Status)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="row">
+                        <div class="col-md-6">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <button type="submit" class="btn btn-default">@Resource.Filter</button>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </section>
+
+               <section class="tile color transparent-black">
+                  <div class="tile-header transparent">
+                     <h1><strong>@Resource.My_Time_Sheet</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                     </div>
+                  </div>
+
+                  <div class="tile-body ">
+                     <div class="table-responsive">
+                        <table class="table table-datatable table-custom" id="TSDataTable">
+                           <thead>
+                              <tr>
+                                 <th class="sort-alpha">@Resource.Date</th>
+                                 <th class="sort-alpha">(@Resource._24_Hour_Clock)<br /> @Resource.Clock_In</th>
+                                 <th class="sort-alpha">(@Resource._24_Hour_Clock)<br /> @Resource.Clock_Out</th>
+                                 <th class="sort-alpha">@Resource.Indent_No</th>
+                                 <th class="sort-alpha">@Resource.Customer_Name</th>
+                                 <th class="sort-alpha">@Resource.Duration</th>
+                                 <th class="sort-alpha">@Resource.Hour_Rate</th>
+                                 <th class="sort-alpha">@Resource.Total_Amount_SymbolDollar</th>
+                                 <th class="sort-alpha">@Resource.Status</th>
+                                 <th class="no-sort" style="width:110px;">@Resource.Action</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              @if (Model.TimeSheetList != null)
+                              {
+                                 var i = 0;
+                                 foreach (var row in Model.TimeSheetList)
+                                 {
+                                    var status = "";
+                                    var show = false; ;
+                                    if (!row.Request_ID.HasValue)
+                                    {
+                                       show = true;
+                                    }
+                                    else if (requestIDs.Contains(row.Request_ID.HasValue ? row.Request_ID.Value : 0))
+                                    {
+                                       var request = requests.Where(w => w.Request_ID == row.Request_ID).FirstOrDefault();
+                                       if (request != null && request.Task_Assignment != null)
+                                       {
+                                          status = request.Status;
+                                          show = true;
+                                       }
+                                    }
+                                    if (show)
+                                    {
+                                       var duration = row.Duration.HasValue ? row.Duration.Value : new TimeSpan();
+                                       <tr>
+                                          <td width="75px">@DateUtil.ToDisplayDate(row.Date_Of_Date)</td>
+                                          <td width="65px">@DateUtil.ToDisplayTime(row.Clock_In)</td>
+                                          <td width="65px">@DateUtil.ToDisplayTime(row.Clock_Out)</td>
+                                          <td>
+                                             <span style="font-weight:700">@row.Indent_No</span>
+                                             <br />
+                                             <span style="color: rgb(144, 144, 144); ">@row.Indent_Name</span>
+                                          </td>
+                                          <td>@row.Customer_Name</td>
+                                          <td width="65px">@duration.Hours @Resource.Hr_S @(duration.Minutes > 0 ? duration.Minutes + " " + Resource.Min_S : "") </td>
+                                          <td class="text-right">@NumUtil.FormatCurrency(row.Hour_Rate, 2)</td>
+                                          <td class="text-right">
+                                             @NumUtil.FormatCurrency(row.Total_Amount, 2)
+                                          </td>
+                                          <td width="70px">
+                                             @if (!string.IsNullOrEmpty(row.Cancel_Status) && row.Cancel_Status != WorkflowStatus.Cancellation_Rejected)
+                                             {
+                                                @StatusUtil.Get_Overall_Status(row.Cancel_Status)
+                                             }
+                                             else
+                                             {
+                                                if (row.Overall_Status == WorkflowStatus.Pending || row.Overall_Status == WorkflowStatus.Approved)
+                                                {
+                                                   @Resource.Pending
+                                                }
+                                                else
+                                                {
+                                                   @StatusUtil.Get_Overall_Status(row.Overall_Status)
+                                                }
+                                             }
+                                          </td>
+                                          <td class="actions text-left">
+                                             @if (Model.rights != null && Model.rights.Contains(Operation.U))
+                                             {
+                                                if (row.Overall_Status == WorkflowStatus.Draft)
+                                                {
+                                                   //********  Workflow Draft  ********//
+                                                   <a href="@Url.Action("Application", "TimeSheet", new { tsID = EncryptUtil.Encrypt(row.Time_Sheet_ID), operation = EncryptUtil.Encrypt(Operation.U) })"><i class="fa fa-edit fa-2x" title="@Resource.Edit"></i></a>
+                                                   <a href="@Url.Action("TimeSheetDelete", "TimeSheet", new { tID = EncryptUtil.Encrypt(row.Time_Sheet_ID), operation = EncryptUtil.Encrypt(Operation.D) })" onclick="return confirm('@Resource.Confirm_Delete_Msg');" title="@Resource.Delete"><i class="fa fa-times-circle-o fa-2x"></i></a>
+                                                }
+                                                else
+                                                {
+                                                   <a href="@Url.Action("Application", "TimeSheet", new { tsID = EncryptUtil.Encrypt(row.Time_Sheet_ID), operation = EncryptUtil.Encrypt(Operation.U) })"><i class="fa fa-file-o  fa-2x" title="@Resource.View"></i></a>
+                                                }
+                                             }
+                                          </td>
+                                       </tr>
+                                    }
+                                    i++;
+                                 }
+                              }
+                           </tbody>
+                        </table>
+                     </div>
+                  </div>
+               </section>
+            }
+         </div>
+      </div>
+   </div>
+}
+
+   @*@functions {
+         string GetEmployeeProfile(int? EmployeeProfileID)
+         {
+            var UserServ = new UserService();
+            var user = UserServ.getUserByEmployeeProfile(EmployeeProfileID);
+            if (user != null)
+            {
+               return AppConst.GetUserName(user);
+            }
+            return "";
+         }
+      }*@

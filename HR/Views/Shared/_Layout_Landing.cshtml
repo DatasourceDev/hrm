@@ -1,0 +1,168 @@
+﻿@using System.Web.Configuration
+@using HR.Models;
+@using HR.Common;
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Constants;
+<!DOCTYPE html>
+<html>
+<head>
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta charset="UTF-8" />
+   <link rel="icon" type="image/ico" href="@Url.Content("~/assets/images/favicon.ico")" />
+   <title>@ViewBag.Title</title>
+   @HtmlUtil.InitJS()
+   @HtmlUtil.InitCSS()
+   <script>
+      // this is important for IEs
+      var polyfilter_scriptpath = '@Url.Content("~/assets/js/vendor/modals/")';
+   </script>
+   @{
+      var controllername = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+      var actionname = HttpContext.Current.Request.RequestContext.RouteData.Values["action"].ToString();
+      var uitem = UserUtil.GetUserItem(Request.RequestContext.HttpContext);
+      if (uitem.aMode == AuthenMode.IncorrectUser)
+      {
+         Request.RequestContext.HttpContext.Session.Clear();
+         uitem = UserUtil.GetUserItem(Request.RequestContext.HttpContext);
+      }
+
+      if (uitem.aMode == AuthenMode.UserNoFound)
+      {
+         Response.Redirect("~/Account/Logout");
+      }
+
+      var appcnt = 0;
+      var approvers = new List<Notification>();
+      var requests = new List<Request>();
+      var requestIDs = new List<int>();
+      var erequests = new List<Request>();
+      var erequestIDs = new List<int>();
+      var err = ViewData.ModelState.SelectMany(m => m.Value.Errors, (m, error) => (m.Key)).Distinct().ToList();
+   }
+</head>
+
+<body class="@uitem.bg">
+   <div id="divjavaAddin"></div>
+   <div class="warning-timeout-dlg" align="center" style="z-index:9999">
+      <div>
+         <div class="notification ">
+            <h4><strong>@Resource.Message_Connection_Timeout </strong>@Resource.Message_Do_you_want_To_Continue_Using_This_System</h4>
+            <p>
+               <button type="button" class="btn btn-primary" onclick="ContinousLogin();">@Resource.Continue</button>
+               <button type="button" class="btn btn-danger" onclick="logout();">@Resource.Logout</button>
+            </p>
+         </div>
+      </div>
+   </div>
+   <div class="loading" align="center" style="z-index:9999">
+      <img src="@Url.Content("~/assets/images/loader.gif")">
+   </div>
+   <div id="wrap">
+      <div class="row">
+         @if (uitem.aMode == AuthenMode.Authenticated)
+         {
+            <div id="content" class="full-page" style="top:-15px">
+               @RenderBody()
+            </div>
+         }
+         else
+         {
+            @RenderBody()
+         }
+      </div>
+   </div>
+
+   <script type="text/javascript">
+      $(function () {
+         InitCollapseHeader(false);
+         @foreach (var ctl in ViewData.ModelMetadata.Properties)
+            {
+                if(ctl.ModelType.IsArray)
+                {
+                    if (ctl.ModelType.BaseType.BaseType != null && ctl.ModelType.BaseType.BaseType.ToString() == "System.Object")
+                    {
+
+                    }
+                }
+                else
+                {
+                    if (ctl.IsRequired)
+                    {
+                        var ctlname = ctl.PropertyName;
+                        ctlname = ctlname.Replace("[", "_");
+                        ctlname = ctlname.Replace("]", "_");
+                        ctlname = ctlname.Replace(".", "_");
+
+                        @:if ($("#@ctlname").get(0) != null) { $("#@ctlname").get(0).setAttribute('onblur', "Input_Onblur('@ctlname','@ctl.DisplayName',@ctl.IsRequired.ToString().ToLower())"); }
+
+                        if (ctl.Model == null || ctl.Model == "")
+                        {
+                            @:MandatoryColor('@ctlname');
+                                                                                                                                                                                                                                                                                                                                                                                                                                    }
+                                            }
+                }
+
+                if (ctl.ModelType.IsValueType && ctl.ModelType.FullName.Contains("System.Decimal"))
+                {
+                    var ctlname =  ctl.PropertyName;
+                    ctlname = ctlname.Replace("[", "_");
+                    ctlname = ctlname.Replace("]", "_");
+                    ctlname = ctlname.Replace(".", "_");
+                    @:InitAmountControl('@ctlname');
+                                                                                                                                                                                                                                                                                                                                                                                                @:if ($("#@ctlname").get(0) != null) { $("#@ctlname").get(0).setAttribute('onblur', "ValidateDecimal('@ctlname','@ctl.DisplayName',@ctl.IsRequired.ToString().ToLower())"); }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                    }
+                else if (ctl.ModelType.IsValueType && ctl.ModelType.FullName.Contains("System.Int32"))
+                {
+                    var ctlname =  ctl.PropertyName;
+                    ctlname = ctlname.Replace("[", "_");
+                    ctlname = ctlname.Replace("]", "_");
+                    ctlname = ctlname.Replace(".", "_");
+                    @:InitAmountControl('@ctlname');
+                                                                                                                                                                                                                                                                                                                                                                                        @:if ($("#@ctlname").get(0) != null) { $("#@ctlname").get(0).setAttribute('onblur', "ValidateNumber('@ctlname','@ctl.DisplayName',@ctl.IsRequired.ToString().ToLower(), true)"); }
+                                                                                                                                                                                                                                                                                                                                                            }
+                else if (ctl.ModelType.FullName.Contains("System.String"))
+                {
+                    if (ctl.DataTypeName == "EmailAddress")
+                    {
+                        var ctlname = ctl.PropertyName;
+                        ctlname = ctlname.Replace("[", "_");
+                        ctlname = ctlname.Replace("]", "_");
+                        ctlname = ctlname.Replace(".", "_");
+
+                        @:if ($("#@ctlname").get(0) != null) { $("#@ctlname").get(0).setAttribute('onblur', "ValidateEmail('@ctlname','@ctl.DisplayName',@ctl.IsRequired.ToString().ToLower())"); }
+                                                                                                                                                                                                                                                                                                                                                                                } else if (ctl.DataTypeName == "Date")
+                    {
+                        var ctlname = ctl.PropertyName;
+                        ctlname = ctlname.Replace("[", "_");
+                        ctlname = ctlname.Replace("]", "_");
+                        ctlname = ctlname.Replace(".", "_");
+
+                        @:if ($("#@ctlname").get(0) != null) { $("#@ctlname").get(0).setAttribute('onblur', "ValidateDate('@ctlname','@ctl.DisplayName',@ctl.IsRequired.ToString().ToLower(),true)"); }
+                                                                                                                                                                                                                                                                                                                                                            }
+                }
+            }
+         @if (err != null && err.Count > 0)
+            {
+                foreach (var ctl in err)
+                {
+                    var ctlname = ctl;
+                    ctlname = ctlname.Replace("[", "_");
+                    ctlname = ctlname.Replace("]", "_");
+                    ctlname = ctlname.Replace(".", "_");
+                    @:ErrorColor('@ctlname');
+               }
+            }
+      });
+
+      function Confirm_Alert(ID) {
+         if ((parseInt(ID) > 0) || (ID == true)) {
+            return confirm('@Resource.Message_Confirm_Saving_Change');
+         }
+      }
+   </script>
+</body>
+</html>

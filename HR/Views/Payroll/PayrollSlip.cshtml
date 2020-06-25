@@ -1,0 +1,763 @@
+﻿@model HR.Models.PayrollViewModels
+@using HR.Models;
+@using SBSModel.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+    ViewBag.Title = @Resource.Payroll;
+    decimal overtime = 0;
+    if (Model.Overtime_Rows != null && Model.Overtime_Rows.Count() > 0)
+        overtime = (from a in Model.Overtime_Rows select (a.Amount.HasValue ? a.Amount : 0)).Sum().Value;
+
+    decimal allowance = 0;
+    decimal additionpayment = 0;
+    decimal deduction = Model.Employee_Contribution + Model.Donation + Model.Extra_Donation;
+    decimal overtimehour = 0;
+    decimal allowanceAddOn = 0;
+
+    //Added by sun 03-01-2018
+    decimal bonus = 0;
+}
+@{
+    var headertext = Resource.Payslip_for + " ";
+    if (!string.IsNullOrEmpty(Model.Process_Date_From) && !string.IsNullOrEmpty(Model.Process_Date_To))
+    {
+        var fdate = DateUtil.ToDate(Model.Process_Date_From);
+        var fto = DateUtil.ToDate(Model.Process_Date_To);
+        if (fdate.HasValue && fto.HasValue)
+        {
+            headertext += " " + fdate.Value.Day + " - " + fto.Value.Day + " ";
+        }
+    }
+    headertext += DateUtil.GetFullMonth(Model.Process_Month) + " " + Model.Process_Year;
+}
+@if (Model.Allowance_Rows != null)
+{
+    foreach (var row in Model.Allowance_Rows)
+    {
+        if (row.Type == PayrollAllowanceType.Allowance)
+        {
+            if (row.PRC_ID != null && row.PRC_ID.HasValue)
+            {
+                allowance = (allowance + (row.Amount.HasValue ? row.Amount.Value : 0));
+            }
+            else
+            {
+                additionpayment = (additionpayment + (row.Amount.HasValue ? row.Amount.Value : 0));
+            }
+        }
+        else if (row.Type == PayrollAllowanceType.Deduction || row.Type == PayrollAllowanceType.Deduction_Donation || row.Type == PayrollAllowanceType.Adjustment_Deduction)// โค้ดที่เเก้ไข
+        {
+            deduction = (deduction + (row.Amount.HasValue ? row.Amount.Value : 0));
+        }
+        else if (row.Type == PayrollAllowanceType.Allowance_Add_On_To_Basic_Salary)
+        {
+            allowanceAddOn = (allowanceAddOn + (row.Amount.HasValue ? row.Amount.Value : 0));
+        }
+        else if (row.Type == PayrollAllowanceType.Bonus)
+        {
+            bonus = (bonus + (row.Amount.HasValue ? row.Amount.Value : 0));
+        }
+    }
+}
+
+@{
+    var expenses = (from a in Model.expensesList orderby a.Expenses_Config.Expenses_Name select a);
+    var expensestype = 0;
+    var expensesDesc = "";
+    decimal eAmount = 0;
+}
+
+@foreach (var row in expenses)
+{
+    expensestype = row.Expenses_Config_ID.Value;
+    expensesDesc = row.Expenses_Config.Expenses_Name;
+    eAmount = row.Amount_Claiming.Value;
+    additionpayment = (additionpayment + eAmount);
+
+    var mdamount = expenses.Where(w => w.Expenses_Config.Expenses_Name == "Stationery").Select(s => s.Amount_Claiming.Value).Sum();
+}
+
+@{
+    //Added by sun 18-03-2016
+    Model.LeaveLstTempItem = new List<leave_By_Payroll>();
+    var wcnt = 5;
+    if (Model.Working_Day == null)
+    {
+        Model.Working_Day = new List<int>();
+    }
+    if (Model.Working_Day.Count() > 0)
+    {
+        wcnt = Model.Working_Day.Count();
+    }
+}
+@if (Model.leaveList != null)
+{
+    foreach (var row in Model.leaveList)
+    {
+        if (row.Leave_Config != null && row.Leave_Config.Deduct_In_Payroll.HasValue && row.Leave_Config.Deduct_In_Payroll.Value)
+        {
+            if (!string.IsNullOrEmpty(Model.Leave_Period_From) && !string.IsNullOrEmpty(Model.Leave_Period_To))
+            {
+                decimal processday = 0;
+                var otherprdls = (from a in row.PRDLs where a.PRM_ID != Model.PRM_ID & a.Leave_Application_Document_ID == row.Leave_Application_Document_ID select a).ToList();
+                var payrollService = new PayrollService();
+                var prdls = payrollService.ProcessPrdl(otherprdls, DateUtil.ToDate(Model.Leave_Period_From).Value, DateUtil.ToDate(Model.Leave_Period_To).Value);
+                foreach (var p in prdls)
+                {
+                    var enddate = row.End_Date.HasValue ? row.End_Date : row.Start_Date;
+                    if (p.Start_Date <= enddate)
+                    {
+                        var prdl = payrollService.ProcessPayrollLeave(row, p.Start_Date, p.End_Date, Model.holidays, Model.Working_Day, Model.Basic_Salary, new PRDL());
+                        processday = processday + prdl.Process_Day;
+                    }
+                }
+                decimal leave_amount_deduction = 0;
+                if (row.Leave_Config.Deduct_In_Payroll == true)
+                {
+                    leave_amount_deduction = ((12 * Model.Basic_Salary) / (52 * wcnt)) * processday;
+                    deduction += leave_amount_deduction;
+                    Model.leaveAmountList.Add(leave_amount_deduction);
+                    //Added by sun 18-03-2016
+                    Model.LeaveLstTempItem.Add(new leave_By_Payroll()
+                    {
+                        leave_ID = row.Leave_Config_ID.Value,
+                        leave_Name = row.Leave_Config.Leave_Name,
+                        leave_Amount = leave_amount_deduction,
+                        leave_Allowed_Probation = row.Leave_Config.Deduct_In_Payroll.Value
+                    });
+                }
+            }
+        }
+    }
+}
+
+<div class="main-content">
+    <div id="divReport" style="padding: 5px; font-size: 10px">
+        <table style="width: 100%;" class="header-form">
+            <tr>
+                <td style="" width="30%"></td>
+                <td style=""></td>
+            </tr>
+            <tr>
+                <td colspan="2" style=" font-weight:700;">
+                    <span style="text-align: center;">@headertext</span>
+                </td>
+            </tr>
+            <tr>
+                <td style=" font-weight:700;">
+                    @Resource.Employer_Name
+                </td>
+                <td style=" text-align: left;">@Model.Company_Name</td>
+            </tr>
+            <tr>
+                <td style=" font-weight:700;">
+                    @Resource.Employee_S_Name
+                </td>
+                <td style=" text-align: left;">
+                    @Model.Name
+                </td>
+            </tr>
+            <tr>
+                <td style=" font-weight:700;">
+                    @Resource.Department
+                </td>
+                <td style=" text-align: left;">
+                    @Model.Department
+                </td>
+            </tr>
+            <tr>
+                <td style=" font-weight:700;">
+                    @Resource.Date_Of_Payment
+                </td>
+                <td style=" text-align: left;">
+                    @{
+                        var rundate = DateUtil.ToDate(Model.Run_Date).Value;
+                    }
+                    @(rundate.Day.ToString("00") + " " + DateUtil.GetFullMonth(rundate.Month) + " " + rundate.Year)
+                </td>
+            </tr>
+            <tr>
+                <td style=" font-weight:700;">
+                    @Resource.Mode_Of_Payment
+                </td>
+                <td style=" text-align: left;">
+                    @if (Model.Payment_Type_Name != null && Model.Payment_Type_Name.ToLower() == "cheque")
+                    {
+                        @(Resource.Cheque + " " + Model.Cheque_No)
+                    }
+                    else
+                    {
+                        @Model.Payment_Type_Name
+                    }
+                </td>
+            </tr>
+            <tr>
+                <td style=" font-weight:700;">
+                    @Resource.Currency
+                </td>
+                <td style=" text-align: left;">
+                    @Model.Company_Currency_Code : @Model.Company_Currency_Name
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <br />
+                </td>
+                <td></td>
+            </tr>
+        </table>
+        <table cellpadding="1" cellspacing="0" style="width:100%;">
+            <thead>
+                <tr bgcolor="#ccc" class="text-highlight">
+                    <td width="7%" align="center"></td>
+                    <td width="60%" align="left">@Resource.Description</td>
+                    <td width="23%" align="right">@Resource.Amount_SymbolDollar</td>
+                    <td width="10%"></td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1.</td>
+                    <td>@Resource.Basic_Salary</td>
+                    <td style=" text-align: right;">
+                        @Model.Basic_Salary.ToString("n2")
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>2.</td>
+                    <td>@Resource.Bonus</td>
+                    <td style=" text-align: right;">
+                        @bonus.ToString("n2")
+                    </td>
+                    <td></td>
+                </tr>
+
+                <tr>
+                    <td>3.</td>
+                    <td>@Resource.Overtime</td>
+                    <td style=" text-align: right;">
+                        @overtime.ToString("n2")
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>4.</td>
+                    <td>@Resource.Total_Allowance</td>
+                    <td style=" text-align: right;">
+                        @allowance.ToString("n2")
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>5.</td>
+                    <td>@Resource.Total_Additional_Payment</td>
+                    <td style=" text-align: right;">@additionpayment.ToString("n2")</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>6.</td>
+                    <td>@Resource.Total_Deduction</td>
+                    <td style=" text-align: right;">
+                        @deduction.ToString("n2")
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>7.</td>
+                    <td>@Resource.Net_Salary</td>
+                    <td style=" text-align: right;">
+                        @Model.Net_Salary.ToString("n2")
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><br /></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+        <table style="width: 100%;">
+
+            <tr>
+                <td colspan="2" style="font-weight:700;text-decoration:underline">
+                    @Resource.Additional_Information
+                </td>
+            </tr>
+        </table>
+        <table style="width: 100%;">
+            <tr>
+                <td valign="top">
+                    <table cellpadding="1" cellspacing="0" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <td style="font-weight:700" width="70%">
+                                    @Resource.Breakdown_Of_Allowance
+                                </td>
+                                <td style="font-weight: 700; text-align: right;">@Resource.Amount_SymbolDollar</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Allowance_Rows != null)
+                            {
+                                foreach (var row in Model.Allowance_Rows)
+                                {
+                                    if (row.Type == "Allowance" || row.Type == PayrollAllowanceType.Allowance_Add_On_To_Basic_Salary)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @if (row.PRC_ID != null && row.PRC_ID.HasValue)
+                                                {
+                                                    @row.Description
+                                                }
+                                                else
+                                                {
+                                                    @Resource.Other
+                                                }
+                                            </td>
+                                            <td style="text-align: right;">
+                                                @((row.Amount.HasValue ? row.Amount.Value : 0).ToString("n2"))
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            }
+
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td style="font-weight:700">
+                                    @Resource.Total
+                                </td>
+                                <td style="text-align: right; font-weight: 700;">@NumUtil.FormatCurrency(allowance + allowanceAddOn, 2)</td>
+                            </tr>
+                            <tr>
+                                <td><br /></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <table cellpadding="1" cellspacing="0" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <td style="font-weight:700" width="70%">
+                                    @Resource.Breakdown_Of_Additional_Payment
+                                </td>
+                                <td style="font-weight: 700; text-align: right;">@Resource.Amount_SymbolDollar</td>
+                            </tr>
+                        </thead>
+                        @*<tbody>
+                                @{
+                                    expensestype = 0;
+                                    expensesDesc = "";
+                                    eAmount = 0;
+                                    decimal etotal = 0;
+                                    int j = 0;
+                                    bool cktemp = false;
+                                }
+
+                                @foreach (var row in expenses)
+                                {
+                                    if (expensestype != row.Expenses_Config_ID)
+                                    {
+                                        if (expensestype > 0)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @expensesDesc
+                                                </td>
+                                                <td style="text-align: right;">
+                                                    @if (cktemp)
+                                                    {
+                                                        etotal = etotal + eAmount;
+                                                        @etotal.ToString("n2")
+                                                        cktemp = false;
+                                                    }
+                                                    else
+                                                    {
+                                                        @eAmount.ToString("n2")
+                                                    }
+                                                </td>
+                                            </tr>
+                                                    etotal = 0;
+                                        }
+                                        expensestype = row.Expenses_Config_ID.Value;
+                                        expensesDesc = row.Expenses_Config.Expenses_Name;
+                                    }
+                                    else
+                                    {
+                                        j++;
+                                        cktemp = true;
+                                        etotal = etotal + eAmount;
+                                    }
+                                    eAmount = row.Amount_Claiming.Value;
+                                }
+                                @if (expensestype > 0)
+                                {
+                                    <tr>
+                                        <td>
+                                            @expensesDesc
+                                        </td>
+                                        <td style="text-align: right;">
+                                            @eAmount.ToString("n2")
+                                        </td>
+                                    </tr>
+                                }
+                                @if (Model.Allowance_Rows != null)
+                                {
+                                    foreach (var row in Model.Allowance_Rows)
+                                    {
+                                        if (row.Type == "Allowance")
+                                        {
+                                            if (row.PRC_ID != null && row.PRC_ID.HasValue)
+                                            {
+
+                                            }
+                                            else
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @("Other")
+                                                    </td>
+                                                    <td style="text-align: right;">
+                                                        @((row.Amount.HasValue ? row.Amount.Value : 0).ToString("n2"))
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                    }
+                                }
+                            </tbody>*@
+
+                        @*Added by sun 18-03-2016*@
+                        <tbody>
+                            @if (expenses != null && Model.ExpensesLst != null)
+                            {
+                                var epname = "";
+                                decimal epamount = 0;
+                                int j = 0;
+                                foreach (var row in Model.ExpensesLst)
+                                {
+                                    var newexp = expenses.Where(w => w.Expenses_Config.Expenses_Name == row.Text).FirstOrDefault();
+                                    if (newexp != null)
+                                    {
+                                        epamount = expenses.Where(w => w.Expenses_Config.Expenses_Name == row.Text).Select(s => s.Amount_Claiming.Value).Sum();
+                                        if (epamount == null || epamount <= 0)
+                                        {
+                                            continue;
+                                        }
+                                        epname = newexp.Expenses_Config.Expenses_Name;
+                                        j++;
+                                        <tr>
+                                            <td>
+                                                @epname
+                                            </td>
+                                            <td style="text-align: right;">
+                                                @epamount.ToString("n2")
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            }
+                            @*Added by sun 18-03-2016*@
+
+                            @if (Model.Allowance_Rows != null)
+                            {
+                                foreach (var row in Model.Allowance_Rows)
+                                {
+                                    if (row.Type == "Allowance")
+                                    {
+                                        if (row.PRC_ID != null && row.PRC_ID.HasValue)
+                                        {
+
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @("Other")
+                                                </td>
+                                                <td style="text-align: right;">
+                                                    @((row.Amount.HasValue ? row.Amount.Value : 0).ToString("n2"))
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                }
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td style="font-weight:700">
+                                    @Resource.Total
+                                </td>
+                                <td style="text-align: right; font-weight: 700;">@additionpayment.ToString("n2")</td>
+                            </tr>
+                            <tr>
+                                <td><br /></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <table cellpadding="1" cellspacing="0" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <td style="font-weight:700" width="70%">
+                                    @Resource.Breakdown_Of_Deductions
+                                </td>
+                                <td style="font-weight: 700; text-align: right;">@Resource.Amount_SymbolDollar</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    @Resource.Employee_CPF_Contribution
+                                </td>
+                                <td style="text-align: right;">
+                                    @Model.Employee_Contribution.ToString("n2")
+                                </td>
+                            </tr>
+                            @if (Model.leaveList != null && Model.LeaveLst != null)
+                            {
+                                foreach (var row in Model.LeaveLst)
+                                {
+                                    var lpname = "";
+                                    decimal lpamount = 0;
+                                    int i = 0;
+                                    var newexp = Model.LeaveLstTempItem.Where(w => w.leave_ID == NumUtil.ParseInteger(row.Value)).FirstOrDefault();
+                                    if (newexp != null)
+                                    {
+                                        if ((newexp.leave_ID != null) && (newexp.leave_Allowed_Probation))
+                                        {
+                                            lpamount = Model.LeaveLstTempItem.Where(w => w.leave_ID == NumUtil.ParseInteger(row.Value)).Select(s => s.leave_Amount).Sum();
+                                            lpname = newexp.leave_Name;
+                                            <tr>
+                                                <td>
+                                                    @lpname
+                                                </td>
+                                                <td style="text-align: right;">
+                                                    @if (!string.IsNullOrEmpty(Model.Leave_Period_From) && !string.IsNullOrEmpty(Model.Leave_Period_To))
+                                                    {
+                                                        @lpamount.ToString("n2")
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    i++;
+                                }
+                            }
+
+                            @*Edit by sun 04-03-2016*@
+                                @*@if (Model.leaveList != null)
+                                    {
+                                        var ltype = 0;
+                                        var ldesc = "";
+                                        decimal lamount = 0;
+                                        decimal ltotal = 0;
+                                        var i = 0;
+                                        foreach (var row in Model.leaveList)
+                                        {
+                                            if (row.Leave_Config != null && row.Leave_Config.Allowed_Probation.HasValue && row.Leave_Config.Allowed_Probation.Value)
+                                            {
+                                                if (ltype != row.Leave_Config_ID)
+                                                {
+                                                    if (ltype > 0)
+                                                    {
+                                                        <tr>
+                                                            <td>
+                                                                @if (row.Leave_Config != null)
+                                                                {
+                                                                    @row.Leave_Config.Leave_Name
+                                                                }
+                                                            </td>
+                                                            <td style="text-align: right;">
+                                                                @if (!string.IsNullOrEmpty(Model.Leave_Period_From) && !string.IsNullOrEmpty(Model.Leave_Period_To))
+                                                                {
+                                                                    var leave_amount_deduction = Model.leaveAmountList[i];
+                                                                    @leave_amount_deduction.ToString("n2")
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                    ltype = row.Leave_Config.Leave_Config_ID;
+                                                    ldesc = row.Leave_Config.Leave_Name;
+                                                }
+                                                var leave_amount_deduction_ = Model.leaveAmountList[i];
+                                                lamount = leave_amount_deduction_;
+                                                ltotal = ltotal + leave_amount_deduction_;
+                                            }
+                                            i++;
+                                        }
+                                        if (ltype > 0)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @ldesc
+                                                </td>
+                                                <td style="text-align: right;">
+                                                    @ltotal.ToString("n2")
+                                                </td>
+                                            </tr>
+                                        }*@
+
+                                @*var i = 0;
+                                    foreach (var row in Model.leaveList)
+                                    {
+                                        if (row.Leave_Config != null && row.Leave_Config.Allowed_Probation.HasValue && row.Leave_Config.Allowed_Probation.Value)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @if (row.Leave_Config != null)
+                                                    {
+                                                        @row.Leave_Config.Leave_Name
+                                                    }
+                                                </td>
+                                                <td style="text-align: right;">
+                                                    @if (!string.IsNullOrEmpty(Model.Leave_Period_From) && !string.IsNullOrEmpty(Model.Leave_Period_To))
+                                                    {
+                                                        var leave_amount_deduction = Model.leaveAmountList[i];
+                                                        @leave_amount_deduction.ToString("n2")
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                        i++;
+                                    }*@
+                                }
+                                @if (Model.Allowance_Rows != null)
+                                {
+                                    foreach (var row in Model.Allowance_Rows)
+                                    {
+                                        if (row.Type == PayrollAllowanceType.Deduction || row.Type == PayrollAllowanceType.Deduction_Donation)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @if (row.PRC_ID != null && row.PRC_ID.HasValue)
+                                                    {
+                                                        @row.Description
+                                                    }
+                                                    else
+                                                    {
+                                                        @Resource.Other
+                                                    }
+                                                </td>
+                                                <td style="text-align: right;">
+                                                    @((row.Amount.HasValue ? row.Amount.Value : 0).ToString("n2"))
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                }
+                                @if (!string.IsNullOrEmpty(Model.Donation_Label))
+                                {
+                                    <tr>
+                                        <td>
+                                            @Model.Donation_Label
+                                        </td>
+                                        <td style="text-align: right;">
+                                            @Model.Donation.ToString("n2")
+                                        </td>
+                                    </tr>
+                                }
+                                @if (Model.Extra_Donation_Rows != null)
+                                {
+                                    foreach (var row in Model.Extra_Donation_Rows)
+                                    {
+                                        if (row.Type == PayrollAllowanceType.Donation)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @if (row.PRC_ID != null && row.PRC_ID.HasValue)
+                                                    {
+                                                        @row.Description
+                                                    }
+                                                    else
+                                                    {
+                                                        @Resource.Other
+                                                    }
+                                                </td>
+                                                <td style="text-align: right;">
+                                                    @((row.Amount.HasValue ? row.Amount.Value : 0).ToString("n2"))
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td style="font-weight:700">
+                                        @Resource.Total
+                                    </td>
+                                    <td style="text-align: right; font-weight: 700;">@deduction.ToString("n2")</td>
+                                </tr>
+                                <tr>
+                                    <td><br /></td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </td>
+                    <td width="2%"></td>
+                    <td valign="top">
+                        <table cellpadding="1" cellspacing="0" style="width:100%;">
+                            <thead>
+                                <tr>
+                                    <td width="70%" style="font-weight:700">
+                                        @Resource.Basic_Salary_Details
+                                    </td>
+                                    <td width="30%"></td>
+                                </tr>
+                            </thead>
+                        </table>
+                        <table cellpadding="1" cellspacing="0" style="width:100%;">
+                            <thead>
+                                <tr>
+                                    <td width="70%" style="font-weight:700">
+                                        @Resource.Overtime_Details
+                                    </td>
+                                    <td width="30%"></td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        @Resource.Overtime_Period
+                                    </td>
+                                    <td style="text-align: right;">@DateUtil.GetFullMonth(Model.Process_Month)</td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        @Resource.Overtime_Hour_Worked
+                                    </td>
+                                    <td style="text-align: right;">
+                                        @if (Model.Overtime_Rows != null)
+                                        {
+                                            foreach (var row in Model.Overtime_Rows)
+                                            {
+                                                overtimehour = (overtimehour + row.Hours_Worked.Value);
+                                            }
+                                        }
+                                        @(overtimehour + " " + Resource.Hours)
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table cellpadding="1" cellspacing="0" style="width:100%;">
+                            <tr>
+                                <td width="70%" style="font-weight:700">
+                                    @Resource.Employer_CPF_Contribution
+                                </td>
+                                <td width="30%" style="text-align: right; font-weight: 700;">@Model.Employer_Contribution.ToString("n2")</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+            <p> @Resource.Message_This_Is_A_Computer_Generated_Payslip</p>
+        </div>
+    </div>

@@ -1,0 +1,149 @@
+﻿@model  HR.Models.PayrollViewModels
+@using HR.Models;
+@using HR.Common;
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+
+@{
+    ViewBag.Title = "Manual Payslip Generator";
+}
+
+<div class="pageheader">
+    <h2>Resend Payslip for specific Employee</h2>
+    <div class="breadcrumbs">
+        <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li class="active">@Resource.Payroll</li>
+        </ol>
+    </div>
+</div>
+<div class="main">
+    <div class="row">
+        <div class="col-md-12">
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+                if (Model.result.Code < 0)
+                {
+                    <div class="alert alert-red">
+                        @if (Model.result.Code == ERROR_CODE.ERROR_18_NO_PAYROLL_RECORDS)
+                        {
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        }
+                        else
+                        {
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        }
+                    </div>
+                }
+                else if (Model.result.Code > 0)
+                {
+                    if (Model.result.Code == ERROR_CODE.SUCCESS)
+                    {
+                        if (string.IsNullOrEmpty(Model.result.Msg))
+                        {
+                            Model.result.Msg = new Success().getSuccess(ERROR_CODE.SUCCESS_CONFIRM);
+                        }
+                        <div class="alert alert-success">
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        </div>
+                    }
+                    else if (Model.result.Code == ERROR_CODE.SUCCESS_GENERATE)
+                    {
+                        <div class="alert alert-success">
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        </div>
+                    }
+
+                }
+            }
+            <section class="tile color transparent-black">
+                <div class="tile-body">
+                    @using (Html.BeginForm("Manual_Payslip", "Payroll", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <label for="sDepartment" class="control-label">@Resource.Company</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control" id="Company_ID" name="Company_ID" value="@Model.Company_ID" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <label for="sDepartment" class="control-label">@Resource.Process_Month</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control" id="Process_Month" name="Process_Month" value="@Model.Process_Month" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <label for="Process_Month" class="control-label">@Resource.Process_Year</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control" name="Process_Year" id="Process_Year" value="@Model.Process_Year">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <label for="sProcess" class="control-label">PRM_ID</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control" id="PRM_ID" name="PRM_ID" value="@Model.PRM_ID" />
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <label for="sProcess" class="control-label">Employee_Profile_ID</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control" id="Employee_ProfileID" name="PRM_ID" value="@Model.Employee_Profile_ID" />
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                @*<a href="@Url.Action("Manual_Payslip", "Payroll", new { pEmpID = Model.Employee_Profile_ID, pstatus = PayrollStatus.Comfirm, pmonth = Model.Process_Month, pyear =Model.Process_Year })" title="Send Email">
+                                        Send Email
+                                    </a>*@
+                                <button id="btnSendEmail" type="submit" class="btn btn-primary">Send Email</button>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+            </section>
+
+        </div>
+
+    </div>
+
+</div>

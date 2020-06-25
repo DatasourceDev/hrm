@@ -1,0 +1,967 @@
+﻿@model  HR.Models.EmployeeViewModels
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+
+@{
+   var admin = Model.adminRights != null ? Model.adminRights.Contains(Model.operation) : false;
+   var self = Model.Profile_ID == Model.User_Login_Profile_ID ? true : false;
+   var hr = Model.hrRights != null ? Model.hrRights.Contains(Model.operation) : false;
+   var divName = "main";
+   var divClassName = "";
+   var divClassNameInfo = "tile color transparent-black";
+
+   var strEmployeeType = "";
+   if (Model.operation == Operation.C)
+   {
+      divName = "hist-tab";
+      divClassName = "tab-pane fade in";
+      divClassNameInfo = "tile transparent";
+   }
+
+   if (Model.empTypeList != null && NumUtil.ParseInteger(Model.History_Employee_Type) > 0)
+   {
+      var datac = Model.empTypeList.Where(w => w.Value == Model.History_Employee_Type).FirstOrDefault();
+      if (datac != null)
+      {
+         strEmployeeType = datac.Desc;
+      }
+   }
+}
+<script type="text/javascript">
+   
+
+   $(document).ready(function () {
+
+      if ('@Model.operation' == '@UserSession.RIGHT_U') {
+         InitDatepicker();
+      }
+
+     
+
+      EmpType_OnChange();
+      Terminate_Date_OnChange();
+
+      MandatoryColor('History_Branch_ID');
+      MandatoryColor('History_Department_ID');
+      MandatoryColor('History_Designation_ID');
+      MandatoryColor('History_Contract_Start_Date');
+      MandatoryColor('History_Contract_End_Date');
+      MandatoryColor('History_Effective_Date');
+      MandatoryColor('History_Confirm_Date');
+      MandatoryColor('History_Notice_Period_Amount');
+      MandatoryColor('History_Notice_Period_Unit');
+      MandatoryColor('History_Basic_Salary');   
+      MandatoryColor('History_Basic_Salary_Unit');
+      MandatoryColor('History_Days');
+
+      if ('@Model.History_No_Approval_WF' == 'False') {
+         MandatoryColor('History_Supervisor');
+      }
+   });
+
+   function CalHourRate()
+   {
+      var salary = parseAmt( $("#History_Basic_Salary").val());
+      var hourrate = parseAmt(salary / (30 * 8));
+      $("#History_Hour_Rate").val(formatCurrency(hourrate));
+   }
+
+   function EmpType_OnChange() {
+      var obj = $('#History_Employee_Type').get(0);
+      //alert(obj);
+      var selectedText = obj.options[obj.selectedIndex].text;
+      //alert(selectedText);
+      if (selectedText == "Contract") {
+         if ($('#History_Contract_Start_Date').hasClass('input-validation-error') == false) {
+            if ($('#History_Contract_Start_Date').val() == null || $('#History_Contract_Start_Date').val() == '') {
+               MandatoryColor('History_Contract_Start_Date');
+            }
+            else {
+               MandatoryRemoveColor('History_Contract_Start_Date');
+            }
+         }
+         if ($('#History_Contract_End_Date').hasClass('input-validation-error') == false) {
+            if ($('#History_Contract_End_Date').val() == null || $('#History_Contract_End_Date').val() == '') {
+               MandatoryColor('History_Contract_End_Date');
+            } else {
+               MandatoryRemoveColor('History_Contract_End_Date');
+            }
+         }
+
+         $('#divContractStart').show();
+         $('#divContractEnd').show();
+         $("#History_Contract_Start_Date").show();
+         $("#History_Contract_End_Date").show();
+
+         $('#divHistEff').hide();
+         $('#History_Effective_Date').val($('#History_Contract_Start_Date').val());
+      }
+      else {
+         $('#divContractStart').hide();
+         $('#divContractEnd').hide();
+         $("#History_Contract_Start_Date").hide();
+         $("#History_Contract_End_Date").hide();
+         $('#divHistEff').show();
+      }
+   }
+
+   function Department_OnChange(opt) {
+      var dpID = $('#History_Department_ID').val();
+      Combo_Reload('History_Supervisor', '@ComboTypeEnum.Supervisor', dpID)
+   }
+
+   function addNewHistAllowance_Onclick() {
+      var rowcount = $('#histAllowanceDataTable > tbody >tr').length;
+      var data = { pIndex: rowcount };
+      ShowMask();
+      $.ajax({
+         url: '@Url.Action("AddNewHistAllowance", "Employee")',
+         //Passes the content of an input up
+         data: data,
+         contentType: "application/json; charset=utf-8",
+         success: function (data) {
+            var str = '<tr  id="harow-' + rowcount + '">';
+            str = str + data + '</tr>';
+            $('#histAllowanceDataTable > tbody').append(str);
+            CloseMask();
+         }
+      });
+   }
+
+   function DeleteHistoryAllowance_Onclick(rowid, index) {
+      if (confirm('@Resource.Confirm_Delete_Msg')) {
+         $('#History_Allowance_Rows_' + index + '__Row_Type').val('@RowType.DELETE');
+         $('#' + rowid).hide();
+      }
+   }
+
+   function HistAllowance_PRT_OnChange(opt, control_id) {
+      var id = opt.options[opt.selectedIndex].value;
+      var comboenum = '@ComboTypeEnum.PRC';
+      var company_id = '@Model.Company_ID';
+      ShowMask();
+      $.ajax({
+         type: 'POST',
+         url: '../Combo/Reload',
+         contentType: 'application/json; charset=utf-8',
+         data: JSON.stringify({ type: comboenum, param: company_id, param2: id }),
+         dataType: 'json',
+         success: function (data) {
+            var result = '';
+            for (var i = 0, iL = data.length; i < iL; i++) {
+               result += '<option value="' + data[i].Value + '">' + data[i].Text + '</option>';
+            }
+            $('#' + control_id).html(result);
+            $('#' + control_id).trigger("chosen:updated");
+            CloseMask();
+         }
+      });
+   }
+
+   function Terminate_Date_OnChange() {
+      if ($('#History_Terminate_Date').val() != null && $('#History_Terminate_Date').val() != '') {
+         $('#divNoticePeriod').show();
+
+         if ($('#History_Notice_Period_Amount').hasClass('input-validation-error') == false) {
+            if ($('#History_Notice_Period_Amount').val() == null || $('#History_Notice_Period_Amount').val() == '') {
+               MandatoryColor('History_Notice_Period_Amount');
+            } else {
+               MandatoryRemoveColor('History_Notice_Period_Amount');
+            }
+         }
+
+         if ($('#History_Notice_Period_Unit').hasClass('input-validation-error') == false) {
+            if ($('#History_Notice_Period_Unit').val() == null || $('#History_Notice_Period_Unit').val() == '') {
+               MandatoryColor('History_Notice_Period_Unit');
+            } else {
+               MandatoryRemoveColor('History_Notice_Period_Unit');
+            }
+         }
+      }
+      else {
+         $('#divNoticePeriod').hide();
+         $('#History_Notice_Period_Amount').val('1')
+         $('#History_Notice_Period_Unit').val('@TimePeriod.Months')
+         $('#History_Notice_Period_Unit').trigger("chosen:updated");
+      }
+   }
+
+   function NoApproval_onchange() {
+      var wf = $('#History_No_Approval_WF').get(0);
+      if (wf.checked == false) {
+         var supName = $('#History_Supervisor').val();
+         if (supName == '' || supName == null || supName == 0) {
+            MandatoryColor('History_Supervisor');
+         }
+         else {
+            MandatoryRemoveColor('History_Supervisor');
+         }
+      } else {
+         MandatoryRemoveColor('History_Supervisor');
+      }
+   }
+
+
+   //function Contract_OnChange() {
+   //    var opt = $('#History_Contract_Staff').get(0);
+   //    if (opt.checked == true) {
+   //        if ($('#History_Contract_Start_Date').hasClass('input-validation-error') == false) {
+   //            if ($('#History_Contract_Start_Date').val() == null || $('#History_Contract_Start_Date').val() == '') {
+   //                MandatoryColor('History_Contract_Start_Date');
+   //            }
+   //            else {
+   //                MandatoryRemoveColor('History_Contract_Start_Date');
+   //            }
+   //        }
+   //        if ($('#History_Contract_End_Date').hasClass('input-validation-error') == false) {
+   //            if ($('#History_Contract_End_Date').val() == null || $('#History_Contract_End_Date').val() == '') {
+   //                MandatoryColor('History_Contract_End_Date');
+   //            } else {
+   //                MandatoryRemoveColor('History_Contract_End_Date');
+   //            }
+   //        }
+
+   //        $('#divContractStart').show();
+   //        $('#divContractEnd').show();
+   //        $('#divHistEff').hide();
+   //        $('#History_Effective_Date').val($('#History_Contract_Start_Date').val());
+   //    }
+   //    else {
+   //        $('#divContractStart').hide();
+   //        $('#divContractEnd').hide();
+   //        $('#divHistEff').show();
+   //    }
+   //}
+</script>
+<div id="@divName" class="@divClassName">
+   @if (Model.operation == Operation.U)
+   {
+      <div class="row">
+         <div class="col-md-12">
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+            <div class="alert alert-red">
+               @Html.Raw(AppConst.GetMsg(Model.result))
+            </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+            <div class="alert alert-success">
+               @Html.Raw(AppConst.GetMsg(Model.result))
+            </div>
+               }
+            }
+         </div>
+      </div>
+   }
+   <div class="row">
+      <div class="col-md-12">
+         <section class="@divClassNameInfo">
+            <div class="tile-header transparent">
+               <h1><strong>@Resource.Employment_History</strong></h1>
+               <div class="controls">
+                  <a href="#" class="minimize" id="divEmpHistory"><i class="fa fa-chevron-down color-white"></i></a>
+               </div>
+            </div>
+            <div class="tile-body">
+               <div class="row">
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="History_Branch_ID" class="control-label">@Resource.Branch</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <select class="chosen-select chosen-transparent form-control" id="History_Branch_ID" name="History_Branch_ID">
+                              @if (Model.branchList != null)
+                              {
+                                 foreach (var row in Model.branchList)
+                                 {
+                                    if (Model.History_Branch_ID == NumUtil.ParseInteger(row.Value))
+                                    {
+                              <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                    }
+                                    else
+                                    {
+                              <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                    }
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.History_Branch_ID, "", new { @id = "History_Branch_ID_Err" })
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="History_Department_ID" class="control-label">@Resource.Department</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <select class="chosen-select chosen-transparent form-control" id="History_Department_ID" name="History_Department_ID" onchange="Department_OnChange(this);">
+                              @if (Model.departmentList != null)
+                              {
+                                 foreach (var row in Model.departmentList)
+                                 {
+                                    if (Model.History_Department_ID == NumUtil.ParseInteger(row.Value))
+                                    {
+                              <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                    }
+                                    else
+                                    {
+                              <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                    }
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.History_Department_ID, "", new { @id = "History_Department_ID_Err" })
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="History_Designation_ID" class="control-label">@Resource.Designation</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <select class="chosen-select chosen-transparent form-control" id="History_Designation_ID" name="History_Designation_ID">
+                              @if (Model.desingnationList != null)
+                              {
+                                 foreach (var row in Model.desingnationList)
+                                 {
+                                    if (Model.History_Designation_ID == NumUtil.ParseInteger(row.Value))
+                                    {
+                              <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                    }
+                                    else
+                                    {
+                              <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                    }
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.History_Designation_ID, "", new { @id = "History_Designation_ID_Err" })
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="History_Other_Branch" class="control-label">@Resource.Other_Branch</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control" id="History_Other_Branch" name="History_Other_Branch" value="@Model.History_Other_Branch">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.History_Other_Branch, "", new { @id = "History_Other_Branch_Err" })
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="History_Other_Department" class="control-label">@Resource.Other_Deaprtment</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control" id="History_Other_Department" name="History_Other_Department" value="@Model.History_Other_Department">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.History_Other_Department, "", new { @id = "History_Other_Department_Err" })
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="History_Other_Designation" class="control-label">@Resource.Other_Designation</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control" id="History_Other_Designation" name="History_Other_Designation" value="@Model.History_Other_Designation">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.History_Other_Designation, "", new { @id = "History_Other_Designation_Err" })
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="History_Employee_Type" class="control-label">@Resource.Employment_Type</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <select class="chosen-select chosen-transparent form-control" id="History_Employee_Type" name="History_Employee_Type" onchange="EmpType_OnChange()">
+                              @if (Model.empTypeList != null)
+                              {
+                                 foreach (var row in Model.empTypeList)
+                                 {
+                                    if ((Model.History_Employee_Type == row.Value) || (Model.History_Employee_Type == "" && row.Desc == "Full-Time"))
+                                    {
+                              <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                    }
+                                    else
+                                    {
+                              <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                    }
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.History_Employee_Type)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="History_Supervisor" class="control-label">@Resource.Supervisor</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <select class="chosen-select chosen-transparent form-control" id="History_Supervisor" name="History_Supervisor">
+                              @if (Model.supervisorList != null)
+                              {
+                                 foreach (var row in Model.supervisorList)
+                                 {
+                                    if (Model.History_Supervisor == NumUtil.ParseInteger(row.Value))
+                                    {
+                              <option value="@(row.Value != null ? row.Value : "0")" selected>@row.Text</option>
+                                    }
+                                    else
+                                    {
+                              <option value="@(row.Value != null ? row.Value : "0")">@row.Text</option>
+                                    }
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.History_Supervisor)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label class="control-label"></label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <div class="checkbox check-transparent">
+                              @if (Model.History_No_Approval_WF.HasValue && Model.History_No_Approval_WF.Value)
+                              {
+                              <input type="checkbox" name="History_No_Approval_WF" id="History_No_Approval_WF" value='true' checked onclick="NoApproval_onchange()">
+                              }
+                              else
+                              {
+                              <input type="checkbox" name="History_No_Approval_WF" id="History_No_Approval_WF" value='true' onclick="NoApproval_onchange()">
+                              }
+                              <label for="History_No_Approval_WF"><span style="font-size:13px"> @Resource.No_Approval_WF</span></label>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  @*<div class="col-md-4">
+                         <div class="form-group">
+                             <div class="col-md-12">
+                                 <label for="History_Effective_Date" class="control-label">@Resource.Contract_Staff</label>
+                             </div>
+                         </div>
+                         <div class="form-group">
+                             <div class="col-md-12">
+
+                                 @if (Model.History_Contract_Staff.HasValue && Model.History_Contract_Staff.Value)
+                                 {
+                                     <input type="checkbox" class="checkbox" name="History_Contract_Staff" id="History_Contract_Staff" value='true' checked onchange="Contract_OnChange()" />
+                                 }
+                                 else
+                                 {
+                                     <input type="checkbox" class="checkbox" name="History_Contract_Staff" id="History_Contract_Staff" value='true' onchange="Contract_OnChange()" />
+                                 }
+                                 <div class="validation-error">
+                                     @Html.ValidationMessageFor(m => m.History_Contract_Staff)
+                                 </div>
+                             </div>
+                         </div>
+                     </div>*@
+                  <div id="divContractStart" @(strEmployeeType == "Contract" ? "" : "hidden")>
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="History_Contract_Start_Date" class="control-label">@Resource.Contract_Start_Date</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input type="text" class="form-control input-datepicker" id="History_Contract_Start_Date" name="History_Contract_Start_Date" value="@Model.History_Contract_Start_Date">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.History_Contract_Start_Date, "", new { id = "History_Contract_Start_Date_Err" })
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div id="divContractEnd" @(strEmployeeType == "Contract" ? "" : "hidden")>
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="History_Contract_End_Date" class="control-label">@Resource.Contract_End_Date</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input type="text" class="form-control input-datepicker" id="History_Contract_End_Date" name="History_Contract_End_Date" value="@Model.History_Contract_End_Date">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.History_Contract_End_Date, "", new { id = "History_Contract_End_Date" })
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-4" id="divHistEff">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="History_Effective_Date" class="control-label">@Resource.Hire_Or_Effective_Date</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control input-datepicker" id="History_Effective_Date" name="History_Effective_Date" value="@Model.History_Effective_Date">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.History_Effective_Date, "", new { id = "History_Effective_Date_Err" })
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="History_Confirm_Date" class="control-label">@Resource.Confirm_Date</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control input-datepicker" id="History_Confirm_Date" name="History_Confirm_Date" value="@Model.History_Confirm_Date">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.History_Confirm_Date, "", new { id = "History_Confirm_Date_Err" })
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="History_Terminate_Date" class="control-label">@Resource.Terminated_Date</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control input-datepicker" id="History_Terminate_Date" name="History_Terminate_Date" value="@Model.History_Terminate_Date" onchange="Terminate_Date_OnChange()">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.History_Terminate_Date, "", new { id = "History_Terminate_Date_Err" })
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4" id="divNoticePeriod">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="History_Notice_Period_Amount" class="control-label">@Resource.Notice_Period</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-6">
+                           <input type="text" class="form-control" id="History_Notice_Period_Amount" name="History_Notice_Period_Amount" value="@Model.History_Notice_Period_Amount" onchange="Terminate_Date_OnChange()">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.History_Notice_Period_Amount)
+                           </div>
+                        </div>
+                        <div class="col-md-6">
+                           <select class="chosen-select chosen-transparent form-control" id="History_Notice_Period_Unit" name="History_Notice_Period_Unit" onchange="Terminate_Date_OnChange()">
+                              @if (Model.periodList != null)
+                              {
+                                 foreach (var row in Model.periodList)
+                                 {
+                                    if (Model.History_Notice_Period_Unit == row.Value)
+                                    {
+                              <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                    }
+                                    else
+                                    {
+                              <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                    }
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.History_Notice_Period_Unit)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="History_Currency_ID" class="control-label">@Resource.Currency</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <select class="chosen-select chosen-transparent form-control" id="History_Currency_ID" name="History_Currency_ID">
+                              @if (Model.currencyList != null)
+                              {
+                                 var Com_Cur = Model.currencyList.Select(w => w.Text.Contains(Model.Company_Currency_Code));
+                                 foreach (var row in Model.currencyList)
+                                 {
+                                    if (Model.History_Currency_ID != null && Model.History_Currency_ID == NumUtil.ParseInteger(row.Value))
+                                    {
+                              <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                    }
+                                    else
+                                    {
+                                       if (row.Text.Contains(Model.Company_Currency_Code) == true)
+                                       {
+                              <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                       }
+                                       else
+                                       {
+                              <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                       }
+                                    }
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.History_Currency_ID)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-6">
+                           <label for="History_Basic_Salary" class="control-label">@Resource.Basic_Salary (@Resource.Month)</label>
+                        </div>
+                        <div class="col-md-6">
+                           <label for="History_Hour_Rate" class="control-label">@Resource.Hour_Rate (@Resource.Hour)</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-6">
+                           <input type="text" class="form-control number" id="History_Basic_Salary" name="History_Basic_Salary" value="@NumUtil.Comma(Model.History_Basic_Salary)" onkeyup="CalHourRate()">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.History_Basic_Salary, "", new { id = "History_Basic_Salary_Err" })
+                           </div>
+                        </div>
+                        <div class="col-md-6">
+                           <input type="hidden" id="History_Basic_Salary_Unit" name="History_Basic_Salary_Unit" value="Monthly" />
+                           <input type="text" class="form-control number" id="History_Hour_Rate" name="History_Hour_Rate" value="@NumUtil.Comma(Model.History_Hour_Rate)">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.History_Hour_Rate, "", new { id = "History_Hour_Rate_Err" })
+                           </div>
+                           @*<select class="chosen-select chosen-transparent form-control" id="History_Basic_Salary_Unit" name="History_Basic_Salary_Unit">
+                              @if (Model.termList != null)
+                              {
+                                 foreach (var row in Model.termList)
+                                 {
+                                    if ((Model.History_Basic_Salary_Unit == row.Value) || (Model.History_Basic_Salary_Unit == null && row.Value == "Monthly"))
+                                    {
+                              <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                    }
+                                    else
+                                    {
+                              <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                    }
+                                 }
+                              }
+                           </select>*@
+                           @*<div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.History_Basic_Salary_Unit)
+                           </div>*@
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                  </div>
+               </div>
+            </div>
+         </section>
+         @if (Model.operation == Operation.U)
+         {
+         <section class="tile color transparent-black">
+            <div class="tile-header transparent">
+               <h1><strong>@Resource.Allowance</strong></h1>
+               <div class="controls">
+                  <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+               </div>
+            </div>
+            <div class="tile-body">
+               <div class="row">
+                  <div class="col-md-12 text-center">
+                     <a class="btn btn-greensea  btn-sm add-row" onclick="addNewHistAllowance_Onclick()">@Resource.Add_An_Item</a>
+                  </div>
+               </div>
+               <div class="table-responsive">
+                  <table class="table table-datatable table-custom" id="histAllowanceDataTable">
+                     <thead>
+                        <tr>
+                           <th class="sort-alpha">@Resource.Allowance_Type</th>
+                           <th class="sort-alpha">@Resource.Description</th>
+                           <th class="sort-alpha">@Resource.Amount</th>
+                           <th class="sort-alpha" style="width:80px">@Resource.Currency</th>
+                           <th class="sort-alpha" style="width:80px">@Resource.Action</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        @if (Model.History_Allowance_Rows != null)
+                           {
+                              var i = 0;
+                              foreach (var row in Model.History_Allowance_Rows)
+                              {
+                                 var prcList = new List<ComboViewModel>();
+                                 if (row.Row_Type != RowType.DELETE && row.PRT_ID.HasValue)
+                                 {
+                                    prcList = new ComboService().LstPRC(Model.Company_ID, row.PRT_ID.Value);
+                                 }
+                           <tr id="harow-@i">
+                              <td>
+                                 @if (row.Row_Type == RowType.DELETE)
+                                       {
+                                       <script type="text/javascript">
+                                             $(function () {
+                                                $('#' + 'harow-@i').hide();
+                                             });
+                                       </script>
+                                       }
+                                 @Html.Hidden("History_Allowance_Rows[" + i + "].Row_Type", Model.History_Allowance_Rows[i].Row_Type)
+                                 @Html.Hidden("History_Allowance_Rows[" + i + "].Employment_History_Allowance_ID", Model.History_Allowance_Rows[i].Employment_History_Allowance_ID)
+                                 <select class="chosen-select chosen-transparent form-control" id="History_Allowance_Rows_@(i)__PRT_ID" name="History_Allowance_Rows[@i].PRT_ID" onchange="HistAllowance_PRT_OnChange(this,'History_Allowance_Rows_@(i)__PRC_ID')">
+                                    @if (Model.prtList != null)
+                                          {
+                                             foreach (var rrow in Model.prtList)
+                                             {
+                                                if (Model.History_Allowance_Rows[i].PRT_ID == NumUtil.ParseInteger(rrow.Value))
+                                                {
+                                          <option value="@rrow.Value" selected>@rrow.Text</option>
+                                                }
+                                                else
+                                                {
+                                          <option value="@(rrow.Value != null ? rrow.Value : "0")">@rrow.Text</option>
+                                                }
+                                             }
+                                          }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessage("History_Allowance_Rows[" + i + "].PRT_ID")
+                                 </div>
+                              </td>
+                              <td>
+                                 <select class="chosen-select chosen-transparent form-control" id="History_Allowance_Rows_@(i)__PRC_ID" name="History_Allowance_Rows[@i].PRC_ID">
+                                    @foreach (var rrow in prcList)
+                                          {
+                                             if (Model.History_Allowance_Rows[i].PRC_ID == NumUtil.ParseInteger(rrow.Value))
+                                             {
+                                          <option value="@rrow.Value" selected>@rrow.Text</option>
+                                             }
+                                             else
+                                             {
+                                          <option value="@(rrow.Value != null ? rrow.Value : "0")">@rrow.Text</option>
+                                             }
+                                          }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessage("History_Allowance_Rows[" + i + "].PRC_ID")
+                                 </div>
+                              </td>
+                              <td>
+                                 <input type="text" class="form-control text-right" name="History_Allowance_Rows[@i].Amount" id="History_Allowance_Rows_@(i)__Amount" value="@Model.History_Allowance_Rows[i].Amount">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessage("History_Allowance_Rows[" + i + "].Amount", new { id = "History_Allowance_Rows_" + i + "__Amount_Err" })
+                                 </div>
+                              </td>
+                              <td>
+                                 <input type="text" class="form-control" value="@Model.Company_Currency_Code" readonly>
+                              </td>
+                              <td class="actions text-left">
+                                 <a data-toggle="modal" href="#" onclick="return DeleteHistoryAllowance_Onclick('harow-@i', @i);" title="@Resource.Delete">
+                                    <i class="fa fa-times-circle-o fa-2x"></i>
+                                 </a>
+                              </td>
+                           </tr>
+                                          i++;
+                              }
+                           }
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+         </section>
+         }
+         <section class="@divClassNameInfo">
+            <div class="tile-header transparent">
+               <h1><strong>@Resource.Working_Days</strong></h1>
+               <div class="controls">
+                  <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+               </div>
+            </div>
+            <div class="tile-body">
+               <div class="row">
+                  <div class="col-md-12">
+                     <div class="form-group">
+                        <div class="col-sm-12">
+                           <label class="control-label">@Resource.Working_Days</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-sm-3">
+                           <div class="radio radio-transparent">
+                              <input type="radio" name="History_Days" id="Days5" value="5" @(Model.History_Days.HasValue && Model.History_Days.Value == 5 ? "checked" : "")>
+                              <label for="Days5">@Resource.Working_Day5</label>
+                           </div>
+                        </div>
+                        <div class="col-sm-3">
+                           <div class="radio radio-transparent">
+                              <input type="radio" name="History_Days" id="Days5_5" value="5.5" @(Model.History_Days.HasValue && Model.History_Days.Value == 5.5M ? "checked" : "")>
+                              <label for="Days5_5">@Resource.Working_Day5_5</label>
+                           </div>
+                        </div>
+                        <div class="col-sm-3">
+                           <div class="radio radio-transparent">
+                              <input type="radio" name="History_Days" id="Days6" value="6" @(Model.History_Days.HasValue && Model.History_Days.Value == 6 ? "checked" : "")>
+                              <label for="Days6">@Resource.Working_Day6</label>
+                           </div>
+                        </div>
+                        <div class="col-sm-3">
+                           <div class="radio radio-transparent">
+                              <input type="radio" name="History_Days" id="Days7" value="7" @(Model.History_Days.HasValue && Model.History_Days.Value == 7 ? "checked" : "")>
+                              <label for="Days7">@Resource.Working_Day7</label>
+                           </div>
+                        </div>
+                        <div class="validation-error">
+                           @Html.ValidationMessageFor(m => m.History_Days)
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </section>
+      </div>
+   </div>
+   @if (Model.operation == Operation.U)
+   {
+      <div class="row">
+         <div class="col-md-12">
+            <section class="tile color transparent-white">
+               <div class="tile-body">
+                  <div class="row">
+                     <div class="col-md-12">
+                        @if (Model.pageAction == "addhist")
+                        {
+                        <button id="btnAddHist" type="submit" class="btn btn-primary" name="pageAction" value="saveAddhist">@Resource.Save</button>
+                        }
+                        else if (Model.pageAction == "edithist")
+                        {
+                        <button id="btnEditHist" type="submit" class="btn btn-primary" name="pageAction" value="saveEdithist">@Resource.Save</button>
+                        }
+                        <button type="submit" class="btn btn-default" name="pageAction" value="main">@Resource.Back</button>
+                     </div>
+                  </div>
+               </div>
+            </section>
+         </div>
+      </div>
+   }
+</div>
+<script type="text/javascript">
+   $(document).ready(function () {
+      $("#btnSaveNew").click(function () {
+         if ('@Model.operation' == '@UserSession.RIGHT_C') {
+            var valid = true;
+            var dropDownVal = $("#History_Branch_ID").val();
+            var textVal = $("#History_Other_Branch").val();
+            if (dropDownVal == "" && textVal == "") {
+               if (!ValidateRequire('History_Branch_ID', '@Resource.Branch', true)) { valid = false; }
+               if (!ValidateRequire('History_Other_Branch', '@Resource.Other_Branch', true)) { valid = false; }
+            }
+
+            dropDownVal = $("#History_Department_ID").val();
+            textVal = $("#History_Other_Department").val();
+            if (dropDownVal == "" && textVal == "") {
+               if (!ValidateRequire('History_Department_ID', '@Resource.Department', true)) { valid = false; }
+               if (!ValidateRequire('History_Other_Department', '@Resource.Other_Deaprtment', true)) { valid = false; }
+            }
+
+            dropDownVal = $("#History_Designation_ID").val();
+            textVal = $("#History_Other_Designation").val();
+            if (dropDownVal == 0) { dropDownVal = ""; $("#History_Designation_ID").val(''); }
+            if (dropDownVal == "" && textVal == "") {
+               if (!ValidateRequire('History_Designation_ID', '@Resource.Designation', true)) { valid = false; }
+               if (!ValidateRequire('History_Other_Designation', '@Resource.Other_Designation', true)) { valid = false; }
+            }
+
+            var opt = $('#History_Employee_Type').get(0);
+            var selectedText = opt.options[opt.selectedIndex].text;
+            if (selectedText == "Contract") {
+               if (!ValidateRequire('History_Contract_Start_Date', '@Resource.Contract_Start_Date', true)) { valid = false; }
+               if (!ValidateRequire('History_Contract_End_Date', '@Resource.Contract_End_Date', true)) { valid = false; }
+            }
+            else {
+               if (!ValidateRequire('History_Effective_Date', '@Resource.Effective_Date', true)) { valid = false; }
+            }
+
+            var tdate = $("#History_Terminate_Date").val();
+            if (tdate != "" && tdate != null) {
+               if (!ValidateRequire('History_Notice_Period_Amount', '@Resource.Notice_Period', true)) { valid = false; }
+            }
+
+            if (!ValidateRequire('History_Confirm_Date', '@Resource.Confirm_Date', true)) { valid = false; }
+            if (!ValidateDecimal('History_Basic_Salary', '@Resource.Basic_Salary', true)) { valid = false; }
+            if (!ValidateDecimal('History_Hour_Rate', '@Resource.Hour_Rate', false)) { valid = false; }
+            if (!ValidateDecimal('History_Days', '@Resource.Days', true)) { valid = false; }
+
+            if (!valid) {
+               Scroll_Top();
+               return false;
+            }
+         }
+      });
+   });
+
+</script>

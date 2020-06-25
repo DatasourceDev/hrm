@@ -1,0 +1,96 @@
+﻿@model  HR.Models.HistoryAllowanceViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+   var i = Model.Index;
+}
+
+<script type="text/javascript">
+   $(function () {
+      $("#History_Allowance_Rows_" + @i + "__PRT_ID").chosen({ disable_search_threshold: 10 });
+      $("#History_Allowance_Rows_" + @i + "__PRC_ID").chosen({ disable_search_threshold: 10 });
+      @foreach (var ctl in ViewData.ModelMetadata.Properties)
+        {
+            var ctlname = ("History_Allowance_Rows[" + i + "]." + ctl.PropertyName);
+            ctlname = ctlname.Replace("[", "_");
+            ctlname = ctlname.Replace("]", "_");
+            ctlname = ctlname.Replace(".", "_");
+            if (ctl.ModelType.BaseType.ToString() == "System.Array")
+            {
+
+            }
+            else
+            {
+                 if (ctl.IsRequired)
+                 {
+                   @:MandatoryColor('@ctlname');
+                 }
+            }
+
+            if(ctl.ModelType.ToString().Contains("System.Decimal"))
+            {
+                @:InitAmountControl('@ctlname');
+            }
+        }
+   });
+</script>
+<td>
+   @Html.Hidden("History_Allowance_Rows[" + i + "].Row_Type", RowType.ADD)
+   @Html.Hidden("History_Allowance_Rows[" + i + "].Employment_History_Allowance_ID", Model.Employment_History_Allowance_ID)
+   <select class="chosen-select chosen-transparent form-control" id="History_Allowance_Rows_@(i)__PRT_ID" name="History_Allowance_Rows[@i].PRT_ID" onchange="HistAllowance_PRT_OnChange(this,'History_Allowance_Rows_@(i)__PRC_ID')">
+      @if (Model.prtList != null)
+      {
+         foreach (var rrow in Model.prtList)
+         {
+            if (Model.PRT_ID == NumUtil.ParseInteger(rrow.Value))
+            {
+               <option value="@rrow.Value" selected>@rrow.Text</option>
+            }
+            else
+            {
+               <option value="@(rrow.Value != null ? rrow.Value : "0")">@rrow.Text</option>
+            }
+         }
+      }
+   </select>
+   <div class="validation-error">
+      @Html.ValidationMessage("History_Allowance_Rows[" + i + "].PRT_ID")
+   </div>
+</td>
+<td>
+   <select class="chosen-select chosen-transparent form-control" id="History_Allowance_Rows_@(i)__PRC_ID" name="History_Allowance_Rows[@i].PRC_ID">
+      @if (Model.prcList != null)
+      {
+         foreach (var rrow in Model.prcList)
+         {
+            if (Model.PRC_ID == NumUtil.ParseInteger(rrow.Value))
+            {
+               <option value="@rrow.Value" selected>@rrow.Text</option>
+            }
+            else
+            {
+               <option value="@(rrow.Value != null ? rrow.Value : "0")">@rrow.Text</option>
+            }
+         }
+      }
+   </select>
+   <div class="validation-error">
+      @Html.ValidationMessage("History_Allowance_Rows[" + i + "].PRC_ID")
+   </div>
+</td>
+<td>
+   <input type="text" class="form-control" name="History_Allowance_Rows[@i].Amount" id="History_Allowance_Rows_@(i)__Amount" value="@Model.Amount" onblur="ValidateDecimal('History_Allowance_Rows_@(i)__Amount', 'Amount', true)">
+   <div class="validation-error">
+      @Html.ValidationMessage("History_Allowance_Rows[" + i + "].Amount", "", new { @id = "History_Allowance_Rows_" + i + "__Amount_Err" })
+   </div>
+</td>
+<td>
+   <input type="text" class="form-control text-right" value="@Model.Company_Currency_Code" readonly>
+</td>
+<td class="actions text-left">
+   <a data-toggle="modal" href="#" onclick="return DeleteHistoryAllowance_Onclick('harow-@i', @i);" title="@Resource.Delete">
+      <i class="fa fa-times-circle-o fa-2x"></i>
+   </a>
+</td>

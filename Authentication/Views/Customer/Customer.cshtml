@@ -1,0 +1,219 @@
+﻿@model Authentication.Models.CustomerViewModels
+@using Authentication.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using Authentication.Models;
+@using SBSResourceAPI;
+
+@{
+   ViewBag.Title = Resource.Customer;
+}
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+   <script type="text/javascript">
+
+      $(function () {
+         InitDatepicker();
+
+         var addRowLink = '<a href="@Url.Action("CustomerInfo", "Customer", new { operation = EncryptUtil.Encrypt(UserSession.RIGHT_C) })" class="btn btn-greensea  btn-sm add-row">@Resource.New</a>'
+         InitDatatable('moduleDataTable', addRowLink, InitDatatableApplyLink({
+            name: "apply",
+            tabAction: null,
+            hasActive: true,
+            hasInactive: true,
+            hasDel: true,
+            confirmAlert: true
+         }), 1, 'asc');
+
+      })
+
+
+      function Billing_Country_OnChange(opt) {
+         var cID = $('#Billing_Country_ID').val();
+         Combo_Reload('Billing_State_ID', '@ComboTypeEnum.State', cID)
+      }
+   </script>
+
+   <div class="pageheader">
+      <h2>@Resource.Customer<span></span></h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li class="active">@Resource.Customer</li>
+         </ol>
+      </div>
+   </div>
+
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+
+            @using (Html.BeginForm("Customer", "Customer", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+            {
+               @Html.AntiForgeryToken()
+
+               <section class="tile color transparent-black filter" id="secfilter">
+                  <div class="tile-header transparent">
+                     <h1 onclick="CollapseHeader(null)" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize filter" id="btncollapse"><i class="fa fa-search  color-white"></i></a>
+                     </div>
+                  </div>
+                  <div class="tile-body">
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Billing_Country_ID" class="control-label">@Resource.Country</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Billing_Country_ID" name="Billing_Country_ID" onchange="Billing_Country_OnChange(this);">
+                                    @if (Model.Countrylst != null)
+                                    {
+                                       foreach (var row in Model.Countrylst)
+                                       {
+                                          <option value="@row.Value" @(Model.Billing_Country_ID == NumUtil.ParseInteger(row.Value) ? "selected" : "")>@row.Desc</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Billing_Country_ID)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Record_Status" class="control-label">@Resource.State</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Billing_State_ID" name="Billing_State_ID">
+                                    @if (Model.Statelst != null)
+                                    {
+                                       foreach (var row in Model.Statelst)
+                                       {
+                                          if (Model.Billing_State_ID == NumUtil.ParseInteger(row.Value))
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                          }
+                                          else
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                          }
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Billing_State_ID)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-6">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <button type="submit" class="btn btn-default">@Resource.Filter</button>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </section>
+
+               <section class="tile color transparent-black">
+                  <div class="tile-header transparent">
+                     <h1><strong>@Resource.Customer</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                     </div>
+                  </div>
+
+                  <div class="tile-body ">
+                     <div class="table-responsive">
+                        <table class="table table-datatable table-custom" id="moduleDataTable">
+                           <thead>
+                              <tr>
+                                 <th class="no-sort" style="width: 40px;">
+                                    <div class="checkbox check-transparent">
+                                       <input type="checkbox" value="1" id="chkallExpType">
+                                       <label for="chkallExpType"></label>
+                                    </div>
+                                 </th>
+                                 <th class="sort-alpha">@Resource.Customer_Name</th>
+                                 <th class="sort-alpha">@Resource.Address</th>
+                                 <th class="sort-alpha">@Resource.Contact_No</th>
+                                 <th class="sort-alpha">@Resource.Email_Address</th>
+                                 <th class="sort-alpha">@Resource.Status</th>
+                                 <th class="no-sort" style="width:110px;">@Resource.Action</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              @if (Model.CustomerList != null)
+                              {
+                                 var i = 0;
+                                 foreach (var row in Model.CustomerList)
+                                 {
+                                    <tr>
+                                       <td>
+                                          <div class="checkbox check-transparent">
+                                             <input type="checkbox" value="@row.Customer_ID" name="Customer_IDs" id="Customer_IDs[@i]">
+                                             <label for="Customer_IDs[@i]"></label>
+                                          </div>
+                                       </td>
+                                       <td>@row.Customer_Name</td>
+                                       <td>@row.Billing_Address</td>
+                                       <td>@row.Office_Phone</td>
+                                       <td>@row.Email</td>
+                                       <td>
+                                          @StatusUtil.Get_Record_Status(row.Record_Status)
+                                       </td>
+                                       <td class="actions text-left">
+                                          @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                          {
+                                             <a href="@Url.Action("CustomerInfo", "Customer", new { pCustID = EncryptUtil.Encrypt(row.Customer_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                          }
+                                          @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_D))
+                                          {
+                                             <a href="@Url.Action("CustomerInfo", "Customer", new { pCustID = EncryptUtil.Encrypt(row.Customer_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_D) }) " onclick="return confirm('@Resource.Confirm_Delete_Msg');" title="@Resource.Delete">
+                                                <i class="fa fa-times-circle-o fa-2x"></i>
+                                             </a>
+                                          }
+                                       </td>
+                                    </tr>
+                                          i++;
+                                 }
+                              }
+                           </tbody>
+                        </table>
+                     </div>
+                  </div>
+               </section>
+            }
+         </div>
+      </div>
+   </div>
+}

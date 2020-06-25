@@ -1,0 +1,823 @@
+﻿@model  HR.Models.EmployeeViewModels
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+
+@{
+   //Modified to partial by sun 01-12-2015
+   ViewBag.Title = Resource.Employee;
+
+   var imgSrc = Url.Content("~/images/avatar.jpg");
+   var admin = Model.adminRights != null ? Model.adminRights.Contains(Model.operation) : false;
+   var self = Model.Profile_ID == Model.User_Login_Profile_ID ? true : false;
+   var hr = Model.hrRights != null ? Model.hrRights.Contains(Model.operation) : false;
+
+   //var admin = false;
+   //var hr = false;
+   //var self = true;
+
+   //All employee,
+   //Can view user account, Personal Info and Address
+
+   //As Company Admin,
+   //User Account is compulsory fields.
+   //Able to add/edit/delete the user role and access right
+   //Able to view Personal Info and Address
+
+   //As HR Role,
+   //User Account is compulsory fields.
+   //Able to view/add/edit/delete Personal Info, Emp Info, Addr, Bank Info, Attachment
+
+   //As Emp themselves,
+   //Can view User Acc, User Role, Access Right
+   //Can edit Personal Info, Address Bank Info and Attachment
+}
+<script src="@Url.Content("~/Scripts/app-control.js")"></script>
+@if (Model.pageAction == "main" | Model.pageAction == "error_relationship")
+{
+   if (Model != null && Model.User_Photo != null)
+   {
+      var base64 = Convert.ToBase64String(Model.User_Photo);
+      imgSrc = String.Format("data:image/gif;base64,{0}", base64);
+   }
+
+
+   <script type="text/javascript">
+      @if (Model.operation == Operation.U || Model.operation == Operation.C)
+      {
+         if (ViewData.ModelState.IsValid == false)
+         {
+            var errs = this.ViewData.ModelState.SelectMany(m => m.Value.Errors, (m, error) => (m.Key)).ToList();
+            if (errs.Where(w => w.Equals("First_Name") || w.Equals("Last_Name") || w.Equals("User_Name") || w.Equals("Email")).Count() > 0)
+            {
+               Model.tabAction = "account";
+            }
+            else if (errs.Where(w => w.Equals("DOB") || w.Equals("NRIC")).Count() > 0)
+            {
+               Model.tabAction = "info";
+            }
+            else if (errs.Where(w => w.Contains("Users_Assign_Role")).Count() > 0)
+            {
+               Model.tabAction = "role";
+            }
+            else if (errs.Where(w => w.Contains("Emer_Contact_Rows")).Count() > 0)
+            {
+               Model.tabAction = "address";
+            }
+            else if (errs.Where(w => w.Contains("Bank_Info_Rows")).Count() > 0)
+            {
+               Model.tabAction = "bank";
+            }
+            else if (errs.Where(w => w.Contains("Attachment_Rows")).Count() > 0)
+            {
+               Model.tabAction = "attach";
+            }
+            else if (errs.Where(w => w.Contains("Relationship_Rows") || w.Contains("Relationship")).Count() > 0)
+            {
+               Model.tabAction = "family";
+            }
+            else if (errs.Where(w => w.Contains("History_")).Count() > 0)
+            {
+               Model.tabAction = "hist";
+            }
+         }
+      }
+
+      $(function () {
+         if ('@ViewData.ModelState.IsValid.ToString()' == 'False') {
+            if ('@Model.tabAction' == 'family') {
+               $('#btnAddRelationShip').get(0).click();
+               Is_Maternity_OnChange();
+            }
+         }
+      });
+   </script>
+
+   <script type="text/javascript">
+      $(document).ready(function () {
+         $('.globalMenu').hide();
+         //to set mandatory field colour
+         MandatoryColor('First_Name');
+         MandatoryColor('Last_Name');
+         MandatoryColor('Email');
+
+         MandatoryColor('DOB');
+         MandatoryColor('NRIC');
+      });
+
+      function InitTab(name, display, enable) {
+         if (display && display == true) {
+            if (!enable || enable == false) {
+               Disable(name + "-tab");
+            }
+         }
+         else {
+            Visible(name + "-tab"); Visible("li-" + name);
+         }
+      }
+
+      $(function () {
+         InitDatepicker();
+         Residential_Status_Onchange();
+         var eaccess = false; eaccess = false; var eaccount = false; erole = false; einfo = false; ehist = false; eaddress = false; ebank = false; eattach = false; efamily = false; // enable
+         var daccess = false; daccess = false; var daccount = false; drole = false; dinfo = false; dhist = false; daddress = false; dbank = false; dattach = false; dfamily = false;// display
+
+         if ('@admin'.toLowerCase() == 'true') {
+            dinfo = true; einfo = false;
+            dhist = false; ehist = false;
+            daddress = true; eaddress = false;
+            dbank = false; ebank = false;
+            dattach = false; eattach = false;
+            dfamily = true; efamily = false;
+         }
+
+         if ('@self'.toLowerCase() == "true") {
+            daccount = true; eaccount = false;
+            drole = true; erole = false;
+            daccess = true; eaccess = false;
+
+            dinfo = true; einfo = true;
+            dhist = true; ehist = false;
+            daddress = true; eaddress = true;
+            dbank = true; ebank = true;
+            dattach = true; eattach = true;
+            dfamily = true; efamily = true;
+         }
+
+         if ('@hr'.toLowerCase() == "true") {
+            daccount = true; eaccount = false;
+            drole = true; erole = false;
+            daccess = true; eaccess = false;
+
+            dinfo = true; einfo = true;
+            dhist = true; ehist = true;
+            daddress = true; eaddress = true;
+            dbank = true; ebank = true;
+            dattach = true; eattach = true;
+            dfamily = true; efamily = true;
+         }
+
+         if ('@admin'.toLowerCase() == 'true') {
+            daccount = true; eaccount = true;
+            drole = true; erole = true;
+            daccess = true; eaccess = true;
+         }
+
+         if ('@admin'.toLowerCase() != 'true' & '@hr'.toLowerCase() != "true" & '@self'.toLowerCase() != "true") {
+            daccount = true; eaccount = false;
+            drole = false; erole = false;
+            daccess = false; eaccess = false;
+
+            dinfo = false; einfo = false;
+            dhist = false; ehist = false;
+            daddress = false; eaddress = false;
+            dbank = false; ebank = false;
+            dattach = false; eattach = false;
+            dfamily = false; efamily = false;
+         }
+
+         InitTab("account", daccount, eaccount);
+         //InitTab("access", daccess, eaccess);
+         InitTab("role", drole, erole);
+         InitTab("info", dinfo, einfo);
+         InitTab("hist", dhist, ehist);
+         InitTab("address", daddress, eaddress);
+         InitTab("bank", dbank, ebank);
+         InitTab("attach", dattach, eattach);
+         InitTab("family", dfamily, efamily);
+
+         if (drole == true && erole == true) {
+            //check all checkboxes
+            $('table thead input[type="checkbox"]').change(function () {
+               var opts = $(this).parents('table').find('tbody input[type="checkbox"]');
+               if (opts != null) {
+                  for (var i = 0; i < opts.length; i++) {
+                     var opt = opts.get(i);
+                     if (opt != null && opt.disabled == false)
+                        opt.checked = $(this).prop('checked');
+                  }
+               }
+            });
+         }
+
+         var module = '@Model.tabAction';
+         if ('@string.IsNullOrEmpty(Model.tabAction)' == "True") {
+            module = "account";
+         }
+         var liID = "li-" + module;
+         var tabID = module + "-tab";
+         $("#" + liID).addClass("active");
+         $("#" + tabID).addClass("active");
+
+         if ('@Model.operation' == '@Operation.C') {
+            Manage_btn(module);
+         }
+      });
+   </script>
+
+   if (Model.operation == Operation.C)
+   {
+      <script type="text/javascript">
+         $(function () {
+
+            $("#tabs ul li").click(function () {
+               var strid = $(this).attr('id');
+
+               console.log(this.id)
+               if ($("#" + strid).is('.disabled')) {
+                  console.log("is disabled")
+                  return false;
+               }
+
+               if (strid != null && strid.length > 0) {
+                  var module = strid.substring(3);
+                  Manage_btn(module);
+               }
+            });
+
+            if ('@ViewData.ModelState.IsValid.ToString()' != 'False') {
+               DisableTab('role');
+               DisableTab('info');
+               DisableTab('hist');
+            }
+         });
+
+         function EnableTab(module) {
+            Enable('li-' + module);
+            $("#id-" + module).attr("href", "#" + module + "-tab")
+         }
+
+         function DisableTab(module) {
+            Disable('li-' + module);
+         }
+
+         function Manage_Tab(module) {
+            ShowMask();
+
+            if (module == "account") {
+               $("#li-role").removeClass("active");
+               $("#li-info").removeClass("active");
+               $("#li-hist").removeClass("active");
+               $("#role-tab").removeClass("active");
+               $("#info-tab").removeClass("active");
+               $("#hist-tab").removeClass("active");
+
+               $("#li-account").addClass("active");
+               $("#account-tab").addClass("active in");
+            } else if (module == "role") {
+               $("#li-account").removeClass("active");
+               $("#li-info").removeClass("active");
+               $("#li-hist").removeClass("active");
+               $("#account-tab").removeClass("active");
+               $("#info-tab").removeClass("active");
+               $("#hist-tab").removeClass("active");
+
+               $("#li-role").addClass("active");
+               $("#role-tab").addClass("active in");
+            } else if (module == "info") {
+               $("#li-account").removeClass("active");
+               $("#li-role").removeClass("active");
+               $("#li-hist").removeClass("active");
+               $("#account-tab").removeClass("active");
+               $("#role-tab").removeClass("active");
+               $("#hist-tab").removeClass("active");
+
+               $("#li-info").addClass("active");
+               $("#info-tab").addClass("active in");
+            } else if (module == "hist") {
+
+               $("#li-account").removeClass("active");
+               $("#li-role").removeClass("active");
+               $("#li-info").removeClass("active");
+               $("#account-tab").removeClass("active");
+               $("#role-tab").removeClass("active");
+               $("#info-tab").removeClass("active");
+
+               $("#li-hist").addClass("active");
+               $("#hist-tab").addClass("active in");
+            }
+            Manage_btn(module)
+            EnableTab(module)
+            $('#content').animate({ scrollTop: 0 }, 'fast');
+            CloseMask();
+         }
+
+         function Manage_btn(module) {
+            if (module == "account") {
+               $("#divbtnaccount").show();
+
+               $("#divbtnrole").hide();
+               $("#divbtninfo").hide();
+               $("#divbtnhist").hide();
+            } else if (module == "role") {
+               $("#divbtnrole").show();
+
+               $("#divbtnaccount").hide();
+               $("#divbtninfo").hide();
+               $("#divbtnhist").hide();
+            } else if (module == "info") {
+               $("#divbtninfo").show();
+
+               $("#divbtnaccount").hide();
+               $("#divbtnrole").hide();
+               $("#divbtnhist").hide();
+            } else if (module == "hist") {
+               $("#divbtnhist").show();
+
+               $("#divbtninfo").hide();
+               $("#divbtnaccount").hide();
+               $("#divbtnrole").hide();
+            }
+         }
+
+
+         function Scroll_Top() {
+            $('#content').animate({ scrollTop: 0 }, 600);
+         }
+      </script>
+   }
+
+   <div class="pageheader" id="divTop">
+      <h2>
+         @if (Model.Employee_Profile_ID.HasValue && Model.Employee_Profile_ID.Value > 0)
+         {
+            @Resource.Employee_Details
+         }
+         else
+         {
+            @Resource.Add_New_Employee
+         }
+         <span></span>
+      </h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li><a href="@Url.Action("Employee", "Employee")">@Resource.Employee</a></li>
+            <li class="active">@Resource.Employee_Info</li>
+         </ol>
+      </div>
+   </div>
+   using (Html.BeginForm("EmployeeInfo", "Employee", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "theForm", enctype = "multipart/form-data" }))
+   {
+      @Html.AntiForgeryToken()
+      @Html.ValidationSummary(true)
+      <input type="hidden" id="Pattern_Nationality_Se" name="Pattern_Nationality_Se" value="@((Model.Pattern_Nationality_Se.HasValue ? Model.Pattern_Nationality_Se.Value : false).ToString())" />
+      <input type="hidden" id="Company_Level" name="Company_Level" value="@Model.Company_Level" />
+      <input type="hidden" id="Profile_ID" name="Profile_ID" value="@Model.Profile_ID" />
+      <input type="hidden" id="User_Authentication_ID" name="User_Authentication_ID" value="@Model.User_Authentication_ID" />
+      <input type="hidden" id="User_Profile_Photo_ID" name="User_Profile_Photo_ID" value="@Model.User_Profile_Photo_ID" />
+      <input type="hidden" id="Employee_Profile_ID" name="Employee_Profile_ID" value="@Model.Employee_Profile_ID" />
+      <input type="hidden" id="User_Login_Profile_ID" name="User_Login_Profile_ID" value="@Model.User_Login_Profile_ID" />
+      <input type="hidden" id="Company_ID" name="Company_ID" value="@Model.Company_ID" />
+      <input type="hidden" id="Company_Currency_Code" name="Company_Currency_Code" value="@Model.Company_Currency_Code" />
+      <input type="hidden" id="operation" name="operation" value="@Model.operation" />
+      if (Model.operation == Operation.U)
+      {
+         <input type="hidden" id="History_Index" name="History_Index" value="@Model.History_Index" />
+         <input type="hidden" id="History_ID" name="History_ID" value="@Model.History_ID" />
+         <input type="hidden" id="History_Branch_ID" name="History_Branch_ID" value="@Model.History_Branch_ID" />
+         <input type="hidden" id="History_Department_ID" name="History_Department_ID" value="@Model.History_Department_ID" />
+         <input type="hidden" id="History_Designation_ID" name="History_Designation_ID" value="@Model.History_Designation_ID" />
+         <input type="hidden" id="History_Other_Branch" name="History_Other_Branch" value="@Model.History_Other_Branch" />
+         <input type="hidden" id="History_Other_Department" name="History_Other_Department" value="@Model.History_Other_Department" />
+         <input type="hidden" id="History_Other_Designation" name="History_Other_Designation" value="@Model.History_Other_Designation" />
+         <input type="hidden" id="History_Effective_Date" name="History_Effective_Date" value="@Model.History_Effective_Date" />
+         <input type="hidden" id="History_Confirm_Date" name="History_Confirm_Date" value="@Model.History_Confirm_Date" />
+         <input type="hidden" id="History_Terminate_Date" name="History_Terminate_Date" value="@Model.History_Terminate_Date" />
+         <input type="hidden" id="History_No_Approval_WF" name="History_No_Approval_WF" value="@Model.History_No_Approval_WF" />
+         <input type="hidden" id="History_Employee_Type" name="History_Employee_Type" value="@Model.History_Employee_Type" />
+         <input type="hidden" id="History_Supervisor" name="History_Supervisor" value="@Model.History_Supervisor" />
+         <input type="hidden" id="History_Currency_ID" name="History_Currency_ID" value="@Model.History_Currency_ID" />
+         <input type="hidden" id="History_Basic_Salary" name="History_Basic_Salary" value="@Model.History_Basic_Salary" />
+         <input type="hidden" id="History_Hour_Rate" name="History_Hour_Rate" value="@Model.History_Hour_Rate" />
+         <input type="hidden" id="History_Basic_Salary_Unit" name="History_Basic_Salary_Unit" value="@Model.History_Basic_Salary_Unit" />
+         <input type="hidden" id="History_Days" name="History_Days" value="@Model.History_Days" />
+         <input type="hidden" id="History_Notice_Period_Amount" name="History_Notice_Period_Amount" value="@Model.History_Notice_Period_Amount" />
+         <input type="hidden" id="History_Notice_Period_Unit" name="History_Notice_Period_Unit" value="@Model.History_Notice_Period_Unit" />
+         <input type="hidden" id="History_Contract_Staff" name="History_Contract_Staff" value="@(Model.History_Employee_Type == "Contract" ? true : false)" />
+         <input type="hidden" id="History_Contract_Start_Date" name="History_Contract_Start_Date" value="@Model.History_Contract_Start_Date" />
+         <input type="hidden" id="History_Contract_End_Date" name="History_Contract_End_Date" value="@Model.History_Contract_End_Date" />
+         <input type="hidden" id="History_Row_Type" name="History_Row_Type" value="@Model.History_Row_Type" />
+      }
+      <div id="History_Allowance_Rows"></div>
+      <div class="main">
+         <div class="row">
+            <div class="col-md-12">
+               @if (Model.rights != null)
+               {
+                  foreach (var row in Model.rights)
+                  {
+                     <input type="hidden" id="rights" name="rights" value="@row" />
+                  }
+               }
+               @if (Model.adminRights != null)
+               {
+                  foreach (var row in Model.adminRights)
+                  {
+                     <input type="hidden" id="adminRights" name="adminRights" value="@row" />
+                  }
+               }
+
+               @if (Model.result != null && Model.result.Code != 0)
+               {
+                  if (Model.result.Code < 0)
+                  {
+                     <div class="alert alert-red">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                     </div>
+                  }
+                  else if (Model.result.Code > 0)
+                  {
+                     <div class="alert alert-success">
+                        @Html.Raw(AppConst.GetMsg(Model.result))
+                     </div>
+                  }
+               }
+
+               @if (Model.SubscriptionList != null)
+               {
+                  foreach (var row in Model.SubscriptionList)
+                  {
+                     if (Model.User_Assign_Module != null && Model.User_Assign_Module.Contains(row.Subscription_ID))
+                     {
+                        <input type="hidden" name="User_Assign_Module" value="@row.Subscription_ID" />
+                     }
+                  }
+               }
+               <section class="tile color transparent-black">
+                  <div id="tabs" class="tile-widget nopadding color transparent-white rounded-top-corners">
+                     <!-- Nav tabs -->
+                     <ul class="nav nav-tabs tabdrop">
+                        @if (Model.operation == Operation.U)
+                        {
+                           <li id="li-account"><a href="#account-tab" data-toggle="tab">@Resource.User_Account</a></li>
+                           <li id="li-role"><a href="#role-tab" data-toggle="tab">@Resource.User_Role</a></li>
+                           <li id="li-info"><a href="#info-tab" data-toggle="tab">@Resource.Personal_Info</a></li>
+                           <li id="li-hist"><a href="#hist-tab" data-toggle="tab">@Resource.Employment_History</a></li>
+                           <li id="li-address"><a href="#address-tab" data-toggle="tab">@Resource.Other_Contacts</a></li>
+                           <li id="li-bank"><a href="#bank-tab" data-toggle="tab">@Resource.Bank_Info</a></li>
+                           <li id="li-attach"><a href="#attach-tab" data-toggle="tab">@Resource.Attachment</a></li>
+                           <li id="li-family"><a href="#family-tab" data-toggle="tab">@Resource.Family_Member</a></li>
+                        }
+                        else
+                        {
+                           <li id="li-account"><a href="#account-tab" data-toggle="tab" id="id-account">@Resource.User_Account</a></li>
+                           <li id="li-role"><a href="#role-tab" data-toggle="tab" id="id-role">@Resource.User_Role</a></li>
+                           <li id="li-info"><a href="#info-tab" data-toggle="tab" id="id-info">@Resource.Personal_Info</a></li>
+                           <li id="li-hist"><a href="#hist-tab" data-toggle="tab" id="id-hist">@Resource.Employment_History</a></li>
+                        }
+                     </ul>
+                     <!-- / Nav tabs -->
+                  </div>
+                  <!-- /tile widget -->
+                  <div class="tile-body tab-content rounded-bottom-corners">
+                     @{
+                        Html.RenderPartial("_InfoUserAccount", Model);
+                        Html.RenderPartial("_InfoUserRole", Model);
+                        Html.RenderPartial("_InfoEmployee", Model);
+                     }
+                     @if (Model.operation == UserSession.RIGHT_U)
+                     {
+                        Html.RenderPartial("_InfoHistory", Model);
+                        Html.RenderPartial("_InfoContacts", Model);
+                        Html.RenderPartial("_InfoBank", Model);
+                        Html.RenderPartial("_InfoAttach", Model);
+                        Html.RenderPartial("_InfoFamilyMe", Model);
+                     }
+                     else
+                     {
+                        Html.RenderPartial("_InfoHistoryDetail", Model);
+                     }
+                  </div>
+               </section>
+            </div>
+         </div>
+
+         @if (Model.operation == Operation.C)
+         {
+            <div class="row" id="DivMainSaveBtn">
+               <div class="col-md-12">
+                  <section class="tile color transparent-white">
+                     <div class="tile-body">
+                        <div class="row">
+                           <div class="col-md-12" @((Model.tabAction == "account" || string.IsNullOrEmpty(Model.tabAction)) ? "" : "hidden") id="divbtnaccount">
+                              <div>
+                                 <button type="button" class="btn btn-primary" onclick="step1_Onclick();">@Resource.Next</button>
+                              </div>
+                           </div>
+                           <div class="col-md-12" @(Model.tabAction == "role" ? "" : "hidden") id="divbtnrole">
+                              <div>
+                                 <button type="button" class="btn btn-primary" onclick="Manage_Tab('account');">@Resource.Previous</button>
+                                 <button type="button" class="btn btn-primary" onclick="step2_Onclick();">@Resource.Next</button>
+                              </div>
+                           </div>
+                           <div class="col-md-12" @(Model.tabAction == "info" ? "" : "hidden") id="divbtninfo">
+                              <div>
+                                 <button type="button" class="btn btn-primary" onclick="Manage_Tab('role')">@Resource.Previous</button>
+                                 <button type="button" class="btn btn-primary" onclick="step3_Onclick();">@Resource.Next</button>
+                              </div>
+                           </div>
+                           <div class="col-md-12" @(Model.tabAction == "hist" ? "" : "hidden") id="divbtnhist">
+                              <div>
+                                 <button type="button" class="btn btn-primary" onclick="Manage_Tab('info')">@Resource.Previous</button>
+                                 <button id="btnSaveNew" type="submit" class="btn btn-primary" name="pageAction" value="save">@Resource.Save</button>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </section>
+               </div>
+            </div>
+         }
+         else if (Model.operation == Operation.U)
+         {
+            <div class="row" id="DivMainSaveBtn">
+               <div class="col-md-12">
+                  <section class="tile color transparent-white">
+                     <div class="tile-body">
+                        <div class="row">
+                           <div class="col-md-12">
+                              @if (admin | hr | self)
+                              {
+                                 <button id="btnSave" type="submit" class="btn btn-primary" name="pageAction" value="save">@Resource.Save</button>
+                              }
+                              <a href="@Url.Action("Employee", "Employee")" class="btn btn-default">@Resource.Back</a>
+                           </div>
+                        </div>
+                     </div>
+                  </section>
+               </div>
+            </div>
+         }
+         @{ Html.RenderPartial("_InfoDialog", Model); }
+      </div>
+   }
+}
+else if (Model.pageAction == "addhist" || Model.pageAction == "edithist")
+{
+   <div class="pageheader">
+      <h2>
+         @if (Model.History_ID > 0)
+         {
+            @Resource.Employment_Information_Details
+         }
+         else
+         {
+            @Resource.Add_New_Employment_Information
+         }
+      </h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li><a href="@Url.Action("Employee", "Employee")">@Resource.Employee</a></li>
+            <li><a href="@Url.Action("EmployeeInfo", "Employee", new { pEmpID = EncryptUtil.Encrypt(Model.Employee_Profile_ID), operation = EncryptUtil.Encrypt(Model.operation) })">@Resource.Employee_Info</a></li>
+            <li class="active">@Resource.Employment_History</li>
+         </ol>
+      </div>
+   </div>
+
+   using (Html.BeginForm("EmployeeInfo", "Employee", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data" }))
+   {
+      @Html.AntiForgeryToken()
+      <input type="hidden" id="Pattern_Nationality_Se" name="Pattern_Nationality_Se" value="@Model.Pattern_Nationality_Se.Value.ToString()" />
+      <input type="hidden" id="Company_Level" name="Company_Level" value="@Model.Company_Level" />
+      <input type="hidden" id="Profile_ID" name="Profile_ID" value="@Model.Profile_ID" />
+      <input type="hidden" id="User_Authentication_ID" name="User_Authentication_ID" value="@Model.User_Authentication_ID" />
+      <input type="hidden" id="Employee_Profile_ID" name="Employee_Profile_ID" value="@Model.Employee_Profile_ID" />
+      <input type="hidden" id="User_Login_Profile_ID" name="User_Login_Profile_ID" value="@Model.User_Login_Profile_ID" />
+      <input type="hidden" id="Company_ID" name="Company_ID" value="@Model.Company_ID" />
+      <input type="hidden" id="Company_Currency_Code" name="Company_Currency_Code" value="@Model.Company_Currency_Code" />
+      <input type="hidden" id="operation" name="operation" value="@Model.operation" />
+
+      <input type="hidden" id="History_ID" name="History_ID" value="@Model.History_ID" />
+      <input type="hidden" id="History_Row_Type" name="History_Row_Type" value="@Model.History_Row_Type" />
+      <input type="hidden" id="History_Index" name="History_Index" value="@Model.History_Index" />
+
+      { Html.RenderPartial("_InfoHistoryDetail", Model); }
+
+      @Html.HiddenFor(m => m.User_Photo)
+
+      <input type="hidden" id="First_Name" name="First_Name" value="@Model.First_Name" />
+      <input type="hidden" id="Middle_Name" name="Middle_Name" value="@Model.Middle_Name" />
+      <input type="hidden" id="Last_Name" name="Last_Name" value="@Model.Last_Name" />
+      <input type="hidden" id="Mobile_No" name="Mobile_No" value="@Model.Mobile_No" />
+      <input type="hidden" id="Email" name="Email" value="@Model.Email" />
+      <input type="hidden" id="User_Name" name="User_Name" value="@Model.User_Name" />
+      <input type="hidden" id="Is_Email" name="Is_Email" value="@Model.Is_Email.ToString()" />
+      <input type="hidden" id="User_Status" name="User_Status" value="@Model.User_Status" />
+
+      <input type="hidden" id="Employee_No" name="Employee_No" value="@Model.Employee_No" />
+      <input type="hidden" id="Gender" name="Gender" value="@Model.Gender" />
+      <input type="hidden" id="Marital_Status" name="Marital_Status" value="@Model.Marital_Status" />
+      <input type="hidden" id="DOB" name="DOB" value="@Model.DOB" />
+      <input type="hidden" id="Religion" name="Religion" value="@Model.Religion" />
+      <input type="hidden" id="Race" name="Race" value="@Model.Race" />
+      <input type="hidden" id="Nationality_ID" name="Nationality_ID" value="@Model.Nationality_ID" />
+      <input type="hidden" id="Residential_Status" name="Residential_Status" value="@Model.Residential_Status" />
+
+      <input type="hidden" id="Work_Pass_Type" name="Work_Pass_Type" value="@Model.Work_Pass_Type" />
+      if (Model.Opt_Out.HasValue ? Model.Opt_Out.Value : false)
+      {
+         <input type="checkbox" id="Opt_Out" name="Opt_Out" value="true" checked style="display:none" />
+      }
+      else
+      {
+         <input type="checkbox" id="Opt_Out" name="Opt_Out" value="true" style="display:none" />
+      }
+      if (Model.Contribute_Rate1.HasValue ? Model.Contribute_Rate1.Value : false)
+      {
+         <input type="checkbox" id="Contribute_Rate1" name="Contribute_Rate1" value="true" checked style="display:none" />
+      }
+      else
+      {
+         <input type="checkbox" id="Contribute_Rate1" name="Contribute_Rate1" value="true" checked style="display:none" />
+      }
+      if (Model.Contribute_Rate2.HasValue ? Model.Contribute_Rate2.Value : false)
+      {
+         <input type="checkbox" id="Contribute_Rate2" name="Contribute_Rate2" value="true" checked style="display:none" />
+      }
+      else
+      {
+         <input type="checkbox" id="Contribute_Rate2" name="Contribute_Rate2" value="true" checked style="display:none" />
+      }
+      <input type="hidden" id="NRIC" name="NRIC" value="@Model.NRIC" />
+      <input type="hidden" id="Passport" name="Passport" value="@Model.Passport" />
+      <input type="hidden" id="NRIC_FIN_Issue_Date" name="NRIC_FIN_Issue_Date" value="@Model.NRIC_FIN_Issue_Date" />
+      <input type="hidden" id="Passport_Issue_Date" name="Passport_Issue_Date" value="@Model.Passport_Issue_Date" />
+      <input type="hidden" id="NRIC_FIN_Expire_Date" name="NRIC_FIN_Expire_Date" value="@Model.NRIC_FIN_Expire_Date" />
+      <input type="hidden" id="Passpor_Expire_Date" name="Passpor_Expire_Date" value="@Model.Passpor_Expire_Date" />
+      <input type="hidden" id="Remark" name="Remark" value="@Model.Remark" />
+
+      <input type="hidden" id="Residential_Address_1" name="Residential_Address_1" value="@Model.Residential_Address_1" />
+      <input type="hidden" id="Residential_Address_2" name="Residential_Address_2" value="@Model.Residential_Address_2" />
+      <input type="hidden" id="Postal_Code_1" name="Postal_Code_1" value="@Model.Postal_Code_1" />
+      <input type="hidden" id="Postal_Code_2" name="Postal_Code_2" value="@Model.Postal_Code_2" />
+      <input type="hidden" id="Residential_Country_1" name="Residential_Country_1" value="@Model.Residential_Country_1" />
+      <input type="hidden" id="Residential_Country_2" name="Residential_Country_2" value="@Model.Residential_Country_2" />
+
+      if (Model.Users_Assign_Role != null)
+      {
+         foreach (var row in Model.Users_Assign_Role)
+         {
+            <input type="hidden" name="Users_Assign_Role" value="@row" />
+         }
+      }
+
+      if (Model.SubscriptionList != null)
+      {
+         foreach (var row in Model.SubscriptionList)
+         {
+            if (Model.User_Assign_Module != null && Model.User_Assign_Module.Contains(row.Subscription_ID))
+            {
+               <input type="hidden" name="User_Assign_Module" value="@row.Subscription_ID" />
+            }
+         }
+      }
+
+      if (Model.Emer_Contact_Rows != null)
+      {
+         var i = 0;
+         foreach (var row in Model.Emer_Contact_Rows)
+         {
+            <input type="hidden" name="Emer_Contact_Rows[@i].Row_Type" value="@row.Row_Type" />
+            <input type="hidden" name="Emer_Contact_Rows[@i].Employee_Emergency_Contact_ID" value="@row.Employee_Emergency_Contact_ID" />
+
+            <input type="hidden" name="Emer_Contact_Rows[@i].Name" value="@row.Name" />
+            <input type="hidden" name="Emer_Contact_Rows[@i].Contact_No" value="@row.Contact_No" />
+            <input type="hidden" name="Emer_Contact_Rows[@i].Relationship" value="@row.Relationship" />
+            i++;
+         }
+      }
+
+      if (Model.Bank_Info_Rows != null)
+      {
+         <input type="hidden" name="Bank_Info_Selected" value="@(Model.Bank_Info_Selected)" />
+         var i = 0;
+         foreach (var row in Model.Bank_Info_Rows)
+         {
+            <input type="hidden" name="Bank_Info_Rows[@i].Row_Type" value="@row.Row_Type" />
+            <input type="hidden" name="Bank_Info_Rows[@i].Banking_Info_ID" value="@row.Banking_Info_ID" />
+
+            <input type="hidden" name="Bank_Info_Rows[@i].Bank_Name" value="@row.Bank_Name" />
+            <input type="hidden" name="Bank_Info_Rows[@i].Bank_Account" value="@row.Bank_Account" />
+            <input type="hidden" name="Bank_Info_Rows[@i].Payment_Type" value="@row.Payment_Type" />
+            <input type="hidden" name="Bank_Info_Rows[@i].Effective_Date" value="@row.Effective_Date" />
+         }
+      }
+
+      if (Model.Attachment_Rows != null)
+      {
+         var i = 0;
+         foreach (var row in Model.Attachment_Rows)
+         {
+            if (row.Attachment_ID.HasValue)
+            {
+               <input type="hidden" name="Attachment_Rows[@i].Row_Type" value="@row.Row_Type" />
+               <input type="hidden" name="Attachment_Rows[@i].Attachment_ID" value="@row.Attachment_ID.Value.ToString()" />
+
+               <input type="hidden" name="Attachment_Rows[@i].Attachment_File" value="@Convert.ToBase64String(row.Attachment_File)" />
+               <input type="hidden" name="Attachment_Rows[@i].Attachment_Type_Name" value="@row.Attachment_Type_Name" />
+               <input type="hidden" name="Attachment_Rows[@i].File_Name" value="@row.File_Name" />
+               <input type="hidden" name="Attachment_Rows[@i].Uploaded_On" value="@row.Uploaded_On" />
+               <input type="hidden" name="Attachment_Rows[@i].Uploaded_By" value="@row.Uploaded_By" />
+            }
+            i++;
+         }
+      }
+
+      if (Model.Relationship_Rows != null)
+      {
+         var i = 0;
+         foreach (var row in Model.Relationship_Rows)
+         {
+            <input type="hidden" name="Relationship_Rows[@i].Row_Type" value="@row.Row_Type" />
+            <input type="hidden" name="Relationship_Rows[@i].Relationship_ID" value="@row.Relationship_ID" />
+
+            <input type="hidden" name="Relationship_Rows[@i].Nationality_Name" value="@row.Nationality_Name" />
+            <input type="hidden" name="Relationship_Rows[@i].Nationality_ID" value="@row.Nationality_ID" />
+            <input type="hidden" name="Relationship_Rows[@i].Name" value="@row.Name" />
+            <input type="hidden" name="Relationship_Rows[@i].Relationship" value="@row.Relationship" />
+            <input type="hidden" name="Relationship_Rows[@i].Relationship_Name" value="@row.Relationship_Name" />
+            <input type="hidden" name="Relationship_Rows[@i].DOB" value="@row.DOB" />
+            <input type="hidden" name="Relationship_Rows[@i].Gender" value="@row.Gender" />
+            <input type="hidden" name="Relationship_Rows[@i].NRIC" value="@row.NRIC" />
+            <input type="hidden" name="Relationship_Rows[@i].Working" value="@row.Working.ToString()" />
+            <input type="hidden" name="Relationship_Rows[@i].Company_Name" value="@row.Company_Name" />
+            <input type="hidden" name="Relationship_Rows[@i].Company_Position" value="@row.Company_Position" />
+            <input type="hidden" name="Relationship_Rows[@i].Passport" value="@row.Passport" />
+            <input type="hidden" name="Relationship_Rows[@i].Child_Type" value="@row.Child_Type" />
+            <input type="hidden" name="Relationship_Rows[@i].Is_Paternity" value="@row.Is_Paternity.ToString()" />
+            <input type="hidden" name="Relationship_Rows[@i].Is_Maternity" value="@row.Is_Maternity.ToString()" />
+            <input type="hidden" name="Relationship_Rows[@i].Is_Maternity_Share_Father" value="@row.Is_Maternity_Share_Father.ToString()" />
+            i++;
+         }
+      }
+
+      if (Model.History_Rows != null)
+      {
+         var i = 0;
+         foreach (var row in Model.History_Rows)
+         {
+            <input type="hidden" name="History_Rows[@i].History_ID" value="@row.History_ID" />
+            <input type="hidden" name="History_Rows[@i].Row_Type" id="History_Rows_@(i)__Row_Type" value="@row.Row_Type" />
+
+            <input type="hidden" name="History_Rows[@i].Employee_Type" value="@row.Employee_Type" />
+            <input type="hidden" name="History_Rows[@i].Employee_Type_Name" value="@row.Employee_Type_Name" />
+
+            <input type="hidden" name="History_Rows[@i].Branch_ID" value="@row.Branch_ID" />
+            <input type="hidden" name="History_Rows[@i].Branch_Name" value="@row.Branch_Name" />
+
+            <input type="hidden" name="History_Rows[@i].Designation_ID" value="@row.Designation_ID" />
+            <input type="hidden" name="History_Rows[@i].Designation_Name" value="@row.Designation_Name" />
+
+            <input type="hidden" name="History_Rows[@i].Department_ID" value="@row.Department_ID" />
+            <input type="hidden" name="History_Rows[@i].Department_Name" value="@row.Department_Name" />
+
+            <input type="hidden" name="History_Rows[@i].Employee_Type" value="@row.Employee_Type" />
+            <input type="hidden" name="History_Rows[@i].Supervisor" value="@row.Supervisor" />
+            <input type="hidden" name="History_Rows[@i].No_Approval_WF" value="@((row.No_Approval_WF.HasValue ? row.No_Approval_WF.Value : false).ToString())" />
+            <input type="hidden" name="History_Rows[@i].Effective_Date" value="@row.Effective_Date" />
+            <input type="hidden" name="History_Rows[@i].Confirm_Date" value="@row.Confirm_Date" />
+            <input type="hidden" name="History_Rows[@i].Terminate_Date" value="@row.Terminate_Date" />
+
+            <input type="hidden" name="History_Rows[@i].Contract_Staff" value="@((row.Contract_Staff.HasValue ? row.Contract_Staff.Value : false).ToString())" />
+            <input type="hidden" name="History_Rows[@i].Contract_Start_Date" value="@row.Contract_Start_Date" />
+            <input type="hidden" name="History_Rows[@i].Contract_End_Date" value="@row.Contract_End_Date" />
+
+            <input type="hidden" name="History_Rows[@i].Currency_ID" value="@row.Currency_ID" />
+            <input type="hidden" name="History_Rows[@i].Basic_Salary_Unit" value="@row.Basic_Salary_Unit" />
+            <input type="hidden" name="History_Rows[@i].Basic_Salary" value="@row.Basic_Salary" />
+
+            <input type="hidden" name="History_Rows[@i].Notice_Period_Amount" value="@row.Notice_Period_Amount" />
+            <input type="hidden" name="History_Rows[@i].Notice_Period_Unit" value="@row.Notice_Period_Unit" />
+            <input type="hidden" name="History_Rows[@i].Payment_Type" value="@row.Payment_Type" />
+            <input type="hidden" name="History_Rows[@i].Days" value="@row.Days" />
+
+            <input type="hidden" name="History_Rows[@i].Other_Branch" value="@row.Other_Branch" />
+            <input type="hidden" name="History_Rows[@i].Other_Department" value="@row.Other_Department" />
+            <input type="hidden" name="History_Rows[@i].Other_Designation" value="@row.Other_Designation" />
+
+            if (row.History_Allowance_Rows != null)
+            {
+               var j = 0;
+               foreach (var arow in row.History_Allowance_Rows)
+               {
+                  <input type="hidden" name="History_Rows[@i].History_Allowance_Rows[@j].Row_Type" value="@arow.Row_Type" />
+                  <input type="hidden" name="History_Rows[@i].History_Allowance_Rows[@j].Employment_History_Allowance_ID" value="@arow.Employment_History_Allowance_ID" />
+
+                  <input type="hidden" name="History_Rows[@i].History_Allowance_Rows[@j].Amount" value="@arow.Amount" />
+                  <input type="hidden" name="History_Rows[@i].History_Allowance_Rows[@j].PRT_ID" value="@arow.PRT_ID" />
+                  <input type="hidden" name="History_Rows[@i].History_Allowance_Rows[@j].PRC_ID" value="@(arow.PRC_ID.HasValue ? arow.PRC_ID.Value : 0)" />
+                  j++;
+               }
+            }
+            i++;
+         }
+      }
+   }
+}
+

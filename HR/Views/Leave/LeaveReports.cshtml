@@ -1,0 +1,363 @@
+﻿@model  HR.Models.LeaveReportViewModel
+@using SBSModel.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+    ViewBag.Title = Resource.Leave_Report;
+    var totalhash = new System.Collections.Hashtable();
+}
+
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+    <div class="pageheader">
+        <h2>@Resource.Leave_Report<span></span></h2>
+        <div class="breadcrumbs">
+            <ol class="breadcrumb">
+                <li>@Resource.You_Are_Here</li>
+                <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+                <li class="active">@Resource.Leave_Report</li>
+            </ol>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $(function () {
+            InitDatepicker();
+            InitDatatable('moduleDataTable', null, null, 0, 'asc');
+
+            $("#Leave_Type_Sel").val(@Model.Leave_Sel);
+           $("#Leave_Type_Sel").trigger("chosen:updated");
+
+           $(function () {
+              $("#btnExport").click(function () {
+                 $('#tabAction').val('export');
+                 var form = $("#theform");
+                 form.attr("action", "@Url.Action("LeaveReports", "Leave")");
+                 form.method = 'get';
+                 form.submit();
+                 CloseMask();
+              });
+
+              $("#btnSearch").click(function () {
+                 $('#tabAction').val('');
+                 var form = $("#theform");
+                 form.attr("action", "@Url.Action("LeaveReports", "Leave")");
+                 form.method = 'get';
+                 form.submit();
+              });
+           });
+        });
+    </script>
+
+    <div class="main">
+        <div class="row">
+            <div class="col-md-12">
+                
+                @if (Model.result != null && Model.result.Code != 0)
+                {
+                    if (Model.result.Code < 0)
+                    {
+                        <div class="alert alert-red">
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        </div>
+                    }
+                    else if (Model.result.Code > 0)
+                    {
+                        <div class="alert alert-success">
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        </div>
+                    }
+                }
+
+                @using (Html.BeginForm("LeaveReports", "Leave", FormMethod.Get, new { @class = "form-horizontal", role = "form", id = "theform" }))
+                {
+                    @*@Html.AntiForgeryToken()*@
+
+                    <section class="tile color transparent-black filter" id="secfilter">
+                        <div class="tile-header transparent">
+                            <h1 onclick="CollapseHeader(null)" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize filter" id="btncollapse"><i class="fa fa-search  color-white"></i></a>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="sDepartment" class="control-label">@Resource.Department</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <select class="chosen-select chosen-transparent form-control" id="Department" name="Department">
+                                                @if (Model.departmentList != null)
+                                                {
+                                                    foreach (var row in Model.departmentList)
+                                                    {
+                                                        if (Model.Department == NumUtil.ParseInteger(row.Value))
+                                                        {
+                                                            <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Department)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="Leave_Type" class="control-label">@Resource.Leave_Type</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <select multiple class="chosen-select chosen-transparent form-control" id="Leave_Type_Sel" name="Leave_Type_Sel">
+                                                @if (Model.leavetypelist != null)
+                                                {
+                                                    foreach (var row in Model.leavetypelist)
+                                                    {
+                                                        if (row.Value != null && !string.IsNullOrEmpty(row.Value))
+                                                        {
+                                                            <option value="@row.Value">@row.Text</option>
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Leave_Type)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="Year" class="control-label">@Resource.Year</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-4">
+                                            <input type="text" class="form-control" name="Year" id="Year" value="@Model.Year">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Year)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                   <input type="hidden" name="tabAction" id="tabAction" />
+                                   <button type="button" id="btnSearch" class="btn btn-default">@Resource.Filter</button>
+                                   <a class="btn btn-default" href="#" target="_blank" id="btnExport" data-toggle="modal">@Resource.Export_To_Excel</a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="tile color transparent-black">
+                        
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.Leave_Report</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+                                              
+                        <div class="tile-body ">
+                            <div class="table-responsive" style="overflow-x:auto">
+                                <table class="table table-datatable table-custom" id="moduleDataTable" cellpadding="2" cellspacing="2" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th rowspan="2" class="sort-alpha">@Resource.Employee_No_SymbolDot</th>
+                                            <th rowspan="2" class="sort-alpha">@Resource.Employee_Name</th>
+                                            @if (Model.leavetypelist != null)
+                                            {
+                                                foreach (var lrow in Model.leavetypelist)
+                                                {
+                                                    if (!string.IsNullOrEmpty(lrow.Value))
+                                                    {
+                                                        if (Model.Leave_Type_Sel != null)
+                                                        {
+                                                            if (Model.Leave_Type_Sel.Contains(NumUtil.ParseInteger(lrow.Value)))
+                                                            {
+                                                                totalhash.Add("a" + lrow.Value, (decimal)0);
+                                                                totalhash.Add("b" + lrow.Value, (decimal)0);
+                                                                totalhash.Add("d" + lrow.Value, (decimal)0);
+                                                                <th colspan="3">@lrow.Text</th>
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            totalhash.Add("a" + lrow.Value, (decimal)0);
+                                                            totalhash.Add("b" + lrow.Value, (decimal)0);
+                                                            totalhash.Add("d" + lrow.Value, (decimal)0);
+                                                            <th colspan="3">@lrow.Text</th>
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        </tr>
+                                        <tr>
+                                            @if (Model.leavetypelist != null)
+                                            {
+                                                foreach (var lrow in Model.leavetypelist)
+                                                {
+                                                    if (!string.IsNullOrEmpty(lrow.Value))
+                                                    {
+                                                        if (Model.Leave_Type_Sel != null)
+                                                        {
+                                                            if (Model.Leave_Type_Sel.Contains(NumUtil.ParseInteger(lrow.Value)))
+                                                            {
+                                                                <th class="sort-numeric" width="100px">@Resource.Leave_Balance</th>
+                                                                <th class="sort-numeric" width="200px">@Resource.Leave_From_Last_Year</th>
+                                                                <th class="sort-numeric" width="100px">@Resource.Days_Taken</th>
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <th class="sort-numeric" width="100px">@Resource.Leave_Balance</th>
+                                                            <th class="sort-numeric" width="200px">@Resource.Leave_From_Last_Year</th>
+                                                            <th class="sort-numeric" width="100px">@Resource.Days_Taken</th>
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.leavelist != null)
+                                        {
+                                            foreach (var row in Model.leavelist)
+                                            {
+                                                <tr>
+                                                    <td>@row.Employee_No</td>
+                                                    <td>@row.Employee_Name</td>
+                                                    @if (Model.leavetypelist != null)
+                                                    {
+                                                        foreach (var lrow in Model.leavetypelist)
+                                                        {
+                                                            if (!string.IsNullOrEmpty(lrow.Value))
+                                                            {
+
+                                                                if (Model.Leave_Type_Sel != null)
+                                                                {
+                                                                    if (Model.Leave_Type_Sel.Contains(NumUtil.ParseInteger(lrow.Value)))
+                                                                    {
+                                                                        var leavetype = row.leaveTypelist.Where(w => w.Leave_Name.ToLower() == lrow.Text.ToLower()).FirstOrDefault();
+                                                                        if (leavetype != null)
+                                                                        {
+                                                                            totalhash["a" + lrow.Value] = (decimal)totalhash["a" + lrow.Value] + leavetype.Entitle;
+                                                                            totalhash["b" + lrow.Value] = (decimal)totalhash["b" + lrow.Value] + leavetype.Bring_Forward;
+                                                                            totalhash["d" + lrow.Value] = (decimal)totalhash["d" + lrow.Value] + leavetype.Days_Taken.Value;
+                                                                            <td class="text-right">@leavetype.Entitle.ToString("n2")</td>
+                                                                            <td class="text-right">@leavetype.Bring_Forward.ToString("n2")</td>
+                                                                            <td class="text-right" style="padding-right:0.2cm">@leavetype.Days_Taken.Value.ToString("n2")</td>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <td class="text-right">@(0.ToString("n2"))</td>
+                                                                            <td class="text-right">@(0.ToString("n2"))</td>
+                                                                            <td class="text-right" style="padding-right:0.2cm">@(0.ToString("n2"))</td>
+                                                                        }
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    var leavetype = row.leaveTypelist.Where(w => w.Leave_Name.ToLower() == lrow.Text.ToLower()).FirstOrDefault();
+                                                                    if (leavetype != null)
+                                                                    {
+                                                                        totalhash["a" + lrow.Value] = (decimal)totalhash["a" + lrow.Value] + leavetype.Entitle;
+                                                                        totalhash["b" + lrow.Value] = (decimal)totalhash["b" + lrow.Value] + leavetype.Bring_Forward;
+                                                                        totalhash["d" + lrow.Value] = (decimal)totalhash["d" + lrow.Value] + leavetype.Days_Taken.Value;
+                                                                        <td class="text-right">@leavetype.Entitle.ToString("n2")</td>
+                                                                        <td class="text-right">@leavetype.Bring_Forward.ToString("n2")</td>
+                                                                        <td class="text-right" style="padding-right:0.2cm">@leavetype.Days_Taken.Value.ToString("n2")</td>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <td class="text-right">@(0.ToString("n2"))</td>
+                                                                        <td class="text-right">@(0.ToString("n2"))</td>
+                                                                        <td class="text-right" style="padding-right:0.2cm">@(0.ToString("n2"))</td>
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="table-footer-summary" style="font-size:15px">
+                                            <td colspan="2"></td>
+                                            @foreach (var lrow in Model.leavetypelist)
+                                            {
+                                                if (!string.IsNullOrEmpty(lrow.Value))
+                                                {
+                                                    if (Model.Leave_Type_Sel != null)
+                                                    {
+                                                        if (Model.Leave_Type_Sel.Contains(NumUtil.ParseInteger(lrow.Value)))
+                                                        {
+                                                            decimal atotal = 0;
+                                                            if (totalhash.Contains("a" + lrow.Value))
+                                                            {
+                                                                atotal = (decimal)totalhash["a" + lrow.Value];
+                                                            }
+                                                            decimal btotal = 0;
+                                                            if (totalhash.Contains("b" + lrow.Value))
+                                                            {
+                                                                btotal = (decimal)totalhash["b" + lrow.Value];
+                                                            }
+                                                            decimal dtotal = 0;
+                                                            if (totalhash.Contains("d" + lrow.Value))
+                                                            {
+                                                                dtotal = (decimal)totalhash["d" + lrow.Value];
+                                                            }
+                                                            <td class="text-right"><strong>@NumUtil.FormatCurrency(atotal)</strong></td>
+                                                            <td class="text-right"><strong>@NumUtil.FormatCurrency(btotal)</strong></td>
+                                                            <td class="text-right"><strong>@NumUtil.FormatCurrency(dtotal)</strong></td>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        decimal atotal = 0;
+                                                        if (totalhash.Contains("a" + lrow.Value))
+                                                        {
+                                                            atotal = (decimal)totalhash["a" + lrow.Value];
+                                                        }
+                                                        decimal btotal = 0;
+                                                        if (totalhash.Contains("b" + lrow.Value))
+                                                        {
+                                                            btotal = (decimal)totalhash["b" + lrow.Value];
+                                                        }
+                                                        decimal dtotal = 0;
+                                                        if (totalhash.Contains("d" + lrow.Value))
+                                                        {
+                                                            dtotal = (decimal)totalhash["d" + lrow.Value];
+                                                        }
+                                                        <td class="text-right"><strong>@NumUtil.FormatCurrency(atotal)</strong></td>
+                                                        <td class="text-right"><strong>@NumUtil.FormatCurrency(btotal)</strong></td>
+                                                        <td class="text-right"><strong>@NumUtil.FormatCurrency(dtotal)</strong></td>
+                                                    }
+                                                }
+                                            }
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>               
+                    </section>
+                }
+            </div>
+        </div>
+    </div>
+}

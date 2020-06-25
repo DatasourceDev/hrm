@@ -1,0 +1,715 @@
+﻿@model  HR.Models.EmployeeViewModels
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+
+@{
+   var imgSrc = Url.Content("~/images/avatar.jpg");
+   var admin = Model.adminRights != null ? Model.adminRights.Contains(Model.operation) : false;
+   var self = Model.Profile_ID == Model.User_Login_Profile_ID ? true : false;
+   var hr = Model.hrRights != null ? Model.hrRights.Contains(Model.operation) : false;
+}
+
+@if (Model != null && Model.User_Photo != null)
+{
+   var base64 = Convert.ToBase64String(Model.User_Photo);
+   imgSrc = String.Format("data:image/gif;base64,{0}", base64);
+}
+
+<div id="info-tab" class="tab-pane fade in">
+   <div class="row">
+      <div class="col-md-12">
+         <section class="tile transparent">
+            <div class="tile-header transparent">
+               <h1><strong>@Resource.Personal_Info</strong></h1>
+               <div class="controls">
+                  <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+               </div>
+            </div>
+            <div class="tile-body">
+               <div class="row">
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12 text-center">
+                           @if (admin | self | hr)
+                           {
+                              <a id="btnOpenUpload" href="#modal-upload" role="button" data-toggle="modal"><img src="@imgSrc" style="max-height:80px;border-radius:40px;cursor:pointer" id="img"></a>
+                           }
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-8">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Employee_No" class="control-label">@Resource.Employee_No</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-6">
+                           <input type="text" class="form-control " id="Employee_No" name="Employee_No" value="@Model.Employee_No" readonly>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Employee_No)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Gender" class="control-label">@Resource.Gender</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <select class="chosen-select chosen-transparent form-control" id="Gender" name="Gender">
+                              @if (Model.genderList != null)
+                              {
+                                 foreach (var row in Model.genderList)
+                                 {
+                                    if (Model.Gender == NumUtil.ParseInteger(row.Value))
+                                    {
+                                       <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                    }
+                                    else
+                                    {
+                                       <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                    }
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Gender)
+                           </div>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Religion" class="control-label">@Resource.Religion</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <select class="chosen-select chosen-transparent form-control" id="Religion" name="Religion">
+                              @if (Model.religionList != null)
+                              {
+                                 foreach (var row in Model.religionList)
+                                 {
+                                    if (Model.Religion == NumUtil.ParseInteger(row.Value))
+                                    {
+                                       <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                    }
+                                    else
+                                    {
+                                       <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                    }
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Religion)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Marital_Status" class="control-label">@Resource.Marital_Status</label>
+                        </div>
+                     </div>
+                     <div class="form-group" id="divMarital_Status">
+                        <div class="col-md-12">
+                           <select class="chosen-select chosen-transparent form-control" id="Marital_Status" name="Marital_Status">
+                              @if (Model.maritalStatusList != null)
+                              {
+                                 foreach (var row in Model.maritalStatusList.OrderBy(o => int.Parse(o.Value)))
+                                 {
+                                    if (Model.Marital_Status == NumUtil.ParseInteger(row.Value))
+                                    {
+                                       <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                    }
+                                    else
+                                    {
+                                       <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                    }
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Marital_Status)
+                           </div>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Race" class="control-label">@Resource.Race</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <select class="chosen-select chosen-transparent form-control" id="Race" name="Race">
+                              @if (Model.raceList != null)
+                              {
+                                 foreach (var row in Model.raceList)
+                                 {
+                                    if (Model.Race == NumUtil.ParseInteger(row.Value))
+                                    {
+                                       <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                    }
+                                    else
+                                    {
+                                       <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                    }
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Race)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="DOB" class="control-label">@Resource.DOB</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control input-datepicker" id="DOB" name="DOB" value="@Model.DOB">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.DOB, "", new { id = "DOB_Err" })
+                           </div>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label class="control-label"></label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <div class="checkbox check-transparent">
+                              @if (Model.Opt_Out.HasValue && Model.Opt_Out.Value)
+                              {
+                                 <input type="checkbox" value="true" id="Opt_Out" name="Opt_Out" checked>
+                              }
+                              else
+                              {
+                                 <input type="checkbox" value="true" id="Opt_Out" name="Opt_Out">
+                              }
+                              <label for="Opt_Out">@Resource.Opt_Out</label>
+                           </div>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Opt_Out)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Nationality_ID" class="control-label">@Resource.Nationality</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <select class="chosen-select chosen-transparent form-control" id="Nationality_ID" name="Nationality_ID" onchange="Nationality_Onchange()">
+                              @if (Model.nationalityList != null)
+                              {
+                                 foreach (var row in Model.nationalityList)
+                                 {
+                                    if (Model.Nationality_ID == NumUtil.ParseInteger(row.Value))
+                                    {
+                                       <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                    }
+                                    else
+                                    {
+                                       <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                    }
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Nationality_ID)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Residential_Status" class="control-label">@Resource.Residential_Status</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <select class="chosen-select chosen-transparent form-control" id="Residential_Status" name="Residential_Status" onchange="Residential_Status_Onchange()">
+                              @if (Model.residentialStatusList != null)
+                              {
+                                 foreach (var row in Model.residentialStatusList)
+                                 {
+                                    if (Model.Residential_Status == row.Value)
+                                    {
+                                       <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                    }
+                                    else
+                                    {
+                                       <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                    }
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Residential_Status)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4" id="divWorkPassType">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Work_Pass_Type" class="control-label">@Resource.Work_Pass_Type</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <select class="chosen-select chosen-transparent form-control" id="Work_Pass_Type" name="Work_Pass_Type">
+                              @if (Model.workPassTypeList != null)
+                              {
+                                 foreach (var row in Model.workPassTypeList)
+                                 {
+                                    if (Model.Work_Pass_Type == NumUtil.ParseInteger(row.Value))
+                                    {
+                                       <option value="@(row.Value != null ? row.Value : "")" selected>@row.Desc</option>
+                                    }
+                                    else
+                                    {
+                                       <option value="@(row.Value != null ? row.Value : "")">@row.Desc</option>
+                                    }
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Work_Pass_Type)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div id="divCPF">
+                  <section class="tile transparent">
+                     <div class="tile-body color transparent-black rounded-corners">
+                        <h5><strong>@Resource.Message_Contribute_Rate_Top</strong></h5>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <div class="radio radio-transparent">
+                                 @if (Model.Contribute_Rate1.HasValue && Model.Contribute_Rate1.Value)
+                                 {
+                                    <input type="radio" name="Contribute_Rate1" id="Contribute_Rate1" value="true" checked>
+                                 }
+                                 else
+                                 {
+                                    <input type="radio" name="Contribute_Rate1" id="Contribute_Rate1" value="true">
+                                 }
+                                 <label for="Contribute_Rate1">@Resource.Message_Contribute_Rate_1</label>
+                              </div>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Contribute_Rate1)
+                              </div>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <div class="radio radio-transparent">
+                                 @if (Model.Contribute_Rate1.HasValue && Model.Contribute_Rate1.Value)
+                                 {
+                                    <input type="radio" name="Contribute_Rate1" id="Contribute_Rate2" value="false">
+                                 }
+                                 else
+                                 {
+                                    <input type="radio" name="Contribute_Rate1" id="Contribute_Rate2" value="false" checked>
+                                 }
+                                 <label for="Contribute_Rate2">@Resource.Message_Contribute_Rate_2</label>
+                              </div>
+
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Contribute_Rate2)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </section>
+               </div>
+               <div class="row">
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="NRIC" class="control-label">@Resource.NRIC_Or_Fin_No_SymbolDot</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control " id="NRIC" name="NRIC" value="@Model.NRIC">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.NRIC, "", new { @id = "NRIC_Err" })
+                           </div>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Passport" class="control-label">@Resource.Passport_No_SymbolDot</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control " id="Passport" name="Passport" value="@Model.Passport">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Passport)
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="NRIC_FIN_Issue_Date" class="control-label">@Resource.Date_Of_Issue</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control input-datepicker" id="NRIC_FIN_Issue_Date" name="NRIC_FIN_Issue_Date" value="@Model.NRIC_FIN_Issue_Date">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.NRIC_FIN_Issue_Date, "", new { id = "NRIC_FIN_Issue_Date_Err" })
+                           </div>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Passport_Issue_Date" class="control-label">@Resource.Date_Of_Issue</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control input-datepicker" id="Passport_Issue_Date" name="Passport_Issue_Date" value="@Model.Passport_Issue_Date">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Passport_Issue_Date, "", new { id = "Passport_Issue_Date_Err" })
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="NRIC_FIN_Expire_Date" class="control-label">@Resource.Date_Of_Expire</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control input-datepicker" id="NRIC_FIN_Expire_Date" name="NRIC_FIN_Expire_Date" value="@Model.NRIC_FIN_Expire_Date">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.NRIC_FIN_Expire_Date, "", new { id = "NRIC_FIN_Expire_Date_Err" })
+                           </div>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Passpor_Expire_Date" class="control-label">@Resource.Date_Of_Expire</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control input-datepicker" id="Passpor_Expire_Date" name="Passpor_Expire_Date" value="@Model.Passpor_Expire_Date">
+                           <div class="validation-error">
+                              @Html.ValidationMessageFor(m => m.Passpor_Expire_Date, "", new { id = "Passpor_Expire_Date_Err" })
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-12">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Remark" class="control-label">@Resource.Remark</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <textarea name="Remark" id="Remark" cols="10" rows="6" class="form-control ckeditor">@Model.Remark</textarea>
+                           <script>
+                              CKEDITOR.replace('Remark', {
+                                 filebrowserBrowseUrl: 'browse',
+                                 filebrowserUploadUrl: 'upload'
+                              });
+
+                              $(document).ready(function () {
+                                 $('#previewBtn').click(function () {
+                                    var contents = $('#Remark').val();
+                                    var mywin = window.open("", "ckeditor_preview", "location=0,status=0,scrollbars=0,width=500,height=500");
+                                    $(mywin.document.body).html(Remarks);
+
+                                    return false;
+                                 });
+                              });
+                           </script>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </section>
+      </div>
+   </div>
+   @if (Model.operation == UserSession.RIGHT_C)
+   {
+      @*<div class="row">
+         <div class="col-md-12">
+            <section class="tile color transparent-white" style="padding-left:15px;">
+               <div class="tile-body">
+                  <div class="row">
+                     <div class="col-md-12">
+                        <button type="button" class="btn btn-primary" onclick="Manage_Tab('role')">@Resource.Previous</button>
+                        <button type="button" class="btn btn-primary" onclick="next3_Onclick()">@Resource.Next</button>
+                     </div>
+                  </div>
+               </div>
+            </section>
+         </div>
+      </div>*@
+   }
+</div>
+
+<script type="text/javascript">
+   $(function () {
+    
+      $(document).on('change', '.btn-file :file', function () {
+         var input = $(this),
+         numFiles = input.get(0).files ? input.get(0).files.length : 1,
+         label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+         input.trigger('fileselect', [numFiles, label]);
+      });
+
+      $('.btn-file :file').on('fileselect', function (event, numFiles, label) {
+
+         var input = $(this).parents('.input-group').find(':text'),
+             log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+         console.log(log);
+
+         if (input.length) {
+            input.val(log);
+         } else {
+            if (log) alert(log);
+         }
+      });
+
+      $("#btnUpload").click(function () {
+         var filename = $('#uploadfile').val();
+         var ext = '';
+         if (filename != null) {
+            var k = filename.lastIndexOf('.');
+            if (k >= 0) {
+               ext = filename.substring(k + 1).toLowerCase();
+            }
+         }
+
+         var sizeIsnull = $('#uploadfile')[0].files[0];
+         if (sizeIsnull != undefined) {
+            var fsize = $('#uploadfile')[0].files[0].size;
+            if (fsize > 2097150) {
+               alert('@Resource.Message_Please_Upload_File_Size_Is_Less_Than_2_MB');
+               $('#uploadfile').after($('#uploadfile').clone(true)).remove();
+               $('#uploadfile').parents('.input-group').find(':text').val('');
+               return false;
+            }
+
+            if (ext != 'jpg' && ext != 'jpeg' && ext != 'png' && ext != 'gif') {
+               alert('@Resource.Message_Please_Upload_File_Image');
+               return;
+            }
+
+            var blah = new FormData();
+            blah.append("file", $("#uploadfile")[0].files[0]);
+            ShowMask();
+            $.ajax({
+               async: true,
+               type: 'POST',
+               url: '@Url.Action("UploadUserPhoto", "Employee", new { pProfileID = Model.Profile_ID })',
+               data: blah,
+               dataType: 'json',
+               cache: false,
+               contentType: false,
+               processData: false,
+               success: function (data) {
+                  if (data != null) {
+                     $("#img").get(0).src = data.img;
+                     $('#btnCloseUpload').get(0).click();
+                     $('#User_Photo').val('');
+                  }
+                  CloseMask();
+               }
+            });
+         }
+      });
+   });
+
+   function Nationality_Onchange() {
+      var ckPatternNationality = $('#Pattern_Nationality_Se').val();
+      if (ckPatternNationality == "true" | ckPatternNationality == "True" | ckPatternNationality == true) {
+         if ('@Model.operation' == '@UserSession.RIGHT_U') {
+            ReloadNumber_Onchange(true);
+         }
+      }
+
+      $("#divCPF").hide();
+      var rStatus = $("#Residential_Status").val()
+      if ($("#Nationality_ID option:selected").text() == "Singaporean") {
+         $("#divWorkPassType").hide();
+         $("#divCPF").show();
+         if ($("#Contribute_Rate1").get(0) != null)
+            $("#Contribute_Rate1").get(0).checked = true;
+
+         var id = 'Residential_Status';
+         ShowMask();
+         $.ajax({
+            type: 'POST',
+            url: '../Combo/Reload',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ type: '@ComboTypeEnum.Residential_Status', param: true }),
+            dataType: 'json',
+            success: function (data) {
+               var result = '';
+               for (var i = 0, iL = data.length; i < iL; i++) {
+                  result += '<option value="' + data[i].Value + '">' + data[i].Text + '</option>';
+               }
+               $('#' + id).html(result);
+               $('#' + id).trigger("chosen:updated");
+
+               $("#Residential_Status").val('L');
+               $('#Residential_Status').trigger("chosen:updated");
+
+               CloseMask();
+            }
+         });
+      }
+      else {
+         var id = 'Residential_Status';
+         ShowMask();
+         $.ajax({
+            type: 'POST',
+            url: '../Combo/Reload',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ type: '@ComboTypeEnum.Residential_Status', param: false }),
+            dataType: 'json',
+            success: function (data) {
+               var result = '';
+               for (var i = 0, iL = data.length; i < iL; i++) {
+                  result += '<option value="' + data[i].Value + '">' + data[i].Text + '</option>';
+               }
+               $('#' + id).html(result);
+               $('#' + id).trigger("chosen:updated");
+
+               $("#Residential_Status").val(rStatus);
+               $('#Residential_Status').trigger("chosen:updated");
+               CloseMask();
+            }
+         });
+      }
+   }
+
+   function Residential_Status_Onchange() {
+      $("#divWorkPassType").hide();
+      $("#divCPF").hide();
+      if ($("#Residential_Status").val() == "F") {
+         $("#divWorkPassType").show();
+      }
+      if ($("#Nationality_ID option:selected").text() == "Singaporean") {
+         $("#divCPF").show();
+      }
+      if ($("#Residential_Status").val() == "P") {
+         $("#divCPF").show();
+      }
+   }
+
+   function ReloadNumber_Onchange(newNationality) {
+      if (confirm('@Resource.Message_Are_You_Sure_To_Proceed_With_Change')) {
+         var number = "";
+         var nalID;
+         if (newNationality == true) {
+            nalID = $('#Nationality_ID').val();
+         }
+         ShowMask();
+         $.ajax({
+            type: 'POST',
+            url: 'ReloadNumber',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(
+                {
+                   pNumber: number,
+                   pNationalityID: nalID,
+                   pEmpNo: $('#Employee_No').val(),
+                   pEmpID: $('#Employee_Profile_ID').val()
+                }),
+            dataType: 'json',
+            success: function (data) {
+               if (data != null) {
+                  if (data.err != null && data.err != '') {
+                     alert(data.err);
+                  } else {
+                     $('#Employee_No').val(data.NewEmpNo);
+                  }
+               }
+               CloseMask();
+            }
+         });
+      }
+   }
+</script>
+
+<script type="text/javascript">
+   function step3_Onclick() {
+
+      var dob = $("#DOB").val();
+      var nric = $("#NRIC").val();
+      var valid = true;
+      if (!ValidateRequire('DOB', '@Resource.DOB', true)) { valid = false; }
+      if (!ValidateRequire('NRIC', '@Resource.NRIC', true)) { valid = false; }
+
+      if (!valid) {
+         Scroll_Top();
+         return false;
+      } else {
+         var age = getAge(dob);
+         if (age <= 15) {
+            valid = false;
+            ValidateManual('DOB', '@Resource.Message_Is_Invalid_DOB')
+         }
+      }
+
+      if (!valid) {
+         Scroll_Top();
+         return false;
+      } else {
+         Manage_Tab('hist')
+      }
+   }
+
+   function getAge(dateString) {
+      var today = new Date();
+      var birthDate = new Date(dateString);
+      var age = today.getFullYear() - birthDate.getFullYear();
+      var m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+         age--;
+      }
+      return age;
+   }
+</script>

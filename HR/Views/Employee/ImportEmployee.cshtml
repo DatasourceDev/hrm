@@ -1,0 +1,276 @@
+﻿@model HR.Models.ImportEmployeeViewModels
+@using SBSModel.Models;
+@using SBSModel.Common;
+@{
+    ViewBag.Title = @Resources.ResourceEmployee.Employee;
+
+}
+@using (Html.BeginForm("ImportEmployee", "Employee", FormMethod.Post, new { @class = "form-horizontal validatable", role = "form", id = "empForm", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="main-content">
+        <div class="container-fluid">
+            <div class="row-fluid">
+
+                <div class="area-top clearfix">
+                    <div class="pull-left header">
+                        <h3 class="title">
+                            <i class="icon-user"></i>
+                            @Resources.ResourceEmployee.ImportEmployee
+                        </h3>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="container-fluid padded">
+            <div class="row-fluid">
+                <!-- Breadcrumb line -->
+                <div id="breadcrumbs">
+                    <div class="breadcrumb-button blue">
+                        <span class="breadcrumb-label"><i class="icon-home"></i><a href="@Url.Action("Index", "Home")"> @Resources.ResourceMain.Home</a></span>
+                        <span class="breadcrumb-arrow"><span></span></span>
+                    </div>
+
+                    <div class="breadcrumb-button">
+                        <span class="breadcrumb-label">
+                            <i class="icon-user"></i> <a href="@Url.Action("Employee", "Employee")"> @Resources.ResourceEmployee.Employee</a>
+                        </span>
+                        <span class="breadcrumb-arrow"><span></span></span>
+                    </div>
+                    <div class="breadcrumb-button">
+                        <span class="breadcrumb-label">
+                            <i class="icon-user"></i> @Resources.ResourceEmployee.ImportEmployee
+                        </span>
+                        <span class="breadcrumb-arrow"><span></span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            $(function () {
+                $("#btnUpload").click(function () {
+                    var filename = $('#uploadfile').val();
+                    var ext = '';
+                    if (filename != null) {
+                        var k = filename.lastIndexOf('.');
+                        if (k >= 0) {
+                            ext = filename.substring(k + 1).toLowerCase();
+                        }
+                    }
+                    if (ext != 'xls' && ext != 'xlsx') {
+                        alert('Please upload .xls, .xlsx');
+                        return;
+                    }
+
+                    ShowProgress();
+                    document.getElementById("empForm").submit();
+                });
+
+                //$("#btnImport").click(function () {
+                //    ShowProgress();
+                //    document.getElementById("empForm").submit();
+                //});
+            });
+        </script>
+
+        @if (Model.errMsg.Count() > 0 | !Model.validated)
+        {
+            <div class="container-fluid padded">
+                <div class="row-fluid">
+                    <div class="span12">
+                        @if (!Model.validated)
+                        {
+                            <div class="alert alert-error">
+                                Validate error please edit your information and reupload.
+                                <br />
+                            </div>
+                        }
+                        @foreach (var row in Model.errMsg)
+                        {
+                            <div class="alert alert-error">
+                                @row
+                                <br />
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (Model.result != null && Model.result.Code != 0)
+        {
+            <div class="container-fluid padded">
+                <div class="row-fluid">
+                    <div class="span12">
+                        @if (Model.result.Code < 0)
+                        {
+                            <div class="alert alert-error">
+                                @UserSession.GetMsg(Model.result.Code, Model.result.Msg, Model.result.Field)
+                                <br />
+                            </div>
+                        }
+                        else if (Model.result.Code > 0)
+                        {
+                            <div class="alert alert-success">
+                                @UserSession.GetMsg(Model.result.Code, Model.result.Msg, Model.result.Field)
+                                <br />
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="container-fluid padded">
+            <div class="row-fluid">
+                <div class="span12">
+                    <div class="box" style='margin-bottom:0;'>
+                        <div class="box-header">
+                            <span class="title">@Resources.ResourceEmployee.Employee</span>
+                        </div>
+                        <div class="box-content">
+                            <div class="padded">
+                                <div class="control-group">
+                                    <div class="span6">
+                                        @Html.Label(Resources.ResourceMain.File, new { @class = "control-label" })
+                                        <div class="controls">
+                                            <input id="uploadfile" type="file" name="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+
+                                        </div>
+                                    </div>
+                                    <div class="span6">
+                                        <button class="btn btn-blue" type="button" id="btnUpload">@Resources.ResourceMain.ValidateFile</button>
+                                    </div>
+                                </div>
+                                <div id="dataTables">
+                                    <table cellpadding="0" cellspacing="0" border="0" class="table table-normal responsive table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th>@Resources.ResourceEmployee.SN</th>
+                                                <th>@Resources.ResourceEmployee.Name</th>
+                                                <th>@Resources.ResourceEmployee.Email</th>
+                                                <th>@Resources.ResourceEmployee.Mobile_Phone</th>
+                                                <th>@Resources.ResourceEmployee.Hired_Date</th>
+                                                <th>@Resources.ResourceEmployee.Gender</th>
+                                                <th>@Resources.ResourceEmployee.Marital_Status</th>
+                                                <th>@Resources.ResourceEmployee.Race</th>
+                                                <th>@Resources.ResourceEmployee.Residential_Status</th>
+                                                <th>@Resources.ResourceEmployee.NRIC</th>
+                                                <th>@Resources.ResourceEmployee.Status</th>
+                                                <th>@Resources.ResourceEmployee.Nationality</th>
+                                                <th>@Resources.ResourceEmployee.Religion</th>
+                                                <th>@Resources.ResourceEmployee.PR_No</th>
+                                                <th>@Resources.ResourceEmployee.PR_Start_Date</th>
+                                                <th>@Resources.ResourceEmployee.PR_End_Date</th>
+                                                <th>@Resources.ResourceEmployee.WP_Class</th>
+                                                <th>@Resources.ResourceEmployee.WP_No</th>
+                                                <th>@Resources.ResourceEmployee.WP_Start_Date</th>
+                                                <th>@Resources.ResourceEmployee.WP_End_Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (Model.emps != null)
+                                            {
+                                                for (int i = 0; i < Model.emps.Length; i++)
+                                                {
+                                                    
+                                                    var row = Model.emps[i];
+                                                    var colour = "color:green;";
+                                                    if (!row.Validate)
+                                                    {
+                                                        colour = "color:red;";
+                                                    }
+                                                    <tr title="@row.ErrMsg" style="@colour">
+                                                        <td>
+                                                            <i class="icon-ok"></i>
+                                                            <input type="hidden" name="emps[@i].Company_ID" value="@row.Company_ID">
+                                                            <input type="hidden" name="emps[@i].Validate" value="@row.Validate.ToString()">
+                                                            <input type="hidden" name="emps[@i].ErrMsg" value="@row.ErrMsg">
+                                                            <input type="hidden" name="emps[@i].Name" value="@row.Name">
+                                                            <input type="hidden" name="emps[@i].Email_Address" value="@row.Email_Address">
+                                                            <input type="hidden" name="emps[@i].Mobile_No" value="@row.Mobile_No">
+                                                            <input type="hidden" name="emps[@i].Hired_Date" value="@row.Hired_Date">
+                                                            <input type="hidden" name="emps[@i].Gender_" value="@row.Gender_">
+                                                            <input type="hidden" name="emps[@i].Gender" value="@row.Gender">
+                                                            <input type="hidden" name="emps[@i].Marital_Status_" value="@row.Marital_Status_">
+                                                            <input type="hidden" name="emps[@i].Marital_Status" value="@row.Marital_Status">
+                                                            <input type="hidden" name="emps[@i].Race_" value="@row.Race_">
+                                                            <input type="hidden" name="emps[@i].Race" value="@row.Race">
+                                                            <input type="hidden" name="emps[@i].Residential_Status_" value="@row.Residential_Status_">
+                                                            <input type="hidden" name="emps[@i].Residential_Status" value="@row.Residential_Status">
+                                                            <input type="hidden" name="emps[@i].PR_No" value="@row.PR_No">
+                                                            <input type="hidden" name="emps[@i].NRIC" value="@row.NRIC">
+                                                            <input type="hidden" name="emps[@i].Emp_Status_" value="@row.Emp_Status_">
+                                                            <input type="hidden" name="emps[@i].Emp_Status" value="@row.Emp_Status">
+                                                            <input type="hidden" name="emps[@i].Nationality_ID" value="@row.Nationality_ID">
+                                                            <input type="hidden" name="emps[@i].Nationality_" value="@row.Nationality_">
+                                                            <input type="hidden" name="emps[@i].Religion_" value="@row.Religion_">
+                                                            <input type="hidden" name="emps[@i].Religion" value="@row.Religion">
+                                                            <input type="hidden" name="emps[@i].PR_Start_Date" value="@row.PR_Start_Date">
+                                                            <input type="hidden" name="emps[@i].PR_End_Date" value="@row.PR_End_Date">
+                                                            <input type="hidden" name="emps[@i].WP_Class_" value="@row.WP_Class_">
+                                                            <input type="hidden" name="emps[@i].WP_No" value="@row.WP_No">
+                                                            <input type="hidden" name="emps[@i].WP_Start_Date" value="@row.WP_Start_Date">
+                                                            <input type="hidden" name="emps[@i].WP_End_Date" value="@row.WP_End_Date">
+
+                                                        </td>
+                                                        <td>@(i + 1)</td>
+                                                        <td>@row.Name</td>
+                                                        <td>@row.Email_Address</td>
+                                                        <td>@row.Mobile_No</td>
+                                                        <td>@row.Hired_Date</td>
+                                                        <td>@row.Gender_</td>
+                                                        <td>@row.Marital_Status_</td>
+                                                        <td>@row.Race_</td>
+                                                        <td>@row.Residential_Status_</td>
+                                                        <td>@row.NRIC</td>
+                                                        <td>@row.Emp_Status_</td>
+                                                        <td>@row.Nationality_</td>
+                                                        <td>@row.Religion_</td>
+                                                        <td>@row.PR_No</td>
+                                                        <td>@row.PR_Start_Date</td>
+                                                        <td>@row.PR_End_Date</td>
+                                                        <td>@row.WP_Class_</td>
+                                                        <td>@row.WP_No</td>
+                                                        <td>@row.WP_Start_Date</td>
+                                                        <td>@row.WP_End_Date</td>
+                                                    </tr>
+
+
+
+                                                }
+                                            }
+
+                                        </tbody>
+                                    </table>
+                                </div>
+
+
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            @if (Model.validated && Model.emps != null && Model.emps.Length > 0)
+                            {
+                                <button class="btn btn-blue" type="submit" name="import" value="1">@Resources.ResourceMain.Import</button>
+                            }
+                            <a href="@Url.Action("Employee", "Employee", new { })" class="btn btn-default"> @Resources.ResourceMain.Cancel</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+
+
+    </div>
+
+}
+

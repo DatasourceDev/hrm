@@ -1,0 +1,132 @@
+﻿@using POS.Common;
+@using POS.Models;
+@using SBSModel.Common;
+@using SBSModel.Models;
+@model  POS.Models.POSViewModel
+
+@{
+    //use RID as count. no.
+}
+
+<table border="0" cellpadding="1" cellspacing="1" style="width:100%">
+    <tr>
+        <td style="text-align:center; " > 
+    <b>@Model.company.Name</b> <br />
+    <b>@if (Model.receipt.Inventory_Location != null)
+       {
+             @Model.receipt.Inventory_Location.Name
+       }
+          
+    </b> <br />
+    <b>@Model.company.Address</b> <br />
+    <b>Tel: @Model.company.Phone</b> <br />
+
+</td>
+    </tr>
+</table>
+
+<br />
+<table border="0.5" width="100%"><tr><td></td></tr></table>
+<br /> 
+
+@if (Model.receipt_config.Receipt_Header != null && Model.receipt_config.Receipt_Header.Length > 0)
+{
+
+<table border="0" cellpadding="1" cellspacing="1" style="width:100%">
+    <tr>
+        <td style="text-align:center">
+            @Model.receipt_config.Receipt_Header
+        </td>
+    </tr>
+</table>
+
+<br />
+<table border="0.5" width="100%"><tr><td></td></tr></table>
+<br /> 
+    
+}
+
+<table border="0" cellpadding="1" cellspacing="1" style="width:100%">
+    <tr>
+        <td style="text-align: left;" width="70%" valign="top">@Resources.ResourcePOS.ReceiptNo: @Model.Receipt_No</td>
+        <td style="text-align: right; " valign="top">@(DateUtil.ToDisplayDateTime(Model.receipt.Receipt_Date))</td>
+    </tr>
+    <tr>
+        <td style="text-align:left">Cashier Name: @Model.receipt.User_Profile.Name</td>
+        <td style="text-align:right">Terminal: @if (Model.receipt.POS_Terminal != null) { @Model.receipt.POS_Terminal.Terminal_Name}</td>
+    </tr>
+</table>
+
+<br />
+<table border="0.5" width="100%"><tr><td></td></tr></table>
+<br /> 
+
+<table border="0" cellpadding="1" cellspacing="1" style="width:100%">
+    @foreach (POSProduct p in Model.products)
+{
+    <tr>
+        <td style="text-align: left; " width="70%" valign="top">@p.Name x @p.Qty</td>
+        <td style="text-align: right;"  valign="top">@((p.Price * p.Qty ).ToString("n2"))</td>
+    </tr>
+}
+    
+</table>
+
+<br />
+<table border="0.5" width="100%"><tr><td></td></tr></table>
+<br />
+
+<table border="0" cellpadding="1" cellspacing="1" style="width:100%">
+    <tr>
+        <td style="text-align: left; ">Sub Total S$</td>
+        <td style="text-align: right; ">@Model.Net_Amount.ToString("n2")</td>
+    </tr>
+    <tr>
+        <td style="text-align:left">GST 7%</td>
+        <td style="text-align:right">@((Model.Net_Amount * 7 / 100).ToString("n2")) </td>
+    </tr>
+</table>
+
+<br />
+<table border="0.5" width="100%"><tr><td></td></tr></table>
+<br /> 
+
+<table border="0" cellpadding="1" cellspacing="1" style="width:100%">
+    <tr>
+        <td style="text-align: left; "><b>Total S$</b></td>
+        <td style="text-align: right; "><b>@Model.Net_Amount.ToString("n2")</b></td>
+    </tr>
+</table>
+
+<br />
+
+@if (Model.receipt_config.Receipt_Footer != null && Model.receipt_config.Receipt_Footer.Length > 0)
+{
+<table border="0" cellpadding="1" cellspacing="1" style="width:100%">
+    <tr>
+        <td style="text-align:center">
+            @Model.receipt_config.Receipt_Footer
+        </td>
+    </tr>
+</table>
+
+<br />
+}
+
+<table border="0" cellpadding="1" cellspacing="1" style="width:100%">
+    <tr>
+        <td style="text-align:center">
+            @if (Model.company.Registry != null && Model.company.Registry.Length > 0)
+            {
+                @:Reg No: @Model.company.Registry
+            } 
+            <br />
+            
+            @if (Model.company.GST_Registration != null && Model.company.GST_Registration.Length > 0)
+            {
+                @:GST Reg No: @Model.company.GST_Registration
+            }
+            
+        </td>
+    </tr>
+</table>

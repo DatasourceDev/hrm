@@ -1,0 +1,251 @@
+﻿@model  Time.Models.TimeTransactionViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using Time.Models;
+@using SBSResourceAPI;
+@{
+   ViewBag.Title = Resource.Transaction;
+}
+<div class="pageheader">
+   <h2>@Resource.Transaction<span></span></h2>
+   <div class="breadcrumbs">
+      <ol class="breadcrumb">
+         <li>You are here</li>
+         <li><a href="@Url.Action("Index", "Home" )">@Resource.DashBoard</a></li>
+         <li class="active">@Resource.Transaction</li>
+      </ol>
+   </div>
+</div>
+@using (Html.BeginForm("DetailTransactionByEmp", "Time", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+            <section class="tile color transparent-black">
+               <div class="tile-header transparent">
+                  <h1>
+                     <strong>@Resource.Transaction_Records</strong>
+                  </h1>
+                  <div class="controls">
+                     <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body">
+                  @{
+                        int? curComID = null; int? curPin = null; string curDate = ""; string curEmp = ""; int? curEmpID = null;
+                        var i = 0;
+                        DateTime? clockin = null; DateTime? clockout = null;
+                        int totalhours = 0;
+                        int totalmins = 0;
+                  }
+                  <div class="table-responsive">
+                     <table class="table table-datatable table-custom" id="tranDataTable">
+                        <thead>
+                           <tr>
+                              <th class="sort-alpha">@Resource.Date</th>
+                              <th class="sort-alpha">@Resource.Employee</th>
+                              <th class="sort-alpha">@Resource.Clock_In</th>
+                              <th class="sort-alpha">@Resource.Clock_Out</th>
+                              <th class="sort-alpha">@Resource.Duration</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           @foreach (var row in Model.transList)
+                           {
+                              if (curPin != row.Device_Employee_Pin | curDate != DateUtil.ToDisplayDate(row.Device_Transaction_Date))
+                              {
+                                 if (i > 0)
+                                 {
+                                    var show = true;
+                                    if (Model.search_Department_ID.HasValue)
+                                    {
+                                       if (Model.search_Department_ID.Value != GetDepartment(curEmpID, clockin))
+                                       {
+                                          show = false;
+                                       }
+                                    }
+                                    if (show)
+                                    {
+                                       var duration = DateTime.Parse(DateUtil.ToDisplayTime(clockout)).Subtract(DateTime.Parse(DateUtil.ToDisplayTime(clockin)));
+                                       var status = GetStatus(curComID, curEmpID, clockin);
+                                       <tr>
+                                          <td>@DateUtil.ToDisplayDate(clockin)</td>
+                                          <td>@curEmp</td>
+                                           <td>@DateUtil.ToLocalTime(DateTime.Parse(DateUtil.ToDisplayTime(clockin)))</td>
+                                           <td>@DateUtil.ToLocalTime(DateTime.Parse(DateUtil.ToDisplayTime(clockout)))</td>
+                                          <td>@duration.Hours @Resource.Hr_S @(duration.Minutes > 0 ? duration.Minutes + Resource.Min_S : "") </td>
+                                       </tr>
+                                       totalhours += duration.Hours;
+                                       totalmins += duration.Minutes;
+                                    }
+                                 }
+                                 clockin = row.Device_Transaction_Date;
+                              }
+                              curEmpID = row.Employee_Profile_ID;
+                              curEmp = row.Employee_Name;
+                              curPin = row.Device_Employee_Pin;
+                              curDate = DateUtil.ToDisplayDate(row.Device_Transaction_Date);
+                              clockout = row.Device_Transaction_Date;
+                              curComID = row.Company_ID;
+
+                              if (i == Model.transList.Count() - 1)
+                              {
+                                 var show = true;
+                                 if (Model.search_Department_ID.HasValue)
+                                 {
+                                    if (Model.search_Department_ID.Value != GetDepartment(curEmpID, clockin))
+                                    {
+                                       show = false;
+                                    }
+                                 }
+                                 if (show)
+                                 {
+                                    var duration = DateTime.Parse(DateUtil.ToDisplayTime(clockout)).Subtract(DateTime.Parse(DateUtil.ToDisplayTime(clockin)));
+                                    var status = GetStatus(curComID, curEmpID, clockin);
+                                    <tr>
+                                       <td>@DateUtil.ToDisplayDate(clockin)</td>
+                                       <td>@curEmp</td>
+                                        <td>@DateUtil.ToLocalTime(DateTime.Parse(DateUtil.ToDisplayTime(clockin)))</td>
+                                        <td>@DateUtil.ToLocalTime(DateTime.Parse(DateUtil.ToDisplayTime(clockout)))</td>
+                                       <td>@duration.Hours @Resource.Hr_S @(duration.Minutes > 0 ? duration.Minutes + Resource.Min_S : "") </td>
+                                    </tr>
+                                    totalhours += duration.Hours;
+                                    totalmins += duration.Minutes;
+                                 }
+                              }
+                              i++;
+                           }
+                        </tbody>
+                        <tfoot>
+                           @if (totalmins > 0)
+                           {
+                              var hours = totalmins / 60;
+                              if ((totalmins % 60) >= 0)
+                              {
+                                 totalmins = (totalmins % 60);
+                              }
+                              totalhours += hours;
+                           }
+                           <tr>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td style="font-size:12px;"><strong>@Resource.Total_Hours_Worked</strong></td>
+                              <td style="padding-left:0px;font-size:12px;"><strong>@totalhours @Resource.Hr_S @(totalmins > 0 ? totalmins + Resource.Min_S : "") </strong></td>
+                           </tr>
+                           <tr>
+                              <td><a href="javascript:history.go(-1)" class="btn btn-default">@Resource.Back</a></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                           </tr>
+                        </tfoot>
+                     </table>
+                  </div>
+
+               </div>
+            </section>
+         </div>
+      </div>
+   </div>
+}
+
+@functions {
+   int? GetDepartment(int? curEmpID, DateTime? clockin)
+   {
+      var histServ = new EmploymentHistoryService();
+      var hist = histServ.GetEmploymentHistory(curEmpID, clockin);
+      if (hist != null)
+         return hist.Department_ID;
+
+      return null;
+   }
+
+   string GetStatus(int? curComID, int? curEmpID, DateTime? clockin)
+   {
+      if (!clockin.HasValue | !curComID.HasValue | !curEmpID.HasValue)
+         return "";
+
+      var tmServ = new TimeService();
+      if (curEmpID.HasValue && curComID.HasValue && clockin.HasValue)
+      {
+         var args = tmServ.LstTimeArrangement(curComID, clockin, curEmpID);
+         if (args != null && args.Count > 0)
+         {
+            TimeSpan? from = null;
+            foreach (var arg in args)
+            {
+               if (arg.Time_From.HasValue & arg.Time_To.HasValue)
+               {
+                  var tfrom = arg.Time_From;
+                  var tTo = arg.Time_To.Value;
+                  if (tfrom < from | from == null)
+                     from = arg.Time_From;
+               }
+            }
+            if (from.HasValue)
+            {
+               var clockintime = DateUtil.ToTime(DateUtil.ToDisplayTime(clockin));
+               if (clockintime > from)
+                  return "<span class='color-red'><strong>" + Resource.Late + "</strong></span>";
+               else
+                  return "<span class='color-green'><strong>" + Resource.On_Time + "</strong></span>";
+            }
+         }
+         else
+         {
+            /* check time from workdays*/
+            if (Model.workdays != null)
+            {
+               var wk = Model.workdays;
+               var dw = (int)clockin.Value.DayOfWeek;
+               if (dw == 0)
+                  return GetStatusFromWorkdays(wk.CL_Sun, wk.ST_Sun_Time, wk.ET_Sun_Time, clockin);
+               else if (dw == 1)
+                  return GetStatusFromWorkdays(wk.CL_Mon, wk.ST_Mon_Time, wk.ET_Mon_Time, clockin);
+               else if (dw == 2)
+                  return GetStatusFromWorkdays(wk.CL_Tue, wk.ST_Tue_Time, wk.ET_Tue_Time, clockin);
+               else if (dw == 3)
+                  return GetStatusFromWorkdays(wk.CL_Wed, wk.ST_Wed_Time, wk.ET_Wed_Time, clockin);
+               else if (dw == 4)
+                  return GetStatusFromWorkdays(wk.CL_Thu, wk.ST_Thu_Time, wk.ET_Thu_Time, clockin);
+               else if (dw == 5)
+                  return GetStatusFromWorkdays(wk.CL_Fri, wk.ST_Fri_Time, wk.ET_Fri_Time, clockin);
+               else if (dw == 6)
+                  return GetStatusFromWorkdays(wk.CL_Sat, wk.ST_Sat_Time, wk.ET_Sat_Time, clockin);
+
+            }
+         }
+      }
+      return "<strong>" + Resource.Not_Mapped + "</strong>";
+   }
+
+   string GetStatusFromWorkdays(bool? disabled, TimeSpan? start, TimeSpan? end, DateTime? clockin)
+   {
+      if (!disabled.HasValue || !disabled.Value)
+      {
+         var clockintime = DateUtil.ToTime(DateUtil.ToDisplayTime(clockin));
+         if (clockintime > start)
+            return "<span class='color-red'><strong>" + Resource.Late + "</strong></span>";
+         else
+            return "<span class='color-green'><strong>" + Resource.On_Time + "</strong></span>";
+      }
+      return "<strong>Invalid Clk-in</strong>";
+   }
+}

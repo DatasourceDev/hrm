@@ -1,0 +1,245 @@
+﻿@using POS.Common;
+@using POS.Models;
+@using SBSModel.Common;
+@using SBSModel.Models;
+@model  POS.Models.POSReportViewModel
+@{
+    ViewBag.Title = @Resources.ResourcePOS.VoidAndRefund;
+    var total = 0M;
+}
+
+
+
+<div class="main-content">
+
+
+    <script type="text/javascript">
+
+        function Void_Onclick(receipt_id, id) {
+
+            var data = { pReceiptID: receipt_id, pUrl: "/POS/VoidAndRefund" };
+            $.ajax({
+                url: '@Url.Action("PrintVoidAndRefund", "POS")',
+                //Passes the content of an input up
+                data: data,
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    if (data != null) {
+                        if (data.Msg !== undefined) {
+                            if (data.Code == '@ERROR_CODE.SUCCESS') {
+                                $("#" + id).hide();
+                            }
+                            alert(data.Msg);
+
+                        } else if (data.ipAddress !== undefined) {
+                            var request = cleanString(data.Message);
+                            sendMessage(request, data.ipAddress);
+                        }
+                        CloseProgress();
+                    }
+                }
+            });
+
+        }
+
+        function sendMessage(request, printerIP) {
+            var url = 'http://' + printerIP + ':90/StarWebPRNT/SendMessage';
+
+            var trader = new StarWebPrintTrader({ url: url });
+
+            trader.onReceive = function (response) {
+                var msg = '- onReceive -\n\n';
+
+                msg += 'TraderSuccess : [ ' + response.traderSuccess + ' ]\n';
+
+                //      msg += 'TraderCode : [ ' + response.traderCode + ' ]\n';
+
+                msg += 'TraderStatus : [ ' + response.traderStatus + ',\n';
+
+                if (trader.isCoverOpen({ traderStatus: response.traderStatus })) { msg += '\tCoverOpen,\n'; }
+                if (trader.isOffLine({ traderStatus: response.traderStatus })) { msg += '\tOffLine,\n'; }
+                if (trader.isCompulsionSwitchClose({ traderStatus: response.traderStatus })) { msg += '\tCompulsionSwitchClose,\n'; }
+                if (trader.isEtbCommandExecute({ traderStatus: response.traderStatus })) { msg += '\tEtbCommandExecute,\n'; }
+                if (trader.isHighTemperatureStop({ traderStatus: response.traderStatus })) { msg += '\tHighTemperatureStop,\n'; }
+                if (trader.isNonRecoverableError({ traderStatus: response.traderStatus })) { msg += '\tNonRecoverableError,\n'; }
+                if (trader.isAutoCutterError({ traderStatus: response.traderStatus })) { msg += '\tAutoCutterError,\n'; }
+                if (trader.isBlackMarkError({ traderStatus: response.traderStatus })) { msg += '\tBlackMarkError,\n'; }
+                if (trader.isPaperEnd({ traderStatus: response.traderStatus })) { msg += '\tPaperEnd,\n'; }
+                if (trader.isPaperNearEnd({ traderStatus: response.traderStatus })) { msg += '\tPaperNearEnd,\n'; }
+
+                msg += '\tEtbCounter = ' + trader.extractionEtbCounter({ traderStatus: response.traderStatus }).toString() + ' ]\n';
+
+                //      msg += 'Status : [ ' + response.status + ' ]\n';
+                //
+                //      msg += 'ResponseText : [ ' + response.responseText + ' ]\n';
+
+            }
+
+            trader.onError = function (response) {
+                var msg = '- onError -\n\n';
+
+                msg += '\tStatus:' + response.status + '\n';
+
+                msg += '\tResponseText:' + response.responseText;
+
+            }
+
+            trader.sendMessage({ request: request });
+        };
+
+        function cleanString(message) {
+            var msg = message.split('&gt;').join('>').split('&lt;').join('<').split('&quot;').join('"').split('nline;').join('\x0a');
+            return msg;
+        };
+
+
+    </script>
+
+    <div class="container-fluid padded">
+        <div class="row-fluid">
+            <div class="span12">
+                <div class="box" style='margin-bottom:0;'>
+                    <div class="box-header">
+                        <span class="title">@Resources.ResourcePOS.VoidAndRefund </span>
+                    </div>
+                    <div class="box-content">
+                        <div class="padded">
+                            @using (Html.BeginForm("VoidAndRefund", "POS", FormMethod.Get, new { @class = "form-horizontal validatable", role = "form" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <div class="control-group ">
+                                    <div class="span3">
+                                        <div class="control-group ">
+                                            @Html.LabelFor(m => m.Start_Date, new { @class = "control-label" })
+                                            <div class="controls">
+                                                <div class="input-append date" id="startdate" data-date="" data-date-format="dd/mm/yyyy">
+                                                    @Html.TextBoxFor(model => model.Start_Date, "{0:dd/mm/yyyy}", new { @class = "" })
+                                                    <span class="add-on"><i class="icon-th"></i></span>
+                                                </div>
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(model => model.Start_Date)
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="span3">
+                                        <div class="control-group ">
+                                            @Html.LabelFor(m => m.End_Date, new { @class = "control-label" })
+                                            <div class="controls">
+                                                <div class="input-append date" id="enddate" data-date="" data-date-format="dd/mm/yyyy">
+                                                    @Html.TextBoxFor(model => model.End_Date, "{0:dd/mm/yyyy}", new { @class = "" })
+                                                    <span class="add-on"><i class="icon-th"></i></span>
+                                                </div>
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(model => model.End_Date)
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="control-group ">
+                                    <div class="span6">
+                                        <div class="control-group ">
+                                            @Html.LabelFor(m => m.TextSearch, new { @class = "control-label" })
+                                            <div class="controls">
+                                                @Html.TextBoxFor(model => model.TextSearch, "{0:dd/mm/yyyy}", new { style = "width:100%" })
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(model => model.TextSearch)
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="span6">
+                                        <div class="control-group ">
+                                            <button type="submit" class="btn btn-white">@Resources.ResourceMain.Search</button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            }
+                            <div id="dataTables">
+                                <table cellpadding="0" cellspacing="0" border="0" class="table table-normal responsive ">
+                                    <thead>
+                                        <tr>
+                                            <th style="display:none;"></th>
+                                            <th>@Resources.ResourcePOS.ReceiptNo</th>
+                                            @if (ViewBag.BusinessType == BusinessType.FoodAndBeverage)
+                                            {
+                                                <th>Table Name</th>
+                                            }
+                                            <th>@Resources.ResourcePOS.Date</th>
+                                            <th>@Resources.ResourcePOS.Time</th>
+                                            <th>@Resources.ResourcePOS.AmountDue</th>
+                                            <th>@Resources.ResourcePOS.Terminal</th>
+                                            <th width="12%"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model != null && Model.receipts != null && Model.receipts.Count > 0)
+                                        {
+                                            int recordcount = 0;
+
+                                            foreach (var row in Model.receipts)
+                                            {
+                                                total = total + (row.Net_Amount.HasValue ? row.Net_Amount.Value : 0);
+                                                recordcount += 1;
+                                                <tr class="status-info">
+                                                    <td style="display:none;"></td>
+                                                    <td>@row.Receipt_No</td>
+                                                    @if (ViewBag.BusinessType == BusinessType.FoodAndBeverage)
+                                                    {
+                                                        <td align="center">@row.Table_No</td>
+                                                    }
+                                                    <td align="center">@DateUtil.ToDisplayDate(row.Receipt_Date)</td>
+                                                    <td align="center">@DateUtil.ToDisplayTime(row.Receipt_Date)</td>
+                                                    <td align="right">@((row.Net_Amount.HasValue ? row.Net_Amount.Value : 0).ToString("n2")) </td>
+                                                    <td align="center">
+                                                        @if (row.POS_Shift != null && row.POS_Shift.POS_Terminal != null)
+                                                        {
+                                                            @row.POS_Shift.POS_Terminal.Terminal_Name
+                                                        }
+                                                    </td>
+                                                    <td align="center">
+                                                        @if (row.Status != ReceiptStatus.Void)
+                                                        {
+                                                            <a id="btnVoid-@recordcount" class="btn btn-white" onclick="Void_Onclick('@row.Receipt_ID','btnVoid-@recordcount' )">@Resources.ResourcePOS.Void</a>
+                                                        }
+
+                                                    </td>
+                                                </tr>
+                                            }
+
+                                        }
+
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td style="display:none;"></td>
+                                            <td></td>
+                                            @if (ViewBag.BusinessType == BusinessType.FoodAndBeverage)
+                                            {
+                                                <td></td>
+                                            }
+                                            <td colspan="2" style="text-align:right">@Resources.ResourcePOS.TotalAmount</td>
+                                            <td style="text-align:right">@total.ToString("n2")</td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>

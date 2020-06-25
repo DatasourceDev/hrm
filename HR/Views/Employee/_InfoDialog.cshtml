@@ -1,0 +1,333 @@
+﻿@model  HR.Models.EmployeeViewModels
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+
+<div class="modal fade" id="modal-relationship" tabindex="-1" role="dialog" aria-labelledby="modal_relationship" aria-hidden="true">
+   <input hidden id="Relationship_ID" name="Relationship_ID" value="@Model.Relationship_ID" />
+   <input hidden id="Relationship_Index" name="Relationship_Index" value="@Model.Relationship_Index" />
+   <input hidden id="Relationship_Row_Type" name="Relationship_Row_Type" value="@Model.Relationship_Row_Type" />
+   <input hidden id="Relationship_Leaved" name="Relationship_Leaved" value="@(Model.Relationship_Leaved.ToString())" />
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h3 class="modal-title" id="modal_relationship"> <strong>@Resource.Family_Member</strong></h3>
+         </div>
+         <div class="modal-body" id="divRelationship">
+            <div class="row">
+               <div class="col-md-4">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Relationship_Name" class="control-label">@Resource.Name</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <input type="text" class="form-control" name="Relationship_Name" id="Relationship_Name" value="@Model.Relationship_Name">
+                        <div class="validation-error">
+                           @Html.ValidationMessageFor(m => m.Relationship_Name, "", new { id = "Relationship_Name_Err" })
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-md-4">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Relationship_Relationship" class="control-label">@Resource.Relationship</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <select class="chosen-select form-control" id="Relationship_Relationship" name="Relationship_Relationship">
+                           @if (Model.relationshipList != null)
+                           {
+                              foreach (var row in Model.relationshipList)
+                              {
+                                 if (Model.Relationship_Relationship == NumUtil.ParseInteger(row.Value))
+                                 {
+                                    <option value="@(row.Value != null ? row.Value : " ")" selected>@row.Text</option>
+                                 }
+                                 else
+                                 {
+                                    <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                 }
+                              }
+                           }
+                        </select>
+                        <div class="validation-error">
+                           @Html.ValidationMessageFor(m => m.Relationship_Relationship)
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-md-4">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Relationship_Child_Type" class="control-label">@Resource.Child_Type</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <select class="chosen-select form-control" id="Relationship_Child_Type" name="Relationship_Child_Type" onchange="Is_Maternity_OnChange()">
+                           @if (Model.childTypeList != null)
+                           {
+                              foreach (var row in Model.childTypeList)
+                              {
+                                 if (Model.Relationship_Child_Type == row.Value)
+                                 {
+                                    <option value="@(row.Value != null ? row.Value : " ")" selected>@row.Text</option>
+                                 }
+                                 else
+                                 {
+                                    <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                 }
+                              }
+                           }
+                        </select>
+                        <div class="validation-error">
+                           @Html.ValidationMessageFor(m => m.Relationship_Child_Type)
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div class="row">
+               <div class="col-md-4">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Relationship_DOB" class="control-label">@Resource.DOB</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <input type="text" class="form-control input-datepicker2" name="Relationship_DOB" id="Relationship_DOB" value="@Model.Relationship_DOB" onchange="Is_Maternity_OnChange()">
+                        <div class="validation-error">
+                           @Html.ValidationMessageFor(m => m.Relationship_DOB, "", new { id = "Relationship_DOB_Err" })
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-md-4">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Relationship_Nationality_ID" class="control-label">@Resource.Nationality</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <select class="chosen-select form-control" id="Relationship_Nationality_ID" name="Relationship_Nationality_ID">
+                           @if (Model.nationalityList != null)
+                           {
+                              foreach (var row in Model.nationalityList)
+                              {
+                                 if (Model.Relationship_Nationality_ID == NumUtil.ParseInteger(row.Value))
+                                 {
+                                    <option value="@(row.Value != null ? row.Value : " ")" selected>@row.Text</option>
+                                 }
+                                 else
+                                 {
+                                    <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                 }
+                              }
+                           }
+                        </select>
+                        <div class="validation-error">
+                           @Html.ValidationMessageFor(m => m.Relationship_Nationality_ID)
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-md-4">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Relationship_NRIC" class="control-label">@Resource.NRIC_Or_Fin_No_SymbolDot</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <input type="text" class="form-control" name="Relationship_NRIC" id="Relationship_NRIC" value="@Model.Relationship_NRIC">
+                        <div class="validation-error">
+                           @Html.ValidationMessageFor(m => m.Relationship_NRIC)
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div class="row">
+               <div class="col-md-12">
+                  <div id="divSharePaternity">
+                     <div id="divShareForMaternity">
+                        <h5><strong>@Resource.Share_Parental_Leave</strong></h5>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label class="control-label">@Resource.Message_Share_Parental_Leave_1</label>
+                           </div>
+                        </div>
+                     </div>
+                     <div id="divShareForPaternity">
+                        <h5><strong>@Resource.Share_Parental_Leave</strong></h5>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label class="control-label">@Resource.Message_Share_Parental_Leave_2</label>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-2">
+                           <div class="radio">
+                              @if (Model.Relationship_Is_Maternity_Share_Father)
+                              {
+                                 <input type="radio" name="Relationship_Is_Maternity_Share_Father" id="Relationship_Is_Maternity_Share_FatherY" value="true" checked>
+                              }
+                              else
+                              {
+                                 <input type="radio" name="Relationship_Is_Maternity_Share_Father" id="Relationship_Is_Maternity_Share_FatherY" value="true">
+                              }
+                              <label for="Relationship_Is_Maternity_Share_FatherY">Yes</label>
+                           </div>
+                        </div>
+                        <div class="col-md-2">
+                           <div class="radio">
+                              @if (Model.Relationship_Is_Maternity_Share_Father)
+                              {
+                                 <input type="radio" name="Relationship_Is_Maternity_Share_Father" id="Relationship_Is_Maternity_Share_FatherN" value="false">
+                              }
+                              else
+                              {
+                                 <input type="radio" name="Relationship_Is_Maternity_Share_Father" id="Relationship_Is_Maternity_Share_FatherN" value="false" checked>
+                              }
+                              <label for="Relationship_Is_Maternity_Share_FatherN">No</label>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+            <button type="submit" class="btn btn-primary" name="pageAction" value="relationship">@Resource.Save_Change</button>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="modal fade" id="modal-upload" tabindex="-1" role="dialog" aria-labelledby="modal_upload" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h3 class="modal-title" id="modal_upload"><strong>@Resource.Upload_Personal_Photo</strong></h3>
+         </div>
+         <div class="modal-body">
+            <div class="row">
+               <div class="col-md-12">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <div class="input-group">
+                           <span class="input-group-btn">
+                              <span class="btn btn-primary btn-file">
+                                 <i class="fa fa-upload"></i>
+                                 <input id="uploadfile" type="file" name="uploadfile" accept="image/jpeg, image/jpg, image/png, image/gif">
+                              </span>
+                           </span>
+                           <input type="text" class="form-control" readonly>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="modal-footer">
+            <button id="btnCloseUpload" type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+            <button type="button" class="btn btn-primary" id="btnUpload">@Resource.Upload_File</button>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="modal fade" id="modal-attach" tabindex="-1" role="dialog" aria-labelledby="modal_attach" aria-hidden="true">
+   <input type="hidden" id="Index">
+   <input type="hidden" id="Row_Type">
+   <input type="hidden" id="Event_Click">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h3 class="modal-title" id="modal_attach"><strong> @Resource.Add_New_Attachment</strong></h3>
+         </div>
+         <div class="modal-body">
+            <div class="row">
+               <div class="col-md-6">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Attachment_Type" class="control-label">@Resource.Attachment_Type</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <select class="chosen-select form-control" id="Attachment_Type">
+                           @if (Model.attachmentTypeList != null)
+                           {
+                              foreach (var row in Model.attachmentTypeList)
+                              {
+                                 <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                              }
+                           }
+                        </select>
+                        <div class="validation-error">
+                           <span id="Attachment_Type_Err"></span>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div class="row">
+               <div class="col-md-6">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="uploadAttachfile" class="control-label">@Resource.Attachment_File</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <div class="input-group">
+                           <span class="input-group-btn">
+                              <span class="btn btn-primary btn-file">
+                                 <i class="fa fa-upload"></i>
+                                 <input id="uploadAttachfile" type="file">
+                              </span>
+                           </span>
+                           <input type="text" class="form-control" readonly>
+                        </div>
+                        <div class="validation-error">
+                           <span id="uploadAttachfile_Err"></span>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-md-6">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Attachment_Rename_File" class="control-label">@Resource.Rename_File</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <input type="text" class="form-control" id="Attachment_Rename_File">
+                        <div class="validation-error">
+                           <span id="Attachment_Rename_File_Err"></span>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="modal-footer">
+            <button id="btnCloseAttachUpload" type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+            <button id="btnUploadAttach" type="button" class="btn btn-primary">@Resource.Upload_File</button>
+         </div>
+      </div>
+   </div>
+</div>
+<div class="md-overlay"></div><!-- the overlay element -->

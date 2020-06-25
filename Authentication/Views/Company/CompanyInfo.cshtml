@@ -1,0 +1,632 @@
+﻿@model Authentication.Models.CompanyInfoViewModel
+@using Authentication.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@{
+   ViewBag.Title = Resource.Company_Info;
+}
+
+@{
+   var imgSrc = Url.Content("~/images/logo.png");
+}
+
+@if (Model != null && Model.Company_Logo != null)
+{
+   var base64 = Convert.ToBase64String(Model.Company_Logo);
+   imgSrc = String.Format("data:image/gif;base64,{0}", base64);
+}
+<script type="text/javascript">
+   $(function () {
+
+      InitDatepicker();
+
+      @*var addRowLink = '<a href="@Url.Action("ModuleSignUp", "Subscription", new { pComID = EncryptUtil.Encrypt(Model.Company_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_C) })" class="btn btn-greensea  btn-sm add-row">@Resource.Add_An_Item</a>'*@
+      var addRowLink = '<a href="@Url.Action("DetailSignUp", "Subscription", new { pComID = EncryptUtil.Encrypt(Model.Company_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_C) })" class="btn btn-greensea  btn-sm add-row">@Resource.Add_An_Item</a>'
+      InitDatatable('moduleDataTable', addRowLink, null, 0, 'asc');
+
+
+      $('.btn-file :file').on('fileselect', function (event, numFiles, label) {
+
+         var input = $(this).parents('.input-group').find(':text'),
+             log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+         console.log(log);
+
+         if (input.length) {
+            input.val(log);
+         } else {
+            if (log) alert(log);
+         }
+
+      });
+      //Added by sun 30-06-2016
+      $("#btnUpload").click(function () {
+         var filename = $('#uploadfile').val();
+         var ext = '';
+         if (filename != null) {
+            var k = filename.lastIndexOf('.');
+            if (k >= 0) {
+               ext = filename.substring(k + 1).toLowerCase();
+            }
+         }
+
+         var sizeIsnull = $('#uploadfile')[0].files[0];
+         if (sizeIsnull != undefined) {
+            var fsize = $('#uploadfile')[0].files[0].size;
+            if (fsize > 2097150) {
+               alert('@Resource.Message_Please_Upload_File_Size_Is_Less_Than_2_MB');
+               $('#uploadfile').after($('#uploadfile').clone(true)).remove();
+               $('#uploadfile').parents('.input-group').find(':text').val('');
+               return false;
+            }
+
+            if (ext != 'jpg' && ext != 'jpeg' && ext != 'png' && ext != 'gif') {
+               alert('@Resource.Message_Please_Upload_File_Image');
+               return;
+            }
+            var blah = new FormData();
+            blah.append("file", $("#uploadfile")[0].files[0]);
+
+            @*var url = '@Url.Action("UploadCompanyLogo", "Upload", new { pCompanyID = Model.Company_ID })';
+            url = url.replace(@ModuleDomain.Authentication, @ModuleDomain.HR);*@
+
+            ShowMask();
+            $.ajax({
+               async: true,
+               type: 'POST',
+               url: '@Url.Action("UploadCompanyLogo", "Upload", new { pCompanyID = Model.Company_ID })',
+               data: blah,
+               dataType: 'json',
+               cache: false,
+               contentType: false,
+               processData: false,
+               success: function (data) {
+                  if (data != null) {
+                     $("#img").get(0).src = data.img;
+                     $('#btnCloseUploadLogo').get(0).click();
+                     //$('#User_Photo').val('');
+
+                  }
+                  CloseMask();
+               }
+            });
+         }
+      });
+   });
+
+   $(document).on('change', '.btn-file :file', function () {
+      var input = $(this),
+      numFiles = input.get(0).files ? input.get(0).files.length : 1,
+      label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+      input.trigger('fileselect', [numFiles, label]);
+   });
+
+   function Country_OnChange(opt) {
+      var cID = $('#Country_ID').val();
+      Combo_Reload('State_ID', '@ComboTypeEnum.State', cID)
+   }
+
+   function Billing_Country_OnChange(opt) {
+      var cID = $('#Billing_Country_ID').val();
+      Combo_Reload('Billing_State_ID', '@ComboTypeEnum.State', cID)
+   }
+
+</script>
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+   <div class="pageheader">
+      <h2>@Resource.Company_Info<span></span></h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li class="active">@Resource.Company_Info</li>
+         </ol>
+      </div>
+   </div>
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+            <section class="tile color transparent-black">
+               <div class="tile-header transparent">
+                  <h1><strong>@Model.Company_Name</strong></h1>
+                  <div class="controls">
+                     <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body">
+                  @using (Html.BeginForm("CompanyInfo", "Company", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                  {
+                  @Html.AntiForgeryToken()
+                  <input type="hidden" name="Company_ID" value="@Model.Company_ID" />
+                  <input type="hidden" name="operation" value="@Model.operation" />
+                  <input type="hidden" name="Belong_To" value="@Model.Belong_To" />
+
+                  <div class="row">
+                     <div class="col-md-8">
+                        <div class="row">
+                           <div class="col-md-6">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="Company_Name" class="control-label">@Resource.Company_Name</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <input type="text" class="form-control" name="Company_Name" id="Company_Name" value="@Model.Company_Name">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Company_Name)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-6">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="No_Of_Employees" class="control-label">@Resource.No_Of_Employees</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <input type="text" class="form-control" name="No_Of_Employees" id="No_Of_Employees" value="@Model.No_Of_Employees">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.No_Of_Employees)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-md-6">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="CPF_Submission_No" class="control-label">@Resource.CPF_Sub_No</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <input type="text" class="form-control" name="CPF_Submission_No" id="CPF_Submission_No" value="@Model.CPF_Submission_No" localizedvalidmaxlength="15">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.CPF_Submission_No)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-6">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="Effective_Date" class="control-label">@Resource.Date_Of_Registration</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <input type="hidden" name="Effective_Date" id="Effective_Date" value="@Model.Effective_Date">
+                                    <input type="text" class="form-control input-datepicker" name="Effective_Date" id="Effective_Date" value="@Model.Effective_Date" disabled>
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Effective_Date)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-4">
+                        <div class="form-group" style="padding-top:30px">
+                           <div class="col-sm-12">
+                              <div class="col-md-12 text-center">
+                                 <a id="btnOpenUpload" href="#modal-uploadLogo" role="button" data-toggle="modal"><img src="@imgSrc" style="max-height:100px;cursor:pointer" id="img"></a>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="row">
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <label for="Address" class="control-label">@Resource.Address</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <textarea class="form-control" name="Address" id="Address" rows="5">@Model.Address</textarea>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Address)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <label for="Country_ID" class="control-label">@Resource.Country</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <select class="chosen-select chosen-transparent form-control" id="Country_ID" name="Country_ID" onchange="Country_OnChange(this);">
+                                 @foreach (var row in Model.countryList)
+                                    {
+                                       if (Model.Country_ID == NumUtil.ParseInteger(row.Value))
+                                       {
+                                    <option value="@row.Value" selected>@row.Desc</option>
+                                       }
+                                       else
+                                       {
+                                    <option value="@(row.Value != null ? row.Value : " ")">@row.Desc</option>
+                                       }
+                                    }
+                              </select>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Country_ID)
+                              </div>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <label for="Zip_Code" class="control-label">@Resource.Zip_Or_Postal_Code</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <input type="text" class="form-control" name="Zip_Code" id="Zip_Code" value="@Model.Zip_Code">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Zip_Code)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <label for="State_ID" class="control-label">@Resource.State_Or_Province</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <select class="chosen-select chosen-transparent form-control" id="State_ID" name="State_ID">
+                                 @if (Model.stateList != null)
+                                    {
+                                       foreach (var row in Model.stateList)
+                                       {
+                                          if (Model.State_ID == NumUtil.ParseInteger(row.Value))
+                                          {
+                                    <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                          }
+                                          else
+                                          {
+                                    <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                          }
+                                       }
+                                    }
+                              </select>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.State_ID)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="row">
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <label for="Billing_Address" class="control-label">@Resource.Billing_Address</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <textarea class="form-control" name="Billing_Address" id="Billing_Address" rows="5">@Model.Billing_Address</textarea>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Billing_Address)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <label for="Billing_Country_ID" class="control-label">@Resource.Country</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <select class="chosen-select chosen-transparent form-control" id="Billing_Country_ID" name="Billing_Country_ID" onchange="Billing_Country_OnChange(this);">
+                                 @if (Model.countryList != null)
+                                    {
+                                       foreach (var row in Model.countryList)
+                                       {
+                                          if (Model.Billing_Country_ID == NumUtil.ParseInteger(row.Value))
+                                          {
+                                    <option value="@row.Value" selected>@row.Desc</option>
+                                          }
+                                          else
+                                          {
+                                    <option value="@(row.Value != null ? row.Value : " ")">@row.Desc</option>
+                                          }
+                                       }
+                                    }
+                              </select>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Billing_Country_ID)
+                              </div>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <label for="Billing_Zip_Code" class="control-label">@Resource.Zip_Or_Postal_Code</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <input type="text" class="form-control" name="Billing_Zip_Code" id="Billing_Zip_Code" value="@Model.Billing_Zip_Code">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Billing_Zip_Code)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <label for="Billing_State_ID" class="control-label">@Resource.State_Or_Province</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <select class="chosen-select chosen-transparent form-control" id="Billing_State_ID" name="Billing_State_ID">
+                                 @if (Model.stateList != null)
+                                    {
+                                       foreach (var row in Model.stateList)
+                                       {
+                                          if (Model.Billing_State_ID == NumUtil.ParseInteger(row.Value))
+                                          {
+                                    <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                          }
+                                          else
+                                          {
+                                    <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                          }
+                                       }
+                                    }
+                              </select>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Billing_State_ID)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="row">
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <label for="Phone" class="control-label">@Resource.Office_Phone</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <input type="text" class="form-control" name="Phone" id="Phone" value="@Model.Phone">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Phone)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <label for="Fax" class="control-label">@Resource.Fax</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <input type="text" class="form-control" name="Fax" id="Fax" value="@Model.Fax">
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Fax)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <label for="Company_level" class="control-label">@Resource.Company_level</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-sm-12">
+                              <input type="hidden" id="Company_Level" name="Company_Level" value="@Model.Company_Level" />
+                              <select class="chosen-select chosen-transparent form-control" id="Company_Level" name="Company_Level" disabled>
+                                 @if (Model.LstCompanylevel != null)
+                                    {
+                                       foreach (var row in Model.LstCompanylevel)
+                                       {
+                                          if (Model.Company_Levelg == row.Value)
+                                          {
+                                    <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                          }
+                                          else
+                                          {
+                                    <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                          }
+                                       }
+                                    }
+                              </select>
+                              <div class="validation-error">
+                                 @Html.ValidationMessageFor(m => m.Company_Level)
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="row">
+                     <div class="col-md-12">
+                        <section class="tile color transparent-white" style="padding-left:15px;">
+                           <div class="tile-body">
+                              <div class="row">
+                                 <div class="col-md-12">
+                                    <div class="form-group">
+                                       <div class="col-sm-12 ">
+                                          @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                             {
+                                             <button type="submit" class="btn btn-primary" onclick="return Confirm_Alert('@Model.Company_ID');">@Resource.Save</button>
+                                             }
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </section>
+                     </div>
+                  </div>
+                  }
+                  <!-- / Tab panes -->
+               </div>
+            </section>
+            @*<section class="tile color transparent-black">
+               <div class="tile-header transparent">
+                  <h1><strong>@Resource.Subscription</strong></h1>
+                  <div class="controls">
+                     <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body ">
+                  <div class="table-responsive">
+                     <table class="table table-datatable table-custom" id="moduleDataTable">
+                        <thead>
+                           <tr>
+                              <th class="sort-alpha">@Resource.Module_Name</th>
+                              <th class="sort-alpha">@Resource.Date_Of_Registration</th>
+                              <th class="sort-alpha">@Resource.Date_Of_Expiration</th>
+                              <th class="sort-alpha">@Resource.Status</th>
+                              <th class="sort-amount">@Resource.Total_License</th>
+                              <th class="sort-amount">@Resource.Unassigned_License</th>
+                              <th class="no-sort" style="width:110px;">@Resource.Action</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           @if (Model.SubscriptionList != null)
+                           {
+                              Nullable<int> currModuleID = null;
+                              var currentDate = StoredProcedure.GetCurrentDate();
+                              foreach (var row in Model.SubscriptionList)
+                              {
+                                 var unassignuser = 0;
+                                 if (row.User_Assign_Module != null)
+                                 {
+                                    unassignuser = row.No_Of_Users.Value - row.User_Assign_Module.Count();
+                                 }
+                                 var active = false;
+                                 var pmonth = 1;
+                                 if (row.Period_Month.HasValue)
+                                 {
+                                    pmonth = row.Period_Month.Value;
+                                 }
+                                 Nullable<DateTime> expiredate = row.Start_Date.Value.AddMonths(pmonth);
+
+                                 if (currModuleID != row.SBS_Module_Detail.Module_ID)
+                                 {
+                                    currModuleID = row.SBS_Module_Detail.Module_ID;
+                                 }
+                                 if (expiredate > currentDate)
+                                 {
+                                    active = true;
+                                 }
+                                 <tr>
+                                    <td>
+                                       @if (row.SBS_Module_Detail != null)
+                                       {
+                                          @row.SBS_Module_Detail.Module_Detail_Name
+                                       }
+                                    </td>
+                                    <td>
+                                       @DateUtil.ToDisplayDate(row.Start_Date)
+                                    </td>
+                                    <td>
+                                       @DateUtil.ToDisplayDate(expiredate)
+                                    </td>
+                                    <td>
+                                       @if (active)
+                                       {
+                                          @Resource.Active
+                                       }
+                                       else
+                                       {
+                                          @Resource.Inactive
+                                       }
+                                    </td>
+                                    <td class="text-right">@((row.No_Of_Users.HasValue ? row.No_Of_Users.Value : 0).ToString("n0"))</td>
+                                    <td class="text-right">
+                                       @unassignuser.ToString("n0")
+                                    </td>
+                                    <td class="actions">
+                                       @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                       {
+                                          <a href="@Url.Action("AssignUser", "Company", new { pComID = EncryptUtil.Encrypt(row.Company_ID), pSubID = EncryptUtil.Encrypt(row.Subscription_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U), pageAction = "Company" })"><i class="fa fa-user-plus fa-2x"></i></a>
+                                       }
+                                    </td>
+                                 </tr>
+                              }
+                           }
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+            </section>*@
+         </div>
+      </div>
+
+      <div class="modal fade" id="modal-uploadLogo" tabindex="-1" role="dialog" aria-labelledby="modalConfirmLabelLogo" aria-hidden="true">
+         <div class="modal-dialog">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h3 class="modal-title" id="modalConfirmLabelLogo"><strong>@Resource.Upload_Company_Logo</strong></h3>
+               </div>
+               <div class="modal-body">
+                  <div class="row">
+                     <div class="col-md-12">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <div class="input-group">
+                                 <span class="input-group-btn">
+                                    <span class="btn btn-primary btn-file">
+                                       <i class="fa fa-upload"></i>
+                                       <input id="uploadfile" type="file" name="uploadfile" accept="image/jpeg, image/jpg, image/png, image/gif">
+                                    </span>
+                                 </span>
+                                 <input type="text" class="form-control" readonly>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="modal-footer">
+                  <button id="btnCloseUploadLogo" type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+                  <button type="button" class="btn btn-primary" id="btnUpload">@Resource.Upload_File</button>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div class="md-overlay"></div>
+   </div>
+}

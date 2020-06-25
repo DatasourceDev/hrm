@@ -1,0 +1,179 @@
+﻿@model  HR.Models.LeaveListViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+    ViewBag.Title = Resource.Leave_Report;
+}
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+    <div class="pageheader">
+        <h2>@Resource.Leave_Report<span></span></h2>
+        <div class="breadcrumbs">
+            <ol class="breadcrumb">
+                <li>@Resource.You_Are_Here</li>
+                <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+                <li class="active">@Resource.Leave_Report</li>
+            </ol>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $(function () {
+            InitDatatable('moduleDataTable', null, null, 0, 'asc');
+            $('#Year').trigger("chosen:updated");
+        });
+    </script>
+
+    <div class="main">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- /tile header -->
+                @if (Model.result != null && Model.result.Code != 0)
+                {
+                    if (Model.result.Code < 0)
+                    {
+                        <div class="alert alert-red">
+                            @UserSession.GetMsg(Model.result.Code, Model.result.Msg, Model.result.Field)
+                        </div>
+                    }
+                    else if (Model.result.Code > 0)
+                    {
+                        <div class="alert alert-success">
+                            @UserSession.GetMsg(Model.result.Code, Model.result.Msg, Model.result.Field)
+                        </div>
+                    }
+                }
+                <section class="tile color transparent-black filter" id="secfilter">
+                    <div class="tile-header transparent">
+                        <h1 onclick="CollapseHeader(null)" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                        <div class="controls">
+                            <a href="#" class="minimize filter" id="btncollapse"><i class="fa fa-search  color-white"></i></a>
+                        </div>
+                    </div>
+                    <div class="tile-body">
+                        @using (Html.BeginForm("LeaveReport", "Leave", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                        {
+                            @Html.AntiForgeryToken()
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="Leave_Type" class="control-label">@Resource.Leave_Type</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <select class="chosen-select chosen-transparent form-control" id="Leave_Type" name="Leave_Type">
+                                                @if (Model.leavetypelst != null)
+                                                {
+                                                    foreach (var row in Model.leavetypelst)
+                                                    {
+                                                        if (Model.Leave_Type == NumUtil.ParseInteger(row.Value))
+                                                        {
+                                                            <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Leave_Type)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="Year" class="control-label">@Resource.Year</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-6">
+                                            <select class="chosen-select chosen-transparent form-control" id="Year" name="Year">
+                                                @if (Model.Yearlst != null)
+                                                {
+                                                    foreach (var row in Model.Yearlst)
+                                                    {
+                                                        if (Model.Year == row)
+                                                        {
+                                                            <option value="@row" selected>@row</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@row">@row</option>
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.Year)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <button type="submit" class="btn btn-default">@Resource.Filter</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </section>
+                <section class="tile color transparent-black">
+                    <!-- tile header -->
+                    <div class="tile-header transparent">
+                        <h1><strong>@Resource.Leave_Report</strong></h1>
+                        <div class="controls">
+                            <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                        </div>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body ">
+                        <div class="table-responsive" style="overflow-x:auto">
+                            <table class="table table-datatable table-custom" id="moduleDataTable">
+                                <thead>
+                                    <tr>
+                                        <th>@Resource.Leave_Type</th>
+                                        <th>@Resource.Days_Taken</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.LeaveList != null)
+                                    {
+                                        foreach (var row in Model.LeaveList)
+                                        {
+                                            <tr>
+                                                @if (row.Leave_ID != null && Model.Year != null)
+                                                {
+                                                    <td class="actions text-left">
+                                                        <a target="_blank" href="@Url.Action("LeaveReports", "Leave", new { lid = EncryptUtil.Encrypt(row.Leave_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U), lYear = Model.Year })" title="@Resource.Open">@row.Leave_Type</a>
+                                                    </td>
+                                                    <td>@row.Days_Taken.ToString("n2")</td>
+                                                }
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- /tile body -->
+                </section>
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,126 @@
+﻿@model  HR.Models.PayrollDetailViewModel
+@using HR.Models;
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@{
+    var cbService = new ComboService();
+    var userlogin = UserSession.getUser(Request.RequestContext.HttpContext);
+    var i = Model.Index;
+
+    var prcs = new List<ComboViewModel>();
+    if (Model.PRT_ID.HasValue)
+    {
+        prcs = cbService.LstPRC(userlogin.Company_ID, Model.PRT_ID);
+    }
+    else
+    {
+        prcs = cbService.LstPRC(userlogin.Company_ID, NumUtil.ParseInteger(Model.prtList[0].Value));
+        if (prcs.Count > 0)
+        {
+            Model.PRC_ID = NumUtil.ParseInteger(prcs[0].Value);
+            Model.Description = prcs[0].Desc;
+        }
+    }
+
+}
+
+<script type="text/javascript">
+    $(function () {
+        $(".chosen-select").chosen({ disable_search_threshold: 10 });
+        if ('@Model.Row_Type' == '@RowType.DELETE')
+            $('#' + 'allowanceRow-@i').hide();
+    });
+</script>
+<td>
+    @Html.Hidden("Allowance_Rows[" + i + "].CPF_Deduction", Model.CPF_Deduction)
+    @Html.Hidden("Allowance_Rows[" + i + "].History_Allowance_ID", Model.History_Allowance_ID)
+    @Html.Hidden("Allowance_Rows[" + i + "].Payroll_Detail_ID", Model.Payroll_Detail_ID)
+    @Html.Hidden("Allowance_Rows[" + i + "].PRM_ID", Model.PRM_ID)
+    @Html.Hidden("Allowance_Rows[" + i + "].Row_Type", Model.Row_Type)
+    @if (Model.History_Allowance_ID.HasValue)
+    {
+       foreach (var h in Model.prtList)
+       {
+          if (NumUtil.ParseInteger(h.Value) == Model.PRT_ID)
+          {
+            <input type="hidden" name="Allowance_Rows[@i].PRT_ID" id="Allowance_Rows_@(i)__PRT_ID" value="@Model.PRT_ID" />
+            <input type="hidden" name="Allowance_Rows[@i].Type" id="Allowance_Rows_@(i)__Type" value="@h.Text" />
+            @h.Text
+             break;
+          }
+
+       }
+    }
+    else
+    {
+        <select class="chosen-select chosen-transparent form-control" name="Allowance_Rows[@i].PRT_ID" id="Allowance_Rows_@(i)__PRT_ID" onchange="PRT_OnChange(this,'Allowance_Rows_@(i)__PRC_ID',@i)">
+            @foreach (var h in Model.prtList)
+            {
+                <option value="@h.Value" @(Model.PRT_ID.HasValue && Model.PRT_ID.Value == NumUtil.ParseInteger(h.Value) ? "selected" : "")>@h.Text</option>
+            }
+        </select>
+    }
+    <div class="validation-error">
+        @Html.ValidationMessage("Allowance_Rows[" + i + "].PRT_ID")
+    </div>
+</td>
+<td>
+    @if (Model.prtList.Count > 0)
+    {
+        if (Model.History_Allowance_ID.HasValue)
+        {
+            foreach (var h in prcs)
+            {
+                if (Model.PRC_ID == NumUtil.ParseInteger(h.Value))
+                {
+                    Model.Description = h.Desc;
+                    <input type="hidden" id="Allowance_Rows_@(i)__PRC_ID" name="Allowance_Rows[@i].PRC_ID" value="@Model.PRC_ID" />
+                    @h.Text
+                    break;
+                }
+            }
+        }
+        else
+        {
+            <select class="chosen-select chosen-transparent form-control" id="Allowance_Rows_@(i)__PRC_ID" name="Allowance_Rows[@i].PRC_ID" onchange="PRC_OnChange(this, @i)">
+                @foreach (var row in prcs)
+                {
+                    if (!Model.PRC_ID.HasValue)
+                    {
+                        Model.PRC_ID = 0;
+                    }
+                    <option value="@row.Value" @(Model.PRC_ID.HasValue && Model.PRC_ID.Value == NumUtil.ParseInteger(row.Value) ? "selected" : "")>@row.Text</option>
+                }
+            </select>
+        }
+        <div class="validation-error">
+            @Html.ValidationMessage("Allowance_Rows[" + i + "].PRC_ID")
+        </div>
+    }
+</td>
+<td>
+    @if (Model.History_Allowance_ID.HasValue)
+    {
+        @Model.Description
+        <input type="hidden" class="form-control" id="Allowance_Rows_@(i)__Description" name="Allowance_Rows[@i].Description" value="@Model.Description" />
+    }
+    else
+    {
+        <input type="text" class="form-control" id="Allowance_Rows_@(i)__Description" name="Allowance_Rows[@i].Description" value="@Model.Description" readonly>
+    }
+
+</td>
+<td>
+    <input type="text" class="form-control text-right" id="Allowance_Rows_@(i)__Amount" name="Allowance_Rows[@i].Amount" value="@Model.Amount" onchange="SumAllowance()" onblur="ValidateDecimal('Allowance_Rows_@(i)__Amount','@Resource.Amount', false)">
+    <div class="validation-error">
+        @Html.ValidationMessage("Allowance_Rows[" + i + "].Amount", "", new { id = "Allowance_Rows_" + i + "__Amount_Err" })
+    </div>
+</td>
+<td class="actions text-left">
+    <a onclick="return DeleteAllowance('allowanceRow-@i', @i);" style="cursor:pointer">
+        <i class="fa fa-times-circle-o fa-2x"></i>
+    </a>
+</td>
+
+

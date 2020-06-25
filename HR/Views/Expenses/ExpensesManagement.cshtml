@@ -1,0 +1,557 @@
+﻿@model HR.Models.ExpensesViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using HR.Common;
+@using SBSWorkFlowAPI.Models;
+@using SBSWorkFlowAPI.ModelsAndService;
+@using SBSResourceAPI;
+@using SBSWorkFlowAPI.Constants;
+@{
+   ViewBag.Title = @Resource.Expenses_Management;
+}
+
+@{
+   var pcnt = Model.Record_Count / Model.Page_Length;
+   var start = 0;
+   var end = 1;
+   if (Model.Record_Count > 0 & Model.Record_Count % Model.Page_Length > 0)
+   {
+      pcnt += 1;
+   }
+
+   if (Model.Page_No == 1)
+   {
+      start = 1;
+      end = Model.Page_Length;
+   }
+   else if (Model.Page_No > 1)
+   {
+      start = (Model.Page_No - 1) * Model.Page_Length;
+      end = (Model.Page_No) * Model.Page_Length;
+   }
+
+   if (end > Model.Record_Count)
+   {
+      end = Model.Record_Count;
+   }
+}
+
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+   <script type="text/javascript">
+      $(function () {
+         InitDatepicker();
+
+         var module = '@Model.tabAction';
+         if ('@string.IsNullOrEmpty(Model.tabAction)' == "True") {
+            module = "pending";
+         }
+         var liID = "li-" + module;
+         var tabID = module + "-tab";
+         $("#" + liID).addClass("active");
+         $("#" + tabID).addClass("active");
+
+         InitDatatable('pendingDataTable', null, null);
+         // InitDatatable('processedDataTable', null, null);
+      })
+   </script>
+   <div class="pageheader">
+      <h2> @Resource.Expenses_Management</h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li class="active">@Resource.Expenses_Management</li>
+         </ol>
+      </div>
+   </div>
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+            <section class="tile color transparent-black">
+
+               <div class="tile-widget nopadding color transparent-white rounded-top-corners">
+                  <ul class="nav nav-tabs tabdrop">
+                     <li id="li-pending"><a href="#pending-tab" data-toggle="tab">@Resource.Pending</a></li>
+                     <li id="li-processed"><a href="#processed-tab" data-toggle="tab">@Resource.Rejected / @Resource.Approved / @Resource.Cancelled </a></li>
+                  </ul>
+               </div>
+               <div class="tile-body tab-content rounded-bottom-corners">
+                  <div id="pending-tab" class="tab-pane fade in">
+                     <div class="row">
+                        <div class="col-md-12">
+                           <section class="tile transparent filter" id="secfilter1">
+                              <div class="tile-header transparent">
+                                 <h1 onclick="CollapseHeader(null, 'btncollapse1', 'secfilter1')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                                 <div class="controls">
+                                    <a href="#" class="minimize filter" id="btncollapse1"><i class="fa fa-search  color-white"></i></a>
+                                 </div>
+                              </div>
+                              <div class="tile-body">
+                                 @using (Html.BeginForm("ExpensesManagement", "Expenses", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                                 {
+                                    @Html.AntiForgeryToken()
+                                    <div class="row">
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="Pending_Profile_ID" class="control-label">@Resource.Request_Form</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <select class="chosen-select chosen-transparent form-control" id="Pending_Profile_ID" name="Pending_Profile_ID">
+                                                   <option value="">-</option>
+                                                   @if (Model.employeeList != null)
+                                                   {
+                                                      foreach (var row in Model.employeeList)
+                                                      {
+                                                         if (Model.Pending_Profile_ID == row.Profile_ID)
+                                                         {
+                                                            <option value="@row.Profile_ID" selected>@UserSession.GetUserName(row)</option>
+                                                         }
+                                                         else
+                                                         {
+                                                            <option value="@row.Profile_ID">@UserSession.GetUserName(row)</option>
+                                                         }
+                                                      }
+                                                   }
+                                                </select>
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.Pending_Profile_ID)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="Pending_Date_Applied" class="control-label">@Resource.Date_Applied</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <input type="text" class="form-control input-datepicker" id="Pending_Date_Applied" name="Pending_Date_Applied" value="@Model.Pending_Date_Applied">
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.Pending_Date_Applied)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <div style="height:30px;"></div>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <button type="submit" class="btn btn-default" name="tabAction" value="pending">@Resource.Filter</button>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 }
+                              </div>
+                           </section>
+                        </div>
+                     </div>
+
+                     <div class="row">
+                        <div class="col-md-12">
+                           <section class="tile transparent">
+                              <div class="tile-header transparent">
+                                 <h1><strong>@Resource.Pending</strong></h1>
+                                 <div class="controls">
+                                    <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                 </div>
+                              </div>
+                              <div class="tile-body">
+                                 <div class="table-responsive">
+                                    <table class="table table-datatable table-custom" id="pendingDataTable">
+                                       <thead>
+                                          <tr>
+                                             <th class="sort-alpha">@Resource.Expenses_No_SymbolDot</th>
+                                             <th class="sort-alpha">@Resource.Expenses_Title</th>
+                                             <th width="250px" class="sort-alpha">@Resource.Employee</th>
+                                             <th class="sort-alpha">@Resource.Date_Applied</th>
+                                             <th class="sort-amount">@Resource.Amount_Claiming</th>
+                                             <th width="150px" class="sort-alpha">@Resource.Status</th>
+                                             <th width="110px" class="no-sort">@Resource.Action</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody>
+                                          @if (Model.ExpensesPendingLst != null)
+                                          {
+                                             int no = 1;
+                                             foreach (var row in Model.ExpensesPendingLst)
+                                             {
+                                                var totalAmount = 0M;
+                                                var claimAmount = 0M;
+                                                if (row.Expenses_Application_Document != null)
+                                                {
+                                                   totalAmount = row.Expenses_Application_Document.Select(s => (s.Total_Amount.HasValue ? s.Total_Amount.Value : 0)).Sum();
+                                                   claimAmount = row.Expenses_Application_Document.Select(s => (s.Amount_Claiming.HasValue ? s.Amount_Claiming.Value : 0)).Sum();
+                                                }
+                                                SBSModel.Models.TsEX tsex = null;
+                                                if (row.TsEXes.Count > 0)
+                                                {
+                                                   tsex = row.TsEXes.FirstOrDefault();
+                                                }
+                                                <tr>
+                                                   <td>
+                                                      @row.Expenses_No
+                                                   </td>
+                                                   <td>
+                                                      @if (tsex != null)
+                                                      {
+                                                         @(DateUtil.GetFullMonth(tsex.Month) + " " + tsex.Year)
+                                                      }
+                                                      else
+                                                      {
+                                                         @row.Expenses_Title
+                                                      }
+                                                   </td>
+                                                   <td>@UserSession.GetUserName(row.Employee_Profile.User_Profile)</td>
+                                                   <td>@DateUtil.ToDisplayDate(row.Date_Applied)</td>
+                                              
+                                                   <td class="text-right">
+                                                      @NumUtil.FormatCurrency(claimAmount,2) 
+                                                   </td>
+                                                   <td class="text-center">
+                                                      @if (!string.IsNullOrEmpty(row.Cancel_Status) && row.Cancel_Status != WorkflowStatus.Cancellation_Rejected)
+                                                      {
+                                                         @StatusUtil.Get_Overall_Status(row.Cancel_Status)
+                                                      }
+                                                      else
+                                                      {
+                                                         if (row.Overall_Status == WorkflowStatus.Pending || row.Overall_Status == WorkflowStatus.Approved)
+                                                         {
+                                                            @Resource.Pending
+                                                         }
+                                                         else
+                                                         {
+                                                            @StatusUtil.Get_Overall_Status(row.Overall_Status)
+                                                         }
+                                                      }
+                                                   </td>
+                                                   <td class="actions">
+                                                      @if (tsex != null)
+                                                      {
+                                                         <a href="@Url.Action("TsExInfo", "TsEx", new { operation = UserSession.RIGHT_U, pID = tsex.TsEx_ID, ctlr = ViewContext.RouteData.Values["controller"], ac = ViewContext.RouteData.Values["action"] })"><i class="fa fa-file-o fa-2x"></i></a>
+                                                      }
+                                                      else
+                                                      {
+                                                         <a href="@Url.Action("Application", "Expenses", new { eID = EncryptUtil.Encrypt(row.Expenses_Application_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U), pAppr = EncryptUtil.Encrypt("Manage") })"><i class="fa fa-file-o  fa-2x"></i></a>
+                                                      }
+                                                      @if (row.Cancel_Status != WorkflowStatus.Cancelled)
+                                                      {
+                                                         <a target="_blank" href="@Url.Action("ExpensesDocPrint", "Expenses", new { eID = EncryptUtil.Encrypt(row.Expenses_Application_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U)})" title="@Resource.Print"><i class="fa fa-print fa-2x"></i> </a>
+                                                      }
+                                                   </td>
+                                                </tr>
+                                                      no++;
+                                             }
+                                          }
+                                       </tbody>
+                                    </table>
+                                 </div>
+                              </div>
+                           </section>
+                        </div>
+
+                     </div>
+                  </div>
+
+                  <div id="processed-tab" class="tab-pane fade in">
+                     <div class="row">
+                        <div class="col-md-12">
+                           <section class="tile transparent filter" id="secfilter2">
+                              <div class="tile-header transparent">
+                                 <h1 onclick="CollapseHeader(null, 'btncollapse2', 'secfilter2')" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                                 <div class="controls">
+                                    <a href="#" class="minimize filter" id="btncollapse2"><i class="fa fa-search  color-white"></i></a>
+                                 </div>
+                              </div>
+                              <div class="tile-body">
+                                 @using (Html.BeginForm("ExpensesManagement", "Expenses", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                                 {
+                                    @Html.AntiForgeryToken()
+                                    <div class="row">
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="Process_Profile_ID" class="control-label">@Resource.Request_Form</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <select class="chosen-select chosen-transparent form-control" id="Process_Profile_ID" name="Process_Profile_ID">
+                                                   <option value="">-</option>
+                                                   @if (Model.employeeList != null)
+                                                   {
+                                                      foreach (var row in Model.employeeList)
+                                                      {
+                                                         if (Model.Process_Profile_ID == row.Profile_ID)
+                                                         {
+                                                            <option value="@row.Profile_ID" selected>@UserSession.GetUserName(row)</option>
+                                                         }
+                                                         else
+                                                         {
+                                                            <option value="@row.Profile_ID">@UserSession.GetUserName(row)</option>
+                                                         }
+                                                      }
+                                                   }
+                                                </select>
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.Process_Profile_ID)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <label for="Process_Date_Applied" class="control-label">@Resource.Date_Applied</label>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <input type="text" class="form-control input-datepicker" id="Process_Date_Applied" name="Process_Date_Applied" value="@Model.Process_Date_Applied">
+                                                <div class="validation-error">
+                                                   @Html.ValidationMessageFor(m => m.Process_Date_Applied)
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-4">
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <div style="height:30px;"></div>
+                                             </div>
+                                          </div>
+                                          <div class="form-group">
+                                             <div class="col-sm-12">
+                                                <button type="submit" class="btn btn-default" name="tabAction" value="processed">@Resource.Filter</button>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 }
+                              </div>
+                           </section>
+                        </div>
+                     </div>
+
+                     <div class="row">
+                        <div class="col-md-12">
+                           <section class="tile transparent">
+                              <div class="tile-header transparent">
+                                 <h1><strong>@Resource.Rejected / @Resource.Approved / @Resource.Cancelled </strong></h1>
+                                 <div class="controls">
+                                    <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                                 </div>
+                              </div>
+                              <div class="tile-body">
+                                 <div class="table-responsive">
+                                    <table class="table table-datatable table-custom" id="processedDataTable">
+                                       <thead>
+                                          <tr>
+                                             <th class="sort-alpha">@Resource.Expenses_No_SymbolDot</th>
+                                             <th class="sort-alpha">@Resource.Expenses_Title</th>
+                                             <th width="250px" class="sort-alpha">@Resource.Employee</th>
+                                             <th class="sort-alpha">@Resource.Date_Applied</th>
+                                             <th class="sort-amount">@Resource.Total_Amount_SymbolDollar</th>
+                                             <th class="sort-amount">@Resource.Claimable_Amount_SymbolDollar</th>
+                                             <th width="150px" class="sort-alpha">@Resource.Status</th>
+                                             <th width="110px" class="no-sort">@Resource.Action</th>
+                                          </tr>
+                                       </thead>
+                                       <tbody>
+                                          @if (Model.ExpensesProcessedLst != null)
+                                          {
+                                             int no = 1;
+                                             foreach (var row in Model.ExpensesProcessedLst)
+                                             {
+                                                var totalAmount = 0M;
+                                                var claimAmount = 0M;
+                                                if (row.Expenses_Application_Document != null)
+                                                {
+                                                   totalAmount = row.Expenses_Application_Document.Select(s => (s.Total_Amount.HasValue ? s.Total_Amount.Value : 0)).Sum();
+                                                   claimAmount = row.Expenses_Application_Document.Select(s => (s.Amount_Claiming.HasValue ? s.Amount_Claiming.Value : 0)).Sum();
+                                                }
+                                                SBSModel.Models.TsEX tsex = null;
+                                                if (row.TsEXes.Count > 0)
+                                                {
+                                                   tsex = row.TsEXes.FirstOrDefault();
+                                                }
+
+                                                <tr>
+                                                   <td>
+                                                      @row.Expenses_No
+                                                   </td>
+                                                   <td>
+                                                      @if (tsex != null)
+                                                      {
+                                                         @(DateUtil.GetFullMonth(tsex.Month) + " " + tsex.Year)
+                                                      }
+                                                      else
+                                                      {
+                                                         @row.Expenses_Title
+                                                      }
+                                                   </td>
+                                                   <td>
+                                                      @UserSession.GetUserName(row.Employee_Profile.User_Profile)
+                                                   </td>
+                                                   <td>@DateUtil.ToDisplayDate(row.Date_Applied)</td>
+                                                   <td class="text-right">
+                                                      @(totalAmount.ToString("n2"))
+                                                   </td>
+                                                   <td class="text-right">
+                                                      @(claimAmount.ToString("n2"))
+                                                   </td>
+                                                   <td class="text-center">
+                                                      @if (!string.IsNullOrEmpty(row.Cancel_Status) && row.Cancel_Status != WorkflowStatus.Cancellation_Rejected)
+                                                      {
+                                                         @StatusUtil.Get_Overall_Status(row.Cancel_Status)
+                                                      }
+                                                      else
+                                                      {
+                                                         if (row.Overall_Status == WorkflowStatus.Pending || row.Overall_Status == WorkflowStatus.Approved)
+                                                         {
+                                                            @Resource.Pending
+                                                         }
+                                                         else
+                                                         {
+                                                            @StatusUtil.Get_Overall_Status(row.Overall_Status)
+                                                         }
+                                                      }
+                                                      @if (!string.IsNullOrEmpty(row.Next_Approver))
+                                                      {
+                                                         @Html.Raw(GetNextApproverProfile(row.Next_Approver));
+                                                      }
+                                                   </td>
+                                                   <td class="actions">
+                                                      @if (tsex != null)
+                                                      {
+                                                         <a href="@Url.Action("TsExInfo", "TsEx", new { operation = UserSession.RIGHT_U, pID = tsex.TsEx_ID, ctlr = ViewContext.RouteData.Values["controller"], ac = ViewContext.RouteData.Values["action"] })"><i class="fa fa-file-o fa-2x"></i></a>
+                                                      }
+                                                      else
+                                                      {
+                                                         <a href="@Url.Action("Application", "Expenses", new { eID = EncryptUtil.Encrypt(row.Expenses_Application_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U), pAppr = EncryptUtil.Encrypt("Manage") })"><i class="fa fa-file-o  fa-2x"></i></a>
+                                                      }
+                                                      @if (row.Cancel_Status != WorkflowStatus.Cancelled)
+                                                      {
+                                                         <a target="_blank" href="@Url.Action("ExpensesDocPrint", "Expenses", new { eID = EncryptUtil.Encrypt(row.Expenses_Application_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U)})" title="@Resource.Print"><i class="fa fa-print fa-2x"></i> </a>
+                                                      }
+                                                   </td>
+                                                </tr>
+                                                      no++;
+                                             }
+                                          }
+
+                                       </tbody>
+                                       <tfoot>
+                                          <tr>
+                                             <td colspan="9" style="font-size:11px">
+                                                <div class="col-md-4 sm-center nopadding-left">
+                                                   <div class="dataTables_info">  Showing @start to @end of @Model.Record_Count entries</div>
+                                                </div><div class="col-md-8 text-right sm-center nopadding-right">
+                                                   <div class="dataTables_paginate paging_bootstrap paging_custombootstrap">
+                                                      <ul class=" pagination">
+                                                         @if (Model.Page_No > 1)
+                                                         {
+                                                            <li class="prev">
+                                                               <a href="@Url.Action("ExpensesManagement", "Expenses", new { pno = Model.Page_No - 1, tabAction = "processed", Process_Profile_ID = Model.Process_Profile_ID, Process_Date_Applied = Model.Process_Date_Applied })">@Resource.Previous</a>
+                                                            </li>
+                                                         }
+                                                         else
+                                                         {
+                                                            <li class="prev disabled">
+                                                               <a>@Resource.Previous</a>
+                                                            </li>
+                                                         }
+
+                                                         @for (var i = 1; i <= pcnt; i++)
+                                                         {
+                                                            if (Model.Page_No == i)
+                                                            {
+                                                               <li class="active"><a>@i</a></li>
+                                                            }
+                                                            else
+                                                            {
+                                                               <li><a href="@Url.Action("ExpensesManagement", "Expenses", new { pno = i, tabAction = "processed", Process_Profile_ID = Model.Process_Profile_ID, Process_Date_Applied = Model.Process_Date_Applied })">@i</a></li>
+                                                            }
+                                                         }
+                                                         @if (Model.Page_No < pcnt)
+                                                         {
+                                                            <li class="next next"><a href="@Url.Action("ExpensesManagement", "Expenses", new { pno = Model.Page_No + 1, tabAction = "processed", Process_Profile_ID = Model.Process_Profile_ID, Process_Date_Applied = Model.Process_Date_Applied })">@Resource.Next</a></li>
+                                                         }
+                                                         else
+                                                         {
+                                                            <li class="next disabled"><a>@Resource.Next</a></li>
+                                                         }
+                                                      </ul>
+                                                   </div>
+                                                </div>
+                                             </td>
+                                          </tr>
+                                       </tfoot>
+                                    </table>
+                                 </div>
+                              </div>
+                           </section>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </section>
+         </div>
+      </div>
+   </div>
+}
+
+@functions {
+   string GetNextApproverProfile(string AproverIDStr)
+   {
+      String NextApprover = string.Empty;
+      var UserServ = new UserService();
+      if (!string.IsNullOrEmpty(AproverIDStr))
+      {
+         var sp = AproverIDStr.Split('|');
+         foreach (var IDStr in sp)
+         {
+            if (!string.IsNullOrEmpty(IDStr))
+            {
+               var ID = NumUtil.ParseInteger(IDStr);
+               if (ID > 0)
+               {
+                  var user = UserServ.getUser(ID);
+                  if (user != null)
+                  {
+                     NextApprover += "<br />";
+                     NextApprover += "( " + AppConst.GetUserName(user) + " )";
+                  }
+               }
+            }
+         }
+      }
+      return NextApprover;
+   }
+}

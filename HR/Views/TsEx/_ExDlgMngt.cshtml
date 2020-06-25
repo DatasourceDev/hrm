@@ -1,0 +1,201 @@
+﻿@model  HR.Models.ExRowViewModel
+@using SBSModel.Models;
+@using System.Text;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Models;
+@using SBSWorkFlowAPI.ModelsAndService;
+@using SBSResourceAPI;
+@using SBSWorkFlowAPI.Constants;
+@{
+
+}
+
+<input type="hidden" id="Upload_Receipt_ID" value="@Model.Upload_Receipt_ID">
+<input type="hidden" id="Upload_Receipt_Name" value="@Model.Upload_Receipt_Name">
+<div class="modal-dialog">
+   <div class="modal-content">
+      <div class="modal-header">
+         <h3 class="modal-title" id="modalConfirmLabel"><strong>@Resource.Item_Details</strong></h3>
+      </div>
+      <div id="divApplication">
+         <div class="modal-body">
+            <div class="row">
+               <div class="col-md-8">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Expenses_Config_ID" class="control-label">@Resource.Expenses_Type</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        @Model.Expenses_Type_Name
+                     </div>
+                  </div>
+               </div>
+               @*<div class="col-md-4">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Balance" class="control-label">@Resource.Balance</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        @NumUtil.FormatCurrency(Model.Balance_Amount, 2)
+                     </div>
+                  </div>
+               </div>*@
+            </div>
+            <div class="row">
+               <div class="col-md-8">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Ex_Job_Cost_ID" class="control-label">@Resource.Job</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        @Model.Job_Cost_No
+                        <br />
+                        @Model.Job_Cost_Name
+                     </div>
+                  </div>
+               </div>
+               @*<div class="col-md-4">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Job_Cost_Balance" class="control-label">@Resource.Job_Cost_Balance</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        @NumUtil.FormatCurrency(Model.Job_Cost_Balance, 2)
+                     </div>
+                  </div>
+               </div>*@
+            </div>
+            <div class="divider"> </div>
+            <div class="row">
+               <div class="col-md-4">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Ex_Total_Amount" class="control-label">@Resource.Total_Amount</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        @NumUtil.FormatCurrency(Model.Ex_Total_Amount, 2)
+                     </div>
+                  </div>
+               </div>
+               <div class="col-md-4">
+               </div>
+               <div class="col-md-4">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Amount_Claiming" class="control-label">@Resource.Amount_Claiming</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-9">
+                        @NumUtil.FormatCurrency(Model.Amount_Claiming, 2)
+                     </div>
+                     <div class="col-md-3" style="padding:5px !important">
+                        <label class="control-label">@Model.Default_Currency_Code</label>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <div class="row">
+               <div class="col-md-4">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Tax_Type" class="control-label">@Resource.Tax_Type</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        @Model.Tax_Type
+                     </div>
+                  </div>
+               </div>
+               <div class="col-md-4">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Tax" class="control-label">@Resource.Tax</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        @NumUtil.FormatCurrency(Model.Tax, 2) @Model.Tax_Amount_Type
+                     </div>
+                  </div>
+               </div>
+               <div class="col-md-4">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Withholding_Tax" class="control-label">@Resource.Withholding_Tax</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        @NumUtil.FormatCurrency(Model.Withholding_Tax, 2) @Model.Withholding_Tax_Type
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <div class="divider"> </div>
+            <div class="row">
+               <div class="col-md-12">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Doc_No" class="control-label">@Resource.Doc_No</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        @Model.Doc_No
+                     </div>
+                  </div>
+               </div>
+            </div>
+            @if (Model.Upload_Receipt_ID != null)
+            {
+               <div class="row">
+                  <div class="col-md-12">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Upload_Receipt" class="control-label">@Resource.Upload_Receipt</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <a id="showfile" href="#" class="link-allow-click" style="padding-top: 5px; float: left; color:#6182E2" onclick="ShowFile_Onclick()">@Model.Upload_Receipt_Name</a>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            }
+            <div class="row">
+               <div class="col-md-12">
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        <label for="Notes" class="control-label">@Resource.Notes</label>
+                     </div>
+                  </div>
+                  <div class="form-group">
+                     <div class="col-md-12">
+                        @Model.Notes
+                     </div>
+                  </div>
+               </div>
+
+            </div>
+         </div>
+      </div>
+      <div class="modal-footer">
+         <button id="btnClose" type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+      </div>
+   </div>
+</div>

@@ -1,0 +1,138 @@
+﻿@{
+    ViewBag.Title = "Member Configration";
+}
+
+@using POS.Common;
+@using POS.Models;
+@using SBSModel.Common;
+@using SBSModel.Models;
+
+@model  POS.Models.MemberConfigurationViewModel
+
+@{
+    var currentdate = StoredProcedure.GetCurrentDate();
+}
+
+
+<script type="text/javascript">
+    $(function () {
+
+        @if (Model != null && Model.Member_Configuration_ID != null && Model.Member_Configuration_ID > 0)
+        {
+             @:Disable('divMemberDis');
+                        }
+    });
+</script>
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+    using (Html.BeginForm("MemberConfiguration", "POSConfig", FormMethod.Post, new { @class = "form-horizontal validatable", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.operation)
+        @Html.HiddenFor(m => m.Member_Configuration_ID)
+        <div class="main-content">
+
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+                <div class="container-fluid padded">
+                    <div class="row-fluid">
+                        <div class="span12">
+                            @if (Model.result.Code < 0)
+                            {
+                                <div class="alert alert-error">
+                                    @UserSession.GetMsg(Model.result.Code, Model.result.Msg, Model.result.Field)
+                                    <br />
+                                </div>
+                            }
+                            else if (Model.result.Code > 0)
+                            {
+                                <div class="alert alert-success">
+                                    @UserSession.GetMsg(Model.result.Code, Model.result.Msg, Model.result.Field)
+                                    <br />
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="container-fluid padded">
+                <div class="row-fluid">
+                    <div class="span8 offset2">
+                        <div class="box" style='margin-bottom:0;'>
+                            <div class="box-header">
+                                <span class="title">@Resources.ResourcePOS.MemberConfiguration</span>
+                            </div>
+                            <div class="box-content">
+                                <div class="padded">
+                                    <div class="control-group">
+                                        <h5 style="text-decoration:underline;">@Resources.ResourcePOS.MemberCardNo @Resources.ResourcePOS.Configuration</h5>
+                                    </div>
+                                    <div class="control-group">
+                                        <div class="span6">
+                                            <div class="control-group">
+                                                @Html.LabelFor(m => m.Prefix, new { @class = "control-label" })
+                                                <div class="controls">
+                                                    @Html.TextBoxFor(m => m.Prefix, "", new { @class = "bg-white" })
+                                                    <div class="validation-error">
+                                                        @Html.ValidationMessageFor(m => m.Prefix)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="divMemberDis">
+                                                <div class="control-group ">
+                                                    @Html.LabelFor(m => m.Num_Lenght, new { @class = "control-label" })
+                                                    <div class="controls">
+                                                        @Html.TextBoxFor(m => m.Num_Lenght, "", new { @class = "text-right" })
+                                                        @Html.ValidationMessageFor(m => m.Num_Lenght)
+                                                    </div>
+                                                </div>
+                                                <div class="control-group">
+                                                    @Html.LabelFor(m => m.Ref_Count, new { @class = "control-label" })
+                                                    <div class="controls">
+                                                        @Html.TextBoxFor(m => m.Ref_Count)
+                                                        @Html.ValidationMessageFor(m => m.Ref_Count)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="control-group">
+                                        <h5 style="text-decoration:underline;">@Resources.ResourcePOS.Discount @Resources.ResourcePOS.Configuration</h5>
+                                    </div>
+                                    <div class="control-group">
+                                        <div class="span6">
+                                            <div class="control-group">
+                                                @Html.LabelFor(m => m.Member_Discount, new { @class = "control-label" })
+                                                <div class="controls">
+                                                    @Html.TextBoxFor(m => m.Member_Discount, new {style = "width: 50%;", @class = "text-right" })
+                                                    @Html.DropDownListFor(m => m.Member_Discount_Type, new SelectList(Model.DiscountTypeList, "Value", "Text"), new { style = "width: 20%;" })
+                                                    @Html.ValidationMessageFor(m => m.Member_Discount)
+                                                </div>
+                                            </div>
+                                            <div class="control-group">
+                                                @Html.LabelFor(m => m.Birthday_Discount, new { @class = "control-label" })
+                                                <div class="controls">
+                                                    @Html.TextBoxFor(m => m.Birthday_Discount, new { @class = "text-right", style = "width: 50%;" })
+                                                    @Html.DropDownListFor(m => m.Birthday_Discount_Type, new SelectList(Model.DiscountTypeList, "Value", "Text"), new { style = "width: 20%;" })
+                                                    @Html.ValidationMessageFor(m => m.Birthday_Discount)
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="control-group" style="text-align:right;">
+                                        @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U) | Model.rights.Contains(UserSession.RIGHT_C))
+                                        {
+                                            <button type="submit" class="btn btn-white">@Resources.ResourceMain.Save</button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}

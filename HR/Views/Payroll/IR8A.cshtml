@@ -1,0 +1,377 @@
+﻿@model HR.Models.IR8AViewModel
+@using HR.Models
+@using HR.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+    ViewBag.Title = Resource.IR8A;
+    var currentdate = StoredProcedure.GetCurrentDate();
+}
+
+@if ((Model.operation == UserSession.RIGHT_A && Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+    <script type="text/javascript">
+        $(function () {
+            InitDatatable("#empDataTable", null, null, 0, 'asc');
+        });
+    </script>
+    <!-- page header -->
+    <div class="pageheader">
+        <h2> @Resource.IR8A</h2>
+        <div class="breadcrumbs">
+            <ol class="breadcrumb">
+                <li>@Resource.You_Are_Here</li>
+                <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+                <li class="active">@Resource.IR8A</li>
+            </ol>
+        </div>
+    </div>
+    
+    
+    <div class="main">      
+        <div class="row">       
+            <div class="col-md-12">
+                <!-- tile  -->
+                @if (Model.result != null && Model.result.Code != 0)
+                {
+                    if (Model.result.Code < 0)
+                    {
+                        <div class="alert alert-red">
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        </div>
+                    }
+                    else if (Model.result.Code > 0)
+                    {
+                        <div class="alert alert-success">
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        </div>
+                    }
+                }
+                <section class="tile color transparent-black filter" id="secfilter">
+                    <div class="tile-header transparent">
+                        <h1 onclick="CollapseHeader(null)" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                        <div class="controls">
+                            <a href="#" class="minimize filter" id="btncollapse"><i class="fa fa-search  color-white"></i></a>
+                        </div>
+                    </div>
+                    <div class="tile-body">
+                        @using (Html.BeginForm("IR8A", "Payroll", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                        {
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="sDepartment" class="control-label">@Resource.Department</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <select class="chosen-select chosen-transparent form-control" id="sDepartment" name="sDepartment">
+                                                @foreach (var row in Model.departmentList)
+                                                {
+                                                    if (Model.sDepartment == NumUtil.ParseInteger(row.Value))
+                                                    {
+                                                        <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.sDepartment)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="sYear" class="control-label">@Resource.Process_Year</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <select class="chosen-select chosen-transparent form-control" id="sYear" name="sYear">
+                                                @foreach (var row in Model.sYearList)
+                                                {
+                                                    if (Model.sYear == row)
+                                                    {
+                                                        <option value="@row" selected>@row</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@row">@row</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.sYear)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <button type="submit" class="btn btn-default  ">@Resource.Filter</button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </section>
+
+                <section class="tile color transparent-black">
+                    <div class="tile-header transparent">
+                        <h1><strong>@Resource.IR8A</strong></h1>
+                        <div class="controls">
+                            <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                        </div>
+                    </div>
+                    
+                    <div class="tile-body">
+                        <div class="table-responsive">
+                            <table class="table table-datatable table-custom" id="empDataTable">
+                                <thead>
+                                    <tr>
+                                        <th class="sort-alpha">@Resource.Employee_Name</th>
+                                        <th class="sort-alpha">@Resource.Department</th>
+                                        <th class="sort-alpha">@Resource.Process</th>
+                                        <th class="sort-alpha" width="40px">@Resource.Print</th>
+                                        <th class="no-sort" width="40px">@Resource.Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model != null && Model.employeeList != null && Model.employeeList.Count > 0)
+                                    {
+                                        for (var i = 0; i < Model.employeeList.Count(); i++)
+                                        {
+                                            var row = Model.employeeList[i];
+
+                                            if (row.Employee_Profile == null || row.Employee_Profile.FirstOrDefault() == null)
+                                            {
+                                                continue;
+                                            }
+
+                                            Employee_Profile emp = row.Employee_Profile.FirstOrDefault();
+                                            var hists = new EmploymentHistoryService().LstEmploymentHistoryAll(emp.Employee_Profile_ID);
+                                            var hist = new Employment_History();
+                                            if (hists.Count() == 0)
+                                            {
+                                                continue;
+                                            }
+
+                                            if (hists.Count() > 1)
+                                            {
+                                                var histTemp = new Employment_History();
+                                                bool ck = false;
+                                                foreach (var raow in hists)
+                                                {
+
+                                                    hist = raow;
+                                                    var idHist = hist.History_ID;
+                                                    if (raow.Contract_Staff == true)
+                                                    {
+                                                        if (raow.Contract_Start_Date.HasValue && raow.Contract_Start_Date.Value != null)
+                                                        {
+                                                            if (raow.Contract_Start_Date.Value.Year <= (Model.sYear - 1))
+                                                            {
+                                                                ck = true;
+                                                                histTemp = raow;
+                                                            }
+                                                            else
+                                                            {
+
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            continue;
+                                                        }
+
+                                                        if (raow.Contract_End_Date.HasValue && raow.Contract_End_Date.Value != null)
+                                                        {
+                                                            if (raow.Contract_End_Date.Value.Year < (Model.sYear - 1))
+                                                            {
+                                                                ck = false;
+                                                                continue;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+
+                                                        if (raow.Effective_Date.HasValue && raow.Effective_Date.Value != null)
+                                                        {
+                                                            if (raow.Effective_Date.Value.Year <= (Model.sYear - 1))
+                                                            {
+                                                                ck = true;
+                                                                histTemp = raow;
+                                                            }
+                                                            else
+                                                            {
+
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            continue;
+                                                        }
+
+                                                        if (raow.Terminate_Date.HasValue && raow.Terminate_Date.Value != null)
+                                                        {
+                                                            if (raow.Terminate_Date.Value.Year < (Model.sYear - 1))
+                                                            {
+                                                                ck = false;
+                                                                continue;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+
+                                                if (ck)
+                                                {
+                                                    hist = histTemp;
+                                                    if (Model.sDepartment != 0 && hist.Department_ID != Model.sDepartment)
+                                                    {
+                                                        continue;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    continue;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                hist = hists.FirstOrDefault();
+
+                                                if (hist == null)
+                                                {
+                                                    continue;
+                                                }
+
+                                                if (Model.sDepartment != 0 && hist.Department_ID != Model.sDepartment)
+                                                {
+                                                    continue;
+                                                }
+
+                                                if (hist.Contract_Staff == true)
+                                                {
+                                                    if (hist.Contract_Start_Date.HasValue && hist.Contract_Start_Date.Value != null)
+                                                    {
+                                                        if ((hist.Contract_Start_Date.Value.Year != (Model.sYear - 1)) && (hist.Contract_Start_Date.Value.Year > (Model.sYear - 1)))
+                                                        {
+                                                            continue;
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        continue;
+                                                    }
+
+                                                    if (hist.Contract_End_Date.HasValue && hist.Contract_End_Date.Value != null)
+                                                    {
+                                                        if (hist.Contract_End_Date.Value.Year < (Model.sYear - 1))
+                                                        {
+                                                            continue;
+                                                        }
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    if (hist.Effective_Date.HasValue && hist.Effective_Date.Value != null)
+                                                    {
+                                                        if ((hist.Effective_Date.Value.Year != (Model.sYear - 1)) && (hist.Effective_Date.Value.Year > (Model.sYear - 1)))
+                                                        {
+                                                            continue;
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        continue;
+                                                    }
+
+                                                    if (hist.Terminate_Date.HasValue && hist.Terminate_Date.Value != null)
+                                                    {
+                                                        if (hist.Terminate_Date.Value.Year < (Model.sYear - 1))
+                                                        {
+                                                            continue;
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            bool isProcess = false;
+                                            var iid = 0;
+                                            <tr>
+                                                <td>
+                                                    @UserSession.GetUserName(row)
+                                                </td>
+                                                <td>
+                                                    @hist.Department.Name
+                                                </td>
+                                                <td >
+                                                    @foreach (var e in Model.etira8.Where(w => w.Employee_Profile_ID == emp.Employee_Profile_ID & w.P_YEAR == Model.sYear.ToString()).ToList())
+                                                    {
+                                                        if (e.P_YEAR == currentdate.Year.ToString())
+                                                        {
+                                                            isProcess = true;
+                                                            break;
+                                                        }
+                                                    }
+
+                                                    @if (isProcess)
+                                                    {
+                                                       @Resource.Yes
+                                                    }
+                                                    else
+                                                    {
+                                                      @Resource.No
+                                                    }
+
+                                                </td>
+                                                <td class="actions text-left">
+                                                    @if (Model.etira8 != null)
+                                                    {
+                                                        foreach (var e in Model.etira8.Where(w => w.Employee_Profile_ID == emp.Employee_Profile_ID & w.P_YEAR == Model.sYear.ToString()).ToList())
+                                                        {
+                                                            if (Model.sYear == Int32.Parse(e.P_YEAR))
+                                                            {
+                                                                <a target="_blank" href="@Url.Action("IR8APDF", "Payroll", new { iid = EncryptUtil.Encrypt(e.ETIRA8_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U), sYear = Model.sYear })" title="@Resource.IR8A @e.P_YEAR"><i class="fa fa-print fa-2x"></i> </a>
+                                                                isProcess = true;
+                                                                iid = e.ETIRA8_ID;
+                                                            }
+                                                        }
+                                                    }
+                                                </td>
+                                                <td class="actions text-left">
+                                                    @if (!isProcess)
+                                                    {
+                                                        <a href="@Url.Action("IR8A", "Payroll", new { pEmpID = EncryptUtil.Encrypt(emp.Employee_Profile_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_C), sYear = Model.sYear })" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a href="@Url.Action("IR8A", "Payroll", new { pEmpID = EncryptUtil.Encrypt(emp.Employee_Profile_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U), sYear = Model.sYear, pIRID = EncryptUtil.Encrypt(iid) })" title="@Resource.View"><i class="fa fa-file-o fa-2x"></i></a>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </section>
+                
+            </div>
+            
+        </div>
+        
+    </div>
+    
+}

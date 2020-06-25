@@ -1,0 +1,584 @@
+﻿@model  HR.Models.ImportEmployeeViewModels
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+
+@{
+    ViewBag.Title = @Resource.Import_Employee;
+}
+
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+    <script type="text/javascript">
+        //initialize file upload button function
+        $(document)
+          .on('change', '.btn-file :file', function () {
+              var input = $(this),
+              numFiles = input.get(0).files ? input.get(0).files.length : 1,
+              label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+              input.trigger('fileselect', [numFiles, label]);
+          });
+
+        $(function () {
+            InitDatatable('empDataTable', null, null, 1, 'asc');
+            InitDatatable('hisDataTable', null, null, 1, 'asc');
+            InitDatatable('emergencyDataTable', null, null, 1, 'asc');
+            InitDatatable('relationDataTable', null, null, 1, 'asc');
+
+            //initialize file upload button
+            $('.btn-file :file').on('fileselect', function (event, numFiles, label) {
+
+                var sizeIsnull = $('#uploadfile')[0].files[0];
+                if (sizeIsnull != undefined) {
+                    var fsize = $('#uploadfile')[0].files[0].size;
+                    if (fsize > 6097150) {
+                        alert('@Resource.Message_Please_Upload_File_Size_Is_Less_Than_5_MB');
+                        $('#uploadfile').after($('#uploadfile').clone(true)).remove();
+                        $('#uploadfile').parents('.input-group').find(':text').val('');
+                        return false;
+                    }
+
+                    var input = $(this).parents('.input-group').find(':text'),
+                        log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+                    console.log(log);
+
+                    if (input.length) {
+                        input.val(log);
+                    } else {
+                        if (log) alert(log);
+                    }
+                }
+            });
+
+
+            $("#btnUpload").click(function () {
+                var filename = $('#uploadfile').val();
+                var ext = '';
+                if (filename != null) {
+                    var k = filename.lastIndexOf('.');
+                    if (k >= 0) {
+                        ext = filename.substring(k + 1).toLowerCase();
+                    }
+                }
+                if (ext != 'xls' && ext != 'xlsx') {
+                    alert('@Resource.Message_Please_Please_Upload_File_xls');
+                    return;
+                }
+                theForm.action = '@Url.Action("EmployeeImport", "Employee")';
+                theForm.method = 'post';
+                theForm.submit();
+            });
+        })
+    </script>
+
+    <div class="pageheader">
+        <h2>@Resource.Import_Employee</h2>
+        <div class="breadcrumbs">
+            <ol class="breadcrumb">
+                <li>@Resource.You_Are_Here</li>
+                <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+                <li><a href="@Url.Action("Employee", "Employee")">@Resource.Employee</a></li>
+                <li class="active">@Resource.Import_Employee</li>
+            </ol>
+        </div>
+    </div>
+    using (Html.BeginForm("EmployeeImport", "Employee", FormMethod.Post, new { @class = "form-horizontal validatable", role = "form", id = "theForm", enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="main">
+            <div class="row">
+                
+                <div class="col-md-12">
+                    @if (Model.result != null && Model.result.Code != 0)
+                    {
+                        if (Model.result.Code < 0)
+                        {
+                            <div class="alert alert-red">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                        else if (Model.result.Code > 0)
+                        {
+                            <div class="alert alert-success">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                    }
+                    <section class="tile color transparent-black filter" id="secfilter">
+                        <div class="tile-header transparent">
+                            <h1 onclick="CollapseHeader(null)" style="cursor:pointer"><strong>@Resource.Import_Employee</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="uploadfile" class="control-label">@Resource.Upload_File</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <div class="input-group">
+                                                <span class="input-group-btn">
+                                                    <span class="btn btn-primary btn-file">
+                                                        <i class="fa fa-upload"></i><input id="uploadfile" type="file" name="file">
+                                                    </span>
+                                                </span>
+                                                <input type="text" class="form-control" ="" readonly>
+                                            </div>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessage("Import_Employee")
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12" style="height :28px;">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <button type="button" class="btn btn-default" id="btnUpload">@Resource.Validate_File</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    @*Employee  --- PAST 1*@
+                    <section class="tile color transparent-black">
+                        
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.Employee_Info</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+                            <div class="validation-error">
+                                @Html.ValidationMessageFor(m => m.emps)
+                            </div>
+                            <div class="table-responsive" style="overflow-x:auto; width:100%;">
+                                <table class="table table-datatable table-custom" id="empDataTable">
+                                    <thead>
+                                        <tr>
+                                            <th class="no-sort" style="width: 20px;"></th>
+                                            <th class="sort-numeric">@Resource.SN</th>
+                                            <th class="sort-alpha">@Resource.Employee_No</th>
+                                            <th class="sort-alpha">@Resource.First_Name</th>
+                                            <th class="sort-alpha">@Resource.Middle_Name</th>
+                                            <th class="sort-alpha">@Resource.Last_Name</th>
+                                            <th class="sort-alpha">@Resource.Mobile_Phone</th>
+                                            <th class="sort-alpha">@Resource.Email</th>
+                                            <th class="sort-alpha">@Resource.Gender</th>
+                                            <th class="sort-alpha">@Resource.Marital_Status</th>
+                                            <th class="sort-alpha">@Resource.DOB</th>
+                                            <th class="sort-alpha">@Resource.Religion</th>
+                                            <th class="sort-alpha">@Resource.Race</th>
+                                            <th class="sort-alpha">@Resource.Nationality</th>
+                                            <th class="sort-alpha">@Resource.Residential_Status</th>
+                                            <th class="sort-alpha">@Resource.NRIC_Or_Fin_No_SymbolDot </th>
+                                            <th class="sort-alpha">@Resource.Passport_No_SymbolDot</th>
+                                            <th class="sort-alpha">@Resource.Date_Of_Issue</th>
+                                            <th class="sort-alpha">@Resource.Date_Of_Expire</th>
+                                            <th class="sort-alpha">@Resource.Address_1</th>
+                                            <th class="sort-alpha">@Resource.Address_1 @Resource.Postal_Code</th>
+                                            <th class="sort-alpha">@Resource.Address_1 @Resource.Country</th>
+                                            <th class="sort-alpha">@Resource.Address_2</th>
+                                            <th class="sort-alpha">@Resource.Address_2 @Resource.Postal_Code</th>
+                                            <th class="sort-alpha">@Resource.Address_2 @Resource.Country</th>
+                                            <th class="sort-alpha">@Resource.Bank_Name</th>
+                                            <th class="sort-alpha">@Resource.Bank_Account</th>
+                                            <th class="sort-alpha">@Resource.Payment_Type</th>
+                                            <th class="sort-alpha">@Resource.Effective_Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.emps != null)
+                                        {
+                                            for (int i = 0; i < Model.emps.Length; i++)
+                                            {
+                                                var row = Model.emps[i];
+                                                var colour = "color:#FFFFFF;";
+                                                if (!row.Validate_Emp)
+                                                {
+                                                    colour = "color:red;";
+                                                }
+                                                <tr title="@row.ErrMsg_Emp" style="@colour">
+                                                    <td>
+                                                        @if (!row.Validate_Emp)
+                                                        {
+                                                            <a><i class="fa fa-ban fa-2x color-white"></i></a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <a><i class="fa fa-check fa-2x color-green"></i></a>
+                                                        }
+
+                                                        <input type="hidden" name="emps[@i].Company_ID" value="@row.Company_ID">
+                                                        <input type="hidden" name="emps[@i].Validate_Emp" value="@row.Validate_Emp.ToString()">
+                                                        <input type="hidden" name="emps[@i].ErrMsg_Emp" value="@row.ErrMsg_Emp">
+
+                                                        <input type="hidden" name="emps[@i].Employee_No" value="@row.Employee_No">
+                                                        <input type="hidden" name="emps[@i].First_Name" value="@row.First_Name">
+                                                        <input type="hidden" name="emps[@i].Middle_Name" value="@row.Middle_Name">
+                                                        <input type="hidden" name="emps[@i].Last_Name" value="@row.Last_Name">
+                                                        <input type="hidden" name="emps[@i].Mobile_No" value="@row.Mobile_No">
+                                                        <input type="hidden" name="emps[@i].Email_Address" value="@row.Email_Address">
+                                                        <input type="hidden" name="emps[@i].Gender" value="@row.Gender">
+                                                        <input type="hidden" name="emps[@i].Gender_" value="@row.Gender_">
+                                                        <input type="hidden" name="emps[@i].Marital_Status" value="@row.Marital_Status">
+                                                        <input type="hidden" name="emps[@i].Marital_Status_" value="@row.Marital_Status_">
+                                                        <input type="hidden" name="emps[@i].DOB" value="@row.DOB">
+                                                        <input type="hidden" name="emps[@i].Religion" value="@row.Religion">
+                                                        <input type="hidden" name="emps[@i].Religion_" value="@row.Religion_">
+                                                        <input type="hidden" name="emps[@i].Race" value="@row.Race">
+                                                        <input type="hidden" name="emps[@i].Race_" value="@row.Race_">
+                                                        <input type="hidden" name="emps[@i].Nationality_ID" value="@row.Nationality_ID">
+                                                        <input type="hidden" name="emps[@i].Nationality_" value="@row.Nationality_">
+                                                        <input type="hidden" name="emps[@i].NRIC" value="@row.NRIC">
+                                                        <input type="hidden" name="emps[@i].Passport" value="@row.Passport">
+                                                        <input type="hidden" name="emps[@i].Date_Of_Issue" value="@row.Date_Of_Issue">
+                                                        <input type="hidden" name="emps[@i].Date_Of_Expire" value="@row.Date_Of_Expire">
+                                                        <input type="hidden" name="emps[@i].Address1" value="@row.Address1">
+                                                        <input type="hidden" name="emps[@i].Address1_Postal_Code" value="@row.Address1_Postal_Code">
+                                                        <input type="hidden" name="emps[@i].Address1_Country" value="@row.Address1_Country">
+                                                        <input type="hidden" name="emps[@i].Address1_Country_" value="@row.Address1_Country_">
+                                                        <input type="hidden" name="emps[@i].Address2" value="@row.Address2">
+                                                        <input type="hidden" name="emps[@i].Address2_Postal_Code" value="@row.Address2_Postal_Code">
+                                                        <input type="hidden" name="emps[@i].Address2_Country" value="@row.Address2_Country">
+                                                        <input type="hidden" name="emps[@i].Address2_Country_" value="@row.Address2_Country_">
+                                                        <input type="hidden" name="emps[@i].Bank_Name" value="@row.Bank_Name">
+                                                        <input type="hidden" name="emps[@i].Bank_Name_" value="@row.Bank_Name_">
+                                                        <input type="hidden" name="emps[@i].Bank_Account" value="@row.Bank_Account">
+                                                        <input type="hidden" name="emps[@i].Payment_Type" value="@row.Payment_Type">
+                                                        <input type="hidden" name="emps[@i].Payment_Type_" value="@row.Payment_Type_">
+                                                        <input type="hidden" name="emps[@i].Effective_Date" value="@row.Effective_Date">
+                                                        <input type="hidden" name="emps[@i].Residential_Status" value="@row.Residential_Status">
+                                                        <input type="hidden" name="emps[@i].Residential_Status_" value="@row.Residential_Status_">
+                                                        <input type="hidden" name="emps[@i].Create_By" value="@row.Create_By">
+                                                        <input type="hidden" name="emps[@i].Create_On" value="@row.Create_On">
+                                                    </td>
+
+                                                    <td style="width:20px">@(i + 1)</td>
+                                                    <td>@row.Employee_No</td>
+                                                    <td>@row.First_Name</td>
+                                                    <td>@row.Middle_Name</td>
+                                                    <td>@row.Last_Name</td>
+                                                    <td>@row.Mobile_No</td>
+                                                    <td>@row.Email_Address</td>
+                                                    <td>@row.Gender_</td>
+                                                    <td>@row.Marital_Status_</td>
+                                                    <td>@row.DOB</td>
+                                                    <td>@row.Religion_</td>
+                                                    <td>@row.Race_</td>
+                                                    <td>@row.Nationality_</td>
+                                                    <td>@row.Residential_Status_</td>
+                                                    <td>@row.NRIC</td>
+                                                    <td>@row.Passport</td>
+                                                    <td>@row.Date_Of_Issue</td>
+                                                    <td>@row.Date_Of_Expire</td>
+                                                    <td>@row.Address1</td>
+                                                    <td>@row.Address1_Postal_Code</td>
+                                                    <td>@row.Address1_Country_</td>
+                                                    <td>@row.Address2</td>
+                                                    <td>@row.Address2_Postal_Code</td>
+                                                    <td>@row.Address2_Country_</td>
+                                                    <td>@row.Bank_Name_</td>
+                                                    <td>@row.Bank_Account</td>
+                                                    <td>@row.Payment_Type_</td>
+                                                    <td>@row.Effective_Date</td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- tile widget -->
+                            <!-- /tile widget -->
+                        </div>
+                       
+                    </section>
+
+                    @*Employment History  --- PAST 2*@
+                    <section class="tile color transparent-black">
+                        
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.Employment_History</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+                            <div class="validation-error">
+                                @Html.ValidationMessageFor(m => m.hiss)
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-datatable table-custom" id="hisDataTable">
+                                    <thead>
+                                        <tr>
+                                            <th class="no-sort" style="width: 20px;"></th>
+                                            <th class="sort-numeric">@Resource.SN</th>
+                                            <th class="sort-alpha">@Resource.Employee_No</th>
+                                            <th class="sort-alpha">@Resource.Employment_Type</th>
+                                            <th class="sort-alpha">@Resource.Department</th>
+                                            <th class="sort-alpha">@Resource.Designation</th>
+                                            <th class="sort-alpha">@Resource.Branch</th>
+                                            <th class="sort-alpha">@Resource.Effective_Date</th>
+                                            <th class="sort-alpha">@Resource.Confirm_Date</th>
+                                            <th class="sort-alpha">@Resource.Currency</th>
+                                            <th class="sort-alpha">@Resource.Basic_Salary</th>
+                                            <th class="sort-alpha">@Resource.MonthlyOrHourly</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.hiss != null)
+                                        {
+                                            for (int i = 0; i < Model.hiss.Length; i++)
+                                            {
+                                                var row = Model.hiss[i];
+                                                var colour = "color:#FFFFFF;";
+                                                if (!row.Validate_His)
+                                                {
+                                                    colour = "color:red;";
+                                                }
+                                                <tr title="@row.ErrMsg_His" style="@colour">
+                                                    <td>
+                                                        @if (!row.Validate_His)
+                                                        {
+                                                            <a><i class="fa fa-ban fa-2x color-white"></i></a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <a><i class="fa fa-check fa-2x color-green"></i></a>
+                                                        }
+                                                        <input type="hidden" name="hiss[@i].Company_ID" value="@row.Company_ID">
+                                                        <input type="hidden" name="hiss[@i].Validate_His" value="@row.Validate_His.ToString()">
+                                                        <input type="hidden" name="hiss[@i].ErrMsg_His" value="@row.ErrMsg_His">
+
+                                                        <input type="hidden" name="hiss[@i].Employee_No" value="@row.Employee_No">
+                                                        <input type="hidden" name="hiss[@i].Employee_Type" value="@row.Employee_Type">
+                                                        <input type="hidden" name="hiss[@i].Employee_Type_" value="@row.Employee_Type_">
+                                                        <input type="hidden" name="hiss[@i].Department_ID" value="@row.Department_ID">
+                                                        <input type="hidden" name="hiss[@i].Department_" value="@row.Department_">
+                                                        <input type="hidden" name="hiss[@i].Designation_ID" value="@row.Designation_ID">
+                                                        <input type="hidden" name="hiss[@i].Designation_" value="@row.Designation_">
+                                                        <input type="hidden" name="hiss[@i].Branch_ID" value="@row.Branch_ID">
+                                                        <input type="hidden" name="hiss[@i].Branch_" value="@row.Branch_">
+                                                        <input type="hidden" name="hiss[@i].Effective_Date" value="@row.Effective_Date">
+                                                        <input type="hidden" name="hiss[@i].Confirm_Date" value="@row.Confirm_Date">
+                                                        <input type="hidden" name="hiss[@i].Currency_ID" value="@row.Currency_ID">
+                                                        <input type="hidden" name="hiss[@i].Currency_" value="@row.Currency_">
+                                                        <input type="hidden" name="hiss[@i].Basic_Salary" value="@row.Basic_Salary">
+                                                        <input type="hidden" name="hiss[@i].Basic_Salary_Unit" value="@row.Basic_Salary_Unit">
+                                                    </td>
+                                                    <td style="width:20px">@(i + 1)</td>
+                                                    <td>@row.Employee_No</td>
+                                                    <td>@row.Employee_Type_</td>
+                                                    <td>@row.Department_</td>
+                                                    <td>@row.Designation_</td>
+                                                    <td>@row.Branch_</td>
+                                                    <td>@row.Effective_Date</td>
+                                                    <td>@row.Confirm_Date</td>
+                                                    <td>@row.Currency_</td>
+                                                    <td>@row.Basic_Salary</td>
+                                                    <td style="text-align:right">@row.Basic_Salary_Unit</td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- tile widget -->
+                            <!-- /tile widget -->
+                        </div>
+                       
+                    </section>
+
+                    @*Emergency Contacts  --- PAST 3*@
+                    <section class="tile color transparent-black">
+                        
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.Emergency</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+                            <div class="validation-error">
+                                @Html.ValidationMessageFor(m => m.emergencys)
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-datatable table-custom" id="emergencyDataTable">
+                                    <thead>
+                                        <tr>
+                                            <th class="no-sort" style="width: 20px;"></th>
+                                            <th class="sort-numeric">@Resource.SN</th>
+                                            <th class="sort-alpha">@Resource.Employee_No</th>
+                                            <th class="sort-alpha">@Resource.Name</th>
+                                            <th class="sort-alpha">@Resource.Contact_No</th>
+                                            <th class="sort-alpha">@Resource.Relationship</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.emergencys != null)
+                                        {
+                                            for (int i = 0; i < Model.emergencys.Length; i++)
+                                            {
+                                                var row = Model.emergencys[i];
+                                                var colour = "color:#FFFFFF;";
+                                                if (!row.Validate_Emergency)
+                                                {
+                                                    colour = "color:red;";
+                                                }
+                                                <tr title="@row.ErrMsg_Emergency" style="@colour">
+                                                    <td>
+                                                        @if (!row.Validate_Emergency)
+                                                        {
+                                                            <a><i class="fa fa-ban fa-2x color-white"></i></a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <a><i class="fa fa-check fa-2x color-green"></i></a>
+                                                        }
+                                                        <input type="hidden" name="emergencys[@i].Company_ID" value="@row.Company_ID">
+                                                        <input type="hidden" name="emergencys[@i].Validate_Emergency" value="@row.Validate_Emergency.ToString()">
+                                                        <input type="hidden" name="emergencys[@i].ErrMsg_Emergency" value="@row.ErrMsg_Emergency">
+
+                                                        <input type="hidden" name="emergencys[@i].Employee_No" value="@row.Employee_No">
+                                                        <input type="hidden" name="emergencys[@i].Name" value="@row.Name">
+                                                        <input type="hidden" name="emergencys[@i].Contact_No" value="@row.Contact_No">
+                                                        <input type="hidden" name="emergencys[@i].Relationship_ID" value="@row.Relationship_ID">
+                                                        <input type="hidden" name="emergencys[@i].Relationship_" value="@row.Relationship_">
+                                                    </td>
+                                                    <td style="width:20px">@(i + 1)</td>
+                                                    <td>@row.Employee_No</td>
+                                                    <td>@row.Name</td>
+                                                    <td>@row.Contact_No</td>
+                                                    <td>@row.Relationship_</td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- tile widget -->
+                            <!-- /tile widget -->
+                        </div>
+                       
+                    </section>
+
+                    @*Family Members  --- PAST 4*@
+                    <section class="tile color transparent-black">
+                        
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.Relationship</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+                            <div class="validation-error">
+                                @Html.ValidationMessageFor(m => m.relations)
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-datatable table-custom" id="relationDataTable">
+                                    <thead>
+                                        <tr>
+                                            <th class="no-sort" style="width: 20px;"></th>
+                                            <th class="sort-numeric">@Resource.SN</th>
+                                            <th class="sort-alpha">@Resource.Employee_No</th>
+                                            <th class="sort-alpha">@Resource.Name</th>
+                                            <th class="sort-alpha">@Resource.Relationship</th>
+                                            <th class="sort-alpha">@Resource.DOB</th>
+                                            <th class="sort-alpha">@Resource.Nationality</th>
+                                            <th class="sort-alpha">@Resource.NRIC_Or_Fin_No_SymbolDot</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.relations != null)
+                                        {
+                                            for (int i = 0; i < Model.relations.Length; i++)
+                                            {
+                                                var row = Model.relations[i];
+                                                var colour = "color:#FFFFFF;";
+                                                if (!row.Validate_Relation)
+                                                {
+                                                    colour = "color:red;";
+                                                }
+                                                <tr title="@row.ErrMsg_Relation" style="@colour">
+                                                    <td>
+                                                        @if (!row.Validate_Relation)
+                                                        {
+                                                            <a><i class="fa fa-ban fa-2x color-white"></i></a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <a><i class="fa fa-check fa-2x color-green"></i></a>
+                                                        }
+                                                        <input type="hidden" name="relations[@i].Company_ID" value="@row.Company_ID">
+                                                        <input type="hidden" name="relations[@i].Validate_Relation" value="@row.Validate_Relation.ToString()">
+                                                        <input type="hidden" name="relations[@i].ErrMsg_Relation" value="@row.ErrMsg_Relation">
+
+                                                        <input type="hidden" name="relations[@i].Employee_No" value="@row.Employee_No">
+                                                        <input type="hidden" name="relations[@i].Name" value="@row.Name">
+                                                        <input type="hidden" name="relations[@i].Relationship_ID" value="@row.Relationship_ID">
+                                                        <input type="hidden" name="relations[@i].Relationship_" value="@row.Relationship_">
+                                                        <input type="hidden" name="relations[@i].DOB" value="@row.DOB">
+                                                        <input type="hidden" name="relations[@i].Nationality_ID" value="@row.Nationality_ID">
+                                                        <input type="hidden" name="relations[@i].Nationality_" value="@row.Nationality_">
+                                                        <input type="hidden" name="relations[@i].NRIC" value="@row.NRIC">
+                                                    </td>
+                                                    <td style="width:20px">@(i + 1)</td>
+                                                    <td>@row.Employee_No</td>
+                                                    <td>@row.Name</td>
+                                                    <td>@row.Relationship_</td>
+                                                    <td>@row.DOB</td>
+                                                    <td>@row.Nationality_</td>
+                                                    <td>@row.NRIC</td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- tile widget -->
+                            <!-- /tile widget -->
+                        </div>
+                       
+                    </section>
+                    
+                </div>
+                
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12">
+                    <section class="tile color transparent-white">
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <input type="hidden" name="validated" value="@Model.validated.ToString()">
+                                    @if (Model.validated && Model.emps != null && Model.emps.Length > 0)
+                                    {
+                                        <button class="btn btn-primary" type="submit" name="pageAction" value="import">@Resource.Import</button>
+                                    }
+                                    <a href="@Url.Action("Employee", "Employee")" class="btn btn-default">@Resource.Back</a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    }
+    
+}

@@ -1,0 +1,205 @@
+﻿@model Authentication.Models.JobCostViewModel
+@using Authentication.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using Authentication.Models;
+@using SBSResourceAPI;
+
+@{
+   ViewBag.Title = Resource.Job_Cost;
+}
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+   <script type="text/javascript">
+
+      $(function () {
+         InitDatepicker();
+
+         var addRowLink = '<a href="@Url.Action("JobCostInfo", "JobCost", new { operation = EncryptUtil.Encrypt(UserSession.RIGHT_C) })" class="btn btn-greensea  btn-sm add-row">@Resource.New</a>'
+         InitDatatable('jobcostDataTable', addRowLink, InitDatatableApplyLink({
+            name: "apply",
+            tabAction: null,
+            hasActive: true,
+            hasInactive: true,
+            hasDel: true,
+            confirmAlert: true
+         }));
+
+      })
+   </script>
+
+   <div class="pageheader">
+      <h2>@Resource.Job_Cost<span></span></h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li class="active">@Resource.Job_Cost</li>
+         </ol>
+      </div>
+   </div>
+
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+
+            @using (Html.BeginForm("JobCost", "JobCost", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+            {
+               @Html.AntiForgeryToken()
+
+               <section class="tile color transparent-black filter" id="secfilter">
+                  <div class="tile-header transparent">
+                     <h1 onclick="CollapseHeader(null)" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize filter" id="btncollapse"><i class="fa fa-search  color-white"></i></a>
+                     </div>
+                  </div>
+                  <div class="tile-body">
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="search_Customer_ID" class="control-label">@Resource.Customer</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="search_Customer_ID" name="search_Customer_ID">
+                                    @if (Model.cCustomerlst != null)
+                                    {
+                                       foreach (var row in Model.cCustomerlst)
+                                       {
+                                          <option value="@row.Value" @(Model.search_Customer_ID.HasValue && Model.search_Customer_ID.Value.ToString() == row.Value ? "selected" : "")>@row.Text</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.search_Customer_ID)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-md-6">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <button type="submit" class="btn btn-default">@Resource.Filter</button>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </section>
+
+               <section class="tile color transparent-black">
+                  <div class="tile-header transparent">
+                     <h1><strong>@Resource.Job_Cost</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                     </div>
+                  </div>
+
+                  <div class="tile-body ">
+                     <div class="table-responsive">
+                        <table class="table table-datatable table-custom" id="jobcostDataTable">
+                           <thead>
+                              <tr>
+                                 <th class="no-sort" style="width: 40px;">
+                                    <div class="checkbox check-transparent">
+                                       <input type="checkbox" value="1" id="chkallExpType">
+                                       <label for="chkallExpType"></label>
+                                    </div>
+                                 </th>
+                                 <th class="sort-alpha" style="width:160px;">@Resource.Indent_No</th>
+                                 <th class="sort-alpha">@Resource.Indent_Name</th>
+                                 <th class="sort-alpha">@Resource.Customer_Name</th>
+                                 <th class="sort-amount">@Resource.Costing</th>
+                                 <th class="sort-amount">@Resource.Sell_Price</th>
+                                 <th class="sort-alpha">@Resource.Status</th>
+                                 <th class="no-sort" style="width:160px;">@Resource.Action</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              @if (Model.JobCostList != null)
+                              {
+
+                                 var i = 0;
+                                 foreach (var row in Model.JobCostList)
+                                 {
+                                    var show = true;
+                                    <tr>
+                                       <td>
+                                          <div class="checkbox check-transparent">
+                                             <input type="checkbox" value="@row.Job_Cost_ID" name="JobCostIDs" id="JobCostIDs[@i]">
+                                             <label for="JobCostIDs[@i]"></label>
+                                          </div>
+                                       </td>
+                                       <td>@row.Indent_No</td>
+                                       <td>@row.Indent_Name</td>
+                                       <td>@(row.Customer_ID != null ? row.Customer.Customer_Name : "")</td>
+                                       <td class="text-right">@NumUtil.FormatCurrency((row.Costing.HasValue ? row.Costing.Value : 0), 2)</td>
+                                       <td class="text-right">@NumUtil.FormatCurrency((row.Sell_Price.HasValue ? row.Sell_Price.Value : 0), 2)</td>
+                                       <td> @StatusUtil.Get_Record_Status(row.Record_Status) </td>
+                                       <td class="actions text-left">
+                                          <a target="_blank" href="@Url.Action("JobCostInfoExport", "JobCost", new { pJobCostID = EncryptUtil.Encrypt(row.Job_Cost_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })" title="@Resource.Export_To_Excel"><i class="fa fa-file-excel-o fa-2x"></i></a>
+                                          @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_U))
+                                          {
+                                             <a href="@Url.Action("JobCostInfo", "JobCost", new { pJobCostID = EncryptUtil.Encrypt(row.Job_Cost_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })" title="@Resource.Edit"><i class="fa fa-edit fa-2x"></i></a>
+                                          }
+
+                                          @if (row.Costing.HasValue)
+                                          {
+                                             if (row.Costing.Value > 0)
+                                             {
+                                                show = false;
+                                             }
+                                          }
+                                          @if (row.Using.HasValue)
+                                          {
+                                             if (row.Using.Value)
+                                             {
+                                                show = false;
+                                             }
+                                          }
+                                          @if (show)
+                                          {
+                                             if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_D))
+                                             {
+                                                <a href="@Url.Action("JobCostInfo", "JobCost", new { pJobCostID = EncryptUtil.Encrypt(row.Job_Cost_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_D) }) " onclick="return confirm('@Resource.Confirm_Delete_Msg');" title="@Resource.Delete">
+                                                   <i class="fa fa-times-circle-o fa-2x"></i>
+                                                </a>
+                                             }
+                                          }
+
+                                       </td>
+                                    </tr>
+                                          i++;
+                                 }
+                              }
+                           </tbody>
+                        </table>
+                     </div>
+                  </div>
+               </section>
+            }
+         </div>
+      </div>
+   </div>
+}

@@ -1,0 +1,32 @@
+﻿@model Authentication.Models.MessagePageViewModel
+@using SBSResourceAPI;
+@{
+    ViewBag.Title = Resource.Payment_Completed;
+}
+
+<div class="main">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- tile -->
+            <section class="tile transparent">
+                <div class="jumbotron bg-transparent-black-3">
+                    <div class="container text-center">
+                        <h1 class="error"><strong>@Resource.Payment_Completed</strong></h1>
+                        <p><a class="btn btn-greensea btn-large" href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> @Resource.Return_To_Home</a></p>
+                    </div>
+                </div>
+            </section>
+            
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+

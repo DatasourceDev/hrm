@@ -1,0 +1,460 @@
+﻿@model  HR.Models.ExpensesViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@using SBSWorkFlowAPI.Constants;
+@{
+   var isReadonly = false;
+   if (Model.Expenses_ID.HasValue && Model.Expenses_ID.Value > 0 && Model.ApprStatus != WorkflowStatus.Draft)
+   {
+      isReadonly = true;
+   }
+   if (Model.operation == UserSession.RIGHT_U && !Model.rights.Contains(UserSession.RIGHT_U) && Model.ApprStatus != WorkflowStatus.Draft)
+   {
+      isReadonly = true;
+   }
+   else if (!Model.rights.Contains(UserSession.RIGHT_C) && Model.ApprStatus != WorkflowStatus.Draft)
+   {
+      isReadonly = true;
+   }
+   var uitem = UserUtil.GetUserItem(Request.RequestContext.HttpContext);
+}
+<a id="btnOpenDlgDetail" href="#modal-detail" role="button" data-toggle="modal" style="display:none;"></a>
+<div class="modal fade" id="modal-detail" tabindex="-1" role="dialog" aria-labelledby="modalConfirmLabel" aria-hidden="true">
+   <input type="hidden" id="Expenses_Application_Document_ID">
+   <input type="hidden" id="Index">
+   <input type="hidden" id="Row_Type">
+   <input type="hidden" id="Event_Click">
+
+   <input type="hidden" id="Upload_Receipt_ID">
+   <input type="hidden" id="Upload_Receipt_Name">
+   <input type="hidden" id="Upload_Receipt">
+
+   <input type="hidden" id="Withholding_Tax_Amount">
+   <input type="hidden" id="Tax_Amount">
+   <input type="hidden" id="Balance">
+
+   <input type="hidden" id="Job_Cost_Name">
+   <input type="hidden" id="Expenses_Type_Name">
+
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h3 class="modal-title" id="modalConfirmLabel"><strong>@Resource.Item_Details</strong></h3>
+         </div>
+         <div id="divApplication">
+            <div class="modal-body">
+               <div class="row">
+                  <div class="col-md-8">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="on_Behalf_Employee" class="control-label">@Resource.On_Behalf_Emplyoee</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control " id="on_Behalf_Employee" readonly>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Doc_No" class="control-label">@Resource.Doc_No</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control" id="Doc_No">
+                           <div class="validation-error">
+                              <span id="Doc_No_Err"></span>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-8">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Expenses_Config_ID" class="control-label">@Resource.Expenses_Type</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <select class="chosen-select form-control" id="Expenses_Config_ID">
+                              @if (Model.expensesConfigList != null)
+                              {
+                                 foreach (var row in Model.expensesConfigList)
+                                 {
+                                    <option value="@row.Expenses_Config_ID">@row.Expenses_Name</option>
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              <span id="Expenses_Config_ID_Err"></span>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Balance" class="control-label">@Resource.Balance</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control text-right" id="Balance_Amount" onblur="ValidateDecimal('Balance', '@Resource.Balance', false)" readonly>
+                           <div class="validation-error">
+                              <span id="Balance_Err"></span>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div class="row">
+                  <div class="col-md-8">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Expenses_Type_Desc" class="control-label">@Resource.Expenses_Type_Desc</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control " id="Expenses_Type_Desc" readonly>
+                           <div class="validation-error">
+                              <span id="Expenses_Type_Desc_Err"></span>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Expenses_Date" class="control-label">@Resource.Expenses_Date</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control input-datepicker2" id="Expenses_Date" onblur="ValidateDate('Expenses_Date', '@Resource.Expenses_Date', true, false)">
+                           <div class="validation-error">
+                              <span id="Expenses_Date_Err"></span>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               @if (uitem.Is_Indent)
+               {
+                  <div class="row">
+                     <div class="col-md-8">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="Job_Cost_ID" class="control-label">@Resource.Job</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <select class="chosen-select form-control" id="Job_Cost_ID">
+                                 @if (Model.JobCostlst != null)
+                                 {
+                                    foreach (var row in Model.JobCostlst)
+                                    {
+                                       <option value="@row.Value">@row.Text</option>
+                                    }
+                                 }
+                              </select>
+                              <div class="validation-error">
+                                 <span id="Job_Cost_ID_Err"></span>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <label for="Job_Cost_Balance" class="control-label">@Resource.Job_Cost_Balance</label>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input type="text" class="form-control text-right" id="Job_Cost_Balance" readonly>
+                              <div class="validation-error">
+                                 <span id="Job_Cost_Balance_Err"></span>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               }
+
+               <div class="row">
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Selected_Currency" class="control-label">@Resource.Currency</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <select class="chosen-select form-control" id="Selected_Currency">
+                              @if (Model.currencyList != null)
+                              {
+                                 foreach (var row in Model.currencyList)
+                                 {
+                                    <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              <span id="Selected_Currency_Err"></span>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Total_Amount" class="control-label">@Resource.Total_Amount</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control text-right decimal" id="Total_Amount" onblur="ValidateDecimal('Total_Amount', '@Resource.Total_Amount', false)">
+                           <div class="validation-error">
+                              <span id="Total_Amount_Err"></span>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Amount_Claiming" class="control-label">@Resource.Amount_Claiming</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-9">
+                           <input type="text" class="form-control text-right" id="Amount_Claiming" readonly>
+                           <div class="validation-error">
+                              <span id="Amount_Claiming_Err"></span>
+                           </div>
+                        </div>
+                        <div class="col-md-3" style="padding:5px !important">
+                           <label class="control-label">@Model.Default_Currency_Code</label>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div class="row" id="divExchangeRate">
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <input type="text" class="form-control text-right" id="Exchange_Detail" readonly>
+                           <div class="validation-error">
+                              <span id="Exchange_Detail_Err"></span>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-9">
+                           <input type="text" class="form-control text-right decimal" id="Exchange_Total_Amount" onblur="ValidateDecimal('Exchange_Total_Amount', '@Resource.Total_Amount', false)" readonly>
+                           <div class="validation-error">
+                              <span id="Exchange_Total_Amountt_Err"></span>
+                           </div>
+                        </div>
+                        <div class="col-md-3">
+                           <label class="control-label">@Model.Default_Currency_Code</label>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div id="divMileage">
+                  <div class="row">
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input hidden="hidden" id="UOM_ID">
+                              <input type="text" class="form-control input-transparent" id="UOM_Name" style="color: #717171 !important; font-weight: 700; border: none; font-size: 14px !important; ">
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="row">
+                     <div class="col-md-4">
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <input type="text" class="form-control text-right" id="Mileage" name="Mileage">
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-md-4">
+                        <div style="height:10px"></div>
+                        <div class="form-group">
+                           <div class="col-md-5">
+                              <input type="text" class="form-control input-transparent text-right" id="Amount_Per_UOM" style="color: #717171 !important; font-weight: 700; border: none; font-size: 14px !important; ">
+                           </div>
+                           <div class="col-md-2">
+                              /
+                           </div>
+                           <div class="col-md-5">
+                              <input type="text" class="form-control input-transparent" id="UOM_Name2" style="color: #717171 !important; font-weight: 700; border: none; font-size: 14px !important; ">
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               @*Start Smart Dev*@
+               <div class="row">
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Tax_Type" class="control-label">@Resource.Tax_Type</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <select class="chosen-select form-control" id="Tax_Type">
+                              @if (Model.TaxTypelst != null)
+                              {
+                                 foreach (var row in Model.TaxTypelst)
+                                 {
+                                    <option value="@row.Value">@row.Text</option>
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              <span id="Tax_Type_Err"></span>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Tax" class="control-label">@Resource.Tax</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-7">
+                           <input type="text" class="form-control text-right decimal" id="Tax" onblur="ValidateDecimal('Tax', '@Resource.Tax', false, true)">
+                           <div class="validation-error">
+                              <span id="Tax_Err"></span>
+                           </div>
+                        </div>
+                        <div class="col-md-5" style="padding-left:0px !important">
+                           <select class="chosen-select form-control" id="Tax_Amount_Type">
+                              @if (Model.AmountTypelst != null)
+                              {
+                                 foreach (var row in Model.AmountTypelst)
+                                 {
+                                    <option value="@row.Value">@row.Text</option>
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              <span id="Tax_Amount_Type_Err"></span>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Withholding_Tax" class="control-label">@Resource.Withholding_Tax</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-7">
+                           <input type="text" class="form-control text-right decimal" id="Withholding_Tax" onblur="ValidateDecimal('Withholding_Tax', '@Resource.Withholding_Tax', false, true)">
+                           <div class="validation-error">
+                              <span id="Withholding_Tax_Err"></span>
+                           </div>
+                        </div>
+                        <div class="col-md-5" style="padding-left:0px !important">
+                           <select class="chosen-select form-control" id="Withholding_Tax_Type">
+                              @if (Model.AmountTypelst != null)
+                              {
+                                 foreach (var row in Model.AmountTypelst)
+                                 {
+                                    <option value="@row.Value">@row.Text</option>
+                                 }
+                              }
+                           </select>
+                           <div class="validation-error">
+                              <span id="Withholding_Tax_Type_Err"></span>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               @*End Smart Dev*@
+
+               <div class="divider"> </div>
+               <div class="row">
+                  <div class="col-md-8">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="Notes" class="control-label">@Resource.Notes</label>
+                        </div>
+                     </div>
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <textarea class="form-control" id="Notes" rows="4"></textarea>
+                           <div class="validation-error">
+                              <span id="Notes_Err"></span>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div class="form-group">
+                        <div class="col-md-12">
+                           <label for="uploadfile" class="control-label">@Resource.Upload_Receipt</label>
+                        </div>
+                     </div>
+                     @if (!isReadonly)
+                     {
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <div class="input-group">
+                                 <span class="input-group-btn">
+                                    <span class="btn btn-primary btn-file">
+                                       <i class="fa fa-upload"></i><input id="uploadfile" type="file" name="file">
+                                    </span>
+                                 </span>
+                                 <input type="text" class="form-control" readonly>
+                              </div>
+                           </div>
+                        </div>
+                     }
+                     else
+                     {
+                        <div class="form-group">
+                           <div class="col-md-12">
+                              <a id="showfile" href="#" class="link-allow-click" style="padding-top: 5px; float: left; color:#6182E2" onclick="ShowFile_Onclick()"></a>
+                           </div>
+                        </div>
+                     }
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="modal-footer">
+            <button id="btnClose" type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+            @if (Model.operation == UserSession.RIGHT_C || (Model.operation == UserSession.RIGHT_U && Model.ApprStatus == WorkflowStatus.Draft))
+            {
+               <button id="btnDetailSubmit" type="button" class="btn btn-primary">@Resource.Save_Change</button>
+            }
+         </div>
+      </div>
+   </div>
+</div>
+<div class="md-overlay"></div>

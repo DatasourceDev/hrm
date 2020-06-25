@@ -1,0 +1,430 @@
+﻿@model  HR.Models.ExpensesSummaryViewModel
+@using SBSModel.Models;
+@using System.Text;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Models;
+@using SBSWorkFlowAPI.ModelsAndService;
+@using SBSResourceAPI;
+@using SBSWorkFlowAPI.Constants;
+
+@{
+   ViewBag.Title = Resource.All_Expenses;
+   var userlogin = UserUtil.getUser(Request.RequestContext.HttpContext);
+   var duphash = new List<string>();
+   var currentdate = StoredProcedure.GetCurrentDate();
+   var total =0M;
+}
+
+
+@{
+   var pcnt = Model.Record_Count / Model.Page_Length;
+   var start = 0;
+   var end = 1;
+   if (Model.Record_Count > 0 & Model.Record_Count % Model.Page_Length > 0)
+   {
+      pcnt += 1;
+   }
+
+   if (Model.Page_No == 1)
+   {
+      start = 1;
+      end = Model.Page_Length;
+   }
+   else if (Model.Page_No > 1)
+   {
+      start = (Model.Page_No - 1) * Model.Page_Length;
+      end = (Model.Page_No) * Model.Page_Length;
+   }
+
+   if (end > Model.Record_Count)
+   {
+      end = Model.Record_Count;
+   }
+}
+
+
+@if (Model.rights != null && Model.rights.Contains(Operation.A))
+{
+   <script type="text/javascript">
+      $(function () {
+         InitDatepicker();
+         //InitDatatable("#TSDataTable", null, null);
+      })
+   </script>
+
+   <div class="pageheader">
+      <h2>@ViewBag.Title<span></span></h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li class="active">@ViewBag.Title</li>
+         </ol>
+      </div>
+   </div>
+
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+
+            @using (Html.BeginForm("TransactionSummary", "Expenses", FormMethod.Get, new { @class = "form-horizontal", role = "form", id = "theForm" }))
+            {
+               //@Html.AntiForgeryToken()
+               <section class="tile color transparent-black filter">
+                  <div class="tile-header transparent">
+                     <h1 style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize filter"><i class="fa fa-search  color-white"></i></a>
+                     </div>
+                  </div>
+                  <div class="tile-body">
+                     <div class="row">
+                        <div class="col-md-2">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Search_Year" class="control-label">@Resource.Year</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Search_Year" name="Search_Year">
+                                    <option value="">-</option>
+                                    @for (var i = currentdate.Year - 3; i <= currentdate.Year + 1; i++)
+                                    {
+                                       <option value="@i" @(Model.Search_Year == i ? "selected" : "")>@i</option>
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Search_Year)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-2">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Search_Month" class="control-label">@Resource.Month</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Search_Month" name="Search_Month">
+                                    @if (Model.Monthlst != null)
+                                    {
+                                       foreach (var row in Model.Monthlst)
+                                       {
+                                          if (Model.Search_Month == NumUtil.ParseInteger(row.Value))
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                          }
+                                          else
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                          }
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Search_Month)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+
+                     </div>
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="search_Emp" class="control-label">@Resource.Indent</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="search_Jobcost" name="search_Jobcost">
+                                    @if (Model.JobCostList != null)
+                                    {
+                                       foreach (var row in Model.JobCostList)
+                                       {
+                                          <option value="@row.Value" @(Model.search_Jobcost == NumUtil.ParseInteger(row.Value) ? "selected" : "")>@row.Text</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.search_Jobcost)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-3">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="search_Emp" class="control-label">@Resource.Employee</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="search_Emp" name="search_Emp">
+                                    <option value="">-</option>
+                                    @if (Model.EmployeeList != null)
+                                    {
+                                       foreach (var row in Model.EmployeeList)
+                                       {
+                                          <option value="@row.Employee_Profile_ID" @(Model.search_Emp == row.Employee_Profile_ID ? "selected" : "")>@AppConst.GetUserName(row.User_Profile)</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.search_Emp)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-2">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="search_Emp" class="control-label">@Resource.Status</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="search_Status" name="search_Status">
+                                    @if (Model.Statuslst != null)
+                                    {
+                                       foreach (var row in Model.Statuslst)
+                                       {
+                                          <option value="@row.Value" @(Model.search_Status == row.Value ? "selected" : "")>@row.Text</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.search_Status)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="col-md-1">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <div style="height:30px;"></div>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <button type="submit" class="btn btn-default">@Resource.Filter</button>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </section>
+
+               <section class="tile color transparent-black">
+                  <div class="tile-header transparent">
+                     <h1><strong>@ViewBag.Title</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                     </div>
+                  </div>
+                  <div class="tile-body ">
+                     <div class="table-responsive">
+                        <table class="table table-datatable table-custom" id="TSDataTable">
+                           <thead>
+                              <tr>
+                                 <th width="250px class=" sort-alpha">@Resource.Employee</th>
+                                 <th class="sort-alpha">@Resource.Year</th>
+                                 <th class="sort-alpha">@Resource.Month</th>
+                                 <th class="sort-alpha">@Resource.Type</th>
+                                 <th class="sort-alpha">@Resource.Expenses_No_SymbolDot</th>
+                                 <th class="sort-amount">@Resource.Amount_Claiming</th>
+                                 <th width="150px" class="sort-alpha">@Resource.Status</th>
+                                 <th width="110px" class="no-sort">@Resource.Action</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              @if (Model.expensesApplicationList != null)
+                              {
+                                 var i = 0;
+                                 foreach (var row in Model.expensesApplicationList)
+                                 {
+                                    SBSModel.Models.TsEX tsex = null;
+                                    if (row.TsEXes.Count > 0)
+                                    {
+                                       tsex = row.TsEXes.FirstOrDefault();
+                                    }
+                                    <tr>
+                                       <td>
+                                          @if (row.Employee_Profile != null && row.Employee_Profile.User_Profile != null)
+                                          {
+                                             @UserSession.GetUserName(row.Employee_Profile.User_Profile)
+                                          }
+                                       </td>
+                                       <td>
+                                          @if (tsex != null)
+                                          {
+                                             @tsex.Year
+                                          }
+                                          else
+                                          {
+                                             @row.Date_Applied.Value.Year
+                                          }
+                                       </td>
+                                       <td>
+                                          @if (tsex != null)
+                                          {
+                                             @DateUtil.GetFullMonth(tsex.Month)
+                                          }
+                                          else
+                                          {
+                                             @DateUtil.GetFullMonth(@row.Date_Applied.Value.Month)
+                                          }
+                                       </td>
+                                       <td>
+                                          @if (tsex != null)
+                                          {
+                                             @Resource.Monthly
+                                          }
+                                          else
+                                          {
+                                             @Resource.Head_Office
+                                          }
+                                       </td>
+                                       <td>@row.Expenses_No</td>
+
+                                       <td class="text-right">
+                                          @{
+                                             var amt = 0M;
+                                             var docs = row.Expenses_Application_Document.Where(w => 1==1);
+                                             if( Model.search_Jobcost.HasValue){
+                                                docs = docs.Where(w=>w.Job_Cost_ID == Model.search_Jobcost);
+                                             }
+                                             foreach (var dtl in docs)
+                                             {
+                                                amt += dtl.Amount_Claiming.HasValue ? dtl.Amount_Claiming.Value : 0M;
+                                             }
+                                             total+= amt;
+                                             @NumUtil.FormatCurrency(amt, 2)
+                                          }
+                                       </td>
+                                       @*<td class="text-right">
+                                             @if (tsex != null)
+                                             {
+                                                @NumUtil.FormatCurrency(tsex.Ts_Total_Amount + tsex.Ex_Total_Amount, 2)
+                                             }
+                                          </td>*@
+                                       <td>
+                                          @if (string.IsNullOrEmpty(row.Cancel_Status))
+                                          {
+                                             if (row.Overall_Status == WorkflowStatus.Pending || row.Overall_Status == WorkflowStatus.Approved)
+                                             {
+                                                @Resource.Pending
+                                             }
+                                             else
+                                             {
+                                                @StatusUtil.Get_Overall_Status(row.Overall_Status)
+                                             }
+                                          }
+                                          else
+                                          {
+                                             @StatusUtil.Get_Overall_Status(row.Cancel_Status)
+                                          }
+                                       </td>
+                                       <td class="actions">
+                                          @if (tsex != null)
+                                          {
+                                             <a href="@Url.Action("TsExInfo", "TsEx", new { operation = UserSession.RIGHT_U, pID = tsex.TsEx_ID, ctlr = ViewContext.RouteData.Values["controller"], ac = ViewContext.RouteData.Values["action"] })"><i class="fa fa-file-o fa-2x"></i></a>
+                                             if (tsex.Expenses_Application.Overall_Status != WorkflowStatus.Draft & tsex.Expenses_Application.Overall_Status != WorkflowStatus.Rejected)
+                                             {
+                                                <a target="_blank" href="@Url.Action("ExpensesDocPrint", "Expenses", new { eID = EncryptUtil.Encrypt(row.Expenses_Application_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })" title="@Resource.Print"><i class="fa fa-print fa-2x"></i> </a>
+                                             }
+                                          }
+                                          else
+                                          {
+                                             <a target="_blank" href="@Url.Action("ExpensesDocPrint", "Expenses", new { eID = EncryptUtil.Encrypt(row.Expenses_Application_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })" title="@Resource.Print"><i class="fa fa-print fa-2x"></i> </a>
+                                          }
+                                       </td>
+                                    </tr>
+                                 }
+                                 i++;
+                              }
+                           </tbody>
+                           <tfoot>
+                              <tr>
+                                 <td ></td>
+                                 <td ></td>
+                                 <td ></td>
+                                 <td ></td>
+                                 <td class="text-right">@Resource.Total</td>
+                                 <td class="text-right" >@NumUtil.FormatCurrency(total,2)</td>
+                                 <td ></td>
+                                 <td ></td>
+                              </tr>
+                              <tr>
+                                 <td colspan="9" style="font-size:11px">
+                                    <div class="col-md-4 sm-center nopadding-left">
+                                       <div class="dataTables_info">  Showing @start to @end of @Model.Record_Count entries</div>
+                                    </div><div class="col-md-8 text-right sm-center nopadding-right">
+                                       <div class="dataTables_paginate paging_bootstrap paging_custombootstrap">
+                                          <ul class=" pagination">
+                                             @if (Model.Page_No > 1)
+                                             {
+                                                <li class="prev">
+                                                   <a href="@Url.Action("TransactionSummary", "Expenses", new { pno = Model.Page_No - 1, search_Emp = Model.search_Emp, Search_Month = Model.Search_Month, Search_Year = Model.Search_Year })">@Resource.Previous</a>
+                                                </li>
+                                             }
+                                             else
+                                             {
+                                                <li class="prev disabled">
+                                                   <a>@Resource.Previous</a>
+                                                </li>
+                                             }
+
+                                             @for (var i = 1; i <= pcnt; i++)
+                                             {
+                                                if (Model.Page_No == i)
+                                                {
+                                                   <li class="active"><a>@i</a></li>
+                                                }
+                                                else
+                                                {
+                                                   <li><a href="@Url.Action("TransactionSummary", "Expenses", new { pno = i, search_Emp = Model.search_Emp, Search_Month = Model.Search_Month, Search_Year = Model.Search_Year })">@i</a></li>
+                                                }
+                                             }
+                                             @if (Model.Page_No < pcnt)
+                                             {
+                                                <li class="next next"><a href="@Url.Action("TransactionSummary", "Expenses", new { pno = Model.Page_No + 1, search_Emp = Model.search_Emp, Search_Month = Model.Search_Month, Search_Year = Model.Search_Year })">@Resource.Next</a></li>
+                                             }
+                                             else
+                                             {
+                                                <li class="next disabled"><a>@Resource.Next</a></li>
+                                             }
+                                          </ul>
+                                       </div>
+                                    </div>
+                                 </td>
+                              </tr>
+                           </tfoot>
+                        </table>
+                     </div>
+                  </div>
+               </section>
+            }
+         </div>
+      </div>
+   </div>
+}

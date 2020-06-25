@@ -1,0 +1,177 @@
+﻿@model  HR.Models.PayrollViewModels
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using HR.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+<script type="text/javascript">
+    function SumLeave(donotsum) {
+        var total = 0;
+        var rowcount = $('#leaveDataTable > tbody >tr').length;
+        for (var i = 0; i < rowcount; i++) {
+            var amount = parseFloat($('input[name="Leave_Row_Amount[' + i + ']"]').val());
+            if (!isNaN(amount)) {
+                total = total + amount;
+            }
+        }
+        var totalstr;
+        if (total > 0) {
+            totalstr = formatCurrency("-" + total);
+        }
+        else {
+            totalstr = formatCurrency(total);
+        }
+
+
+        $('#Leave_Total_Amount').val(totalstr);
+        $('#Leave_Amount').val(totalstr);
+        SumAll(donotsum);
+    }
+</script>
+<div id="leave-tab" class="tab-pane fade in">
+    <div class="tile-header">
+        <h1><strong>@Resource.Leave</strong></h1>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="sLeave_Period_From" class="col-md-4 control-label">@Resource.Start_Date</label>
+                <div class="col-md-8">
+                    <input type="text" class="form-control input-datepicker" name="sLeave_Period_From" id="sLeave_Period_From" value="@Model.sLeave_Period_From">
+                    <div class="validation-error">
+                        @Html.ValidationMessageFor(m => m.sLeave_Period_From, "", new { id = "sLeave_Period_From_Err" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="sLeave_Period_To" class="col-md-4 control-label">@Resource.To_Date</label>
+                <div class="col-md-8">
+                    <input type="text" class="form-control input-datepicker" name="sLeave_Period_To" id="sLeave_Period_To" value="@Model.sLeave_Period_To">
+                    <div class="validation-error">
+                        @Html.ValidationMessageFor(m => m.sLeave_Period_To, "", new { id = "sLeave_Period_To_Err" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-default" name="retrieve" value="leave" id="btnRetrieveLeave">@Resource.Retrieve</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group">
+            <label class="col-md-4 control-label"></label>
+            <div class="col-md-8">
+                <label class="control-label">@Model.Leave_Period_From</label>
+                <input type="hidden" name="Leave_Period_From" value="@Model.Leave_Period_From">
+                @if (!string.IsNullOrEmpty(Model.Leave_Period_To))
+                {
+                    <label class="control-label">-</label>
+                }
+                <label class="control-label">@Model.Leave_Period_To</label>
+                <input type="hidden" name="Leave_Period_To" value="@Model.Leave_Period_To">
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-custom" id="leaveDataTable">
+            <thead>
+                <tr>
+                    <th>@Resource.Leave_Type</th>
+                    <th>@Resource.Start_Date</th>
+                    <th>@Resource.End_Date</th>
+                    <th>@Resource.No_Of_Days</th>
+                    <th>@Resource.Deduct_In_Payroll ?</th>
+                    <th width="200px">@Resource.Amount_Deductable_SymbolDollar</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.leaveList != null & !string.IsNullOrEmpty(Model.Leave_Period_From) & !string.IsNullOrEmpty(Model.Leave_Period_To))
+                {
+
+                    var datefrom = DateUtil.ToDate(Model.Leave_Period_From).Value;
+                    var dateto = DateUtil.ToDate(Model.Leave_Period_To).Value;
+                    for (var i = 0; i < Model.leaveList.Count(); i++)
+                    {
+                        var row = Model.leaveList[i];
+                        <tr>
+                            <td>
+                                <input type="hidden" name="Leave_Rows[@i]" value="@row.Leave_Application_Document_ID">
+                                @row.Leave_Config.Leave_Name
+                            </td>
+                            <td>@(DateUtil.ToDisplayDate(row.Start_Date) + " " + row.Start_Date_Period)</td>
+                            <td>@(DateUtil.ToDisplayDate(row.End_Date) + " " + row.End_Date_Period)</td>
+                            <td>
+                                @{
+                        decimal processday = 0;
+                        var otherprdls = (from a in row.PRDLs where a.PRM_ID != Model.PRM_ID & a.Leave_Application_Document_ID == row.Leave_Application_Document_ID select a).ToList();
+                        var payrollService = new PayrollService();
+                        var prdls = payrollService.ProcessPrdl(otherprdls, datefrom, dateto);
+                        foreach (var p in prdls)
+                        {
+                            var enddate = row.End_Date.HasValue ? row.End_Date : row.Start_Date;
+                            if (p.Start_Date <= enddate)
+                            {
+                                var prdl = payrollService.ProcessPayrollLeave(row, p.Start_Date, p.End_Date, Model.holidays, Model.Working_Day, Model.Basic_Salary, new PRDL());
+                                processday = processday + prdl.Process_Day;
+                            }
+                        }
+                                }
+                                @processday
+                            </td>
+                            <td>
+                                @if (row.Leave_Config.Deduct_In_Payroll == true)
+                                {
+                                    @Resource.Yes
+                                }
+                                else
+                                {
+                                    @Resource.No
+                                }
+                            </td>
+
+                            <td class="text-right">
+                                @{
+                                var wcnt = 5;
+                                if (Model.Working_Day.Count() > 0)
+                                {
+                                    wcnt = Model.Working_Day.Count();
+                                }
+                                decimal leave_amount_deduction = 0;
+                                if (row.Leave_Config.Deduct_In_Payroll == true)
+                                {
+                                    leave_amount_deduction = ((12 * Model.Basic_Salary) / (52 * wcnt)) * processday;
+                                }
+                                }
+
+                                @Html.Hidden("Leave_Row_Amount[" + i + "]", NumUtil.ParseDecimal(leave_amount_deduction.ToString("n2")))
+                                @leave_amount_deduction.ToString("n2")
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="row " style="padding-top:30px;">
+        <div class="col-md-8">
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <div class="col-md-12">
+                    <label for="Leave_Total_Amount" class="control-label">@Resource.Total_Amount</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-8">
+                    <input type="text" class="form-control text-right" id="Leave_Total_Amount" value="0.00" readonly>
+                </div>
+                <div class="col-md-2">
+                    <label class="control-label">@Model.Company_Currency_Code</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

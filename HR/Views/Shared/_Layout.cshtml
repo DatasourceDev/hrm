@@ -1,0 +1,722 @@
+﻿@using System.Web.Configuration
+@using HR.Models;
+@using HR.Common;
+@using SBSModel.Models;
+@using SBSWorkFlowAPI.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Constants;
+@{
+   var controllername = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+   var actionname = HttpContext.Current.Request.RequestContext.RouteData.Values["action"].ToString();
+   var uitem = UserUtil.GetUserItem(Request.RequestContext.HttpContext);
+   if (uitem.aMode == AuthenMode.IncorrectUser)
+   {
+      Request.RequestContext.HttpContext.Session.Clear();
+      uitem = UserUtil.GetUserItem(Request.RequestContext.HttpContext);
+   }
+
+   if (uitem.aMode == AuthenMode.UserNoFound)
+   {
+      Response.Redirect("~/Account/Logout");
+   }
+
+
+   //var appcnt = 0;
+   var approvers = new List<Notification>();
+   var requests = new List<Request>();
+   var requestIDs = new List<int>();
+   var erequests = new List<Request>();
+   var erequestIDs = new List<int>();
+   var err = ViewData.ModelState.SelectMany(m => m.Value.Errors, (m, error) => (m.Key)).Distinct().ToList();
+   var version = AppSetting.Version_Control;
+}
+<!DOCTYPE html>
+<html>
+<head>
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta charset="UTF-8" />
+   <link rel="icon" type="image/ico" href="@Url.Content("~/assets/images/favicon.ico")" />
+   <title>@ViewBag.Title</title>
+
+   @HtmlUtil.InitJS()
+   @HtmlUtil.InitCSS()
+   <script>
+      // this is important for IEs
+      var polyfilter_scriptpath = '@Url.Content("~/assets/js/vendor/modals/")';
+      var isSkip = '@uitem.IsSkipTour';
+      var isAdminHR = '@uitem.IsAdminHR';
+      $(document).ready(function () {
+         $('.globalMenu').hide();
+      });
+
+      $(function () {
+         $("#hCountryFormula").click(function () {
+            //alert("click on country formula");
+            ShowMask();
+            $.ajax({
+               type: "GET",
+               url: "SendCountryFormulaEmailToBC",
+               //dataType: "script"
+            }).done(function (msg) {
+               CloseMask();
+               alert("Thank you. We received your enquiry. We will review and get back to you.");
+            });
+         });
+      });
+   </script>
+
+   <style>
+      @@media (max-width: 600px) {
+         .globalMenu {
+            display: none;
+         }
+      }
+
+      .globalMenu {
+         height: 100%;
+         width: 100%;
+         left: 0%;
+         top: 0%;
+         position: fixed;
+         z-index: 9999;
+         background-color: #000000;
+         opacity: 0.8;
+         color: #ffffff;
+      }
+
+      .box {
+         width: 200px;
+         padding: 30px 15px;
+         margin-left: 15px;
+         margin-bottom: 15px;
+         float: left;
+         opacity: 1;
+         color: white;
+         border: 2px solid #ffffff;
+         height: 200px;
+         text-align: center;
+         border-radius: 5px;
+      }
+
+         .box a {
+            text-decoration: none;
+         }
+
+      .box-disable {
+         width: 200px;
+         padding: 30px 15px;
+         margin-left: 15px;
+         margin-bottom: 15px;
+         float: left;
+         opacity: 1;
+         color: #696565;
+         border: 2px solid #696565;
+         height: 200px;
+         text-align: center;
+         border-radius: 5px;
+      }
+
+      .box.logofeature img {
+         opacity: 1;
+         text-align: center;
+      }
+
+      .box.disable.a {
+         color: #696565;
+      }
+   </style>
+</head>
+
+<body class="@uitem.bg">
+   <div id="divGlobalMenu" class="globalMenu" style="display:none">
+      <div class="row" style="height:70px;">
+      </div>
+      @if (!uitem.IsCompleteProfile)
+      {
+         <div class="row">
+            <div class="container">
+
+               <div class="box mandatory-validation" style="border-width:2px !important;border-radius: 5px;">
+                  <div class="logofeature">
+                     <img id="imgCompleteProfile" src="~/Images/LandingPage/Create-employee-records.png">
+                  </div>
+                  <br /><br />
+                  <p>
+                     <a href="@Url.Action("EmployeeInfo", "Employee", new { pEmpID = EncryptUtil.Encrypt(uitem.EmployeeProfileID), operation  = EncryptUtil.Encrypt(UserSession.RIGHT_U)})">@Resource.L_Fill_in_Admin</a>
+                  </p>
+               </div>
+
+               <div class="box-disable">
+                  <div class="logofeature">
+                     <img id="imgCreateEmp" src="~/Images/LandingPage/Create-employee-records.png">
+
+                  </div>
+                  <br /><br />
+                  <p>
+                     <a href="@Url.Action("EmployeeInfo", "Employee", new { operation  = EncryptUtil.Encrypt(UserSession.RIGHT_C)})">@Resource.L_Create_Emp</a>
+                  </p>
+               </div>
+
+               <div class="box-disable">
+                  <div class="logofeature">
+                     <img id="imgEditDD" src="~/Images/LandingPage/create-department.png">
+
+                  </div>
+                  <br /><br />
+                  <p>
+                     <a href="@Url.Action("Configuration", "Configuration", new { tabAction = "department" })">@Resource.L_Edit_D_D</a>
+                  </p>
+               </div>
+
+               <div class="box-disable">
+                  <div class="logofeature">
+                     <img id="imgEditLeave" src="~/Images/LandingPage/apply-leave.png">
+
+                  </div>
+                  <br /><br />
+                  <p>
+                     <a href="@Url.Action("Configuration", "Leave", new { tabAction = "leaveType" })">@Resource.L_Edit_Leave_WF</a>
+                  </p>
+               </div>
+
+               <div class="box-disable">
+                  <div class="logofeature">
+                     <img id="imgEidtExp" src="~/Images/LandingPage/expense.png">
+
+                  </div>
+                  <br /><br />
+                  <p>
+                     <a href="@Url.Action("Configuration", "Expenses", new { tabAction = "expenses" })">@Resource.L_Edit_Exp_WF</a>
+                  </p>
+               </div>
+            </div>
+         </div>
+
+         <div class="row">
+            <div class="container">
+               <div class="box-disable">
+                  <div class="logofeature">
+                     <img id="imgCountryFormula" src="~/Images/LandingPage/country-formula.png">
+                  </div>
+                  <br /><br />
+                  <p>
+                     <a href="#">@Resource.L_Country_Formula</a>
+                  </p>
+               </div>
+
+               <div class="box-disable">
+                  <div class="logofeature">
+                     <img id="imgPATCpf" src="~/Images/LandingPage/pat-cpf.png">
+                  </div>
+                  <br /><br />
+                  <p>
+                     <a href="@Url.Action("CPFGenerateConfig", "Payroll")">@Resource.L_PAT_CPF</a>
+                  </p>
+               </div>
+               <div class="box-disable">
+                  <div class="logofeature">
+                     <img id="imgPATIras" src="~/Images/LandingPage/pat-iras.png">
+                  </div>
+                  <br /><br />
+                  <p>
+                     <a href="@Url.Action("IR8AGenerateConfig", "Payroll")">@Resource.L_PAT_IRAS</a>
+                  </p>
+               </div>
+
+               <div class="box-disable">
+                  <div class="logofeature">
+                     <img id="imgMaternity" src="~/Images/LandingPage/maternity-leave.png">
+                  </div>
+                  <br /><br />
+                  <p>
+                     <a href="@Url.Action("EmployeeInfo", "Employee", new { pEmpID = EncryptUtil.Encrypt(uitem.EmployeeProfileID), operation = EncryptUtil.Encrypt("MATERNITY") })">@Resource.L_Set_Maternity</a>
+                  </p>
+               </div>
+               <div class="box-disable">
+                  <div class="logofeature">
+                     <img id="imgUserGuide" src="~/Images/LandingPage/user-guide.png">
+                  </div>
+                  <br /><br />
+                  <p>
+                     <a href="#">@Resource.L_StepbyStep</a>
+                  </p>
+               </div>
+            </div>
+         </div>
+      }
+      else
+      {
+         <div class="row">
+            <div class="container">
+               <div class="box">
+                  <div class="logofeature">
+                     <img id="imgCreateEmp" src="~/Images/LandingPage/Create-employee-records.png">
+                  </div>
+                  <br /><br />
+                  <p>
+                     <a href="@Url.Action("EmployeeInfo", "Employee", new { operation  = EncryptUtil.Encrypt(UserSession.RIGHT_C)})">@Resource.L_Create_Emp</a>
+                  </p>
+               </div>
+
+               <div class="box">
+                  <div class="logofeature">
+                     <img id="imgEditDD" src="~/Images/LandingPage/create-department.png">
+                  </div>
+                  <br /><br />
+                  <p>
+                     <a href="@Url.Action("Configuration", "Configuration", new { tabAction = "department" })">@Resource.L_Edit_D_D</a>
+                  </p>
+               </div>
+
+               <div class="box">
+                  <div class="logofeature">
+                     <img id="imgEditLeave" src="~/Images/LandingPage/apply-leave.png">
+                  </div>
+                  <br /><br />
+                  <p>
+                     <a href="@Url.Action("Configuration", "Leave", new { tabAction = "leaveType" })">@Resource.L_Edit_Leave_WF</a>
+                  </p>
+               </div>
+
+               <div class="box">
+                  <div class="logofeature">
+                     <img id="imgEidtExp" src="~/Images/LandingPage/expense.png">
+                  </div>
+                  <br /><br />
+                  <p>
+                     <a href="@Url.Action("Configuration", "Expenses", new { tabAction = "expenses" })">@Resource.L_Edit_Exp_WF</a>
+                  </p>
+               </div>
+
+               <div class="box">
+                  <div class="logofeature">
+                     <img id="imgCountryFormula" src="~/Images/LandingPage/country-formula.png">
+                  </div>
+                  <br /><br />
+                  <p>
+                     <a href="#">@Resource.L_Country_Formula</a>
+                  </p>
+               </div>
+            </div>
+         </div>
+
+         <div class="row">
+            <div class="container">
+
+               <div class="box">
+                  <div class="logofeature">
+                     <img id="imgPATCpf" src="~/Images/LandingPage/pat-cpf.png">
+                  </div>
+                  <br /><br />
+                  <p>
+                     <a href="@Url.Action("CPFGenerateConfig", "Payroll")">@Resource.L_PAT_CPF</a>
+                  </p>
+               </div>
+
+               <div class="box">
+                  <div class="logofeature">
+                     <img id="imgPATIras" src="~/Images/LandingPage/pat-iras.png">
+                  </div>
+                  <br /><br />
+                  <p>
+                     <a href="@Url.Action("IR8AGenerateConfig", "Payroll")">@Resource.L_PAT_IRAS</a>
+                  </p>
+               </div>
+
+               <div class="box">
+                  <div class="logofeature">
+                     <img id="imgMaternity" src="~/Images/LandingPage/maternity-leave.png">
+                  </div>
+                  <br /><br />
+                  <p>
+                     <a href="@Url.Action("EmployeeInfo", "Employee", new { pEmpID = EncryptUtil.Encrypt(uitem.EmployeeProfileID), operation = EncryptUtil.Encrypt("MATERNITY") })">@Resource.L_Set_Maternity</a>
+                  </p>
+               </div>
+
+               <div class="box">
+                  <div class="logofeature">
+                     <img id="imgUserGuide" src="~/Images/LandingPage/user-guide.png">
+                  </div>
+                  <br /><br />
+                  <p>
+                     <a href="#">@Resource.L_StepbyStep</a>
+                  </p>
+               </div>
+            </div>
+         </div>
+      }
+      <div class="row">
+         <div class="container">
+            <p style="text-align:center; opacity:1;">
+               @if (uitem.IsCompleteProfile)
+               {
+                  <button type="button" class="btn btn-primary" onclick="hideDIV()">Skip Tutorial</button>
+               }
+               <br />
+            </p>
+         </div>
+      </div>
+   </div>
+   <div id="divjavaAddin"></div>
+   <div class="warning-timeout-dlg" align="center" style="z-index:9999">
+      <div>
+         <div class="notification ">
+            <h4><strong>@Resource.Message_Connection_Timeout </strong>@Resource.Message_Do_you_want_To_Continue_Using_This_System</h4>
+            <p>
+               <button type="button" class="btn btn-primary" onclick="ContinousLogin();">@Resource.Continue</button>
+               <button type="button" class="btn btn-danger" onclick="logout();">@Resource.Logout</button>
+            </p>
+         </div>
+      </div>
+   </div>
+   <div class="loading" align="center" style="z-index:9999">
+      <img src="@Url.Content("~/assets/images/loader.gif")">
+   </div>
+   <div id="wrap">
+      <div class="row">
+         @if (uitem.aMode == AuthenMode.Authenticated)
+         {
+            <div class="navbar navbar-default navbar-fixed-top navbar-transparent-black mm-fixed-top collapsed" role="navigation" id="navbar">
+               <div class="navbar-header col-md-2">
+                  <a href="@UrlUtil.Action(Url,"Index", "Home")" class="navbar-brand" @(uitem.companyname.Length > 30 ? "style=font-size:11px" : "")>
+                     @uitem.companyname
+                  </a>
+                  <div class="sidebar-collapse">
+                     <a href="#">
+                        <i class="fa fa-bars"></i>
+                     </a>
+                  </div>
+               </div>
+               <div class="navbar-collapse">
+                  <ul class="nav navbar-nav refresh">
+                     <li class="divided">
+                        <a href="#" class="page-refresh"><i class="fa fa-refresh"></i></a>
+                     </li>
+                  </ul>
+                  <ul class="nav navbar-nav quick-actions">
+                     @if (uitem.IsAdminHR)
+                     {
+                        <li class="dropdown divided">
+                           <a href="#" class="fa fa-lightbulb-o" onclick="showDIV()"> Quick Tutorial</a>
+                        </li>
+                     }
+                     <li class="dropdown divided">
+                        <a class="dropdown-toggle button" data-toggle="dropdown" href="#">
+                           <i class="fa fa-cog"></i>
+                        </a>
+                        <ul class="dropdown-menu wide arrow nopadding bordered">
+                           <li><h1>@Resource.Configuration<strong></strong></h1></li>
+                           @if (uitem.menu != null && uitem.menu.topRights != null)
+                           {
+                              foreach (var menu in uitem.menu.topRights)
+                              {
+                                 <li>
+                                    <a href="@UrlUtil.Action(Url,menu.Action, menu.Controller)">
+                                       <span class="label label-green"><i class="fa fa-cog"></i></span>
+                                       @menu.Page_Name
+                                       <span class="small"></span>
+                                    </a>
+                                 </li>
+                              }
+                           }
+                           <li><a href="#"></a></li>
+                        </ul>
+                     </li>
+                     <li class="dropdown divided user" id="current-user">
+                        <div class="profile-photo">
+                           <img src="@uitem.userphoto" style="max-height:45px" />
+                        </div>
+                        <a class="dropdown-toggle options" data-toggle="dropdown" href="#">
+                           @uitem.username<i class="fa fa-caret-down"></i>
+                        </a>
+                        <ul class="dropdown-menu arrow settings">
+
+                           <li>
+                              <h3>@Resource.Backgrounds :</h3>
+                              <ul id="color-schemes">
+                                 <li><a href="#" class="bg-1" onclick="SaveBg('bg-1')"></a></li>
+                                 <li><a href="#" class="bg-2" onclick="SaveBg('bg-2')"></a></li>
+                                 <li><a href="#" class="bg-3" onclick="SaveBg('bg-3')"></a></li>
+                                 <li><a href="#" class="bg-4" onclick="SaveBg('bg-4')"></a></li>
+                                 <li><a href="#" class="bg-5" onclick="SaveBg('bg-5')"></a></li>
+                                 <li><a href="#" class="bg-6" onclick="SaveBg('bg-6')"></a></li>
+                              </ul>
+                           </li>
+                           <li />
+                           <li class="divider"></li>
+                           <li><h3>@Resource.Languages :</h3></li>
+                           @if (SBSResourceAPI.SiteLanguages.AvailableLanguages != null)
+                           {
+                              var sel_lang = "";
+                              HttpCookie langCookie = Request.Cookies["culture"];
+                              if (langCookie != null)
+                              {
+                                 sel_lang = langCookie.Value;
+                              }
+                              foreach (var i in SBSResourceAPI.SiteLanguages.AvailableLanguages)
+                              {
+                                 <li style="padding-left:10px">
+                                    <a href="@UrlUtil.Action(Url,"ChangeLanguage", "Home", new { lang = i.LangCultureName })">
+                                       <i class="fa fa-language">
+                                       </i>  @i.LangFullName
+                                       @if (sel_lang == i.LangCultureName)
+                                       {
+                                          <i class=" fa fa-check"></i>
+                                       }
+                                    </a>
+                                 </li>
+                              }
+                           }
+                           <li class="divider"></li>
+                           <li><h3>@uitem.email</h3></li>
+                           <li>
+                              <a href="@UrlUtil.Action(Url,"EmployeeInfo", "Employee", new { pProfileID = EncryptUtil.Encrypt(uitem.userlogin.Profile_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })"><i class="fa fa-user"></i> @Resource.My_Profile</a>
+                           </li>
+                           <li>
+                              <a href="@UrlUtil.Action(Url,"ResetPassword", "Account")"><i class="fa fa-refresh"></i> @Resource.Reset_Password</a>
+                           </li>
+                           <li>
+                              <a id="trigger" class="trigger-button"><i class="fa fa-warning"></i> @Resource.Report_A_Problem</a>
+                           </li>
+                           <li class="divider"></li>
+                           <li>
+                              <a href="@UrlUtil.Action(Url,"Logout", "Account")"><i class="fa fa-power-off"></i> @Resource.Logout</a>
+                           </li>
+                        </ul>
+                     </li>
+                     <li>
+                        <a></a>
+                     </li>
+                  </ul>
+                  <ul class="nav navbar-nav side-nav" id="sidebar">
+                     <li class="collapsed-content">
+                        <ul>
+                           <li class="search"></li>
+                        </ul>
+                     </li>
+                     <li class="navigation" id="navigation">
+                        <a href="#" class="sidebar-toggle" data-toggle="#navigation">@Resource.Navigation (Version @version)<i class="fa fa-angle-up"></i></a>
+
+                        <ul class="menu">
+                           @if (uitem.menu != null && uitem.menu.lefts != null)
+                           {
+                              foreach (var menu in uitem.menu.lefts)
+                              {
+                                 if (menu.submenu != null)
+                                 {
+                                    if (menu.submenu.Count() == 1)
+                                    {
+                                       var left = menu.submenu[0];
+                                       <li class="dropdown">
+                                          <a href="@UrlUtil.Action(Url, left.Action, left.Controller )">
+                                             <img src="@Url.Content("~/images/" + menu.Menu_Name.ToLower() + ".png")" style="height:30px">
+                                             @Page_Name.Get_Manu_Name(menu.Menu_Name.Trim())
+                                          </a>
+                                       </li>
+                                    }
+                                    else if (menu.submenu.Count() > 0)
+                                    {
+                                       var menuactive = "";
+                                       if (menu.submenu.Where(w => w.Controller == controllername).FirstOrDefault() != null)
+                                       {
+                                          menuactive = "open active";
+                                       }
+                                       <li class="dropdown @menuactive">
+                                          <a class="dropdown-toggle" data-toggle="dropdown">
+                                             <img src="@Url.Content("~/images/" + menu.Menu_Name.ToLower() + ".png")" style="height:30px"> @Page_Name.Get_Manu_Name(menu.Menu_Name.Trim())<b class="fa fa-plus dropdown-plus color-white"></b>
+                                          </a>
+                                          <ul class="dropdown-menu">
+                                             @foreach (var sub in menu.submenu)
+                                             {
+                                                var newaction = sub.Action;
+                                                var newcontroller = sub.Controller;
+                                                if (uitem.isindent)
+                                                {
+                                                   if (sub.Controller == "Expenses" | sub.Controller == "TimeSheet")
+                                                   {
+                                                      if (sub.Action == "Record")
+                                                      {
+                                                         newcontroller = "TsEx";
+                                                         newaction = "TsEx";
+
+                                                         if (sub.Controller == "Expenses")
+                                                         {
+                                                            <li>
+                                                               <a href="@UrlUtil.Action(Url, "Record", "Expenses")" title="@Resource.Head_Office_Expenses">
+                                                                  <i class="fa fa-caret-right"></i>@Resource.Head_Office_Expenses
+                                                               </a>
+                                                            </li>
+                                                         }
+                                                      }
+                                                      else if (sub.Action == "Application")
+                                                      {
+                                                         continue;
+                                                      }
+                                                   }
+                                                }
+                                                <li>
+                                                   <a href="@UrlUtil.Action(Url, newaction, newcontroller)" title="@sub.Page_Name">
+                                                      <i class="fa fa-caret-right"></i> @sub.Page_Name
+                                                   </a>
+                                                </li>
+                                             }
+                                          </ul>
+                                       </li>
+                                    }
+                                 }
+                              }
+                           }
+                        </ul>
+                     </li>
+                  </ul>
+               </div>
+            </div>
+         }
+         @if (uitem.aMode == AuthenMode.Authenticated)
+         {
+            <div id="content" class="col-md-12">
+               @RenderBody()
+            </div>
+         }
+         else
+         {
+            @RenderBody()
+         }
+      </div>
+   </div>
+   <script type="text/javascript">
+      function Confirm_Alert(ID) {
+         if ((parseInt(ID) > 0) || (ID == true))
+            return confirm('@Resource.Message_Confirm_Saving_Change');
+      }
+
+      $(function () {
+         if ('@ViewBag.Title' == 'Payroll')
+            InitCollapseHeader(true);
+         else
+            InitCollapseHeader(false);
+      });
+
+      var ctlsrequired = [];
+      var ctlsdecimal = [];
+      var ctlsInt = [];
+      var ctlsEmail = [];
+      var ctlsDate = [];
+      var ctlsError = [];
+   </script>
+   @*<input type="hidden" id="unsaved" value="false"><input>*@
+
+
+</body>
+
+</html>
+@{
+   foreach (var ctl in ViewData.ModelMetadata.Properties)
+   {
+      var ctlname = ctl.PropertyName;
+      ctlname = ctlname.Replace("[", "_");
+      ctlname = ctlname.Replace("]", "_");
+      ctlname = ctlname.Replace(".", "_");
+      if (!ctl.ModelType.IsArray && ctl.IsRequired)
+      {
+         @:
+         <script>ctlsrequired.push({ ctlname: '@ctlname', displayname: '@ctl.DisplayName', isrequired: '@ctl.IsRequired.ToString().ToLower()' });</script>
+      }
+      if (ctl.ModelType.IsValueType && ctl.ModelType.FullName.Contains("System.Decimal"))
+      {
+         @:
+         <script>ctlsdecimal.push({ ctlname: '@ctlname', displayname: '@ctl.DisplayName', isrequired: '@ctl.IsRequired.ToString().ToLower()' });</script>
+      }
+      else if (ctl.ModelType.IsValueType && ctl.ModelType.FullName.Contains("System.Int32"))
+      {
+         @:
+         <script>ctlsInt.push({ ctlname: '@ctlname', displayname: '@ctl.DisplayName', isrequired: '@ctl.IsRequired.ToString().ToLower()' });</script>
+      }
+      else if (ctl.ModelType.FullName.Contains("System.String"))
+      {
+         if (ctl.DataTypeName == "EmailAddress")
+         {
+            @:
+            <script>ctlsEmail.push({ ctlname: '@ctlname', displayname: '@ctl.DisplayName', isrequired: '@ctl.IsRequired.ToString().ToLower()' });</script>
+         }
+         else if (ctl.DataTypeName == "Date")
+         {
+            @:
+            <script>ctlsDate.push({ ctlname: '@ctlname', displayname: '@ctl.DisplayName', isrequired: '@ctl.IsRequired.ToString().ToLower()' });</script>
+         }
+      }
+
+   }
+   if (err != null && err.Count > 0)
+   {
+      foreach (var ctl in err)
+      {
+         var ctlname = ctl;
+         ctlname = ctlname.Replace("[", "_");
+         ctlname = ctlname.Replace("]", "_");
+         ctlname = ctlname.Replace(".", "_");
+         @:
+         <script>ctlsError.push('@ctlname');</script>
+      }
+   }
+
+}
+
+<script>
+   $(function () {
+      if (ctlsrequired != null) {
+         for (var i = 0; i < ctlsrequired.length ; i++) {
+            var ctl = ctlsrequired[i];
+            if ($("#" + ctl.ctlname).get(0) != null) {
+               $("#" + ctl.ctlname).get(0).setAttribute('onblur', "Input_Onblur('" + ctl.ctlname + "','" + ctl.displayname + "',true)");
+            }
+         }
+      }
+      if (ctlsdecimal != null) {
+         for (var i = 0; i < ctlsdecimal.length ; i++) {
+            var ctl = ctlsdecimal[i];
+            InitAmountControl(ctl.ctlname);
+         }
+      }
+      if (ctlsInt != null) {
+         for (var i = 0; i < ctlsdecimal.length ; i++) {
+            var ctl = ctlsdecimal[i];
+            InitAmountControl(ctl.ctlname);
+         }
+      }
+      if (ctlsEmail != null) {
+         for (var i = 0; i < ctlsEmail.length ; i++) {
+            var ctl = ctlsEmail[i];
+            if ($("#" + ctl.ctlname).get(0) != null) {
+               $("#" + ctl.ctlname).get(0).setAttribute('onblur', "ValidateEmail('" + ctl.ctlname + "','" + ctl.displayname + "'," + ctl.isrequired + ")");
+            }
+         }
+      }
+      if (ctlsDate != null) {
+         for (var i = 0; i < ctlsDate.length ; i++) {
+            var ctl = ctlsDate[i];
+            if ($("#" + ctl.ctlname).get(0) != null) {
+               $("#" + ctl.ctlname).get(0).setAttribute('onblur', "ValidateDate('" + ctl.ctlname + "','" + ctl.displayname + "'," + ctl.isrequired + ",true)");
+            }
+         }
+      }
+      if (ctlsError != null) {
+         for (var i = 0; i < ctlsError.length ; i++) {
+            var ctl = ctlsError[i];
+            ErrorColor(ctl);
+         }
+      }
+   });
+</script>
+
+<script>
+   function showDIV() {
+      $('.globalMenu').show();
+   }
+
+   function hideDIV() {
+      $('.globalMenu').hide();
+   }
+
+</script>

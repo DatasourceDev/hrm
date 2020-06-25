@@ -1,0 +1,278 @@
+﻿@model  HR.Models.EmployeeViewModels
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using SBSResourceAPI;
+
+@{
+   var admin = Model.adminRights != null ? Model.adminRights.Contains(Model.operation) : false;
+   var self = Model.Profile_ID == Model.User_Login_Profile_ID ? true : false;
+   var hr = Model.hrRights != null ? Model.hrRights.Contains(Model.operation) : false;
+}
+
+
+<script type="text/javascript">
+
+   function createHiddenHistAllowance(name, value) {
+      var hid = "<input type='hidden' id='" + name + "' name='" + name + "' value='" + value + "' />";
+      $('#History_Allowance_Rows').append(hid);
+   };
+
+
+   function EditEmpHist_Onclick(
+       History_Index,
+       History_ID,
+       History_Basic_Salary,
+       History_Hour_Rate,
+       History_Branch_ID,
+       History_Confirm_Date,
+       History_Currency_ID,
+       History_Department_ID,
+       History_Designation_ID,
+       History_Effective_Date,
+       History_Employee_Type,
+       History_Payment_Type,
+       History_Supervisor,
+       History_Terminate_Date,
+       History_Row_Type,
+       History_Notice_Period_Amount,
+       History_Notice_Period_Unit,
+       History_Contract_Staff,
+       History_Contract_Start_Date,
+       History_Contract_End_Date,
+       History_Basic_Salary_Unit,
+       History_Days,
+       History_Other_Branch,
+       History_Other_Department,
+       History_Other_Designation,
+       History_No_Approval_WF) {
+
+      $("#History_Index").val(History_Index);
+      $("#History_ID").val(History_ID);
+      $("#History_Branch_ID").val(History_Branch_ID);
+      $("#History_Department_ID").val(History_Department_ID);
+      $("#History_Designation_ID").val(History_Designation_ID);
+
+      $("#History_Other_Branch").val(History_Other_Branch);
+      $("#History_Other_Department").val(History_Other_Department);
+      $("#History_Other_Designation").val(History_Other_Designation);
+
+      $("#History_Employee_Type").val(History_Employee_Type);
+      $("#History_Supervisor").val(History_Supervisor);
+      $("#History_No_Approval_WF").val(History_No_Approval_WF);
+
+      $("#History_Effective_Date").val(History_Effective_Date);
+      $("#History_Confirm_Date").val(History_Confirm_Date);
+      $("#History_Terminate_Date").val(History_Terminate_Date);
+
+      $("#History_Currency_ID").val(History_Currency_ID);
+      $("#History_Basic_Salary").val(History_Basic_Salary);
+      $("#History_Hour_Rate").val(History_Hour_Rate);
+      $("#History_Basic_Salary_Unit").val(History_Basic_Salary_Unit);
+
+      $("#History_Days").val(History_Days);
+
+      $("#History_Payment_Type").val(History_Payment_Type);
+      $("#History_Row_Type").val(History_Row_Type);
+
+      $("#History_Notice_Period_Amount").val(History_Notice_Period_Amount);
+      $("#History_Notice_Period_Unit").val(History_Notice_Period_Unit);
+      $("#History_Contract_Staff").val(History_Contract_Staff);
+      $("#History_Contract_Start_Date").val(History_Contract_Start_Date);
+      $("#History_Contract_End_Date").val(History_Contract_End_Date);
+
+      @for (var i = 0; i < (Model.History_Rows != null ? Model.History_Rows.Length : 0) ; i++)
+         {
+            @:if ('@i' == History_Index) {
+                                                                             for(var j = 0; j < (Model.History_Rows[i].History_Allowance_Rows != null ? Model.History_Rows[i].History_Allowance_Rows.Length : 0) ;j++ )
+               {
+                  @:createHiddenHistAllowance('History_Allowance_Rows[@j].Amount', '@Model.History_Rows[i].History_Allowance_Rows[j].Amount'); createHiddenHistAllowance('History_Allowance_Rows[@j].Employment_History_Allowance_ID', '@Model.History_Rows[i].History_Allowance_Rows[j].Employment_History_Allowance_ID'); createHiddenHistAllowance('History_Allowance_Rows[@j].PRC_ID', '@Model.History_Rows[i].History_Allowance_Rows[j].PRC_ID'); createHiddenHistAllowance('History_Allowance_Rows[@j].PRT_ID', '@Model.History_Rows[i].History_Allowance_Rows[j].PRT_ID'); createHiddenHistAllowance('History_Allowance_Rows[@j].Row_Type', '@Model.History_Rows[i].History_Allowance_Rows[j].Row_Type');
+                                                                              }
+           @:}
+            }
+
+      ShowMask();
+      theForm.action = '@Url.Action("EmployeeInfo", "Employee")' + '?pageAction=edithist';
+      theForm.method = 'post';
+      theForm.submit();
+   };
+
+
+   function DeleteEmpHist_Onclick(rowid, index, histID) {
+      if (histID != null) {
+         var data = { pHistoryID: histID };
+         ShowMask();
+         $.ajax({
+            url: '@Url.Action("CheckEmpHistRelation", "Employee")',
+            //Passes the content of an input up
+            data: data,
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+               if (data != null && data.related == true) {
+                  if (alert('@(new Error().getError(ERROR_CODE.ERROR_505_DELETE_ERROR))')) {
+                     return;
+                  }
+               }
+               else {
+                  if (confirm('@Resource.Confirm_Delete_Msg')) {
+                     $('#History_Rows_' + index + '__Row_Type').val('@RowType.DELETE');
+                     $('#' + rowid).hide();
+                  }
+               }
+               CloseMask();
+            }
+         });
+      }
+      else {
+         if (confirm('@Resource.Confirm_Delete_Msg')) {
+            $('#History_Rows_' + index + '__Row_Type').val('@RowType.DELETE');
+            $('#' + rowid).hide();
+         }
+      }
+   };
+</script>
+
+<div id="hist-tab" class="tab-pane fade in">
+   <div class="row">
+      <div class="col-md-12">
+         <section class="tile transparent">
+            <div class="tile-header transparent">
+               <h1><strong>@Resource.Employment_History</strong></h1>
+               <div class="controls">
+                  <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+               </div>
+            </div>
+            <div class="tile-body">
+               <div class="row">
+                  <div class="col-md-12 text-center">
+                     <button id="btnAddNewHist" type="submit" class="btn btn-greensea  btn-sm add-row" name="pageAction" value="addhist">@Resource.Add_An_Item</button>
+                  </div>
+               </div>
+               <div class="table-responsive">
+                  <table class="table table-datatable table-custom" id="histDataTable">
+                     <thead>
+                        <tr>
+                           <th class="sort-alpha">@Resource.Effective_Date</th>
+                           <th class="sort-alpha">@Resource.Employment_Type</th>
+                           <th class="sort-alpha">@Resource.Branch</th>
+                           <th class="sort-alpha">@Resource.Designation</th>
+                           <th class="sort-alpha">@Resource.Department</th>
+                           <th class="sort-alpha" style="width:120px">@Resource.Action</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        @if (Model.History_Rows != null)
+                        {
+                           var i = 0;
+                           foreach (var row in Model.History_Rows)
+                           {
+                              <tr id="hrow-@i">
+                                 <td>
+                                    @if (Model.History_Rows[i].Row_Type == RowType.DELETE)
+                                    {
+                                       <script type="text/javascript">
+                                          $(function () {
+                                             $('#' + 'hrow-@i').hide();
+                                          });
+                                       </script>
+                                    }
+
+                                    @if (row.History_Allowance_Rows != null)
+                                    {
+                                       var j = 0;
+                                       foreach (var arow in row.History_Allowance_Rows)
+                                       {
+                                          <input type="hidden" name="History_Rows[@i].History_Allowance_Rows[@j].Employment_History_Allowance_ID" value="@arow.Employment_History_Allowance_ID" />
+                                          <input type="hidden" name="History_Rows[@i].History_Allowance_Rows[@j].Amount" value="@arow.Amount" />
+                                          <input type="hidden" name="History_Rows[@i].History_Allowance_Rows[@j].PRT_ID" value="@arow.PRT_ID" />
+                                          <input type="hidden" name="History_Rows[@i].History_Allowance_Rows[@j].PRC_ID" value="@(arow.PRC_ID.HasValue ? arow.PRC_ID.Value : 0)" />
+                                          <input type="hidden" name="History_Rows[@i].History_Allowance_Rows[@j].Row_Type" value="@arow.Row_Type" />
+                                          j++;
+                                       }
+                                    }
+
+                                    <input type="hidden" name="History_Rows[@i].History_ID" value="@row.History_ID" />
+                                    <input type="hidden" name="History_Rows[@i].Row_Type" id="History_Rows_@(i)__Row_Type" value="@row.Row_Type" />
+
+                                    <input type="hidden" name="History_Rows[@i].Employee_Type" value="@row.Employee_Type" />
+                                    <input type="hidden" name="History_Rows[@i].Supervisor" value="@row.Supervisor" />
+                                    <input type="hidden" name="History_Rows[@i].No_Approval_WF" value="@((row.No_Approval_WF.HasValue ? row.No_Approval_WF.Value : false).ToString())" />
+                                    <input type="hidden" name="History_Rows[@i].Effective_Date" value="@row.Effective_Date" />
+                                    <input type="hidden" name="History_Rows[@i].Confirm_Date" value="@row.Confirm_Date" />
+                                    <input type="hidden" name="History_Rows[@i].Terminate_Date" value="@row.Terminate_Date" />
+
+                                    <input type="hidden" name="History_Rows[@i].Contract_Staff" value="@((row.Contract_Staff.HasValue ? row.Contract_Staff.Value : false).ToString())" />
+                                    <input type="hidden" name="History_Rows[@i].Contract_Start_Date" value="@row.Contract_Start_Date" />
+                                    <input type="hidden" name="History_Rows[@i].Contract_End_Date" value="@row.Contract_End_Date" />
+
+                                    <input type="hidden" name="History_Rows[@i].Currency_ID" value="@row.Currency_ID" />
+                                    <input type="hidden" name="History_Rows[@i].Basic_Salary_Unit" value="@row.Basic_Salary_Unit" />
+                                    <input type="hidden" name="History_Rows[@i].Basic_Salary" value="@row.Basic_Salary" />
+
+                                    <input type="hidden" name="History_Rows[@i].Notice_Period_Amount" value="@row.Notice_Period_Amount" />
+                                    <input type="hidden" name="History_Rows[@i].Notice_Period_Unit" value="@row.Notice_Period_Unit" />
+                                    <input type="hidden" name="History_Rows[@i].Payment_Type" value="@row.Payment_Type" />
+                                    <input type="hidden" name="History_Rows[@i].Days" value="@row.Days" />
+
+                                    <input type="hidden" name="History_Rows[@i].Other_Branch" value="@row.Other_Branch" />
+                                    <input type="hidden" name="History_Rows[@i].Other_Department" value="@row.Other_Department" />
+                                    <input type="hidden" name="History_Rows[@i].Other_Designation" value="@row.Other_Designation" />
+
+                                    @row.Effective_Date
+                                    <div class="validation-error">
+                                       @Html.ValidationMessage("History_Rows[" + i + "].Effective_Date", "", new { id = "History_Rows_" + i + "__Effective_Date_Err" })
+                                    </div>
+                                 </td>
+                                 <td>
+                                    @row.Employee_Type_Name
+                                    <input type="hidden" name="History_Rows[@i].Employee_Type" value="@row.Employee_Type" />
+                                    <input type="hidden" name="History_Rows[@i].Employee_Type_Name" value="@row.Employee_Type_Name" />
+                                    <div class="validation-error">
+                                       @Html.ValidationMessage("History_Rows[" + i + "].Employee_Type")
+                                    </div>
+                                 </td>
+                                 <td>
+                                    @row.Branch_Name
+                                    <input type="hidden" name="History_Rows[@i].Branch_ID" value="@row.Branch_ID" />
+                                    <input type="hidden" name="History_Rows[@i].Branch_Name" value="@row.Branch_Name" />
+                                    <div class="validation-error">
+                                       @Html.ValidationMessage("History_Rows[" + i + "].Branch_ID")
+                                    </div>
+                                 </td>
+                                 <td>
+                                    @row.Designation_Name
+                                    <input type="hidden" name="History_Rows[@i].Designation_ID" value="@row.Designation_ID" />
+                                    <input type="hidden" name="History_Rows[@i].Designation_Name" value="@row.Designation_Name" />
+                                    <div class="validation-error">
+                                       @Html.ValidationMessage("History_Rows[" + i + "].Designation_ID")
+                                    </div>
+                                 </td>
+                                 <td>
+                                    @row.Department_Name
+                                    <input type="hidden" name="History_Rows[@i].Department_ID" value="@row.Department_ID" />
+                                    <input type="hidden" name="History_Rows[@i].Department_Name" value="@row.Department_Name" />
+                                    <div class="validation-error">
+                                       @Html.ValidationMessage("History_Rows[" + i + "].Department_ID")
+                                    </div>
+                                 </td>
+                                 <td class="actions text-center">
+                                    <a href="#" id="btnEditEmpHist-@i" onclick="EditEmpHist_Onclick('@i', '@row.History_ID','@row.Basic_Salary','@row.Hour_Rate','@row.Branch_ID','@row.Confirm_Date', '@row.Currency_ID','@row.Department_ID', '@row.Designation_ID', '@row.Effective_Date','@row.Employee_Type', '@row.Payment_Type', '@row.Supervisor', '@row.Terminate_Date', '@row.Row_Type','@row.Notice_Period_Amount','@row.Notice_Period_Unit','@((row.Contract_Staff.HasValue ? row.Contract_Staff.Value : false).ToString())','@row.Contract_Start_Date','@row.Contract_End_Date','@row.Basic_Salary_Unit','@row.Days','@row.Other_Branch','@row.Other_Department','@row.Other_Designation','@((row.No_Approval_WF.HasValue ? row.No_Approval_WF.Value : false).ToString())')">
+                                       <i class="fa fa-edit fa-2x"></i>
+                                    </a>
+                                    <a data-toggle="modal" onclick="return DeleteEmpHist_Onclick('hrow-@i', @i,'@row.History_ID');" href="#">
+                                       <i class="fa fa-times-circle-o fa-2x"></i>
+                                    </a>
+                                 </td>
+                              </tr>
+                                    i++;
+                           }
+                        }
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+         </section>
+      </div>
+   </div>
+</div>
+

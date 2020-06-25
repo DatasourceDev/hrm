@@ -1,0 +1,551 @@
+﻿@using System.Web.Configuration
+@using HR.Models;
+@using HR.Common;
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Constants;
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/ico" href="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/images/favicon.ico" />
+
+    <title>@ViewBag.Title</title>
+    <!--  Widget Code -->
+    <script async src="https://s.tagove.com/a-adcfe/init.js"></script>
+    <script async src="https://s.tagove.com/main.js"></script>
+    <!-- / Widget Code -->
+    @HtmlUtil.InitJS()
+    @HtmlUtil.InitCSS()
+    <script>
+        // this is important for IEs
+        var polyfilter_scriptpath = '@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/js/vendor/modals/';
+    </script>
+    @{
+        var controllername = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+        var actionname = HttpContext.Current.Request.RequestContext.RouteData.Values["action"].ToString();
+        var uitem = UserUtil.GetUserItem(Request.RequestContext.HttpContext);
+        if (uitem.aMode == AuthenMode.IncorrectUser)
+        {
+            Request.RequestContext.HttpContext.Session.Clear();
+            uitem = UserUtil.GetUserItem(Request.RequestContext.HttpContext);
+        }
+
+        if (uitem.aMode == AuthenMode.UserNoFound)
+        {
+            Response.Redirect("~/Account/Logout");
+        }
+
+        var appcnt = 0;
+        var approvers = new List<Notification>();
+        var requests = new List<Request>();
+        var requestIDs = new List<int>();
+        var erequests = new List<Request>();
+        var erequestIDs = new List<int>();
+        var err = ViewData.ModelState.SelectMany(m => m.Value.Errors, (m, error) => (m.Key)).Distinct().ToList();
+    }
+
+</head>
+
+<body class="@uitem.bg">
+    <div id="divjavaAddin"></div>
+    <div class="warning-timeout-dlg" align="center" style="z-index:9999">
+        <div>
+            <div class="notification ">
+                <h4><strong>@Resource.Message_Connection_Timeout </strong>@Resource.Message_Do_you_want_To_Continue_Using_This_System</h4>
+                <p>
+                    <button type="button" class="btn btn-primary" onclick="ContinousLogin();">@Resource.Continue</button>
+                    <button type="button" class="btn btn-danger" onclick="logout();">@Resource.Logout</button>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="loading" align="center" style="z-index:9999">
+        <img src="@AppSetting.SERVER_NAME/@AppSetting.SBSTmpAPI/assets/images/loader.gif">
+    </div>
+    <div id="wrap">
+        <div class="row">
+            @if (uitem.aMode == AuthenMode.Authenticated)
+            {
+                <div id="content" class="full-page">
+                    @RenderBody()
+                </div>
+            }
+            else
+            {
+                @RenderBody()
+            }
+            <div class="feedback-modal">
+                <input type="hidden" id="feedback_key" value="AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAcAIis34HnUeefIaDOof+YwQAAAACAAAAAAADZgAAwAAAABAAAAAZeevKHk5anB3Q27GtwMzzAAAAAASAAACgAAAAEAAAAEE4U7qbxhw19V25BKSz5HBYAAAA4CYdzrf7DmJUKTrJzW6/F0Hhw5sTf8gv3LcykgHzuQVvx88IrvVSoU0sEn34yTEPtFNxj+3dYVYEgc8giUD6rniarFzm6fGKfzQJAioTJ8yTaFRdExZrNxQAAAD8rpIWE8CAwSHCyWnBKlKRVukmKg==" />
+                <input type="hidden" id="feedback_identifier" value="hr-sbs2" />
+                <h3>Report an Issue</h3>
+            </div>
+        </div>
+
+
+    </div>
+
+    <script src="http://demo.bluecube.com.sg/bcservices.redmine/scripts/lib/feedback/js/feedback.js" type="text/javascript"></script>
+    <link href="http://demo.bluecube.com.sg/bcservices.redmine/scripts/lib/feedback/css/feedback.css" type="text/css" rel="stylesheet" />
+
+    <script type="text/javascript">
+        $(function () {
+            InitCollapseHeader(false);
+            @foreach (var ctl in ViewData.ModelMetadata.Properties)
+            {
+                if(ctl.ModelType.IsArray)
+                {
+                    if (ctl.ModelType.BaseType.BaseType != null && ctl.ModelType.BaseType.BaseType.ToString() == "System.Object")
+                    {
+
+                    }
+                }
+                else
+                {
+                    if (ctl.IsRequired)
+                    {
+                        var ctlname = ctl.PropertyName;
+                        ctlname = ctlname.Replace("[", "_");
+                        ctlname = ctlname.Replace("]", "_");
+                        ctlname = ctlname.Replace(".", "_");
+
+                        @:if ($("#@ctlname").get(0) != null) { $("#@ctlname").get(0).setAttribute('onblur', "Input_Onblur('@ctlname','@ctl.DisplayName',@ctl.IsRequired.ToString().ToLower())"); }
+
+                        if (ctl.Model == null || ctl.Model == "")
+                        {
+                            @:MandatoryColor('@ctlname');
+                                                                                                                                                                                                                                                                                                                                                                                                            }
+                                            }
+                }
+
+                if (ctl.ModelType.IsValueType && ctl.ModelType.FullName.Contains("System.Decimal"))
+                {
+                    var ctlname =  ctl.PropertyName;
+                    ctlname = ctlname.Replace("[", "_");
+                    ctlname = ctlname.Replace("]", "_");
+                    ctlname = ctlname.Replace(".", "_");
+                    @:InitAmountControl('@ctlname');
+                                                                                                                                                                                                                                                                                                                                                                        @:if ($("#@ctlname").get(0) != null) { $("#@ctlname").get(0).setAttribute('onblur', "ValidateDecimal('@ctlname','@ctl.DisplayName',@ctl.IsRequired.ToString().ToLower())"); }
+                                                                                                                                                                                                                                                                                                                                                                                                                            }
+                else if (ctl.ModelType.IsValueType && ctl.ModelType.FullName.Contains("System.Int32"))
+                {
+                    var ctlname =  ctl.PropertyName;
+                    ctlname = ctlname.Replace("[", "_");
+                    ctlname = ctlname.Replace("]", "_");
+                    ctlname = ctlname.Replace(".", "_");
+                    @:InitAmountControl('@ctlname');
+                                                                                                                                                                                                                                                                                                                                                                @:if ($("#@ctlname").get(0) != null) { $("#@ctlname").get(0).setAttribute('onblur', "ValidateNumber('@ctlname','@ctl.DisplayName',@ctl.IsRequired.ToString().ToLower(), true)"); }
+                                                                                                                                                                                                                                                                                                                                    }
+                else if (ctl.ModelType.FullName.Contains("System.String"))
+                {
+                    if (ctl.DataTypeName == "EmailAddress")
+                    {
+                        var ctlname = ctl.PropertyName;
+                        ctlname = ctlname.Replace("[", "_");
+                        ctlname = ctlname.Replace("]", "_");
+                        ctlname = ctlname.Replace(".", "_");
+
+                        @:if ($("#@ctlname").get(0) != null) { $("#@ctlname").get(0).setAttribute('onblur', "ValidateEmail('@ctlname','@ctl.DisplayName',@ctl.IsRequired.ToString().ToLower())"); }
+                                                                                                                                                                                                                                                                                                                                                        } else if (ctl.DataTypeName == "Date")
+                    {
+                        var ctlname = ctl.PropertyName;
+                        ctlname = ctlname.Replace("[", "_");
+                        ctlname = ctlname.Replace("]", "_");
+                        ctlname = ctlname.Replace(".", "_");
+
+                        @:if ($("#@ctlname").get(0) != null) { $("#@ctlname").get(0).setAttribute('onblur', "ValidateDate('@ctlname','@ctl.DisplayName',@ctl.IsRequired.ToString().ToLower(),true)"); }
+                                                                                                                                                                                                                                                                                                                                    }
+                }
+            }
+            @if (err != null && err.Count > 0)
+            {
+                foreach (var ctl in err)
+                {
+                    var ctlname = ctl;
+                    ctlname = ctlname.Replace("[", "_");
+                    ctlname = ctlname.Replace("]", "_");
+                    ctlname = ctlname.Replace(".", "_");
+                    @:ErrorColor('@ctlname');
+                                                                                                                                                                                                                                                                                                                                                                                                                            }
+            }
+
+            $("#Quick_Search").keyup(function (event) {
+                if (event.keyCode == 13) {
+                    var key = $("#Quick_Search").val();
+                    if (key != '') {
+                        ShowMask();
+                        $.ajax({
+                            type: 'POST',
+                            url: '@UrlUtil.Action(Url,"QuickSearch", "Account")',
+                            contentType: 'application/json; charset=utf-8',
+                            data: JSON.stringify({ pSearch: key }),
+                            dataType: 'json',
+                            success: function (data) {
+                                if (data != null) {
+                                    var result = '<li><h1>Quick Search</h1></li>';
+                                    for (var i = 0; i < data.Menu_Page_Name.length; i++) {
+                                        result = result + '<li><a href="' + data.Page_Url[i] + '">' + data.Menu_Page_Name[i] + '</a></li>';
+                                    }
+                                    $('#QuickSearchlist').html(result);
+
+                                }
+                                if ($('#liSearchOpen').hasClass("open") == false) {
+                                    $('#btnQuickSearch').get(0).click();
+                                }
+
+
+                                $("#Quick_Search").focus();
+                                CloseMask();
+                            }
+                        });
+                    }
+                }
+            });
+
+            @*if ('@uitem.aMode' == '@AuthenMode.Authenticated') {
+                setTimeout(doStuff, 180000); //every three mins
+            }*@
+        });
+
+        function Confirm_Alert(ID) {
+            if ((parseInt(ID) > 0) || (ID == true)) {
+                return confirm('@Resource.Message_Confirm_Saving_Change');
+            }
+        }
+    </script>
+
+
+    @using (Html.BeginForm("Approve", "Approval", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        <script type="text/javascript">
+            $(function () {
+                $("#L_btnApprove").click(function () {
+                    ShowMask();
+                    $.ajax({
+                        type: 'POST',
+                        url: '@UrlUtil.Action(Url,"Approve", "Approval")',
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify({
+                            Leave_Application_Document_ID: $("#L_Leave_Application_Document_ID").val(),
+                            Expenses_Application_ID: $("#L_Expenses_Application_ID").val(),
+                            Employee_Profile_ID: $("#L_Employee_Profile_ID").val(),
+                            Request_ID: $("#L_Request_ID").val(),
+                            Status: '@WorkflowStatus.Approved',
+                            Remark: $("#L_Remark").val(),
+                            Index: $("#L_Index").val()
+                        }),
+                        dataType: 'json',
+                        success: function (data) {
+                            if (data != null && data.Index != null) {
+                                $("#liLApprove-" + data.Index).hide();
+                                var cnt = parseInt($("#appcnt").val()) - 1;
+                                $("#appcnt").val(cnt);
+                                $("#appcnt2").val(cnt);
+                                $('#L_btnClose').get(0).click();
+                            }
+                            CloseMask();
+                        }
+                    });
+
+                });
+
+                $("#L_btnReject").click(function () {
+                    ShowMask();
+                    $.ajax({
+                        type: 'POST',
+                        url: '@UrlUtil.Action(Url,"Approve", "Approval")',
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify({
+                            Leave_Application_Document_ID: $("#L_Leave_Application_Document_ID").val(),
+                            Expenses_Application_ID: $("#L_Expenses_Application_ID").val(),
+                            Employee_Profile_ID: $("#L_Employee_Profile_ID").val(),
+                            Request_ID: $("#L_Request_ID").val(),
+                            Status: '@WorkflowStatus.Rejected',
+                            Remark: $("#L_Remark").val(),
+                            Index: $("#L_Index").val()
+                        }),
+                        dataType: 'json',
+                        success: function (data) {
+                            if (data != null && data.Index != null) {
+                                $("#liLApprove-" + data.Index).hide();
+                                var cnt = parseInt($("#appcnt").val()) - 1;
+                                $("#appcnt").val(cnt);
+                                $("#appcnt2").val(cnt);
+                                $('#L_btnClose').get(0).click();
+
+                            }
+                            else {
+                                $("#L_Error").val('@Resource.The @Resource.Remark @Resource.Field @Resource.Is_Rrequired_Lower');
+                            }
+
+                            CloseMask();
+                        }
+                    });
+                });
+            });
+        </script>
+
+        <div class="modal fade" id="modal-approve" tabindex="-1" role="dialog" aria-labelledby="modalConfirmLabel" aria-hidden="true">
+            <input type="hidden" id="L_Leave_Application_Document_ID" name="L_Leave_Application_Document_ID">
+            <input type="hidden" id="L_Expenses_Application_ID" name="L_Expenses_Application_ID">
+            <input type="hidden" id="L_Employee_Profile_ID" name="L_Employee_Profile_ID">
+            <input type="hidden" id="L_Request_ID" name="L_Request_ID">
+            <input type="hidden" id="L_Index" name="L_Index">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <label for="Expenses_Date" class="control-label">@Resource.Remarks</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <textarea class="form-control" id="L_Remark" name="L_Remark" rows="6"></textarea>
+                                        <input class="form-control input-transparent color-red" id="L_Error" readonly />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="L_btnClose" type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Close</button>
+                        <button id="L_btnApprove" type="button" class="btn btn-primary">@Resource.Approve</button>
+                        <button id="L_btnReject" type="button" class="btn btn-primary">@Resource.Reject</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            var scfilecount = 0;
+            $(function () {
+                $("#L_btnSCCancel").click(function () {
+                    SC_Clear();
+                });
+
+                $("#L_btnSCSend").click(function () {
+                    var desc = $('#L_SC_Description').val();
+                    var images = document.getElementsByName('scUploadImage');
+                    var cand = document.getElementsByTagName('canvas');
+                    var canvasData = "";
+                    if (cand != null && cand.length > 0) {
+                        canvasData = cand[0].toDataURL("image/png");
+                    }
+
+                    if (images != null && images.length > 0) {
+                        var files = [];
+                        var filecnt = 0;
+                        for (var i = 0; i < images.length; i++) {
+                            var img = images[i];
+                            var fileToLoad = images[i].files[0];
+
+                            if (fileToLoad == null) {
+                                alert('@Resource.Message_The_File_Is_Required');
+                                return;
+                            }
+                            var fileReader = new FileReader();
+
+                            fileReader.onload = function (fileLoadedEvent) {
+                                var srcData = fileLoadedEvent.target.result; // <--- data: base64
+                                files[filecnt] = srcData;
+                                filecnt++;
+                                if (filecnt == images.length) {
+                                    // last file
+                                    var data = { pScreenImage: canvasData, pUploadfile: files, pDesc: desc };
+                                    ShowMask();
+                                    $.ajax({
+                                        type: "POST",
+                                        url: '@UrlUtil.Action(Url,"SaveScreenShot", "Account")',
+                                        data: data,
+                                        success: function (data) {
+                                            SC_Clear();
+
+                                            alert('@Resource.Message_Your_Problem_Has_Been_Sent_Successfully');
+                                        }
+                                    }).done(function () {
+                                        $('#L_btnSCCancel').get(0).click();
+                                        CloseMask();
+                                    });
+                                }
+                            }
+                            fileReader.readAsDataURL(fileToLoad);
+                        }
+                    }
+                    else {
+                        var data = { pScreenImage: canvasData, pDesc: desc };
+                        ShowMask();
+                        $.ajax({
+                            type: "POST",
+                            url: '@UrlUtil.Action(Url,"SaveScreenShot", "Account")',
+                            data: data,
+                            success: function (data) {
+                                SC_Clear();
+                                alert('@Resource.Message_Your_Problem_Has_Been_Sent_Successfully');
+                            }
+                        }).done(function () {
+                            $('#L_btnSCCancel').get(0).click();
+                            CloseMask();
+                        });
+                    }
+                });
+
+
+                $("#L_btnSCNewFile").click(function () {
+                    var index = scfilecount;
+                    var html = "";
+                    html += '<div class="form-group" id="divSCFileUpload-' + index + '">';
+                    html += '<div class="col-md-12" >';
+                    html += '<div class="input-group">';
+                    html += '<span class="input-group-btn">';
+                    html += '<span class="btn btn-primary btn-file">';
+                    html += '<i class="fa fa-upload"></i>';
+                    html += '<input  type="file" name="scUploadImage" accept="image/jpeg, image/jpg, image/png, image/gif" onchange="SC_File_Onchange( $(this))">';
+                    html += '</span>';
+                    html += '</span>';
+                    html += '<input  type="text" class="form-control" readonly>';
+                    html += '<span class="input-group-btn">';
+                    html += '<a  class="btn btn-red btn-file" onclick="RemoveSC_Onclick(' + index + ')">';
+                    html += '<i class="fa fa-times"></i>';
+                    html += ' </a>';
+                    html += '</span>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</div>';
+
+                    $('#divSCUpload').append(html);
+                    scfilecount++;
+                });
+            });
+
+            function SC_Clear() {
+                $('#divSCUpload').html('');
+                $("#imgScreenShot").get(0).src = '';
+                $("#divScreenShot").hide();
+                $('#L_Include_Screen_Shot').get(0).checked = false;
+                $('#L_SC_Description').val('');
+
+                if (document.getElementsByTagName('canvas')[0] != null) {
+                    document.getElementsByTagName('canvas')[0].remove();
+                }
+            }
+
+            function SC_File_Onchange(opt) {
+                var input = opt,
+                    numFiles = input.get(0).files ? input.get(0).files.length : 1,
+                    label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+
+                input.trigger('fileselect', [numFiles, label]);
+
+                var input = opt.parents('.input-group').find(':text'),
+                       log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+                if (input.length) {
+                    input.val(log);
+                } else {
+                    if (log) alert(log);
+                }
+            }
+
+            function RemoveSC_Onclick(index) {
+                $('#divSCFileUpload-' + index).remove();
+            }
+
+            function ScreenShot_Include_Onchange(opt) {
+                if (opt.checked) {
+                    takeScreenShot();
+                }
+                else {
+                    document.getElementsByTagName('canvas')[0].remove();
+                    $("#imgScreenShot").get(0).src = '';
+                    $("#divScreenShot").hide();
+                }
+            }
+
+            function takeScreenShot() {
+                document.getElementsByClassName('modal-backdrop')[0].setAttribute('data-html2canvas-ignore', '')
+                ShowMask();
+                var body = window.parent.document.body;
+                html2canvas(body, {
+                    onrendered: function (canvas) {
+                        var cand = document.getElementsByTagName('canvas');
+                        if (cand[0] === undefined || cand[0] === null) {
+
+                        } else {
+                            //cand[0].remove();
+                            document.body.removeChild(cand[0]);
+                        }
+                        document.body.appendChild(canvas);
+                        var canvasData = canvas.toDataURL("image/png");
+                        $("#imgScreenShot").get(0).src = canvasData;
+                        $("#divScreenShot").show();
+                        CloseMask();
+                    }
+                });
+            }
+        </script>
+
+        <form class="form-horizontal" role="form">
+            <div class="modal fade" id="modal-sc" data-html2canvas-ignore tabindex="-1" role="dialog" aria-labelledby="modalSC" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title"><strong>@Resource.Report_A_Problem</strong></h3>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="L_SC_Description" class="control-label">@Resource.What_Happened_Msg</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <textarea class="form-control" id="L_SC_Description" name="L_SC_Description" rows="6"></textarea>
+                                            @*<input class="form-control input-transparent color-red" id="L_SC_Description_Error" readonly />*@
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <div class="checkbox" style="padding-top:0px;">
+                                                <input type="checkbox" value="true" id="L_Include_Screen_Shot" onchange="ScreenShot_Include_Onchange(this)">
+                                                <label for="L_Include_Screen_Shot">@Resource.Include_A_Screenshot_With_My_Report</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" id="divScreenShot" style="display:none;">
+                                        <div class="col-md-12">
+                                            <img id="imgScreenShot" style="width:100%" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <button id="L_btnSCNewFile" type="button" class="btn btn-default"><i class="fa fa-paperclip"></i> @Resource.Upload_File</button>
+                                        </div>
+                                    </div>
+                                    <div id="divSCUpload">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="L_btnSCCancel" type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">@Resource.Cancel</button>
+                            <button id="L_btnSCSend" type="button" class="btn btn-primary">@Resource.Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    }
+
+</body>
+
+</html>

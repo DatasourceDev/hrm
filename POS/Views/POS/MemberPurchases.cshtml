@@ -1,0 +1,498 @@
+﻿@using POS.Common;
+@using POS.Models;
+@using SBSModel.Common;
+@using SBSModel.Models;
+@model  POS.Models.POSMemberViewModel
+
+<div class="main-content">
+    <div class="container-fluid padded">
+        <div class="row-fluid">
+            <div class="span10 offset1">
+                <div class="box" style='margin-bottom:0;'>
+                    <div class="box-header">
+                        <span class="title">@Model.Member_Name</span>
+                        @*<div class="control-group" style="text-align:right; vertical-align:central;">
+                                <a class="btn btn-white" data-toggle="modal" href="" onclick="EditMember_Onclick('@Model.Member_ID')">@Resources.ResourceMain.Edit</a>
+                            </div>*@
+                    </div>
+
+                    <div class="box-content">
+                        <div class="padded">
+                            <div class="divMemberDetails">
+                                <div class="row-fluid">
+                                    <div class="span4">
+                                        <div class="control-group">
+                                            @Html.LabelFor(m => m.Member_Card_No, new { @class = "display-text-medium" })
+                                        </div>
+                                        <div class="control-group">
+                                            @Html.TextBoxFor(m => m.Member_Card_No, new { Readonly = true })
+
+                                            <div class="validation-error">
+                                                <span id="Member_Card_No_Err"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="span4">
+                                        <div class="control-group">
+                                            @Html.LabelFor(m => m.NRIC_No, new { @class = "display-text-medium" })
+                                        </div>
+                                        <div class="control-group">
+                                            @Html.TextBoxFor(m => m.NRIC_No, new { Readonly = true })
+                                            <div class="validation-error">
+                                                <span id="NRIC_No_Err"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="span4">
+                                        <div class="control-group">
+                                            @Html.LabelFor(m => m.DOB, new { @class = "display-text-medium" })
+                                        </div>
+                                        <div class="control-group">
+                                            @Html.TextBoxFor(model => model.DOB, new { Readonly = true })
+                                        </div>
+                                        <div class="validation-error">
+                                            <span id="DOB_Err"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row-fluid">
+                                    <div class="span4">
+                                        <div class="control-group">
+                                            @Html.LabelFor(m => m.Phone_No, new { @class = "display-text-medium" })
+                                        </div>
+                                        <div class="control-group">
+                                            @Html.TextBoxFor(m => m.Phone_No, new { Readonly = true })
+
+                                            <div class="validation-error">
+                                                <span id="Phone_No_Err"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="span4">
+                                        <div class="control-group">
+                                            @Html.LabelFor(m => m.Email, new { @class = "display-text-medium" })
+                                        </div>
+                                        <div class="control-group">
+                                            @Html.TextBoxFor(m => m.Email, new { Readonly = true })
+                                            <div class="validation-error">
+                                                <span id="Email_Err"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="span4">
+                                        <div class="control-group">
+                                            @Html.LabelFor(m => m.Credit, new { @class = "display-text-medium" })
+                                        </div>
+                                        <div class="control-group">
+                                            @Html.TextBoxFor(m => m.Credit, new { Readonly = true, @class = "text-right" })
+                                            <div class="validation-error">
+                                                <span id="Credit_Err"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @using (Html.BeginForm("MemberPurchases", "POS", FormMethod.Get, new { @class = "form-horizontal validatable", role = "form", id = "theForm" })) {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.Member_ID)
+        <div class="container-fluid padded">
+            <div class="row-fluid">
+                <div class="span10 offset1">
+                    <div class="box" style='margin-bottom:0;'>
+
+                        <div class="box-header">
+                            <span class="title">@Resources.ResourcePOS.PurchaseHistory</span>
+                            <div class="control-group" style="text-align:right; vertical-align:central;">
+                                <a class="btn btn-white" id="btnExport" data-toggle="modal">@Resources.ResourceMain.ExporttoExcel</a>
+                            </div>
+                        </div>
+
+                        <div class="box-content">
+                            <div class="padded">
+                                <div class="row-fluid">
+                                    <div class="span3">
+                                        <div class="control-group">
+                                            @Html.Label("Date From", new { @class = "display-text-medium" })
+                                        </div>
+                                        <div class="control-group">
+                                            <div class="input-append date" id="dobdate" data-date="" data-date-format="dd/mm/yyyy">
+                                                @Html.TextBoxFor(model => model.Search_Date_From, "{0:dd/mm/yyyy}")
+                                                <span class="add-on"><i class="icon-th"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="span3">
+                                        <div class="control-group">
+                                            @Html.Label("Date To", new { @class = "display-text-medium" })
+                                        </div>
+                                        <div class="control-group">
+                                            <div class="input-append date" id="dobdate" data-date="" data-date-format="dd/mm/yyyy">
+                                                @Html.TextBoxFor(model => model.Search_Date_To, "{0:dd/mm/yyyy}")
+                                                <span class="add-on"><i class="icon-th"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="span3">
+                                        <div class="control-group">
+                                            @Html.Label("Receipt Status", new { @class = "display-text-medium" })
+                                        </div>
+                                        <div class="control-group">
+                                            @Html.DropDownListFor(m => m.Search_Status, new SelectList(
+                                               new List<string> {
+                                                {""},
+                                                {"Paid"},
+                                                {"Hold"},
+                                                {"Void"}
+                                               }))
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row-fluid">
+                                    <div class="span3">
+                                        <div class="control-group">
+                                            @Html.Label("Terminal ID", new { @class = "display-text-medium" })
+                                        </div>
+                                        <div class="control-group">
+                                            @Html.TextBoxFor(model => model.Search_Terminal)
+                                        </div>
+                                    </div>
+                                    <div class="span3">
+                                        <div class="control-group">
+                                            @Html.Label("lblReceiptNo", "Receipt No.", new { @class = "display-text-medium" })
+                                        </div>
+                                        <div class="control-group">
+                                            @Html.TextBoxFor(model => model.Search_Receipt_No)
+                                        </div>
+                                    </div>
+                                    <div class="span2">
+                                        <div class="control-group">
+                                        </div>
+                                        <div class="control-group">
+                                            <button type="submit" class="btn btn-white span12">@Resources.ResourceMain.Filter</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    <div class="container-fluid padded">
+        <div class="row-fluid">
+            <div class="span10 offset1">
+                <div class="box" style='margin-bottom:0;'>
+                    <div class="box-content">
+                        <div class="padded">
+                            <div class="row-fluid">
+                                <div id="dataTables">
+                                    <table cellpadding="0" cellspacing="0" border="0" class="table table-normal responsive">
+                                        <thead>
+                                            <tr>
+                                                <th>@Resources.ResourcePOS.Date</th>
+                                                <th>@Resources.ResourcePOS.ReceiptNo</th>
+                                                <th>@Resources.ResourcePOS.Terminal</th>
+                                                <th>@Resources.ResourcePOS.Status</th>
+                                                <th>@Resources.ResourcePOS.TotalAmount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (Model.purchaseList != null) {
+                                                int recordcount = 0;
+                                                foreach (var row in Model.purchaseList) {
+                                                    var totalDiscount = 0.00m;
+
+                                                    if (row.Discount.HasValue) {
+                                                        if (row.Discount.Value > 0) {
+                                                            if (row.Discount_Type == "%") {
+                                                                totalDiscount += row.Total_Amount.Value * (row.Discount.Value / 100);
+                                                            } else {
+                                                                totalDiscount += row.Discount.Value;
+                                                            }
+                                                        }
+                                                    }
+
+                                                    if (row.Member_Discount.HasValue) {
+                                                        if (row.Member_Discount.Value > 0) {
+                                                            if (row.Member_Discount_Type == "%") {
+                                                                totalDiscount += row.Total_Amount.Value * (row.Member_Discount.Value / 100);
+                                                            } else {
+                                                                totalDiscount += row.Member_Discount.Value;
+                                                            }
+                                                        }
+                                                    }
+
+                                                    <tr class="status-info parent">
+                                                        <td><a class="toggle-switch" href="" onclick="return false;">&#x25BC;</a> @row.Receipt_Date.Value.ToShortDateString()</td>
+                                                        <td>@row.Receipt_No</td>
+                                                        <td>@row.POS_Shift.POS_Terminal.Terminal_Name</td>
+                                                        <td>@row.Status</td>
+                                                        <td class="text-right">@((row.Total_Amount.HasValue ? row.Total_Amount.Value : 0).ToString("n2"))</td>
+                                                    </tr>
+                                                    <tr class="child" style="background-color: #436a77;">
+                                                        <td colspan="5" tabindex="@recordcount">
+                                                            <div class="row-fluid">
+                                                                <div class="span10">
+                                                                    @foreach (var prod in row.POS_Products_Rcp) {
+                                                                        <div class="row-fluid">
+                                                                            <div class="span3 offset1">
+                                                                                <b>@prod.Qty x @prod.Product_Name (@prod.Product.Product_Code)</b>
+                                                                            </div>
+                                                                            <div class="span4 text-right">
+                                                                                <b>@@ @prod.Price.Value.ToString("n2")</b>
+                                                                            </div>
+                                                                            <div class="span4 text-right">
+                                                                                <b>@((prod.Price.Value * prod.Qty.Value).ToString("n2"))</b>
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                    <hr style="border-top: dotted 1px;" />
+                                                                    <div class="row-fluid">
+                                                                        <div class="span5 offset1">
+                                                                            Subtotal
+                                                                        </div>
+                                                                        <div class="span6 text-right">
+                                                                            @row.Total_Amount.Value.ToString("n2")
+                                                                        </div>
+                                                                    </div>
+
+                                                                    @if (totalDiscount > 0) {
+                                                                        <div class="row-fluid">
+                                                                            <div class="span5 offset1">
+                                                                                Total Discount
+                                                                            </div>
+                                                                            <div class="span6 text-right">
+                                                                                - @totalDiscount.ToString("n2")
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                    <div class="row-fluid">
+                                                                        <div class="span5 offset1">
+                                                                            GST
+                                                                        </div>
+                                                                        <div class="span6 text-right">
+                                                                            @row.Total_GST_Amount.Value.ToString("n2")
+                                                                        </div>
+                                                                    </div>
+                                                                    <hr style="border-top: dotted 1px;" />
+                                                                    <div class="row-fluid display-text-large">
+                                                                        <div class="span5 offset1">
+                                                                            <b>TOTAL</b>
+                                                                        </div>
+                                                                        <div class="span6 text-right">
+                                                                            @row.Net_Amount.Value.ToString("n2")
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="span2">
+                                                                    <div class="control-group">
+                                                                        <a class="btn btn-white span12" href="@Url.Action("POS", "POS", new { pReceiptID = row.Receipt_ID, operation = UserSession.RIGHT_U, pPageAction = 2 })">@Resources.ResourceMain.View</a>
+                                                                    </div>
+                                                                    <div class="control-group">
+                                                                        <a class="btn btn-white span12" onclick="Print_Onclick('@row.Receipt_ID')">@Resources.ResourceMain.Print</a>
+                                                                    </div>
+                                                                    <div class="control-group">
+                                                                        @if (row.Status != ReceiptStatus.Void) {
+                                                                            @*<a id="btnVoid-@recordcount" class="btn btn-white span12" onclick="Void_Onclick('@row.Receipt_ID', 'btnVoid-@recordcount')">@Resources.ResourcePOS.Void</a>*@
+                                                                            <input type="button" id="btnVoid-@recordcount" class="btn btn-white span12" value="@Resources.ResourcePOS.Void" onclick="Void_Onclick('@row.Receipt_ID', 'btnVoid-@recordcount')" />
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+                                                                        recordcount += 1;
+                                                }
+                                            }
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $('.child').hide();
+
+        function getChildren($row) {
+            var children = [];
+            while ($row.next().hasClass('child')) {
+                children.push($row.next());
+                $row = $row.next();
+            }
+            return children;
+        }
+
+        $('.parent').on('click', function () {
+
+            var children = getChildren($(this));
+            $.each(children, function () {
+                $(this).toggle();
+            });
+
+            flipToggleSwitch($(this).closest('tr').find('.toggle-switch'));
+            var td = $(this).closest('tr').next('tr').find('td');
+            td.focus();
+        });
+
+        $("#btnExport").click(function () {
+            theForm.action = '@Url.Action("ExportMemberPurchases", "POS")';
+            theForm.method = 'get';
+            theForm.submit();
+
+
+            theForm.action = '@Url.Action("MemberPurchases", "POS")';
+            CloseProgress();
+        });
+
+        function flipToggleSwitch(ctrl) {
+            //if icon is down / inverted triangle, then revert to triangle
+            if (ctrl.html() === $($.parseHTML("&#x25BC;")).text()) {
+                ctrl.html("&#x25B2;");
+            } else {
+                ctrl.html("&#x25BC;");
+            }
+        }
+
+        function Print_Onclick(receipt_id) {
+
+            var data = { pReceiptID: receipt_id, pUrl: "/POS/Report" };
+            $.ajax({
+                url: '@Url.Action("PrintReport", "POS")',
+                //Passes the content of an input up
+                data: data,
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    if (data != null) {
+                        if (data.Msg !== undefined) {
+                            alert(data.Msg);
+                        } else if (data.ipAddress !== undefined) {
+                            var request = cleanString(data.Message);
+                            sendMessage(request, data.ipAddress);
+                        }
+                    }
+                    CloseProgress();
+                    location.reload();
+                }
+            });
+
+        }
+
+        function Void_Onclick(receipt_id, btnId) {
+
+            if (!confirm("Void action cannot be undone. Would you like some milk?")) {
+                CloseProgress();
+                return false;
+            }
+
+            ShowProgress();
+
+            var data = { pReceiptID: receipt_id, pUrl: "/POS/VoidAndRefund" };
+            $.ajax({
+                url: '@Url.Action("PrintVoidAndRefund", "POS")',
+                //Passes the content of an input up
+                data: data,
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    if (data != null) {
+                        if (data.Msg !== undefined) {
+                            if (data.Code == '@ERROR_CODE.SUCCESS') {
+                                $("#" + btnId).hide();
+                            }
+
+                            alert(data.Msg);
+
+                        } else if (data.ipAddress !== undefined) {
+                            var request = cleanString(data.Message);
+                            sendMessage(request, data.ipAddress);
+                        }
+                        CloseProgress();
+                    }
+                }
+            });
+
+        }
+
+        function sendMessage(request, printerIP) {
+            var url = 'http://' + printerIP + ':90/StarWebPRNT/SendMessage';
+
+            var trader = new StarWebPrintTrader({ url: url });
+
+            trader.onReceive = function (response) {
+                var msg = '- onReceive -\n\n';
+
+                msg += 'TraderSuccess : [ ' + response.traderSuccess + ' ]\n';
+
+                //      msg += 'TraderCode : [ ' + response.traderCode + ' ]\n';
+
+                msg += 'TraderStatus : [ ' + response.traderStatus + ',\n';
+
+                if (trader.isCoverOpen({ traderStatus: response.traderStatus })) { msg += '\tCoverOpen,\n'; }
+                if (trader.isOffLine({ traderStatus: response.traderStatus })) { msg += '\tOffLine,\n'; }
+                if (trader.isCompulsionSwitchClose({ traderStatus: response.traderStatus })) { msg += '\tCompulsionSwitchClose,\n'; }
+                if (trader.isEtbCommandExecute({ traderStatus: response.traderStatus })) { msg += '\tEtbCommandExecute,\n'; }
+                if (trader.isHighTemperatureStop({ traderStatus: response.traderStatus })) { msg += '\tHighTemperatureStop,\n'; }
+                if (trader.isNonRecoverableError({ traderStatus: response.traderStatus })) { msg += '\tNonRecoverableError,\n'; }
+                if (trader.isAutoCutterError({ traderStatus: response.traderStatus })) { msg += '\tAutoCutterError,\n'; }
+                if (trader.isBlackMarkError({ traderStatus: response.traderStatus })) { msg += '\tBlackMarkError,\n'; }
+                if (trader.isPaperEnd({ traderStatus: response.traderStatus })) { msg += '\tPaperEnd,\n'; }
+                if (trader.isPaperNearEnd({ traderStatus: response.traderStatus })) { msg += '\tPaperNearEnd,\n'; }
+
+                msg += '\tEtbCounter = ' + trader.extractionEtbCounter({ traderStatus: response.traderStatus }).toString() + ' ]\n';
+
+                //      msg += 'Status : [ ' + response.status + ' ]\n';
+                //
+                //      msg += 'ResponseText : [ ' + response.responseText + ' ]\n';
+
+            }
+
+            trader.onError = function (response) {
+                var msg = '- onError -\n\n';
+
+                msg += '\tStatus:' + response.status + '\n';
+
+                msg += '\tResponseText:' + response.responseText;
+
+            }
+
+            trader.sendMessage({ request: request });
+        };
+
+    </script>
+
+</div>
+@{
+    Html.RenderPartial("POSDlgMember", new POSMemberViewModel() {
+        Member_Status = "New",
+        Company_ID = Model.Company_ID,
+        Member_Discount = Model.Member_Discount,
+        Member_Discount_Type = Model.Member_Discount_Type,
+        Select_Discount = Model.Member_Discount,
+        Select_Discount_Type = Model.Member_Discount_Type,
+        Birthday_Discount = Model.Birthday_Discount,
+        Birthday_Discount_Type = Model.Birthday_Discount_Type,
+        Currency_Code = Model.Currency_Code,
+        Is_Payment = false
+    });
+}

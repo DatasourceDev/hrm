@@ -1,0 +1,437 @@
+﻿@model  HR.Models.PayrollReportViewModel
+@using HR.Models;
+@using SBSModel.Models;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+   ViewBag.Title = Resource.Payroll_Report;
+   var totalhash = new System.Collections.Hashtable();
+
+   var emps = Model.prmList.Select(s => s.Employee_Profile).Distinct().ToList();
+
+   totalhash.Add("BasicSalary", (decimal)0);
+   totalhash.Add("Expenses", (decimal)0);
+   totalhash.Add("Allowance", (decimal)0);
+   totalhash.Add("Adjustment_Addition", (decimal)0);
+   totalhash.Add("Commission", (decimal)0);
+   totalhash.Add("Overtime", (decimal)0);
+   totalhash.Add("Donation", (decimal)0);
+
+   totalhash.Add("Deduction", (decimal)0);
+   totalhash.Add("Adjustment_Deduction", (decimal)0);
+   totalhash.Add("Deduction_Donation", (decimal)0);
+
+   totalhash.Add("EmployeeCPF", (decimal)0);
+   totalhash.Add("EmployerCPF", (decimal)0);
+
+   totalhash.Add("Other", (decimal)0);
+   totalhash.Add("total", (decimal)0);
+}
+
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+   <div class="pageheader">
+      <h2>@Resource.Payroll_Report<span></span></h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action(" index", "Home" )">@Resource.DashBoard</a></li>
+            <li class="active">@Resource.Payroll_Report</li>
+         </ol>
+      </div>
+   </div>
+
+   <script type="text/javascript">
+      $(function () {
+
+         InitDatepicker();
+         InitDatatable('moduleDataTable', null, null, 0, 'asc');
+
+      });
+   </script>
+
+
+   <script type="text/javascript">
+      $(function () {
+
+         $(function () {
+            $("#btnExport").click(function () {
+               $('#tabAction').val('export');
+               var form = $("#theform");
+               form.attr("action", "@Url.Action("PayrollReport", "Payroll")");
+               form.method = 'get';
+               form.submit();
+               CloseMask();
+            });
+
+            $("#btnSearch").click(function () {
+               $('#tabAction').val('');
+               var form = $("#theform");
+               form.attr("action", "@Url.Action("PayrollReport", "Payroll")");
+               form.method = 'get';
+               form.submit();
+            });
+         });
+      });
+   </script>
+
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+
+            @using (Html.BeginForm("PayrollReport", "Payroll", FormMethod.Get, new { @class = "form-horizontal", role = "form", id = "theform" }))
+            {
+               @*@Html.AntiForgeryToken()*@
+
+               <section class="tile color transparent-black filter" id="secfilter">
+                  <div class="tile-header transparent">
+                     <h1 onclick="CollapseHeader(null)" style="cursor:pointer"><strong>@Resource.Apply_Filter</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize filter" id="btncollapse"><i class="fa fa-search  color-white"></i></a>
+                     </div>
+                  </div>
+                  <div class="tile-body">
+                     <div class="row">
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="sDepartment" class="control-label">@Resource.Department</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <select class="chosen-select chosen-transparent form-control" id="Department" name="Department">
+                                    @if (Model.departmentList != null)
+                                    {
+                                       foreach (var row in Model.departmentList)
+                                       {
+                                          if (Model.Department == NumUtil.ParseInteger(row.Value))
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                          }
+                                          else
+                                          {
+                                             <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                          }
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.Department)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Process_Month" class="control-label">@Resource.From</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-8">
+                                 <select class="chosen-select chosen-transparent form-control" id="sFromMonth" name="sFromMonth">
+                                    @foreach (var row in Model.processDateList)
+                                    {
+                                       if (Model.sFromMonth == NumUtil.ParseInteger(row.Value))
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                       }
+                                       else
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.sFromMonth)
+                                 </div>
+                              </div>
+                              <div class="col-sm-4">
+                                 <input type="text" class="form-control" name="sFromYear" id="sFromYear" value="@Model.sFromYear">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.sFromYear)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+
+                        <div class="col-md-4">
+                           <div class="form-group">
+                              <div class="col-sm-12">
+                                 <label for="Process_Month" class="control-label">@Resource.To</label>
+                              </div>
+                           </div>
+                           <div class="form-group">
+                              <div class="col-sm-8">
+                                 <select class="chosen-select chosen-transparent form-control" id="sToMonth" name="sToMonth">
+                                    @foreach (var row in Model.processDateList)
+                                    {
+                                       if (Model.sToMonth == NumUtil.ParseInteger(row.Value))
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                       }
+                                       else
+                                       {
+                                          <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                       }
+                                    }
+                                 </select>
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.sToMonth)
+                                 </div>
+                              </div>
+                              <div class="col-sm-4">
+                                 <input type="text" class="form-control" name="sToYear" id="sToYear" value="@Model.sToYear">
+                                 <div class="validation-error">
+                                    @Html.ValidationMessageFor(m => m.sToYear)
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+
+                     </div>
+                     <div class="row">
+                        <div class="col-sm-4">
+                           @*<button type="submit" class="btn btn-default">@Resource.Filter</button>
+                              <button type="submit" class="btn btn-default" name="tabAction" value="export">@Resource.Export_To_Excel</button>*@
+                           <button type="button" id="btnSearch" class="btn btn-default">@Resource.Filter</button>
+                           <a class="btn btn-default" href="#" target="_blank" id="btnExport" data-toggle="modal">@Resource.Export_To_Excel</a>
+                           <input type="hidden" name="tabAction" id="tabAction" />
+                        </div>
+                     </div>
+                  </div>
+               </section>
+
+               <section class="tile color transparent-black">
+
+                  <div class="tile-header transparent">
+                     <h1><strong>@Resource.Payroll_Report</strong></h1>
+                     <div class="controls">
+                        <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                     </div>
+                  </div>
+
+
+                  <div class="tile-body ">
+                     <div class="table-responsive" style="overflow-x:auto">
+                        <table class="table table-datatable table-custom" id="moduleDataTable">
+                           <thead>
+                              <tr>
+                                 <th class="sort-alpha">@Resource.Employee_No_SymbolDot</th>
+                                 <th class="sort-alpha">@Resource.Employee_Name</th>
+                                 <th class="sort-alpha">@Resource.Designation</th>
+                                 <th class="sort-amount">@Resource.Basic_Salary</th>
+                                 <th class="sort-amount">@Resource.Employee_CPF_Contribution</th>
+                                 <th class="sort-amount">@Resource.Employer_CPF_Contribution</th>
+                                 <th class="sort-amount">@Resource.Other</th>
+                                 <th class="sort-amount">@Resource.Net_Salary</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              @if (emps != null && emps.Count > 0)
+                              {
+                                 foreach (var employee in emps)
+                                 {
+                                    string designation = "";
+
+                                    decimal BasicSalary = 0;
+                                    decimal Expenses = 0;
+                                    decimal Allowance = 0;
+                                    decimal Adjustment_Addition = 0;
+                                    decimal Commission = 0;
+                                    decimal Overtime = 0;
+                                    decimal Donation = 0;
+
+                                    decimal Deduction = 0;
+                                    decimal Adjustment_Deduction = 0;
+                                    decimal Deduction_Donation = 0;
+                                    decimal EmployeeCPF = 0;
+                                    decimal EmployerCPF = 0;
+                                    decimal other = 0;
+
+                                    decimal total = 0;
+
+                                    string paymentterm = "";
+                                    if (employee != null && employee.Employment_History != null && employee.Employment_History.Count() > 0)
+                                    {
+                                       try
+                                       {
+                                          var emphist = (new EmploymentHistoryService()).GetCurrentEmploymentHistory(employee.Employee_Profile_ID);
+                                          if (emphist != null)
+                                          {
+                                             designation = emphist.Designation.Name;
+                                             paymentterm = emphist.Basic_Salary_Unit;
+                                          }
+                                       }
+                                       catch
+                                       {
+                                       }
+                                       List<PRM> prmList = Model.prmList.Where(w => w.Employee_Profile_ID == employee.Employee_Profile_ID).ToList();
+                                       if (prmList != null && prmList.Count > 0)
+                                       {
+                                          foreach (PRM p in prmList)
+                                          {
+                                             var total_salary = 0M;
+                                             if (p.Basic_Salary.HasValue && p.Basic_Salary.Value > 0)
+                                             {
+                                                total_salary = p.Basic_Salary.Value;
+                                             }
+                                             if (p.Total_Allowance_Basic_Salary.HasValue && p.Total_Allowance_Basic_Salary.Value > 0)
+                                             {
+                                                total_salary += p.Total_Allowance_Basic_Salary.Value;
+                                             }
+
+                                             if (total_salary > 0)
+                                             {
+                                                BasicSalary += total_salary;
+                                             }
+                                             else
+                                             {
+                                                if (paymentterm == Term.Hourly)
+                                                {
+                                                   BasicSalary += ((p.Hourly_Rate.HasValue ? p.Hourly_Rate.Value : 0) * (p.No_Of_Hours.HasValue ? p.No_Of_Hours.Value : 0));
+                                                }
+                                                else
+                                                {
+                                                   var effectivedate = DateUtil.ToDate(1, p.Process_Month.Value, p.Process_Year.Value);
+                                                   var emphist2 = (new EmploymentHistoryService()).GetEmploymentHistory(employee.Employee_Profile_ID, effectivedate.Value);
+                                                   if (emphist2 != null)
+                                                   {
+                                                      var salary = NumUtil.ParseDecimal(EncryptUtil.Decrypt(emphist2.Basic_Salary));
+                                                      if (salary == 0)
+                                                      {
+                                                         salary = NumUtil.ParseDecimal(EncryptUtil.Decrypt(EncryptUtil.Decrypt(emphist2.Basic_Salary)));
+                                                      }
+                                                      BasicSalary += salary;
+                                                   }
+
+                                                }
+
+                                             }
+
+                                             foreach (PRD d in p.PRDs.ToList())
+                                             {
+                                                //+++++++++++++++++++++++++++++++++++++++++++++++++++++//
+                                                if (d.PRT != null && d.PRT.Name == PayrollAllowanceType.Allowance)
+                                                {
+                                                   Allowance += (d.Amount.HasValue ? d.Amount.Value : 0);
+                                                }
+                                                else if (d.PRT != null && d.PRT.Name == PayrollAllowanceType.Adjustment_Addition)
+                                                {
+                                                   Adjustment_Addition += (d.Amount.HasValue ? d.Amount.Value : 0);
+                                                }
+                                                else if (d.PRT != null && d.PRT.Name == PayrollAllowanceType.Commission)
+                                                {
+                                                   Commission += (d.Amount.HasValue ? d.Amount.Value : 0);
+                                                }
+                                                else if (d.PRT != null && d.PRT.Name == PayrollAllowanceType.Overtime)
+                                                {
+                                                   Overtime += (d.Amount.HasValue ? d.Amount.Value : 0);
+                                                }
+                                                else if (d.PRT != null && d.PRT.Name == PayrollAllowanceType.Donation)
+                                                {
+                                                   Donation += (d.Amount.HasValue ? d.Amount.Value : 0);
+                                                }
+
+                                                //-------------------------------------------------------//
+                                                else if (d.PRT != null && d.PRT.Name == PayrollAllowanceType.Deduction)
+                                                {
+                                                   Deduction += (d.Amount.HasValue ? d.Amount.Value : 0);
+                                                }
+                                                else if (d.PRT != null && d.PRT.Name == PayrollAllowanceType.Adjustment_Deduction)
+                                                {
+                                                   Adjustment_Deduction += (d.Amount.HasValue ? d.Amount.Value : 0);
+                                                }
+                                                else if (d.PRT != null && d.PRT.Name == PayrollAllowanceType.Deduction_Donation)
+                                                {
+                                                   Deduction_Donation += (d.Amount.HasValue ? d.Amount.Value : 0);
+                                                }
+                                             }
+                                             foreach (var prde in p.PRDEs.ToList())
+                                             {
+                                                Expenses = Expenses + (prde.Expenses_Application_Document.Amount_Claiming.HasValue ? prde.Expenses_Application_Document.Amount_Claiming.Value : 0);
+                                             }
+                                             EmployeeCPF += (p.CPF_Employee.HasValue ? p.CPF_Employee.Value : 0);
+                                             EmployerCPF += (p.CPF_Emplyer.HasValue ? p.CPF_Emplyer.Value : 0);
+                                             total += p.Nett_Wages.Value;
+                                          }
+                                       }
+                                    }
+                                    //total = (BasicSalary + Expenses + Allowance + Adjustment_Addition + Commission + Overtime + Donation) - (EmployeeCPF + Deduction + Adjustment_Deduction + Deduction_Donation);
+                                    other = (Expenses + Allowance + Adjustment_Addition + Commission + Overtime + Donation) - (Deduction + Adjustment_Deduction + Deduction_Donation);
+
+
+                                    totalhash["BasicSalary"] = (decimal)totalhash["BasicSalary"] + BasicSalary;
+                                    totalhash["EmployeeCPF"] = (decimal)totalhash["EmployeeCPF"] + EmployeeCPF;
+                                    totalhash["EmployerCPF"] = (decimal)totalhash["EmployerCPF"] + EmployerCPF;
+                                    totalhash["Other"] = (decimal)totalhash["Other"] + other;
+                                    totalhash["total"] = (decimal)totalhash["total"] + total;
+                                    <tr>
+                                       <td>@employee.Employee_No</td>
+                                       <td>
+                                          @if (employee != null)
+                                          {
+                                             @UserSession.GetUserName(employee.User_Profile)
+                                          }
+                                       </td>
+                                       <td>@designation</td>
+                                       <td class="text-right">@BasicSalary.ToString("n2")</td>
+                                       <td class="text-right">@EmployeeCPF.ToString("n2")</td>
+                                       <td class="text-right">@EmployerCPF.ToString("n2")</td>
+                                       <td class="text-right">@other.ToString("n2")</td>
+                                       <td class="text-right" style="padding-right:0.2cm">@total.ToString("n2")</td>
+                                    </tr>
+                                 }
+                              }
+                           </tbody>
+                           <tfoot>
+                              <tr class="table-footer-summary" style="font-size:15px">
+                                 <td colspan="3" class="text-right"></td>
+                                 <td class="text-right">
+                                    <strong>@(NumUtil.FormatCurrency((decimal)totalhash["BasicSalary"], 2))</strong>
+                                 </td>
+                                 <td class="text-right">
+                                    <strong>@(NumUtil.FormatCurrency((decimal)totalhash["EmployeeCPF"], 2))</strong>
+
+                                 </td>
+                                 <td class="text-right">
+                                    <strong>@(NumUtil.FormatCurrency((decimal)totalhash["EmployerCPF"], 2))</strong>
+                                 </td>
+                                 <td class="text-right">
+                                    <strong>@(NumUtil.FormatCurrency((decimal)totalhash["Other"], 2))</strong>
+                                 </td>
+                                 <td class="text-right">
+                                    <strong>@(NumUtil.FormatCurrency((decimal)totalhash["total"], 2))</strong>
+                                 </td>
+                              </tr>
+                           </tfoot>
+                        </table>
+                     </div>
+                  </div>
+
+               </section>
+            }
+         </div>
+      </div>
+   </div>
+
+}
+

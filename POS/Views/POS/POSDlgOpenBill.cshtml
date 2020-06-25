@@ -1,0 +1,109 @@
+﻿@using POS.Common;
+@using POS.Models;
+@using SBSModel.Common;
+@using SBSModel.Models;
+@model  POS.Models.POSViewModel
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnOpenBillSelectProduct").click(function () {
+            var pAmount = $('#Open_Bill_Amount').val();
+
+            $('#Open_Bill_Amount_Err').get(0).setAttribute("class", "field-validation-valid")
+            if ($('#Open_Bill_Amount_Err').get(0).childNodes.length > 0) $('#Open_Bill_Amount_Err').get(0).removeChild($('#Open_Bill_Amount_Err').get(0).childNodes[0]);
+
+            var valid = true;
+
+
+            if (pAmount == null || pAmount == "") {
+                $('#Open_Bill_Amount_Err').get(0).setAttribute("class", "field-validation-error")
+
+                var spanErr = document.createElement("span");
+                spanErr.textContent = "The Amount field is required.";
+                $('#Open_Bill_Amount_Err').get(0).appendChild(spanErr);
+
+                valid = false;
+            }
+            else {
+                var amount = parseFloat(pAmount).toFixed(2);
+                if (isNaN(amount) || amount < 0) {
+                    $('#Open_Bill_Amount_Err').get(0).setAttribute("class", "field-validation-error")
+
+                    var spanErr = document.createElement("span");
+                    spanErr.textContent = "The value '" + pAmount + "' is not valid for Amount.";
+                    $('#Open_Bill_Amount_Err').get(0).appendChild(spanErr);
+
+                    valid = false;
+                }
+                else {
+                    $('#Open_Bill_Amount').val(amount);
+                }
+            }
+
+            if (valid) {
+                $("#modal-open-bill").modal('hide');
+                $("#btnOpenBill").get(0).style.color = "#b6dd69";
+                $("#btnOpenBill").get(0).style.borderColor = "#b6dd69";
+                $("#iOpenBill").get(0).setAttribute("class", "icon icon-check");
+                $("#Opening_Bill").val(true);
+            }
+
+        });
+
+        $("#btnOpenBillCancel").click(function () {
+            $("#modal-open-bill").modal('hide');
+            $("#btnOpenBill").get(0).style.color = "#666";
+            $("#btnOpenBill").get(0).style.borderColor = "#666";
+            $("#iOpenBill").get(0).setAttribute("class", "icon icon-check-empty");
+            $('#Open_Bill_Amount').val('');
+            $("#Opening_Bill").val(false);
+        });
+
+
+    });
+   
+</script>
+
+
+<input type="hidden" id="Opening_Bill" value="false" />
+<a data-toggle="modal" href="#modal-open-bill" id="btnOpenBill"><div class="btn btn-white btn-large" style="width:20%;"><p><i id="iOpenBill" class="icon icon-check-empty"></i>@Resources.ResourcePOS.OpenBill</p></div></a>
+<div id="modal-open-bill" class="modal hide fade">
+    <div class="modal-body">
+        <div class="control-group text-center">
+            <label class="control-label" style="font-weight: 600; font-size: 20px; line-height: 40px">@Resources.ResourcePOS.OpenBill</label>
+        </div>
+        <div class="control-group">
+            <div class="span6">
+                <div class="control-group">
+                    @Html.Label("Open_Bill_Amount", "Amount", new { @class = "control-label", style = "font-size:18px;" })
+                </div>
+                <div class="control-group">
+                    <div class="span9">
+                        @Html.TextBox("Open_Bill_Amount", "", new { style = "width:90%;text-align:right;", @class = "bg-white" })
+                        <div class="validation-error">
+                            <span id="Open_Bill_Amount_Err"></span>
+                        </div>
+                    </div>
+                    <div class="span3">
+                        @Html.TextBoxFor(m => m.Currency_Code, new { Readonly = true })
+                    </div>
+                  
+                </div>
+            </div>
+            <div class="span6">
+                <div class="control-group">
+                    @{
+                        Html.RenderPartial("POSDlgNumber", new POSNumberViewModel()
+                        {
+                            Type = POSDlgType.OpenBill,
+                            Display_Label_ID = "Open_Bill_Amount"
+                        });
+                    }
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>

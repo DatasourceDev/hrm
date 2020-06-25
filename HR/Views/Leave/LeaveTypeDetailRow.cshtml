@@ -1,0 +1,63 @@
+﻿@model  HR.Models.LeaveConfigDetailViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using HR.Common;
+@{
+    var userlogin = UserSession.getUser(Request.RequestContext.HttpContext);
+    var i = Model.Index;
+
+    var designations = Newtonsoft.Json.JsonConvert.SerializeObject(Model.Designations);
+    var desinationsText = "";
+
+    var designationcnt = 0;
+    if (Model.Designations != null)
+    {
+        designationcnt = Model.Designations.Count();
+
+    }
+}
+
+<td id="td-@i">
+
+    @Html.Hidden("Detail_Rows[" + i + "].Leave_Config_ID", Model.Leave_Config_ID)
+    @Html.Hidden("Detail_Rows[" + i + "].Group_ID", (i + 1))
+    @Html.Hidden("Detail_Rows[" + i + "].Row_Type", RowType.ADD)
+
+    @if (Model.Designations != null)
+    {
+        foreach (var drow in Model.designationList)
+        {
+            if (Model.Designations.Contains(NumUtil.ParseInteger(drow.Value)))
+            {
+                desinationsText = desinationsText + drow.Text + Environment.NewLine;
+                <input type="hidden" name="Detail_Rows[@i].Designations" value="@drow.Value" />
+            }
+        }
+        <textarea class="form-control input-table-transparent" id="Detail_Rows_@(i)__Designations_Text" rows="@designationcnt" readonly>@desinationsText</textarea>
+    }
+    <div class="validation-error">
+        @Html.ValidationMessage("Detail_Rows[" + i + "].Designations")
+    </div>
+</td>
+<td>
+    <input type="text" class="form-control input-table-transparent" id="Detail_Rows_@(i)__Year_Service_Text" value="@Model.Year_Service" readonly>
+    <input type="hidden" id="Detail_Rows_@(i)__Year_Service" name="Detail_Rows[@i].Year_Service" value="@Model.Year_Service">
+    <div class="validation-error">
+        @Html.ValidationMessage("Detail_Rows[" + i + "].Year_Service")
+    </div>
+</td>
+<td class="text-right">
+    <input type="text" class="form-control input-table-transparent text-right" id="Detail_Rows_@(i)__Default_Leave_Amount_Text" value="@Model.Default_Leave_Amount" readonly>
+    <input type="hidden" id="Detail_Rows_@(i)__Default_Leave_Amount" name="Detail_Rows[@i].Default_Leave_Amount" value="@Model.Default_Leave_Amount">
+    <div class="validation-error">
+        @Html.ValidationMessage("Detail_Rows[" + i + "].Default_Leave_Amount")
+    </div>
+</td>
+<td class="actions text-left" style="cursor:pointer">
+    <a href="#" id="btnEditDetail-@i" onclick="EditDetail_Onclick('@i', '@Model.Leave_Config_ID','@(i + 1)','@Model.Row_Type',@designations, '@Model.Year_Service','@Model.Default_Leave_Amount')"><i class="fa fa-edit fa-2x"></i></a>
+    <a data-toggle="modal" onclick="return DeleteDetail('erow-@i', @i);">
+        <i class="fa fa-times-circle-o fa-2x"></i>
+    </a>
+</td>
+

@@ -1,0 +1,1302 @@
+﻿@model HR.Models.IR8AViewModel
+@using HR.Models
+@using HR.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@{
+    ViewBag.Title = Resource.IR8A;
+    var currentdate = StoredProcedure.GetCurrentDate();
+
+    string ref_no = Model.Employee_Profile.NRIC;
+    if (ref_no.IsEmpty())
+    {
+        ref_no = "FIN/ " + Model.Employee_Profile.FIN_No;
+    }
+    else
+    {
+        ref_no = "NRIC/ " + ref_no;
+    }
+
+    String nationality = "";
+    if (Model.Employee_Profile != null && Model.Employee_Profile.Nationality != null)
+    {
+        nationality = Model.nationalityList.Where(w => w.Value == Model.Employee_Profile.Nationality_ID.ToString()).FirstOrDefault().Text;
+    }
+
+    var year = Model.sYear - 1;
+}
+
+
+
+<script type="text/javascript">
+    $(function () {
+        InitDatepicker();
+    });
+</script>
+<script type="text/javascript">
+    $(function () {
+
+        @if (Model.operation == UserSession.RIGHT_U) {
+            @:Disable('ir8a');
+                                                                                                                                                                                                                                                                                                                                           }
+
+        $('input[name=Income_Tax_Employer]:radio').click(function () {
+            setIncome_Tax_Employer();
+        });
+
+        $('input[name=Approval_IRAS]:radio').click(function () {
+            if (this.getAttribute("readonly") == null || this.getAttribute("readonly") == '')
+                setDate_Approval();
+        });
+
+        setIncome_Tax_Employer();
+        setDate_Approval();
+
+
+        $('#Allowance_Transport').change(function () {
+            sumAullowance();
+        });
+
+        $('#Allowance_Entertain').change(function () {
+            sumAullowance();
+        });
+
+        $('#Allowance_Others').change(function () {
+            sumAullowance();
+        });
+
+        sumAullowance();
+
+        $('#Gratuity').change(function () {
+            lumpSum();
+        });
+
+        $('#Notice_Pay').change(function () {
+            lumpSum();
+        });
+
+        $('#Ex_Gratia').change(function () {
+            lumpSum();
+        });
+
+        $('#Lump_Sum_Others').change(function () {
+            lumpSum();
+        });
+
+        $('#Compensation_Loss').change(function () {
+            lumpSum();
+        });
+
+        lumpSum();
+
+        $('#Allowance').change(function () {
+            sumD();
+        });
+        $('#Commission_Amount').change(function () {
+            sumD();
+        });
+        $('#Pension').change(function () {
+            sumD();
+        });
+        $('#Lump_Sum').change(function () {
+            sumD();
+        });
+        $('#Amount_Accured_1992').change(function () {
+            sumD();
+        });
+        $('#Amount_Accured_1993').change(function () {
+            sumD();
+        });
+        $('#Contribution_Out_Singapore').change(function () {
+            sumD();
+        });
+        $('#Excess_Less').change(function () {
+            sumD();
+        });
+        $('#Excess_Employer').change(function () {
+            sumD();
+        });
+        $('#Gain_Profit').change(function () {
+            sumD();
+        });
+        $('#Value_Benefit').change(function () {
+            sumD();
+        });
+
+        sumD();
+
+        Commission_Onchage();
+    });
+
+
+    function setIncome_Tax_Employer() {
+        if ($('input[name=Income_Tax_Employer][value=false]').prop('readonly') == false) {
+            if ($('input[name=Income_Tax_Employer][value=false]').prop('checked') == true) {
+                $('#Tax_Partially').prop('readonly', true);
+                $('#Tax_Fixed').prop('readonly', true);
+            }
+            else {
+                $('#Tax_Partially').prop('readonly', false);
+                $('#Tax_Fixed').prop('readonly', false);
+                $('#Tax_Partially').val("0.00");
+                $('#Tax_Fixed').val("0.00");
+            }
+        }
+
+    }
+
+    function setDate_Approval() {
+        if ($('input[name=Approval_IRAS][value=true]').prop('checked') == true) {
+            $('#Date_Approval').prop('readonly', false);
+        }
+        else {
+            $('#Date_Approval').prop('readonly', true);
+            $('#Date_Approval').val("");
+        }
+    }
+
+    function sumAullowance() {
+
+        total = parseFloat($('#Allowance_Transport').val()) +
+            parseFloat($('#Allowance_Entertain').val()) +
+            parseFloat($('#Allowance_Others').val());
+        $('#Allowance').val(parseFloat(total).toFixed(2));
+    }
+
+    function lumpSum() {
+        total = parseFloat($('#Gratuity').val()) +
+            parseFloat($('#Notice_Pay').val()) +
+            parseFloat($('#Ex_Gratia').val()) +
+            parseFloat($('#Lump_Sum_Others').val()) +
+            parseFloat($('#Compensation_Loss').val());
+        $('#Lump_Sum').val(parseFloat(total).toFixed(2));
+
+    }
+
+    function sumD() {
+        total = parseFloat($('#Allowance').val()) +
+            parseFloat($('#Commission_Amount').val()) +
+            parseFloat($('#Pension').val()) +
+            parseFloat($('#Lump_Sum').val()) +
+            parseFloat($('#Amount_Accured_1992').val()) +
+            parseFloat($('#Amount_Accured_1993').val()) +
+            parseFloat($('#Contribution_Out_Singapore').val()) +
+            parseFloat($('#Excess_Less').val()) +
+            parseFloat($('#Excess_Employer').val()) +
+            parseFloat($('#Gain_Profit').val()) +
+            parseFloat($('#Value_Benefit').val());
+
+        $('#sumD').val(parseFloat(total).toFixed(2));
+    }
+
+    function Commission_Onchage() {
+        $("#Commission_Amount").val(0);
+        var sdate = $("#Commission_Start").val();
+        var edate = $("#Commission_End").val();
+        var eid = '@Model.Employee_Profile_ID';
+        $.ajax({
+            type: 'POST',
+            url: 'IR8ACommissionAmount',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({
+                sdate: sdate,
+                edate: edate,
+                eid: eid
+            }),
+            dataType: 'json',
+            success: function (data) {
+                if (data != null) {
+                    $("#Commission_Amount").val(data.amount);
+                }
+                @if(Model.operation == UserSession.RIGHT_U) {
+                    @:$("#Commission_Amount").val(parseFloat($("#Commission_Amount").val()).toFixed(2));
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     }
+
+            }
+        });
+    }
+</script>
+
+<div class="pageheader">
+    <h2>@Resource.IR8A @Model.sYear</h2>
+    <div class="breadcrumbs">
+        <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li><a href="@Url.Action("IR8A", "Payroll")">@Resource.IR8A</a></li>
+            <li class="active">@Resource.IR8A_Info</li>
+        </ol>
+    </div>
+
+
+</div>
+@using (Html.BeginForm("IR8A", "Payroll", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+
+    <input type="hidden" name="sYear" value="@Model.sYear" />
+
+    <div class="main">
+        <div id="ir8a">
+            <div class="row">
+                <div class="col-md-12">
+                    @if (Model.result != null && Model.result.Code != 0)
+                    {
+
+                        if (Model.result.Code < 0)
+                        {
+                            <div class="alert alert-red">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                        else if (Model.result.Code > 0)
+                        {
+                            <div class="alert alert-success">
+                                @Html.Raw(AppConst.GetMsg(Model.result))
+                            </div>
+                        }
+                    }
+
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" value="@Model.operation" name="operation" />
+                    <input type="hidden" value="@Model.iid" name="iid" />
+                    <input type="hidden" value="@Model.Employee_Profile_ID" name="Employee_Profile_ID" />
+
+                    <section class="tile color transparent-black">
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.Employee_Info</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Employee_No" class="control-label">@Resource.Employee_No</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control" id="Employee_No" value="@Model.Employee_Profile.Employee_No" readonly>
+
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Name" class="control-label">@Resource.Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control" id="Name" value="@Model.Employee_Profile.User_Profile.First_Name @Model.Employee_Profile.User_Profile.Last_Name" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Residential_Address_1" class="control-label">@Resource.Residential_Address</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input id="Residential_Address_1" class="form-control" value="@(Model.Employee_Profile.Residential_Address_1 + " " + Model.Employee_Profile.Postal_Code_1)" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Run_Date" class="control-label">@Resource.Run_Date</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control" id="Run_Date" value="@Model.Run_Date" readonly>
+
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="FIN_No" class="control-label">@Resource.Employees_Tax_Ref_No</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control" id="FIN_No" value="@ref_no" readonly>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Gender" class="control-label">@Resource.Sex</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control" id="Gender" value="@(Model.genderList.Where(w => w.Value == Model.Employee_Profile.Gender.Value.ToString()).FirstOrDefault().Text)" readonly>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Commission_End" class="control-label">@Resource.For_Year_Ended</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control" id="Commission_End" value="@Model.Commission_End" readonly>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="DOB" class="control-label">@Resource.DOB</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control" id="DOB" value="@(DateUtil.ToDisplayDate(Model.Employee_Profile.DOB))" readonly>
+
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Residential_Address_1" class="control-label">@Resource.Nationality</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control" id="FIN_No" value="@nationality" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="tile color transparent-black">
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.Employment_Information</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Registry" class="control-label">@Resource.Employees_Tax_Ref_No</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control" id="Registry" value="@Model.company.Registry" readonly>
+
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Date_of_Cessation" class="control-label">@Resource.Date_Of_Cessation_Overseas_Posting</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control input-datepicker" id="Date_of_Cessation" name="Date_of_Cessation" value="@Model.Date_of_Cessation">
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Designation" class="control-label">@Resource.Designation</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control" id="Designation" value="@Model.Designation_Name" readonly>
+
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Bank_Name" class="control-label">@Resource.Message_Bank_To_Which_Salary_Is_Credited</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control" id="Bank_Name" name="Bank_Name" value="@Model.Bank_Name">
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Hired_Date" class="control-label">@Resource.Employment_Commenced_Ceased</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control" id="Hired_Date" value="@Model.Hired_Date" readonly>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="tile color transparent-black">
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.Income</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <div class="col-md-10">
+                                            <label for="Gross_Salary" class="control-label">a) <b>Gross Salary, Fees, Leave Pay, Wages and Overtime Pay (See Explanatory Note 12a)</b></label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Gross_Salary" name="Gross_Salary" value="@Model.Gross_Salary">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Gross_Salary)
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-10">
+                                            <label for="Bonus" class="control-label">b) @Resource.Bonus (@Resource.Message_Non_Contractual_Bonus_Paid_In @year @Resource.Message_And_Or_Contractual_Bonus) (<b>See Explanatory Note 12b </b>)</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Bonus" name="Bonus" value="@Model.Bonus">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Bonus)
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-10">
+                                            <label for="Director_Fee" class="control-label">c) @Resource.DirectorS_Fees (@Resource.Message_Approved_At_The_Company_S_AGM_EGM_On ../ ../ @year) (<b>See Explanatory Note 12c</b>)</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Director_Fee" name="Director_Fee" value="@Model.Director_Fee">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Director_Fee)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-6">
+                                            <label for="Director_Fee" class="control-label">d) @Resource.Others</label>
+                                        </div>
+                                        <div class="col-md-6">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4" style="padding-left:30px;">
+                                            <label class="control-label">1) @Resource.Allowances</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label for="Allowance_Transport" class="control-label">i) @Resource.Transport</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label for="Allowance_Entertain" class="control-label">ii) @Resource.Entertainment</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label for="Allowance_Others" class="control-label">iii) @Resource.Others</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-4" style="padding-left:30px;">
+
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Allowance_Transport" name="Allowance_Transport" value="@Model.Allowance_Transport">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Allowance_Transport)
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Allowance_Entertain" name="Allowance_Entertain" value="@Model.Allowance_Entertain">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Allowance_Entertain)
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Allowance_Others" name="Allowance_Others" value="@Model.Allowance_Others">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Allowance_Others)
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Allowance" name="Allowance" value="0" readonly>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-4" style="padding-left:30px;">
+                                            <label class="control-label">2) @Resource.Message_Gross_Commission_For_The_Period</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control  input-datepicker" id="Commission_Start" name="Commission_Start" value="@Model.Commission_Start">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control  input-datepicker" id="Commission_End" name="Commission_End" value="@Model.Commission_End">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Commission_Type == 1)
+                                                {
+                                                    <input type="radio" name="Commission_Type" id="Commission_Type1" value="1" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Commission_Type" id="Commission_Type1" value="1">
+                                                }
+
+                                                <label for="Commission_Type1">@Resource.Monthly</label>
+                                            </div>
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Commission_Type == 1)
+                                                {
+                                                    <input type="radio" name="Commission_Type" id="Commission_Type2" value="2">
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Commission_Type" id="Commission_Type2" value="2" checked>
+                                                }
+
+                                                <label for="Commission_Type2">@Resource.Other</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Commission_Amount" name="Commission_Amount" value="@Model.Commission_Amount">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4" style="padding-left:30px;">
+                                            <label class="control-label">3) @Resource.Pension </label>
+                                        </div>
+                                        <div class="col-md-2">
+                                        </div>
+                                        <div class="col-md-2">
+                                        </div>
+                                        <div class="col-md-2">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Pension" name="Pension" value="@Model.Pension">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Pension)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4" style="padding-left:30px;">
+                                            <label class="control-label">4) @Resource.Lump_Sum_Payment</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                        </div>
+                                        <div class="col-md-2">
+                                        </div>
+                                        <div class="col-md-2">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Lump_Sum" name="Lump_Sum" value="0" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4" style="padding-left:60px;">
+                                            <label for="Gratuity" class="control-label">@Resource.Gratuity</label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="Notice_Pay" class="control-label">@Resource.Notice_Pay</label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="Ex_Gratia" class="control-label">@Resource.Ex_Gratia_Payment</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4" style="padding-left:60px;">
+                                            <input type="text" class="form-control text-right" id="Gratuity" name="Gratuity" value="@Model.Gratuity">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Gratuity)
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control text-right" id="Notice_Pay" name="Notice_Pay" value="@Model.Notice_Pay">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Notice_Pay)
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control text-right" id="Ex_Gratia" name="Ex_Gratia" value="@Model.Ex_Gratia">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Ex_Gratia)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4" style="padding-left:60px;">
+                                            <label for="Lump_Sum_Others" class="control-label">@Resource.Others</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <label for="Nature" class="control-label">@Resource.Nature</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4" style="padding-left:60px;">
+                                            <input type="text" class="form-control text-right" id="Lump_Sum_Others" name="Lump_Sum_Others" value="@Model.Lump_Sum_Others">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Lump_Sum_Others)
+                                            </div>
+
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" id="Nature" name="Nature" value="@Model.Nature">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Nature)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4" style="padding-left:60px;">
+                                            <label for="Compensation_Loss" class="control-label">@Resource.Message_Compensation_For_Loss_Of_Office</label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="Approval_IRAS" class="control-label">@Resource.Message_Approval_Obtained_From_IRAS</label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="Date_Approval" class="control-label">@Resource.Date_Of_Approval</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4" style="padding-left:60px;">
+                                            <input type="text" class="form-control text-right" id="Compensation_Loss" name="Compensation_Loss" value="@Model.Compensation_Loss">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Compensation_Loss)
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Approval_IRAS)
+                                                {
+                                                    <input type="radio" name="Approval_IRAS" id="Approval_IRASY" value="true" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Approval_IRAS" id="Approval_IRASY" value="true">
+                                                }
+
+                                                <label for="Approval_IRASY">@Resource.Yes</label>
+                                            </div>
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Approval_IRAS)
+                                                {
+                                                    <input type="radio" name="Approval_IRAS" id="Approval_IRASN" value="false">
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Approval_IRAS" id="Approval_IRASN" value="false" checked>
+                                                }
+
+                                                <label for="Approval_IRASN">@Resource.No</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control " id="Date_Approval" name="Date_Approval" value="@Model.Date_Approval">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Date_Approval)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4" style="padding-left:60px;">
+                                            <label for="Reason_Payment" class="control-label">@Resource.Reason_For_Payment</label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="Length_Service" class="control-label">@Resource.Length_Of_Service</label>
+                                        </div>
+                                        <div class="col-md-4">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4" style="padding-left:60px;">
+                                            <input type="text" class="form-control" id="Reason_Payment" name="Reason_Payment" value="@Model.Reason_Payment">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Reason_Payment)
+                                            </div>
+
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control text-right" id="Length_Service" name="Length_Service" value="@Model.Length_Service">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Length_Service)
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12" style="padding-left:60px;">
+                                            <label for="Basis_Payment" class="control-label">@Resource.Basis_Of_Driving_At_Payment</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-8" style="padding-left:60px;">
+                                            <input type="text" class="form-control" id="Basis_Payment" name="Basis_Payment" value="@Model.Basis_Payment">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Basis_Payment)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12" style="padding-left:30px;">
+                                            <label class="control-label"> 5) @Resource.Message_Retirement_Benefits_Including_GratuitiesPpension_Ccommutation</label>
+                                        </div>
+
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12" style="padding-left:60px;">
+                                            <label for="Retirement_Pension" class="control-label">@Resource.Message_Pension_Provident_Fund_Name_Of_Fund</label>
+                                        </div>
+
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-8" style="padding-left:60px;">
+                                            <input type="text" class="form-control" id="Retirement_Pension" name="Retirement_Pension" value="@Model.Retirement_Pension">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Retirement_Pension)
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4" style="padding-left:60px;">
+                                            <label for="Amount_Accured_1992" class="control-label">@Resource.Message_Amount_Accrued_Up_To_31_Dec_1992</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Amount_Accured_1992" name="Amount_Accured_1992" value="@Model.Amount_Accured_1992">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Amount_Accured_1992)
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="Amount_Accured_1993" class="control-label">@Resource.Message_Amount_Accrued_From_1993</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Amount_Accured_1993" name="Amount_Accured_1993" value="@Model.Amount_Accured_1993">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Amount_Accured_1993)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12" style="padding-left:30px;">
+                                            <label class="control-label">6)  @Resource.Message_Contributions_Made_By_Employer_Pension_Provident_Fund_Singapore</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-10" style="padding-left:60px;">
+                                            <label for="Contribution_Out_Singapore" class="control-label">@Resource.Message_Without_Tax_Concession</label>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Contribution_Out_Singapore" name="Contribution_Out_Singapore" value="@Model.Contribution_Out_Singapore">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Contribution_Out_Singapore)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-10" style="padding-left:60px;">
+                                            <label class="control-label">@Resource.Message_With_Tax_Concession</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Contribution_With_Singapore" name="Contribution_With_Singapore" value="@Model.Contribution_With_Singapore">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Contribution_With_Singapore)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12" style="padding-left:60px;">
+                                            <label class="control-label">@Resource.Message_Name_Of_The_Overseas_Pension_Provident_Fund</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-8" style="padding-left:60px;">
+                                            <input type="text" class="form-control" id="Contribution_With_Name" name="Contribution_With_Name" value="@Model.Contribution_With_Name">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Contribution_With_Name)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4" style="padding-left:60px;">
+                                            <label for="Contribution_With_Madatory" class="control-label">@Resource.Message_Are_Contributions_Mandatory</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <label for="Contribution_With_Establishment" class="control-label">@Resource.Message_Were_Contributions_Charged_Deductions_Claimed_Singapore</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4" style="padding-left:60px;">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Contribution_With_Madatory.HasValue && Model.Contribution_With_Madatory.Value)
+                                                {
+                                                    <input type="radio" name="Contribution_With_Madatory" id="Contribution_With_MadatoryY" value="true" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Contribution_With_Madatory" id="Contribution_With_MadatoryY" value="true">
+                                                }
+
+                                                <label for="Contribution_With_MadatoryY">@Resource.Yes</label>
+                                            </div>
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Contribution_With_Madatory.HasValue && Model.Contribution_With_Madatory.Value)
+                                                {
+                                                    <input type="radio" name="Contribution_With_Madatory" id="Contribution_With_MadatoryN" value="false">
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Contribution_With_Madatory" id="Contribution_With_MadatoryN" value="false" checked>
+                                                }
+
+                                                <label for="Contribution_With_MadatoryN">@Resource.No</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Contribution_With_Establishment.HasValue && Model.Contribution_With_Establishment.Value)
+                                                {
+                                                    <input type="radio" name="Contribution_With_Establishment" id="Contribution_With_EstablishmentY" value="true" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Contribution_With_Establishment" id="Contribution_With_EstablishmentY" value="true">
+                                                }
+
+                                                <label for="Contribution_With_EstablishmentY">@Resource.Yes</label>
+                                            </div>
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Contribution_With_Establishment.HasValue && Model.Contribution_With_Establishment.Value)
+                                                {
+                                                    <input type="radio" name="Contribution_With_Establishment" id="Contribution_With_EstablishmentN" value="false">
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Contribution_With_Establishment" id="Contribution_With_EstablishmentN" value="false" checked>
+                                                }
+
+                                                <label for="Contribution_With_EstablishmentN">@Resource.No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-8" style="padding-left: 30px;">
+                                            <label for="Excess_Less" class="control-label">7) @Resource.Message_Excess_Voluntary_Contribution_CPF_Employer</label>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Excess_Less" name="Excess_Less" value="@Model.Excess_Less">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Excess_Less)
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Excess_Employer" name="Excess_Employer" value="@Model.Excess_Employer">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Excess_Employer)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-10" style="padding-left: 30px;">
+                                            <label for="Gain_Profit" class="control-label">8) @Resource.Message_Gains_Profits_From_Employee_Stock_Option_Ther</label>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Gain_Profit" name="Gain_Profit" value="@Model.Gain_Profit">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Gain_Profit)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-10" style="padding-left: 30px;">
+                                            <label for="Value_Benefit" class="control-label">9) @Resource.Message_Value_Of_Benefits_In_Kind</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Value_Benefit" name="Value_Benefit" value="@Model.Value_Benefit">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Value_Benefit)
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-7" style="padding-left: 30px;">
+                                        </div>
+                                        <div class="col-md-3" style="padding-left: 30px;">
+                                            <label for="Value_Benefit" class="control-label">@Resource.Total (@Resource.Item d1 @Resource.To d9)</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="sumD" name="sumD" value="0" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-10">
+                                            <label for="Remission_Income" class="control-label">e) @Resource.Message_Remissio_Amount_Of_Income</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Remission_Income" name="Remission_Income" value="@Model.Remission_Income">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-10" style="padding-left:30px">
+                                            <label for="Non_Tax_Income" class="control-label">@Resource.Message_Exempt_Non_Taxable_Income</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Non_Tax_Income" name="Non_Tax_Income" value="@Model.Non_Tax_Income">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-6">
+                                            <label for="Income_Tax_Employer" class="control-label">f) @Resource.Message_Employee_S_Income_Tax_Borne_Employer</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-3" style="padding-left:30px">
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Income_Tax_Employer)
+                                                {
+                                                    <input type="radio" name="Income_Tax_Employer" id="Income_Tax_EmployerY" value="true" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Income_Tax_Employer" id="Income_Tax_EmployerY" value="true">
+                                                }
+                                                <label for="Income_Tax_EmployerY">@Resource.Yes</label>
+                                            </div>
+                                            <div class="radio radio-transparent">
+                                                @if (Model.Income_Tax_Employer)
+                                                {
+                                                    <input type="radio" name="Income_Tax_Employer" id="Income_Tax_EmployerN" value="false">
+                                                }
+                                                else
+                                                {
+                                                    <input type="radio" name="Income_Tax_Employer" id="Income_Tax_EmployerN" value="false" checked>
+                                                }
+
+                                                <label for="Income_Tax_EmployerN">@Resource.No</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-8" style="padding-left:30px">
+                                            <div class="alert alert-info"> @Resource.Message_Note_IR8A_2014</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-10" style="padding-left:30px">
+                                            <label for="Tax_Partially" class="control-label">(i) @Resource.Message_Note_IR8A_2014_Detal_1</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Tax_Partially" name="Tax_Partially" value="@Model.Tax_Partially" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-10" style="padding-left:30px">
+                                            <label for="Tax_Fixed" class="control-label">(ii) @Resource.Message_Note_IR8A_2014_Detal_2</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Tax_Fixed" name="Tax_Fixed" value="@Model.Tax_Fixed" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="tile color transparent-black">
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.Deduction</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <div class="col-md-10">
+                                            <label for="Employee_CPF" class="control-label">@Resource.Message_EMPLOYEE_S_COMPULSORY</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Employee_CPF" name="Employee_CPF" value="@Model.Employee_CPF">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Employee_CPF)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-8">
+                                            <label for="Name_CPF" class="control-label">@Resource.Name_Of_Fund</label>
+                                        </div>
+                                        <div class="col-md-4">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control " id="Name_CPF" name="Name_CPF" value="@Model.Name_CPF">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Name_CPF)
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-10">
+                                            <label class="control-label">@Resource.Message_Donations_Deducted_From_Salaries_For</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Donation" name="Donation" value="@Model.Donation">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Donation)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-10">
+                                            <div class="checkbox check-transparent">
+                                                @if (Model.Yayasan_Mendaki_Fund == "on")
+                                                {
+                                                    <input type="checkbox" value="true" id="Yayasan_Mendaki_Fund" name="Yayasan_Mendaki_Fund" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" value="true" id="Yayasan_Mendaki_Fund" name="Yayasan_Mendaki_Fund">
+                                                }
+                                                <label for="Yayasan_Mendaki_Fund">@Resource.Message_Yayasan_Mendaki_Fund</label>
+                                            </div>
+                                            <div class="checkbox check-transparent">
+                                                @if (Model.Community_chest_of_Singapore == "on")
+                                                {
+                                                    <input type="checkbox" value="true" id="Community_chest_of_Singapore" name="Community_chest_of_Singapore" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" value="true" id="Community_chest_of_Singapore" name="Community_chest_of_Singapore">
+                                                }
+                                                <label for="Community_chest_of_Singapore">@Resource.Message_Community_Chest_Of_Singapore</label>
+                                            </div>
+                                            <div class="checkbox check-transparent">
+                                                @if (Model.SINDA == "on")
+                                                {
+                                                    <input type="checkbox" value="true" id="SINDA" name="SINDA" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" value="true" id="SINDA" name="SINDA">
+                                                }
+                                                <label for="SINDA">@Resource.SINDA</label>
+                                            </div>
+                                            <div class="checkbox check-transparent">
+                                                @if (Model.CDAC == "on")
+                                                {
+                                                    <input type="checkbox" value="true" id="CDAC" name="CDAC" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" value="true" id="CDAC" name="CDAC">
+                                                }
+                                                <label for="CDAC">@Resource.CDAC</label>
+                                            </div>
+                                            <div class="checkbox check-transparent">
+                                                @if (Model.ECF == "on")
+                                                {
+                                                    <input type="checkbox" value="true" id="ECF" name="ECF" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" value="true" id="ECF" name="ECF">
+                                                }
+                                                <label for="ECF">@Resource.ECF</label>
+                                            </div>
+                                            <div class="checkbox check-transparent">
+                                                @if (Model.Other_tax_exempt_donations == "on")
+                                                {
+                                                    <input type="checkbox" value="true" id="Other_tax_exempt_donations" name="Other_tax_exempt_donations" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" value="true" id="Other_tax_exempt_donations" name="Other_tax_exempt_donations">
+                                                }
+                                                <label for="Other_tax_exempt_donations">@Resource.Message_Other_Tax_Exempt_Donations</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-10">
+                                            <label for="Contribution_Mosque" class="control-label">@Resource.Message_Contribution_Deducted_From_Salaries_For_Mosque_Building_Fund</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Contribution_Mosque" name="Contribution_Mosque" value="@Model.Contribution_Mosque">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Contribution_Mosque)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-10">
+                                            <label for="Life_Insurance" class="control-label">@Resource.Message_Life_Insurance_Premiums_Deducted_From_Salaries</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" id="Life_Insurance" name="Life_Insurance" value="@Model.Life_Insurance">
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(model => model.Life_Insurance)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="tile color transparent-black">
+                        <div class="tile-header transparent">
+                            <h1><strong>@Resource.Declaration</strong></h1>
+                            <div class="controls">
+                                <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Company_Name" class="control-label">@Resource.Name_Of_Employer</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Company_Address" class="control-label"> @Resource.Address_Of_Employer</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="User_Name" class="control-label">@Resource.Message_Name_Of_Authorised_Person_Making_Declaration</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control " id="Company_Name" value="@Model.company.Name" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Designation" class="control-label">@Resource.Designation</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control " id="Designation" value="@Model.employer_Desination_Name" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control" id="Company_Address" value="@Model.company.Address" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <label for="Tel" class="control-label">@Resource.Tel</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control" id="Tel" value="@Model.employer.Mobile_No" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control " id="User_Name" value="@AppConst.GetUserName(Model.employer.User_Profile)" readonly>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <section class="tile color transparent-white">
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    @if (Model.operation == UserSession.RIGHT_C)
+                                    {
+                                        <button type="submit" class="btn btn-primary">@Resource.Save</button>
+                                    }
+                                    @if ((Model.operation == UserSession.RIGHT_U || Model.operation == UserSession.RIGHT_A) && Model.iid != 0)
+                                    {
+                                        <a id="preview" class="btn btn-primary link-allow-click" target="_blank" href="@Url.Action("IR8APdf", new { operation = EncryptUtil.Encrypt(UserSession.RIGHT_A),  iid = EncryptUtil.Encrypt(Model.iid) })"> @Resource.Preview_IR8A</a>
+                                    }
+
+                                    <a href="@Url.Action("IR8A", "Payroll", new { })" class="btn btn-default link-allow-click">@Resource.Back</a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+

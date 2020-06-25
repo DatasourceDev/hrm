@@ -1,0 +1,944 @@
+﻿@model Authentication.Models.CompanyRegisterViewModel
+@using Authentication.Common
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@{
+   ViewBag.Title = Resource.Company_Info;
+
+   var company_level = Model.Company_Levelg;
+   var EndUser = Companylevel.EndUser;
+}
+
+<script type="text/javascript">
+   $(function () {
+      InitDatepicker();
+
+      if ('@company_level' == '@EndUser') {
+         $('#Company_Level').attr("readonly", "true");
+         $('#Company_Level').prop('disabled', true);
+      } else {
+         $('#Company_Level').removeAttr("readonly");
+         $('#Company_Level').prop('disabled', false);
+      }
+      $('#Company_Level').trigger("chosen:updated");
+   });
+
+   function Country_OnChange(opt) {
+
+      var cID = $('#Country_ID').val();
+      var id = 'State_ID';
+      var type = '@ComboTypeEnum.State';
+      $.ajax({
+         type: 'POST',
+         url: '@Url.Action("Reload", "Combo")',
+         contentType: 'application/json; charset=utf-8',
+         data: JSON.stringify({ type: type, param: cID }),
+         dataType: 'json',
+         success: function (data) {
+            var result = '';
+            for (var i = 0, iL = data.length; i < iL; i++) {
+               result += '<option value="' + data[i].Value + '">' + data[i].Text + '</option>';
+            }
+            $('#' + id).html(result);
+            $('#' + id).trigger("chosen:updated");
+
+            if (($('#Billing_Country_ID').val() == null || $('#Billing_Country_ID').val().trim() == '')) {
+               $('#Billing_Country_ID').val(cID);
+               Combo_Reload('Billing_State_ID', '@ComboTypeEnum.State', cID)
+               $('#Billing_Country_ID').trigger("chosen:updated");
+
+               Billing_Country_OnChange(opt);
+            }
+
+            if (($('#State_ID').val() == null || $('#State_ID').val().trim() == '')) {
+
+               $("#State_ID").prop('disabled', true).trigger("chosen:updated");
+               $('#State_ID').trigger("chosen:updated");
+
+            } else {
+
+               $("#State_ID").prop('disabled', false).trigger("chosen:updated");
+               $('#State_ID').trigger("chosen:updated");
+            }
+         }
+      });
+   }
+
+   function Billing_Country_OnChange(opt) {
+
+      var cID = $('#Billing_Country_ID').val();
+      var id = 'Billing_State_ID';
+      var type = '@ComboTypeEnum.State';
+      $.ajax({
+         type: 'POST',
+         url: '@Url.Action("Reload", "Combo")',
+         contentType: 'application/json; charset=utf-8',
+         data: JSON.stringify({ type: type, param: cID }),
+         dataType: 'json',
+         success: function (data) {
+            var result = '';
+            for (var i = 0, iL = data.length; i < iL; i++) {
+               result += '<option value="' + data[i].Value + '">' + data[i].Text + '</option>';
+            }
+            $('#' + id).html(result);
+            $('#' + id).trigger("chosen:updated");
+
+            $('#Billing_Country_ID').val(cID);
+            Combo_Reload('Billing_State_ID', '@ComboTypeEnum.State', cID)
+
+            if (($('#Billing_State_ID').val() == null || $('#Billing_State_ID').val().trim() == '')) {
+
+               $("#Billing_State_ID").prop('disabled', true).trigger("chosen:updated");
+               $('#Billing_State_ID').trigger("chosen:updated");
+
+            } else {
+
+               $("#Billing_State_ID").prop('disabled', false).trigger("chosen:updated");
+               $('#Billing_State_ID').trigger("chosen:updated");
+
+            }
+         }
+      });
+   }
+
+   function Add_ZipOnTextChange() {
+      var cADD = $('#Address').val();
+      var cZCode = $('#Zip_Code').val();
+      var cSId = $('#State_ID').val();
+
+      if (document.getElementById('Billing_Address').value == "") {
+         document.getElementById('Billing_Address').value = cADD;
+      }
+      if (document.getElementById('Billing_Zip_Code').value == "") {
+         document.getElementById('Billing_Zip_Code').value = cZCode;
+      }
+      if ($('#Country_ID').val() == $('#Billing_Country_ID').val()) {
+         $('#Billing_State_ID').val(cSId);
+         $('#Billing_State_ID').trigger("chosen:updated");
+         $('#Country_ID').trigger("chosen:updated");
+      }
+   }
+
+</script>
+
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+   <div class="pageheader">
+      <h2>@Resource.Register_New_Company<span></span></h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+            <li class="active">@Resource.Register_New_Company</li>
+         </ol>
+      </div>
+   </div>
+   <div class="main">
+      <div class="row">
+         <div class="col-md-12">
+            @if (Model.result != null && Model.result.Code != 0)
+            {
+               if (Model.result.Code < 0)
+               {
+                  <div class="alert alert-red">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+               else if (Model.result.Code > 0)
+               {
+                  <div class="alert alert-success">
+                     @Html.Raw(AppConst.GetMsg(Model.result))
+                  </div>
+               }
+            }
+            <!-- tile widget -->
+            <section class="tile color transparent-black">
+               <div class="tile-header transparent">
+                  <h1><strong>@Resource.Company_Details</strong></h1>
+                  <div class="controls">
+                     <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body ">
+                  @using (Html.BeginForm("CompanyRegister", "Company", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                  {
+                     @Html.AntiForgeryToken()
+                     <input type="hidden" name="Currency" value="@Model.Currency" />
+                     <input type="hidden" name="Currency_ID" value="@Model.Currency_ID" />
+                     if (Model.step == "1")
+                     {
+                        <input type="hidden" name="Company_ID" value="@Model.Company_ID" />
+                        <input type="hidden" name="operation" value="@Model.operation" />
+                        <input type="hidden" name="Belong_To" value="@Model.Belong_To" />
+
+                        <div class="row">
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="Company_Name" class="control-label">@Resource.Company_Name</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <input type="text" class="form-control" name="Company_Name" id="Company_Name" value="@Model.Company_Name">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Company_Name)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="No_Of_Employee" class="control-label">@Resource.No_Of_Employees</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <input type="text" class="form-control" name="No_Of_Employee" id="No_Of_Employee" value="@Model.No_Of_Employee">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.No_Of_Employee)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="CPF_Submission_No" class="control-label">@Resource.CPF_Sub_No</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <input type="text" class="form-control" name="CPF_Submission_No" id="CPF_Submission_No" value="@Model.CPF_Submission_No" localizedvalidmaxlength="15">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.CPF_Submission_No)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="Address" class="control-label">@Resource.Address</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <textarea class="form-control" name="Address" id="Address" rows="5" onchange="Add_ZipOnTextChange();">@Model.Address</textarea>
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Address)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="Country_ID" class="control-label">@Resource.Country</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <select class="chosen-select chosen-transparent form-control" id="Country_ID" name="Country_ID" onchange="Country_OnChange(this);">
+                                       @if (Model.countryList != null)
+                                       {
+                                          foreach (var row in Model.countryList)
+                                          {
+                                             if (Model.Country_ID == NumUtil.ParseInteger(row.Value))
+                                             {
+                                                <option value="@row.Value" selected>@row.Desc</option>
+                                             }
+                                             else
+                                             {
+                                                <option value="@(row.Value != null ? row.Value : " ")">@row.Desc</option>
+                                             }
+                                          }
+                                       }
+                                    </select>
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Country_ID)
+                                    </div>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="Zip_Code" class="control-label">@Resource.Postal_Code</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <input type="text" class="form-control" name="Zip_Code" id="Zip_Code" value="@Model.Zip_Code" onchange="Add_ZipOnTextChange();">
+                                    <div class=" validation-error">
+                                       @Html.ValidationMessageFor(m => m.Zip_Code)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="State_ID" class="control-label">@Resource.State</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <select class="chosen-select chosen-transparent form-control" id="State_ID" name="State_ID" onchange="Add_ZipOnTextChange();">
+                                       @if (Model.stateList != null)
+                                       {
+                                          foreach (var row in Model.stateList)
+                                          {
+                                             if (Model.State_ID == NumUtil.ParseInteger(row.Value))
+                                             {
+                                                <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                             }
+                                             else
+                                             {
+                                                <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                             }
+                                          }
+                                       }
+                                    </select>
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.State_ID)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="Billing_Address" class="control-label">@Resource.Billing_Address</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <textarea class="form-control" name="Billing_Address" id="Billing_Address" rows="5">@Model.Billing_Address</textarea>
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Billing_Address)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="Billing_Country_ID" class="control-label">@Resource.Country</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <select class="chosen-select chosen-transparent form-control" id="Billing_Country_ID" name="Billing_Country_ID" onchange="Billing_Country_OnChange(this);">
+                                       @if (Model.countryList != null)
+                                       {
+                                          foreach (var row in Model.countryList)
+                                          {
+                                             if (Model.Billing_Country_ID == NumUtil.ParseInteger(row.Value))
+                                             {
+                                                <option value="@row.Value" selected>@row.Desc</option>
+                                             }
+                                             else
+                                             {
+                                                <option value="@(row.Value != null ? row.Value : " ")">@row.Desc</option>
+                                             }
+                                          }
+                                       }
+                                    </select>
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Billing_Country_ID)
+                                    </div>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="Billing_Zip_Code" class="control-label">@Resource.Postal_Code</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <input type="text" class="form-control" name="Billing_Zip_Code" id="Billing_Zip_Code" value="@Model.Billing_Zip_Code">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Billing_Zip_Code)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="Billing_State_ID" class="control-label">@Resource.State</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <select class="chosen-select chosen-transparent form-control" id="Billing_State_ID" name="Billing_State_ID">
+                                       @if (Model.stateList != null)
+                                       {
+                                          foreach (var row in Model.stateList)
+                                          {
+                                             if (Model.Billing_State_ID == NumUtil.ParseInteger(row.Value))
+                                             {
+                                                <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                             }
+                                             else
+                                             {
+                                                <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                             }
+                                          }
+                                       }
+                                    </select>
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Billing_State_ID)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="First_Name" class="control-label">@Resource.First_Name</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <input type="text" class="form-control" name="First_Name" id="First_Name" value="@Model.First_Name">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.First_Name)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="Middle_Name" class="control-label">@Resource.Middle_Name</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <input type="text" class="form-control" name="Middle_Name" id="Middle_Name" value="@Model.Middle_Name">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Middle_Name)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="Last_Name" class="control-label">@Resource.Last_Name</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <input type="text" class="form-control" name="Last_Name" id="Last_Name" value="@Model.Last_Name">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Last_Name)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="row">
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="Phone" class="control-label">@Resource.Office_Phone</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <input type="text" class="form-control" name="Phone" id="Phone" value="@Model.Phone">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Phone)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="Email" class="control-label">@Resource.Email</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <input type="text" class="form-control" name="Email" id="Email" value="@Model.Email">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Email)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="Company_Level" class="control-label">@Resource.Company_level</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <select class="chosen-select chosen-transparent form-control" id="Company_Level" name="Company_Level">
+                                       @if (Model.LstCompanylevelNoMe != null)
+                                       {
+                                          foreach (var row in Model.LstCompanylevelNoMe)
+                                          {
+                                             if (Model.Company_Level == row.Value)
+                                             {
+                                                <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                             }
+                                             else
+                                             {
+                                                <option value="@(row.Value != null ? row.Value : " ")">@row.Text</option>
+                                             }
+                                          }
+                                       }
+                                    </select>
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Company_Level)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+
+                        <div class="row">
+                           <div class="col-md-4">
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <label for="Fax" class="control-label">@Resource.Fax</label>
+                                 </div>
+                              </div>
+                              <div class="form-group">
+                                 <div class="col-sm-12">
+                                    <input type="text" class="form-control" name="Fax" id="Fax" value="@Model.Fax">
+                                    <div class="validation-error">
+                                       @Html.ValidationMessageFor(m => m.Fax)
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+
+                        @*<div class="row">
+                               <div class="col-md-4">
+                                   <div class="form-group">
+                                       <div class="col-sm-12">
+                                           <label for="Password" class="control-label">@Resources.ResourceAccount.Password</label>
+                                       </div>
+                                   </div>
+                                   <div class="form-group">
+                                       <div class="col-sm-12">
+                                           <input type="password" class="form-control" name="Password" id="Password" value="@Model.Password">
+                                           <div class="validation-error">
+                                               @Html.ValidationMessageFor(m => m.Password)
+                                           </div>
+                                       </div>
+                                   </div>
+                               </div>
+                               <div class="col-md-4">
+                                   <div class="form-group">
+                                       <div class="col-sm-12">
+                                           <label for="ConfirmPassword" class="control-label">@Resources.ResourceAccount.ConfirmNewPassword</label>
+                                       </div>
+                                   </div>
+                                   <div class="form-group">
+                                       <div class="col-sm-12">
+                                           <input type="password" class="form-control" name="ConfirmPassword" id="ConfirmPassword" value="@Model.ConfirmPassword">
+                                           <div class="validation-error">
+                                               @Html.ValidationMessageFor(m => m.ConfirmPassword)
+                                           </div>
+                                       </div>
+                                   </div>
+
+                               </div>
+                               <div class="col-md-4">
+
+                               </div>
+                           </div>*@
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile color transparent-white" style="padding-right:15px;">
+                                 <div class="tile-body">
+                                    <div class="row">
+                                       <div class="col-md-12 text-right">
+                                          <a href="@Url.Action("Company", "Company")" class="btn btn-default">@Resource.Back</a>
+                                          @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_C))
+                                          {
+                                             <button type="submit" class="btn btn-primary" name="step" value="2">@Resource.Register</button>
+                                          }
+                                       </div>
+                                    </div>
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                     }
+                     else if (Model.step == "2")
+                     {
+                        <input type="hidden" name="Company_ID" value="@Model.Company_ID" />
+                        <input type="hidden" name="No_Of_Employee" value="@Model.No_Of_Employee" />
+                        <input type="hidden" name="Company_Level" value="@Model.Company_Level" />
+                        <input type="hidden" name="operation" value="@Model.operation" />
+                        <input type="hidden" name="Belong_To" value="@Model.Belong_To" />
+                        <input type="hidden" name="Company_Name" value="@Model.Company_Name" />
+                        <input type="hidden" name="Address" value="@Model.Address" />
+                        <input type="hidden" name="Country_ID" value="@Model.Country_ID" />
+                        <input type="hidden" name="State_ID" value="@Model.State_ID" />
+                        <input type="hidden" name="Zip_Code" value="@Model.Zip_Code" />
+                        <input type="hidden" name="Billing_Address" value="@Model.Billing_Address" />
+                        <input type="hidden" name="Billing_Country_ID" value="@Model.Billing_Country_ID" />
+                        <input type="hidden" name="Billing_State_ID" value="@Model.Billing_State_ID" />
+                        <input type="hidden" name="Billing_Zip_Code" value="@Model.Billing_Zip_Code" />
+                        <input type="hidden" name="First_Name" value="@Model.First_Name" />
+                        <input type="hidden" name="Middle_Name" value="@Model.Middle_Name" />
+                        <input type="hidden" name="Last_Name" value="@Model.Last_Name" />
+                        <input type="hidden" name="Phone" value="@Model.Phone" />
+                        <input type="hidden" name="Email" value="@Model.Email" />
+                        <input type="hidden" name="CPF_Submission_No" value="@Model.CPF_Submission_No" />
+                        <input type="hidden" name="Fax" value="@Model.Fax" />
+                        @*<input type="hidden" name="Password" value="@Model.Password" />
+                           <input type="hidden" name="ConfirmPassword" value="@Model.ConfirmPassword" />*@
+
+                        <script type="text/javascript">
+                           $(function () {
+                              //check all checkboxes
+                              $('table thead input[type="checkbox"]').change(function () {
+                                 $(this).parents('table').find('tbody input[type="checkbox"]').prop('checked', $(this).prop('checked'));
+                                 SumTotal();
+                              });
+
+                              SumTotal();
+                           });
+
+
+
+                           function SumTotal() {
+                              var total = 0;
+                              for (i = 0 ; i < $('#comDataTable > tbody >tr').length ; i++) {
+                                 var chk = $('#Module_Detail_ID-' + i);
+                                 if (chk.get(0).checked) {
+                                    if ($('#Period_Month-' + i).val() == '') {
+                                       $('#Period_Month-' + i).val('1');
+                                    }
+                                    if ($('#No_Of_Users-' + i).val() == '') {
+                                       $('#No_Of_Users-' + i).val('1');
+                                    }
+
+                                    var month = $('#Period_Month-' + i).val();
+                                    var users = $('#No_Of_Users-' + i).val();
+                                    var amount = $('#Amount-' + i).val();
+                                    var totalamount = 0;
+
+                                    if (!isNaN(month) & !isNaN(users) & !isNaN(amount)) {
+                                       totalamount = (parseInt(month) * parseInt(users) * parseFloat(amount));
+                                       total += totalamount;
+                                    }
+
+                                    $('#Period_Month-' + i).get(0).readOnly = false;
+                                    $('#No_Of_Users-' + i).get(0).readOnly = false;
+                                    $('#Total_Amount-' + i).val(formatCurrency(totalamount));
+
+                                 }
+                                 else {
+                                    $('#Period_Month-' + i).get(0).readOnly = true;
+                                    $('#No_Of_Users-' + i).get(0).readOnly = true;
+
+                                    $('#Period_Month-' + i).val('');
+                                    $('#No_Of_Users-' + i).val('');
+                                    $('#Total_Amount-' + i).val('0.00');
+                                 }
+
+                              }
+                              $('#Total_Amount').val('$ ' + formatCurrency(total) + ' @Model.Currency');
+                           }
+
+                        </script>
+                        <div class="table-responsive">
+                           <table class="table table-datatable table-custom" id="comDataTable">
+                              <thead>
+                                 <tr>
+                                    <th class="no-sort" style="width: 40px;">
+                                       <div class="checkbox check-transparent">
+                                          <input type="checkbox" value="1" id="chkall">
+                                          <label for="chkall"></label>
+                                       </div>
+                                    </th>
+                                    <th class="sort-alpha">@Resource.Module_Name</th>
+                                    <th class="sort-alpha">@(Resource.Subscription_Period)(@Resource.Month)</th>
+                                    <th class="sort-alpha">@Resource.No_Of_User</th>
+                                    <th class="sort-alpha">@(Resource.Amount)/@Resource.Per_User/@Resource.Per_Month</th>
+                                    <th class="sort-alpha">@Resource.Total_Amount</th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+
+                                 @for (var i = 0; i < Model.moduleList.Count(); i++)
+                                 {
+                                    Nullable<int> month = 0;
+                                    Nullable<int> user = 0;
+                                    Subscription sub = null;
+                                    Nullable<decimal> totalAmount = 0;
+                                    if (Model.Subscriptions != null && Model.Subscriptions.Length == Model.moduleList.Count)
+                                    {
+                                       sub = Model.Subscriptions[i];
+                                       if (Model.Select_Module.Contains(sub.Module_Detail_ID.Value))
+                                       {
+                                          month = sub.Period_Month;
+                                          user = sub.No_Of_Users;
+                                       }
+
+                                    }
+                                    totalAmount = (month * user) * Model.moduleList[i].Price_Per_Person;
+                                    <tr>
+                                       <td>
+                                          <div class="checkbox check-transparent">
+                                             <input type="hidden" name="Subscriptions[@i].Module_Detail_ID" value="@Model.moduleList[i].Module_Detail_ID" />
+                                             @if (sub != null && Model.Select_Module.Contains(sub.Module_Detail_ID.Value))
+                                             {
+                                                <input type="checkbox" value="@Model.moduleList[i].Module_Detail_ID" name="Select_Module" id="Module_Detail_ID-@i" onchange="SumTotal()" checked>
+                                             }
+                                             else
+                                             {
+                                                <input type="checkbox" value="@Model.moduleList[i].Module_Detail_ID" name="Select_Module" id="Module_Detail_ID-@i" onchange="SumTotal()">
+                                             }
+                                             <label for="Module_Detail_ID-@i"></label>
+                                          </div>
+                                       </td>
+                                       <td>
+                                          @Model.moduleList[i].Module_Detail_Name
+                                       </td>
+                                       <td>
+                                          <input type="text" class="form-control " name="Subscriptions[@i].Period_Month" id="Period_Month-@i" value="@month" onchange="SumTotal()">
+                                          <div class="validation-error">
+                                             @Html.ValidationMessageFor(m => m.Subscriptions[i].Period_Month)
+                                          </div>
+                                       </td>
+                                       <td>
+                                          <input type="text" class="form-control " name="Subscriptions[@i].No_Of_Users" id="No_Of_Users-@i" value="@user" onchange="SumTotal()">
+                                          <div class="validation-error">
+                                             @Html.ValidationMessageFor(m => m.Subscriptions[i].No_Of_Users)
+                                          </div>
+                                       </td>
+                                       <td>
+                                          <input type="text" class="form-control input-transparent text-right" id="Amount-@i" value="@Model.moduleList[i].Price_Per_Person">
+                                       </td>
+                                       <td><input type="text" class="form-control input-transparent text-right" id="Total_Amount-@i" value="@totalAmount.Value.ToString("n2")"></td>
+                                    </tr>
+                                 }
+                              </tbody>
+                              <tfoot>
+                                 <tr>
+                                    <td colspan="5"></td>
+                                    <td class="text-right">@Resource.Total_Amount</td>
+                                 </tr>
+                                 <tr>
+                                    <td colspan="5"></td>
+                                    <td class="text-right"><input type="text" class="form-control input-transparent text-right" style="font-size:18px !important" id="Total_Amount" value="$ 0.00 @Model.Currency"></td>
+                                 </tr>
+                              </tfoot>
+                           </table>
+                        </div>
+
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile color transparent-white" style="padding-right:15px;">
+                                 <div class="tile-body">
+                                    <div class="row">
+                                       <div class="col-md-12 text-right">
+                                          <button type="submit" class="btn btn-default" name="step" value="1">@Resource.Back</button>
+                                          @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_C))
+                                          {
+                                             <button type="submit" class="btn btn-primary" name="step" value="3">@Resource.Next</button>
+                                          }
+                                       </div>
+                                    </div>
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                     }
+                     else if (Model.step == "3")
+                     {
+                        var i = 0;
+                        <input type="hidden" name="Company_ID" value="@Model.Company_ID" />
+                        <input type="hidden" name="No_Of_Employee" value="@Model.No_Of_Employee" />
+                        <input type="hidden" name="Company_Level" value="@Model.Company_Level" />
+                        <input type="hidden" name="operation" value="@Model.operation" />
+                        <input type="hidden" name="Belong_To" value="@Model.Belong_To" />
+                        <input type="hidden" name="Company_Name" value="@Model.Company_Name" />
+                        <input type="hidden" name="Address" value="@Model.Address" />
+                        <input type="hidden" name="Country_ID" value="@Model.Country_ID" />
+                        <input type="hidden" name="State_ID" value="@Model.State_ID" />
+                        <input type="hidden" name="Zip_Code" value="@Model.Zip_Code" />
+                        <input type="hidden" name="Billing_Address" value="@Model.Billing_Address" />
+                        <input type="hidden" name="Billing_Country_ID" value="@Model.Billing_Country_ID" />
+                        <input type="hidden" name="Billing_State_ID" value="@Model.Billing_State_ID" />
+                        <input type="hidden" name="Billing_Zip_Code" value="@Model.Billing_Zip_Code" />
+                        <input type="hidden" name="First_Name" value="@Model.First_Name" />
+                        <input type="hidden" name="Middle_Name" value="@Model.Middle_Name" />
+                        <input type="hidden" name="Last_Name" value="@Model.Last_Name" />
+                        <input type="hidden" name="Phone" value="@Model.Phone" />
+                        <input type="hidden" name="Email" value="@Model.Email" />
+                        <input type="hidden" name="CPF_Submission_No" value="@Model.CPF_Submission_No" />
+                        @*<input type="hidden" name="Password" value="@Model.Password" />
+                           <input type="hidden" name="ConfirmPassword" value="@Model.ConfirmPassword" />*@
+
+
+                        if (Model.Select_Module != null)
+                        {
+                           for (var j = 0; j < Model.Select_Module.Count(); j++)
+                           {
+                              <input type="hidden" name="Select_Module" value="@Model.Select_Module[j]" />
+                           }
+                        }
+
+
+                        <script type="text/javascript">
+                           $(function () {
+                              //check all checkboxes
+                              SumTotal();
+                           });
+
+                           function SumTotal() {
+                              var total = 0;
+                              for (i = 0 ; i < $('#comDataTable > tbody >tr').length ; i++) {
+
+                                 if ($('#Period_Month-' + i).val() == '') {
+                                    $('#Period_Month-' + i).val('1');
+                                 }
+                                 if ($('#No_Of_Users-' + i).val() == '') {
+                                    $('#No_Of_Users-' + i).val('1');
+                                 }
+
+                                 var month = $('#Period_Month-' + i).val();
+                                 var users = $('#No_Of_Users-' + i).val();
+                                 var amount = $('#Amount-' + i).val();
+
+                                 var totalamount = 0;
+                                 if (!isNaN(month) & !isNaN(users) & !isNaN(amount)) {
+                                    totalamount = (parseInt(month) * parseInt(users) * parseFloat(amount));
+                                    total += totalamount;
+                                 }
+
+                                 $('#Total_Amount-' + i).val('$ ' + formatCurrency(totalamount));
+                              }
+                              $('#Total_Amount').val('$ ' + formatCurrency(total) + ' @Model.Currency');
+                           }
+                        </script>
+
+                        <div class="table-responsive">
+                           <table class="table table-datatable table-custom" id="comDataTable">
+                              <thead>
+                                 <tr>
+                                    <th class="sort-alpha">@Resource.Module_Name</th>
+                                    <th class="sort-alpha">@(Resource.Subscription_Period)(@Resource.Month)</th>
+                                    <th class="sort-alpha">@Resource.No_Of_User</th>
+                                    <th class="sort-alpha">@(Resource.Amount)/@Resource.Per_User/@Resource.Per_Month</th>
+                                    <th class="sort-alpha">@Resource.Total_Amount</th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+
+                                 @for (var j = 0; j < Model.moduleList.Count(); j++)
+                                 {
+                                    var display = "";
+                                    Nullable<int> month = 0;
+                                    Nullable<int> user = 0;
+                                    Subscription sub;
+                                    Nullable<decimal> totalAmount = 0;
+                                    if (Model.Select_Module != null && !Model.Select_Module.Contains(Model.moduleList[j].Module_Detail_ID))
+                                    {
+                                       display = "none";
+                                       month = 0;
+                                       user = 0;
+                                    }
+                                    else
+                                    {
+                                       sub = Model.Subscriptions.Where(w => w.Module_Detail_ID == Model.moduleList[j].Module_Detail_ID).FirstOrDefault();
+                                       if (sub == null)
+                                       {
+                                          display = "none";
+                                          month = 0;
+                                          user = 0;
+                                       }
+                                       else
+                                       {
+                                          month = sub.Period_Month;
+                                          user = sub.No_Of_Users;
+                                       }
+                                    }
+                                    totalAmount = (month * user) * Model.moduleList[i].Price_Per_Person;
+                                    <tr style="display:@display">
+                                       <td>
+                                          @Model.moduleList[j].Module_Detail_Name
+                                          <input type="text" class="form-control " name="Subscriptions[@i].Module_Detail_ID" value="@Model.moduleList[j].Module_Detail_ID" style="display:none">
+                                       </td>
+                                       <td>
+                                          @month months
+                                          <input type="text" class="form-control " name="Subscriptions[@i].Period_Month" id="Period_Month-@i" value="@month" style="display:none">
+                                       </td>
+                                       <td>
+                                          @user
+                                          <input type="text" class="form-control " name="Subscriptions[@i].No_Of_Users" id="No_Of_Users-@i" value="@user" style="display:none">
+                                       </td>
+                                       <td class="text-right">
+                                          @Model.moduleList[j].Price_Per_Person
+                                          <input type="text" class="form-control " id="Amount-@i" value="@Model.moduleList[j].Price_Per_Person" style="display:none">
+                                       </td>
+                                       <td class="text-right">
+                                          @totalAmount.Value.ToString("n2")
+                                       </td>
+                                    </tr>
+                                    i++;
+                                 }
+
+                              </tbody>
+                              <tfoot>
+                                 <tr>
+                                    <td colspan="4"></td>
+                                    <td class="text-right">@Resource.Total_Amount</td>
+                                 </tr>
+                                 <tr>
+                                    <td colspan="4"></td>
+                                    <td class="text-right"><input type="text" class="form-control input-transparent text-right" style="font-size:18px !important" id="Total_Amount" value="$ 0.00 @Model.Currency"></td>
+                                 </tr>
+                              </tfoot>
+                           </table>
+                        </div>
+
+                        <div class="row">
+                           <div class="col-md-12">
+                              <section class="tile color transparent-white" style="padding-right:15px;">
+                                 <div class="tile-body">
+                                    <div class="row">
+                                       <div class="col-md-12  text-right">
+                                          <button type="submit" class="btn btn-default" name="step" value="2">@Resource.Back</button>
+                                          @if (Model.rights != null && Model.rights.Contains(UserSession.RIGHT_C))
+                                          {
+                                             <button type="submit" class="btn btn-primary" name="step" value="Save">@Resource.Proceed_To_PayPal</button>
+                                          }
+                                       </div>
+                                    </div>
+                                 </div>
+                              </section>
+                           </div>
+                        </div>
+                     }
+                  }
+                  <!-- / Tab panes -->
+               </div>
+
+            </section>
+         </div>
+      </div>
+   </div>
+}

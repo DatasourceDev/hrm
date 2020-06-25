@@ -1,0 +1,238 @@
+﻿@model  HR.Models.ExpensesDashBoardViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSWorkFlowAPI.Models;
+@using SBSWorkFlowAPI.ModelsAndService;
+@using SBSResourceAPI;
+@using SBSWorkFlowAPI.Constants;
+@{
+   ViewBag.Title = @Resource.DashBoard;
+}
+@{
+   var userlogin = UserSession.getUser(Request.RequestContext.HttpContext);
+   var requests = new List<Request>();
+   var requestIDs = new List<int>();
+   var hist = new EmploymentHistoryService().GetCurrentEmploymentHistoryByProfile(userlogin.Profile_ID);
+   if (hist != null)
+   {
+      var aService = new SBSWorkFlowAPI.Service();
+      var r = aService.GetMyRequests(userlogin.Company_ID.Value, hist.Department_ID.Value, userlogin.Profile_ID, ModuleCode.HR, ApprovalType.Expense);
+      if (r.Item2.IsSuccess && r.Item1 != null)
+      {
+         requests = r.Item1.ToList();
+         requestIDs = r.Item1.Select(s => s.Request_ID).ToList();
+      }
+   }
+}
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+    <!-- page header -->
+   <div class="pageheader">
+      <h2> @Resource.DashBoard <span></span></h2>
+      <div class="breadcrumbs">
+         <ol class="breadcrumb">
+            <li>@Resource.You_Are_Here</li>
+            <li class="active">@Resource.DashBoard</li>
+         </ol>
+      </div>
+   </div>
+   <div class="main">
+      <div class="row">
+         <!-- col 6 -->
+         <div class="col-md-4">
+            <section class="tile color transparent-black">
+               <div class="tile-header transparent">
+                  <h1><strong>@Resource.Expenses_Balances</strong></h1>
+                  <div class="controls">
+                     <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body ">
+                  <div class="row" style="max-height: 450px; min-height: 450px; overflow-y: auto">
+                     <table class="table">
+                        <thead>
+                           <tr>
+                              <th style="padding-left:15px;">@Resource.Expenses_Type</th>
+                              <th style="padding-right:15px;" class="text-right">@Resource.Amount_SymbolDollar</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           @foreach (var row in Model.ExpensesBalanceList)
+                           {
+                              <tr>
+                                 <td style="padding-left:15px;">@row.Expenses_Type_Name</td>
+                                 <td style="padding-right:15px;" class="text-right">@NumUtil.FormatCurrency(row.Amount) @Resource.Out_Of_Tolower @NumUtil.FormatCurrency(row.Total_Amount) @Model.Currency_Code</td>
+                              </tr>
+                           }
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+            </section>
+         </div>
+         <div class="col-md-4">
+            <section class="tile color transparent-black">
+               <div class="tile-header transparent">
+                  <h1><strong>@Resource.Pending_Applications</strong></h1>
+                  <div class="controls">
+                     <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body">
+                  <div class="row" style="max-height: 400px; min-height: 400px; overflow-y: auto">
+                     <table class="table">
+                        <tbody>
+                           @foreach (var row in Model.ExpensesList)
+                           {
+                              var status = "";
+
+                             
+                              if (string.IsNullOrEmpty(row.Cancel_Status))
+                              {
+                                 status = StatusUtil.Get_Overall_Status(row.Overall_Status );
+                                 if (row.Overall_Status != WorkflowStatus.Pending )
+                                 {
+                                    continue;
+                                 }
+                              }
+                              else
+                              {
+                                 status = StatusUtil.Get_Overall_Status(row.Cancel_Status);
+                                 if (row.Overall_Status != WorkflowStatus.Canceling)
+                                 {
+                                    continue;
+                                 }
+                              }
+                              
+                              if (true)
+                              {
+                                 var totalAmount = 0M;
+                                 var claimAmount = 0M;
+                                 if (row.Expenses_Application_Document != null)
+                                 {
+                                    totalAmount = row.Expenses_Application_Document.Sum(s => s.Total_Amount.HasValue ? s.Total_Amount.Value : 0);
+                                    claimAmount = row.Expenses_Application_Document.Sum(s => s.Amount_Claiming.HasValue ? s.Amount_Claiming.Value : 0);
+                                 }
+
+                                 <tr>
+                                    <td style="padding-left:15px">
+                                       <div class="row">
+                                          <div class="col-sm-12" style="padding-left:0px;padding-right:0px;">
+                                             <div class="form-group">
+                                                <div class="col-sm-12"><i class="fa fa-clock-o"> @DateUtil.ToDisplayDate(row.Date_Applied)</i></div>
+                                             </div>
+                                             <div class="form-group">
+                                                <div class="col-sm-12">
+                                                   <strong>@row.Expenses_Title @row.Expenses_No</strong>
+                                                   <br />
+                                                   @Resource.Expense_Of <span class="color-green" style="font-weight:700;">@NumUtil.FormatCurrency(claimAmount) @Model.Currency_Code</span>
+                                                   <br />
+                                                   @Resource.Is <span class="color-orange" style="font-weight:700;font-size:16px;text-decoration:underline">@status</span>
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </td>
+                                    <td class="actions text-right" style="padding-right:15px;"><a style="padding-right:0px;margin-right:0px;" href="@Url.Action("Application", "Expenses", new { eID = EncryptUtil.Encrypt(row.Expenses_Application_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })"><i class="fa fa-file-o fa-2x"></i></a> </td>
+                                 </tr>
+                              }
+                           }
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="row" style="margin-top:15px;">
+                     <div class="col-sm-12">
+                        <a class="btn btn-default" href="@Url.Action("Record", "Expenses")">@Resource.View_All_Applications</a>
+                     </div>
+                  </div>
+               </div>
+            </section>
+         </div>
+         <div class="col-md-4">
+            <section class="tile color transparent-black">
+               <div class="tile-header transparent">
+                  <h1><strong> @Resource.Rejected / @Resource.Approved / @Resource.Cancelled</strong></h1>
+                  <div class="controls">
+                     <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                  </div>
+               </div>
+               <div class="tile-body ">
+                  <div style="max-height: 400px; min-height: 400px; overflow-y: auto; ">
+                     <table class="table">
+                        <tbody>
+                           @foreach (var row in Model.ExpensesList)
+                           {
+                              var status = "";
+
+                              if (string.IsNullOrEmpty(row.Cancel_Status))
+                              {
+                                 status = StatusUtil.Get_Overall_Status(row.Overall_Status);
+                                 if (row.Overall_Status == WorkflowStatus.Closed || row.Overall_Status == WorkflowStatus.Rejected)
+                                 {
+                                  
+                                 }
+                                 else
+                                 {
+                                    continue;
+                                 }
+                              }
+                              else
+                              {
+                                 status = StatusUtil.Get_Overall_Status(row.Cancel_Status);
+                                 if (row.Cancel_Status == WorkflowStatus.Cancelled || row.Cancel_Status == WorkflowStatus.Cancellation_Rejected)
+                                 {
+                                    
+                                 }
+                                 else
+                                 {
+                                    continue;
+                                 }
+                              }
+                           
+
+                              if (true)
+                              {
+                                 var totalAmount = 0M;
+                                 var claimAmount = 0M;
+                                 if (row.Expenses_Application_Document != null)
+                                 {
+                                    totalAmount = row.Expenses_Application_Document.Sum(s => s.Total_Amount.HasValue ? s.Total_Amount.Value : 0);
+                                    claimAmount = row.Expenses_Application_Document.Sum(s => s.Amount_Claiming.HasValue ? s.Amount_Claiming.Value : 0);
+                                 }
+                                 <tr>
+                                    <td style="padding-left:0px;">
+                                       <div class="row">
+                                          <div class="col-sm-12" style="padding-left:0px;padding-right:0px;">
+                                             <div class="form-group">
+                                                <div class="col-sm-12"><i class="fa fa-clock-o"> @DateUtil.ToDisplayDate(row.Date_Applied)</i></div>
+                                             </div>
+                                             <div class="form-group">
+                                                <div class="col-sm-12"><strong>@row.Expenses_Title @row.Expenses_No</strong>
+                                                <br/> 
+                                                @Resource.Expense_Of <span class="color-green" style="font-weight:700;">@NumUtil.FormatCurrency(claimAmount) @Model.Currency_Code</span>
+                                                <br /> 
+                                                @Resource.Is <span class="color-orange" style="font-weight:700;font-size:16px;text-decoration:underline">@status</span></div>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </td>
+                                    <td class="actions text-right" style="padding-right:0px">
+                                       <a style="padding-right:0px;margin-right:0px;" href="@Url.Action("Application", "Expenses", new { eID = EncryptUtil.Encrypt(row.Expenses_Application_ID), operation = EncryptUtil.Encrypt(UserSession.RIGHT_U) })"><i class="fa fa-file-o fa-2x"></i></a>
+                                    </td>
+                                 </tr>
+                              }
+                           }
+                        </tbody>
+                     </table>
+                  </div>
+                  <div class="row" style="margin-top:15px;">
+                     <div class="col-sm-12">
+                        <a class="btn btn-default" href="@Url.Action("Record", "Expenses")">@Resource.View_All_Applications</a>
+                     </div>
+                  </div>
+               </div>
+            </section>
+         </div>
+      </div>
+   </div>
+}

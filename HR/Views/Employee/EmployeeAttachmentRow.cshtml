@@ -1,0 +1,53 @@
+﻿@model HR.Models.AttachmentViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using HR.Models;
+@using HR.Common;
+@using SBSResourceAPI;
+@using SBSModel.Common;
+@{
+   var eService = new ExpenseService();
+   var userlogin = UserSession.getUser(Request.RequestContext.HttpContext);
+   var i = Model.Index;
+}
+
+<td id="td-@i">
+   @Html.Hidden("Attachment_Rows[" + i + "].Row_Type", RowType.ADD)
+   @Html.Hidden("Attachment_Rows[" + i + "].Attachment_Type", Model.Attachment_Type)
+   @Html.Hidden("Attachment_Rows[" + i + "].Attachment_Type_Name", Model.Attachment_Type_Name)
+   @Html.Hidden("Attachment_Rows[" + i + "].Uploaded_On", Model.Uploaded_On)
+   @Html.Hidden("Attachment_Rows[" + i + "].Uploaded_By", Model.Uploaded_By)
+   @Html.Hidden("Attachment_Rows[" + i + "].Attachment_File", Model.Attachment_File)
+   <input type="text" class="form-control input-table-transparent" id="Attachment_Rows_@(i)__Attachment_Type_Name_Text" value="@Model.Attachment_Type_Name">
+   <input type="hidden" id="Attachment_Rows_@(i)__Attachment_Type_Name" name="Attachment_Rows[@i].Attachment_Type_Name" value="@Model.Attachment_Type">
+   <div class="validation-error">
+      @Html.ValidationMessage("Attachment_Rows[" + i + "].Attachment_Type_Name")
+   </div>
+</td>
+<td>
+   <input type="text" class="form-control input-table-transparent" id="Attachment_Rows_@(i)__File_Name_Text" value="@Model.File_Name">
+   <input type="hidden" id="Attachment_Rows_@(i)__File_Name" name="Attachment_Rows[@i].File_Name" value="@Model.File_Name">
+   <div class="validation-error">
+      @Html.ValidationMessage("Attachment_Rows[" + i + "].File_Name")
+   </div>
+</td>
+<td class="text-right">
+   <input type="text" class="form-control input-table-transparent" id="Attachment_Rows_@(i)__Uploaded_On_Text" value="@Model.Uploaded_On">
+   <input type="hidden" id="Attachment_Rows_@(i)__Uploaded_On" name="Attachment_Rows[@i].Uploaded_On" value="@Model.Uploaded_On">
+   <div class="validation-error">
+      @Html.ValidationMessage("Attachment_Rows[" + i + "].Uploaded_On")
+   </div>
+</td>
+<td class="text-right">
+   <input type="text" class="form-control input-table-transparent" id="Attachment_Rows_@(i)__Uploaded_By_Text" value="@Model.Uploaded_By">
+   <input type="hidden" id="Attachment_Rows_@(i)__Uploaded_By" name="Attachment_Rows[@i].Uploaded_By" value="@Model.Uploaded_By">
+   <div class="validation-error">
+      @Html.ValidationMessage("Attachment_Rows[" + i + "].Uploaded_By")
+   </div>
+</td>
+<td class="actions text-right" style="cursor:pointer">
+   <a data-toggle="modal" onclick="return DeleteAttactment_Onclick('atrow-@i', @i);">
+      <i class="fa fa-times-circle-o fa-2x"></i>
+   </a>
+</td>
+

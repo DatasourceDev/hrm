@@ -1,0 +1,416 @@
+﻿@model  HR.Models.LeaveViewModel
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using System;
+@using System.Collections;
+@using SBSResourceAPI;
+@{
+    ViewBag.Title = @Resource.Team_Calendar;
+    var userlogin = UserSession.getUser(Request.RequestContext.HttpContext);
+}
+
+@{
+    Hashtable hashtable = new Hashtable();
+}
+
+<script src="@Url.Content("~/assets/fullcalendar/javascripts/vendor/fullcalendar/fullcalendar.min.js")"></script>
+<link href="@Url.Content("~/assets/fullcalendar/stylesheets/fullcalendar.min.css")" rel="stylesheet">
+
+
+@if ((Model.rights != null && Model.rights.Contains(UserSession.RIGHT_A)))
+{
+        <!-- page header -->
+    <div class="pageheader">
+        <h2> @Resource.Team_Calendar</h2>
+        <div class="breadcrumbs">
+            <ol class="breadcrumb">
+                <li>@Resource.You_Are_Here</li>
+                <li><a href="@Url.Action("Index", "Home")">@Resource.DashBoard</a></li>
+                <li class="active">@Resource.Team_Calendar</li>
+            </ol>
+        </div>
+    </div>
+    <div class="main">
+        <div class="row">
+            <div class="col-md-12">
+                <section class="tile color transparent-black">
+                    <div class="tile-header transparent">
+                        <h1><strong>@Resource.Team_Calendar</strong></h1>
+                        <div class="controls">
+                            <a href="#" class="minimize"><i class="fa fa-chevron-down color-white"></i></a>
+                        </div>
+                    </div>
+                    <div class="tile-body ">
+                        @using (Html.BeginForm("TeamCalendar", "Leave", FormMethod.Get, new { @class = "form-horizontal", role = "form" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="search_Pending_Emp" class="control-label">@Resource.Employee_Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <select class="chosen-select chosen-transparent form-control" id="search_Pending_Emp" name="search_Pending_Emp">
+                                                <option value="">-</option>
+                                                @if (Model.EmpList != null)
+                                                {
+                                                    foreach (var row in Model.EmpList)
+                                                    {
+                                                        if (Model.search_Pending_Emp == row.Profile_ID)
+                                                        {
+                                                            <option value="@row.Profile_ID" selected>@UserSession.GetUserName(row)</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@row.Profile_ID">@UserSession.GetUserName(row)</option>
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.search_Pending_Emp)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="search_Branch" class="control-label">@Resource.Branch</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <select class="chosen-select chosen-transparent form-control" id="search_Branch" name="search_Branch">
+                                                @if (Model.branchList != null)
+                                                {
+                                                    foreach (var row in Model.branchList)
+                                                    {
+                                                        if (Model.search_Branch == NumUtil.ParseInteger(row.Value))
+                                                        {
+                                                            <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.search_Branch)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <label for="search_Department" class="control-label">@Resource.Department</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <select class="chosen-select chosen-transparent form-control" id="search_Department" name="search_Department">
+                                                @if (Model.departmentList != null)
+                                                {
+                                                    foreach (var row in Model.departmentList)
+                                                    {
+                                                        if (Model.search_Department == NumUtil.ParseInteger(row.Value))
+                                                        {
+                                                            <option value="@(row.Value != null ? row.Value : "")" selected>@row.Text</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@(row.Value != null ? row.Value : "")">@row.Text</option>
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                            <div class="validation-error">
+                                                @Html.ValidationMessageFor(m => m.search_Department)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <button type="submit" class="btn btn-default">@Resource.Filter</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </section>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                @if (Model.result != null && Model.result.Code != 0)
+                {
+                    if (Model.result.Code < 0)
+                    {
+                        <div class="alert alert-red">
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        </div>
+                    }
+                    else if (Model.result.Code > 0)
+                    {
+                        <div class="alert alert-success">
+                            @Html.Raw(AppConst.GetMsg(Model.result))
+                        </div>
+                    }
+                }
+                <section class="tile transparent">
+                    <div class="tile-body color transparent-black rounded-corners">
+
+                        <script type="text/javascript">
+                            function getDaysInMonth(m, y) {
+                                return /4|6|9|11/.test(m) ? 30 : m == 2 ? (!(y % 4) && y % 100) || !(y % 400) ? 29 : 28 : 31;
+                            }
+
+                            $(document).ready(function () {
+
+                                $("#teamcalendar").fullCalendar({
+                                    header: { left: "prev,next", center: "title", right: "month" },
+                                    firstDay: 1,
+                                    editable: false,
+                                    droppable: false,
+                                    dayClick: function (date, allDay, jsEvent, view) {
+                                        @if (!Model.rights.Contains(UserSession.RIGHT_C))
+                                             {
+                                                 @:return false;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     }
+                                        var day = date.dates();
+                                        if (String(day).length == 1) {
+                                            day = "0" + String(day);
+                                        }
+                                        var month = date.months() + 1;
+                                        if (String(month).length == 1) {
+                                            month = "0" + String(month);
+                                        }
+                                        var year = date.years();
+                                        var strdate = day + '/' + month + '/' + year;
+                                        var url = '@Url.Action("Application", "Leave")' + '?pStartDate=' + encodeURIComponent(strdate);
+                                        //window.location.href = url;
+                                        window.open(url, '_blank');
+                                    },
+                                    eventClick: function (calEvent, jsEvent, view) {
+                                        @if (!Model.rights.Contains(UserSession.RIGHT_U))
+                                            {
+                                                @:return false;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        }
+                                        if ('@userlogin.Profile_ID' != calEvent.profile_id) {
+                                            return false;
+                                        }
+
+                                        var url = '@Url.Action("Application", "Leave")' + '?pDocID=' + encodeURIComponent(calEvent.id) + '&operation=' + encodeURIComponent('@EncryptUtil.Encrypt(UserSession.RIGHT_U)');
+                                        //window.location.href = url;
+                                        window.open(url, '_blank');
+                                    },
+                                    eventAfterAllRender: function (view) {
+                                        //Added by sun 04-12-2015
+                                        var cols = $('.fc-month-view [class*="fc-day"].fc-widget-content');
+                                        for (var i = 0; i < cols.length; i++) {
+                                            var datestr = $(cols[i]).attr("data-date");
+                                            var subYear = datestr.substring(0, 4);
+                                            var subMonth = datestr.substring(5, 7);
+                                            var strM = subMonth.replace(/\b0+/g, "");
+                                            var subDay = datestr.substring(8, 10);
+                                            var strD = subDay.replace(/\b0+/g, "");
+
+                                            @foreach (var day in Model.HolidayList)
+                                            {
+                                                @:if (('@day.date.Month' == strM) && ('@day.date.Day' == strD) && ('@day.date.Year' == subYear))
+                                                                                                                                                                                              @: {
+                                                                                                                                                                                              @:$("td[data-date=" + datestr + "]").removeClass('fc-day-number');
+                                                                                                                                                                                              @:$("td[data-date=" + datestr + "]").addClass('fc-day-number')
+                                                                                                                                                                                              @:$("td[data-date=" + datestr + "]").addClass('fc-state-highlight-holiday').append('</br><div class ="fc-content holiday-left"><span class="fc-title holiday-text">' + '@day.name' + '</span></div>');
+                                                                                                                                                                                              @:}
+                                            }
+                                        }
+                                    },
+                                    events: [
+                                    @if (Model.LeaveApplicationDocumentList != null)
+                {
+                    var j = 0;
+                    var i = 0;
+                    foreach (var row in Model.LeaveApplicationDocumentList)
+                    {
+                        //r = year , // n = month
+                        if (!hashtable.Contains(row.Employee_Profile_ID))
+                        {
+                            //hashtable[row.Employee_Profile_ID] = colors[0];
+                            //colors.RemoveAt(0);
+                            //Edit by sun 16-11-2015
+                            if (Model.Collor != null && Model.Collor[j] != null)
+                            {
+                                hashtable[row.Employee_Profile_ID] = Model.Collor[j];
+                                j++;
+                            }
+                            else
+                            {
+                                hashtable[row.Employee_Profile_ID] = "#ff4a43";
+                                j = 0;
+                            }
+                        }
+
+                        if (row.Start_Date.HasValue && row.End_Date.HasValue)
+                        {
+                            var startyear = row.Start_Date.Value.Year;
+                            var startmonth = row.Start_Date.Value.Month - 1;
+                            var startday = row.Start_Date.Value.Day;
+                            var desc = UserSession.GetUserName(row.Employee_Profile.User_Profile);
+
+                            var endyear = row.End_Date.Value.Year;
+                            var endmonth = row.End_Date.Value.Month - 1;
+
+                            var endday = row.End_Date.Value.Day + 1;
+                            var dayInmonth = DateTime.DaysInMonth(row.End_Date.Value.Year, row.End_Date.Value.Month);
+                            if (row.End_Date.Value.Day + 1 > dayInmonth)
+                            {
+                                endday = 1;
+                                endmonth = endmonth + 1;
+                                if (endmonth > 11)
+                                {
+                                    endmonth = 0;
+                                    endyear = endyear + 1;
+                                }
+                            }
+                            var leavecolour = hashtable[row.Employee_Profile_ID];
+                            if (row.Leave_Config != null)
+                            {
+                                //leavecolour = row.Leave_Config.Global_Lookup_Data.Colour_Config;
+                                desc = desc + " " + row.Leave_Config.Leave_Name;
+                            }
+                            if (i != 0)
+                            {
+                              @:,
+                                                                                                                                                                                    }
+                              @:{ title: '@desc', start: new Date('@startyear', '@startmonth', '@startday'), end: new Date('@endyear', '@endmonth', '@endday'), color: '@leavecolour', id: '@EncryptUtil.Encrypt(row.Leave_Application_Document_ID)', profile_id: '@row.Employee_Profile.Profile_ID', allDay: true }
+                                                                                                                                                                                }
+                        else if (row.Start_Date.HasValue)
+                        {
+
+                            var startyear = row.Start_Date.Value.Year;
+                            var startmonth = row.Start_Date.Value.Month - 1;
+                            var startday = row.Start_Date.Value.Day;
+                            var leavecolour = hashtable[row.Employee_Profile_ID];
+
+                            var desc = UserSession.GetUserName(row.Employee_Profile.User_Profile);
+                            if (row.Leave_Config != null)
+                            {
+                                //leavecolour = row.Leave_Config.Global_Lookup_Data.Colour_Config;
+                                desc = desc + " " + row.Leave_Config.Leave_Name;
+                            }
+
+                            if (i != 0)
+                            {
+                             @:,
+                                                                                                                                                                                    }
+                             @:{ title: '@desc', start: new Date('@startyear', '@startmonth', '@startday'), color: '@leavecolour', id: '@EncryptUtil.Encrypt(row.Leave_Application_Document_ID)', profile_id: '@row.Employee_Profile.Profile_ID', allDay: true }
+                                                                                                                                                                                }
+                        i++;
+                    }
+                }
+                                    ]
+                                })
+
+                                $(".fc-prev-button").click(function () {
+                                    var selectMonth = $("#teamcalendar").fullCalendar('getDate').months() + 1;
+                                    var selectYesr = $("#teamcalendar").fullCalendar('getDate').years();
+                                    RenderEvent(selectMonth, selectYesr);
+                                });
+
+                                $(".fc-next-button").click(function () {
+                                    var selectMonth = $("#teamcalendar").fullCalendar('getDate').months() + 1;
+                                    var selectYesr = $("#teamcalendar").fullCalendar('getDate').years();
+                                    RenderEvent(selectMonth, selectYesr);
+                                });
+
+                                RenderEvent($("#teamcalendar").fullCalendar('getDate').months() + 1, $("#teamcalendar").fullCalendar('getDate').years());
+                            });
+                            //Edit by sun 04-12-2015 Detail: Added check year
+                            function RenderEvent(month, year) {
+
+                                $('#external-events .external-event').remove();
+                                var str = "";
+                                @if (Model.LeaveApplicationDocumentList != null)
+        {
+            foreach (var row in Model.LeaveApplicationDocumentList)
+            {
+                var startDate = row.Start_Date.Value;
+                Nullable<DateTime> endDate = null;
+
+                var desc = UserSession.GetUserName(row.Employee_Profile.User_Profile);
+                var col = hashtable[row.Employee_Profile_ID];
+                if (row.Leave_Config != null)
+                {
+                    desc = desc + " " + row.Leave_Config.Leave_Name;
+                }
+
+                if (row.Start_Date.HasValue && row.End_Date.HasValue)
+                {
+                    endDate = row.End_Date.Value;
+                    desc = desc + " " + DateUtil.ToDisplayDate(row.Start_Date);
+                    if (!string.IsNullOrEmpty(row.Start_Date_Period))
+                    {
+                        desc = desc + " " + row.Start_Date_Period;
+                    }
+                    desc = desc + " - ";
+                    desc = desc + DateUtil.ToDisplayDate(row.End_Date);
+                    if (!string.IsNullOrEmpty(row.End_Date_Period))
+                    {
+                        desc = desc + " " + row.End_Date_Period;
+                    }
+                }
+                else if (row.Start_Date.HasValue)
+                {
+                    endDate = row.Start_Date.Value;
+                    desc = desc + " " + DateUtil.ToDisplayDate(row.Start_Date);
+                    if (!string.IsNullOrEmpty(row.Start_Date_Period))
+                    {
+                        desc = desc + " " + row.Start_Date_Period;
+                    }
+                    desc = desc + " - ";
+                    desc = desc + DateUtil.ToDisplayDate(row.Start_Date);
+                    if (!string.IsNullOrEmpty(row.Start_Date_Period))
+                    {
+                        desc = desc + " " + row.Start_Date_Period;
+                    }
+                }
+               @:if (('@startDate.Month' == month || '@(endDate.Value.Month)' == month) && ('@startDate.Year' == year || '@(endDate.Value.Year)' == year)) { var str = str + '<div class="external-event" style="border-left: 10px solid ' + '@col' + '">' + '@desc' + '</div>'; }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    }
+                                }
+                                $('#external-events').html(str);
+                            }
+                        </script>
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="cal-options" style="overflow-y: auto;max-height: 550px;">
+                                    <div id="external-events" class="events-wrapper">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div id="teamcalendar"></div>
+                            </div>
+                        </div>
+                        <img style="width: 15px; height: 15px; vertical-align: text-bottom;" class="fc-state-highlight-holiday" /> @Resource.Public_Holiday
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+}

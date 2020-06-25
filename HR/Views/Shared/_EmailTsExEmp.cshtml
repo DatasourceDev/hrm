@@ -1,0 +1,164 @@
+﻿@model  SBSModel.Common.EmailItem
+@using SBSModel.Models;
+@using SBSModel.Common;
+@using SBSResourceAPI;
+@using SBSWorkFlowAPI.Constants;
+@using System.Text;
+@using HR.Models
+@{
+   var totalClaimAmount = 0M;
+   var totaltimeAmount = 0M;
+   var totalAmount = 0M;
+   if (Model.Expenses != null && Model.Expenses.Expenses_Application_Document.Count() > 0)
+  {
+     totalClaimAmount = Model.Expenses.Expenses_Application_Document.Sum(s => s.Amount_Claiming.HasValue ? s.Amount_Claiming.Value : 0);
+     totalAmount += totalClaimAmount;
+   }
+   if (Model.Timesheet != null && Model.Timesheet.Time_Sheet_Dtl.Count() > 0)
+{
+    totaltimeAmount = Model.Timesheet.Time_Sheet_Dtl.Sum(s => s.Total_Amount.HasValue ? s.Total_Amount.Value : 0);
+    totalAmount += totaltimeAmount;
+   }
+   var curcode = Model.Company != null ? Model.Company.Currency.Currency_Code : "";
+}
+<b>Dear @Model.Send_To_Name</b>,
+<br />
+<br />
+@if (Model.Status == WorkflowStatus.Canceling)
+{
+   <span>Your <b>@Resource.Timesheet_Expenses application @Model.Status</b> request has been forwarded for the approval.</span>
+}
+else if (Model.Status == WorkflowStatus.Rejected)
+{
+   <span>Your <b>@Resource.Timesheet_Expenses </b> has been<b style='color:#CC0033;font-size:18px;'> @Model.Status</b></span>
+}
+else if (Model.Status == WorkflowStatus.Cancellation_Rejected)
+{
+   <span>Your <b>@Resource.Timesheet_Expenses </b> has been<b style='color:#CC0033;font-size:18px;'> Rejected cancellation</b></span>
+}
+else
+{
+   <span>Your <b>@Resource.Timesheet_Expenses </b> has been<b style='color:#0E9D41;font-size:18px;'> @Model.Status</b></span>
+}
+<br />
+<br />
+
+@if (Model.Expenses != null && Model.Expenses.Expenses_Application_Document.Count() > 0)
+{
+   var even = false;
+  
+   <table style='border-collapse: collapse; line-height: 30px;width:100%' cellpadding='6'>
+      <tr style='border-bottom: 1px solid #ccc'>
+         <td style='width:120px;'></td>
+         <td> <span style='font-weight:700;'></span></td>
+      </tr>
+      <tr style='border-bottom: 1px solid #ccc'>
+         <td style='width:120px;'>@Resource.Doc_No: </td>
+         <td><b>@Model.Expenses.Expenses_No</b></td>
+      </tr>
+      <tr style='border-bottom: 1px solid #ccc'>
+         <td style='width:120px;'>@Resource.Date_Applied: </td>
+         <td><b>@DateUtil.ToDisplayFullDate(Model.Expenses.Date_Applied)</b></td>
+      </tr>
+      <tr style='border-bottom: 1px solid #ccc'>
+         <td style='width:120px;'>@Resource.Total_Amount: </td>
+         <td><b>@NumUtil.FormatCurrency(totalAmount, 2) @curcode</b></td>
+      </tr>
+      @if (Model.Status != WorkflowStatus.Cancelled)
+      {
+      <tr style='border-bottom: 1px solid #ccc'>
+         <td style='width:120px;'>@Resource.Approver: </td>
+         <td><b>@Model.Approver_Name</b></td>
+      </tr>
+      }
+   </table>
+   <br />
+   <br />
+
+   <table style='border-collapse: collapse; line-height: 30px;width:100%' cellpadding='6'>
+      <thead>
+         <tr style='background-color: #E2ECFB;text-align:left'>
+            <th><strong>@Resource.Indent</strong></th>
+            <th><strong>@Resource.Expenses_Type</strong></th>
+            <th><strong>@Resource.Expenses_Date</strong></th>
+            <th><strong>@Resource.Total_Amount</strong></th>
+            <th><strong>@Resource.Amount_Claiming</strong></th>
+         </tr>
+      </thead>
+
+      @foreach (var row in Model.Expenses.Expenses_Application_Document)
+      {
+         <tr style='@(even ? "background-color:#F7F7F7" : "")'>
+            <td>
+               @if (row.Job_Cost != null)
+               {
+                  @row.Job_Cost.Indent_No<br />@row.Job_Cost.Indent_Name
+               }
+            </td>
+            <td>
+               @if (row.Expenses_Config != null)
+               {
+                  @row.Expenses_Config.Expenses_Name
+               }
+            </td>
+            <td>@DateUtil.ToDisplayFullDate(row.Expenses_Date)</td>
+            <td>@NumUtil.FormatCurrency(row.Total_Amount, 2) @curcode</td>
+            <td>@NumUtil.FormatCurrency(row.Amount_Claiming, 2) @curcode</td>
+         </tr>
+               even = !even;
+      }
+
+      <tfoot>
+         <tr style='background-color:#E2ECFB'>
+            <td><b>@Resource.Total_Amount</b></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><b>@NumUtil.FormatCurrency(totalClaimAmount,2) @curcode</b></td>
+         </tr>
+      </tfoot>
+   </table>
+   <br />
+   <br />
+}
+
+@if (Model.Timesheet != null && Model.Timesheet.Time_Sheet_Dtl.Count() > 0)
+{
+   var even = false;
+   
+   <table style='border-collapse: collapse; line-height: 30px;width:100%' cellpadding='6'>
+      <thead>
+         <tr style='background-color: #E2ECFB;text-align:left'>
+            <th><strong>@Resource.Indent</strong></th>
+            <th><strong>@Resource.Date</strong></th>
+            <th><strong>@Resource.Clock_In - @Resource.Clock_Out</strong></th>
+            <th><strong>@Resource.Duration</strong></th>
+            <th><strong>@Resource.Total_Amount</strong></th>
+         </tr>
+      </thead>
+
+      @foreach (var row in Model.Timesheet.Time_Sheet_Dtl)
+      {
+         <tr style='@(even ? "background-color:#F7F7F7" : "")'>
+            <td>@row.Indent_No<br/>@row.Indent_Name</td>
+            <td>@DateUtil.ToDisplayFullDate(row.Date_Of_Date)</td>
+            <td>@DateUtil.ToDisplayTime(row.Clock_In) - @DateUtil.ToDisplayTime(row.Clock_Out) </td>
+            <td>@DateUtil.ToDisplayTime(row.Duration)</td>
+            <td>@NumUtil.FormatCurrency(row.Total_Amount,2) @curcode</td>
+         </tr>
+         even = !even;
+      }
+
+      <tfoot>
+         <tr style='background-color:#E2ECFB'>
+            <td><b>@Resource.Total_Amount</b></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><b>@NumUtil.FormatCurrency(totaltimeAmount,2) @curcode</b></td>
+         </tr>
+      </tfoot>
+   </table>
+   <br />
+   <br />
+}

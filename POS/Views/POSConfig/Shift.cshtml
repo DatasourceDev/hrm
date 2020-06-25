@@ -1,0 +1,412 @@
+﻿@using POS.Common;
+@using POS.Models;
+@using SBSModel.Common;
+@using SBSModel.Models;
+@model  POS.Models.ShiftViewModel
+@{
+    ViewBag.Title = @Resources.ResourcePOS.Shift;
+}
+
+
+
+@using (Html.BeginForm("Shift", "POSConfig", FormMethod.Post, new { @class = "form-horizontal validatable", role = "form", id = "theForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Shift_ID)
+    @Html.HiddenFor(m => m.Status)
+    @Html.HiddenFor(m => m.Action)
+    @Html.HiddenFor(m => m.Company_ID)
+    @Html.HiddenFor(m => m.Terminal_ID)
+    @Html.HiddenFor(m => m.operation)
+    @Html.HiddenFor(m => m.Terminal_Local_ID)
+    @Html.HiddenFor(m => m.Shift_Local_ID)
+    @Html.HiddenFor(m => m.Is_Uploaded)
+    @Html.HiddenFor(m => m.Is_Latest)
+    <div class="main-content">
+
+        @if (Model.result != null && Model.result.Code != 0)
+        {
+            <div class="container-fluid padded">
+                <div class="row-fluid">
+                    <div class="span12">
+                        @if (Model.result.Code < 0)
+                        {
+                            <div class="alert alert-error">
+                                @UserSession.GetMsg(Model.result.Code, Model.result.Msg, Model.result.Field)
+                                <br />
+                            </div>
+                        }
+                        else if (Model.result.Code > 0)
+                        {
+                            <div class="alert alert-success">
+                                @UserSession.GetMsg(Model.result.Code, Model.result.Msg, Model.result.Field)
+                                <br />
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        @Scripts.Render("~/notify/scripts")
+        <link href="~/Content/notifyjs/notifyjs.css" rel="stylesheet" />
+
+        <script type="text/javascript">
+            $(document).ready(function () {
+
+
+                if (thisMonthHaveBirthdays()) {
+                    var url = '@Url.Action("memberbirthdays", "pos")';
+
+                    initNotificationStyle(url);
+                    showNotification('We have members celebrating their birthdays this month.');
+                }
+
+                var receiptdata = cleanString('@Model.Sales_Report_Data');
+
+                if (receiptdata != '') {
+                    sendMessage(receiptdata, '@Model.Terminal_IP_Address');
+                }
+            });
+
+            $(function () {
+                Disable("divShift");
+            });
+
+            $(function () {
+
+                $("#btnOpenShift").click(function () {
+                    $('#Action').val(1);
+                    theForm.action = '@Url.Action("Shift", "POSConfig")';
+                    theForm.method = 'post';
+                    theForm.submit();
+                    CloseProgress();
+                });
+
+                $("#btnPrintSalesReport").click(function () {
+                    $('#Action').val(2);
+                    theForm.action = '@Url.Action("Shift", "POSConfig")';
+                    theForm.method = 'post';
+                    theForm.submit();
+                    CloseProgress();
+                });
+
+                $("#btnPrintClose").click(function () {
+                    $('#Action').val(3);
+                    theForm.action = '@Url.Action("Shift", "POSConfig")';
+                    theForm.method = 'post';
+                    theForm.submit();
+                    CloseProgress();
+                });
+
+            });
+
+            function sendMessage(request, ipAddress) {
+                var url = 'http://' + ipAddress + ':90/StarWebPRNT/SendMessage';
+
+                var trader = new StarWebPrintTrader({ url: url });
+
+                trader.onReceive = function (response) {
+                    var msg = '- onReceive -\n\n';
+
+                    msg += 'TraderSuccess : [ ' + response.traderSuccess + ' ]\n';
+
+                    //      msg += 'TraderCode : [ ' + response.traderCode + ' ]\n';
+
+                    msg += 'TraderStatus : [ ' + response.traderStatus + ',\n';
+
+                    if (trader.isCoverOpen({ traderStatus: response.traderStatus })) { msg += '\tCoverOpen,\n'; }
+                    if (trader.isOffLine({ traderStatus: response.traderStatus })) { msg += '\tOffLine,\n'; }
+                    if (trader.isCompulsionSwitchClose({ traderStatus: response.traderStatus })) { msg += '\tCompulsionSwitchClose,\n'; }
+                    if (trader.isEtbCommandExecute({ traderStatus: response.traderStatus })) { msg += '\tEtbCommandExecute,\n'; }
+                    if (trader.isHighTemperatureStop({ traderStatus: response.traderStatus })) { msg += '\tHighTemperatureStop,\n'; }
+                    if (trader.isNonRecoverableError({ traderStatus: response.traderStatus })) { msg += '\tNonRecoverableError,\n'; }
+                    if (trader.isAutoCutterError({ traderStatus: response.traderStatus })) { msg += '\tAutoCutterError,\n'; }
+                    if (trader.isBlackMarkError({ traderStatus: response.traderStatus })) { msg += '\tBlackMarkError,\n'; }
+                    if (trader.isPaperEnd({ traderStatus: response.traderStatus })) { msg += '\tPaperEnd,\n'; }
+                    if (trader.isPaperNearEnd({ traderStatus: response.traderStatus })) { msg += '\tPaperNearEnd,\n'; }
+
+                    msg += '\tEtbCounter = ' + trader.extractionEtbCounter({ traderStatus: response.traderStatus }).toString() + ' ]\n';
+
+                }
+
+                trader.onError = function (response) {
+                    var msg = '- onError -\n\n';
+
+                    msg += '\tStatus:' + response.status + '\n';
+
+                    msg += '\tResponseText:' + response.responseText;
+                }
+
+                var builder = new StarWebPrintBuilder();
+                var rqst = builder.createRawDataElement({ data: request });
+
+                trader.sendMessage({ request: request });
+            }
+
+            function cleanString(message) {
+                var msg = message.split('&gt;').join('>').split('&lt;').join('<').split('&quot;').join('"').split('nline;').join('\x0a');
+                return msg;
+            }
+
+            function thisMonthHaveBirthdays() {
+
+                var haveBirthdays = false;
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CurrentMonthBirthdays", "POS")',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    async: false
+                }).done(function (data) {
+                    if (data.Count > 0) {
+                        haveBirthdays = true;
+                    }
+                }).fail(function (response) {
+                    haveBirthdays = false;
+                });
+
+                return haveBirthdays;
+            };
+
+            function showNotification(message) {
+
+                $.notify({
+                    title: message,
+                    redirect: 'Check them out!'
+                }, {
+                    style: 'foo',
+                    autoHide: false,
+                    clickToHide: true,
+                    position: "left top",
+                    showAnimation: "slideDown",
+                    showDuration: 700,
+                    hideAnimation: "slideUp"
+                });
+            };
+
+            function initNotificationStyle(redirectUrl) {
+                var strConfirmButton = '';
+
+                if (redirectUrl != null){
+                    strConfirmButton += '<button class="yes" data-notify-text="redirect" onclick="redirect(\'' + redirectUrl + '\')"></button>';
+                } else{
+                    strConfirmButton += "<button class='yes' data-notify-text='redirect' ></button>";
+                }
+
+                $.notify.addStyle('foo', {
+                    html:
+                      "<div>" +
+                        "<div class='clearfix'>" +
+                          "<div class='title' data-notify-html='title'/>" +
+                          "<div class='buttons'>" +
+                            "<button class='no'>Hide this!</button>" +
+                            strConfirmButton +
+                          "</div>" +
+                        "</div>" +
+                      "</div>"
+                });
+            };
+
+            function redirect(url) {
+                //$(location).attr('href', url);
+                window.open(url, '_blank');
+            }
+
+        </script>
+
+        <div class="container-fluid padded">
+            <div class="row-fluid">
+                <div class="span12">
+                    <div class="box" style='margin-bottom:0;'>
+                        <div class="box-header">
+                            <span class="title">@Resources.ResourcePOS.Shift</span>
+                        </div>
+                        <div class="box-content">
+                            <div class="padded">
+                                <div class="control-group">
+                                    @if (Model.Status == ShiftStatus.Open)
+                                    {
+                                        <h5 style="text-decoration:underline;">@Resources.ResourcePOS.CloseShift</h5>
+                                    }
+                                    else if (Model.Status == ShiftStatus.Close)
+                                    {
+                                        <h5 style="text-decoration:underline;">@Resources.ResourcePOS.ClosedShift</h5>
+                                    }
+                                    else
+                                    {
+                                        <h5 style="text-decoration:underline;">@Resources.ResourcePOS.OpenShift</h5>
+                                    }
+
+                                </div>
+                                <div id="divShift">
+                                    <div class="control-group">
+                                        <div class="span4">
+                                            @Html.LabelFor(m => m.Branch_ID, new { @class = "control-label" })
+                                            <div class="controls">
+                                                @Html.DropDownListFor(m => m.Branch_ID, new SelectList(Model.branchlist, "Branch_ID", "Branch_Name"), new { Readonly = true })
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(m => m.Branch_ID)
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="span4">
+                                            @Html.LabelFor(m => m.Effective_Date, new { @class = "control-label" })
+                                            <div class="controls">
+                                                <div class="input-append date" id="effdate" data-date="" data-date-format="dd/mm/yyyy">
+                                                    @Html.TextBoxFor(model => model.Effective_Date, "{0:dd/mm/yyyy}", new { @class = "" })
+                                                    <span class="add-on"><i class="icon-th"></i></span>
+                                                </div>
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(model => model.Effective_Date)
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div class="span4">
+                                            @Html.LabelFor(m => m.Status, new { @class = "control-label" })
+                                            <div class="controls" style="padding-top:4px;">
+                                                @Model.Status
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="control-group">
+                                        <div class="span4">
+                                            @Html.LabelFor(m => m.Open_Time, new { @class = "control-label" })
+                                            <div class="controls" style="padding-top:4px;">
+                                                @Model.Open_Time
+                                                @Html.HiddenFor(m => m.Open_Time)
+                                            </div>
+                                        </div>
+                                        <div class="span4">
+                                            @Html.LabelFor(m => m.Close_Time, new { @class = "control-label" })
+                                            <div class="controls" style="padding-top:4px;">
+                                                @Model.Close_Time
+                                                @Html.HiddenFor(m => m.Close_Time)
+                                            </div>
+                                        </div>
+                                        <div class="span4">
+                                            @Html.LabelFor(m => m.Total_Amount, new { @class = "control-label" })
+                                            <div class="controls" style="padding-top:4px;">
+                                                @((Model.Total_Amount.HasValue ? Model.Total_Amount.Value : 0).ToString("n2"))
+                                                @Html.TextBoxFor(m => m.Total_Amount, new { style = "text-align:right;display:none;" })
+                                                <div class="validation-error">
+                                                    @Html.ValidationMessageFor(m => m.Total_Amount)
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+                                <div class="control-group" style="text-align:right;">
+                                    @if (Model.Status == ShiftStatus.Open)
+                                    {
+                                        <button id="btnPrintSalesReport" class="btn btn-white">Print Sales Report</button>
+                                        <button id="btnPrintClose" type="submit" class="btn btn-white">@Resources.ResourcePOS.CloseShift</button>
+                                    }
+                                    else if (Model.Status == ShiftStatus.Close)
+                                    {
+
+                                    }
+                                    else
+                                    {
+                                        <button id="btnOpenShift" type="submit" class="btn btn-white">@Resources.ResourcePOS.OpenShift</button>
+                                    }
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="container-fluid padded">
+            <div class="row-fluid">
+                <div class="span12">
+                    <div class="box" style='margin-bottom:0;'>
+                        <div class="box-header">
+                            <span class="title">@Resources.ResourcePOS.Shift</span>
+                        </div>
+                        <div class="box-content">
+                            <div class="padded">
+                                <div id="dataTables">
+                                    <table cellpadding="0" cellspacing="0" border="0" class="table table-normal responsive ">
+                                        <thead>
+                                            <tr>
+                                                <th style="display:none;"></th>
+                                                <th style="display:none;"></th>
+                                                <th>@Resources.ResourcePOS.Branch</th>
+                                                <th>@Resources.ResourcePOS.EffectiveDate</th>
+                                                <th>@Resources.ResourcePOS.Status</th>
+                                                <th>@Resources.ResourcePOS.OpenTime</th>
+                                                <th>@Resources.ResourcePOS.CloseTime</th>
+                                                <th>@Resources.ResourcePOS.TotalAmount</th>
+                                                <th>&nbsp;</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (Model != null && Model.shiftlist != null && Model.shiftlist.Count > 0)
+                                            {
+                                                int recordcount = 0;
+
+                                                foreach (var row in Model.shiftlist)
+                                                {
+                                                    recordcount += 1;
+                                                    <tr class="status-info">
+                                                        <td style="display:none;"></td>
+                                                        <td style="display:none;">
+                                                            @row.Shift_ID
+                                                        </td>
+                                                        <td>
+                                                            @if (row.Branch != null)
+                                                            {
+                                                                @row.Branch.Branch_Name
+                                                            }
+                                                        </td>
+                                                        <td style="text-align:center">
+                                                            @DateUtil.ToDisplayDate(row.Effective_Date)
+                                                        </td>
+                                                        <td style="text-align:center">
+                                                            @row.Status
+                                                        </td>
+                                                        <td style="text-align:center">
+                                                            @DateUtil.ToDisplayTime(row.Open_Time)
+                                                        </td>
+                                                        <td style="text-align:center">
+                                                            @DateUtil.ToDisplayTime(row.Close_Time)
+                                                        </td>
+                                                        <td style="text-align:right">
+                                                            @((row.Total_Amount.HasValue ? row.Total_Amount.Value : 0).ToString("n2"))
+                                                        </td>
+                                                        <td style="text-align:center;" class="actions">
+                                                            @if (row.Status == ShiftStatus.Close)
+                                                            {
+                                                                <a class="btn btn-sm btn-transparent" href="@Url.Action("PrintSalesReport", "POSConfig", new { shiftID = row.Shift_ID })">Print Sales</a>
+                                                            }
+                                                        </td>
+                                                    </tr>
+                                                }
+
+                                            }
+
+                                        </tbody>
+
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+}
